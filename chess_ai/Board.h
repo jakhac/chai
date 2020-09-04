@@ -8,9 +8,13 @@ class Board
 {
 public:
 
+	// store all 120 squares from big board
 	int pieces[NUM_SQUARES];
+
 	int KingSquares[2];
-	U64 pawns[3];
+
+	// pawn bitboards for black white both
+	U64 pawns[3] = {0ULL, 0ULL, 0ULL};
 
 	int side;
 	int enPas;
@@ -33,15 +37,35 @@ public:
 	U64 setMask[64];
 	U64 clearMask[64];
 
-	int pieceNumber[13];
-	int bigPieces[3]; // pieces excuding pawns
-	int majorPieces[3]; // rook and queen
-	int minorPieces[3]; // knight and bishop
+	/* Address file and rank with given square as index */
+	int fileBoard[NUM_SQUARES];
+	int rankBoard[NUM_SQUARES];
+
+	/* piece and material counters */
+	int pieceNumber[13]; // store the amount of pieces on board (pieceNumber[whitepawn] = 8)
+	int bigPieces[2]; // number of pieces excuding pawns
+	int majPieces[2]; // number of rooks and queens
+	int minPieces[2]; // number of knights and bishops
+	int material[2] = { 0, 0 }; // material score for black and white
+
+	/* index true if piece is big / maj / min /wb and value */
+	int pieceBig[13] = { 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1 };
+	int pieceMaj[13] = { 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1 };
+	int pieceMin[13] = { 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0 };
+	int pieceVal[13] = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
+	int pieceCol[13] = { BOTH, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK };
+
+	/* variables to parse fen into board variables */
+	string pieceChar = ".PNBRQKpnbrqk";
+	string sideChar = "wb-";
+	string rankChar = "12345678";
+	string fileChar = "abcdefgh";
 
 	UNDO_MOVE history[MAX_GAME_MOVES];
 
-	int pieceList[13][10]; // keep track of possible moves for pieces
+	int pieceList[13][10]; // for each piece store current square (max 10 rooks possible)
 
+	/* Address small and big board squares with each board type square as index */
 	int sq120ToSq64[NUM_SQUARES];
 	int sq64ToSq120[64];
 
@@ -57,6 +81,8 @@ public:
 	void init();
 	void init120To64();
 	void printBitBoard(U64 bb);
+
+	int checkBoard(Board* board);
 
 	// Reset all variables of referenced board
 	void resetBoard(Board *bb);
@@ -85,10 +111,17 @@ public:
 	void clearBit(U64 bb, int square);
 
 	// set bit from (pawn) bitboard
-	void setBit(U64 bb, int square);
+	void setBit(U64* bb, int square);
+
+	void updateListsMaterial(Board* b);
+
+	void initRankFileArrays();
+
+	int SQ_64(int sq120);
+	int SQ_120(int sq64);
 
 };
 
 
-#define SQ64(sq120) (sq120ToSq64[(sq120)])
-#define SQ120(sq64) (sq64ToSq120[(sq64)])
+//#define SQ64(sq120) (sq120ToSq64[(sq120)])
+//#define SQ120(sq64) (sq64ToSq120[(sq64)])

@@ -28,7 +28,7 @@ enum FILES { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FIL
 enum RANKS { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
 enum COLORS { WHITE, BLACK, BOTH };
 
-enum CASTLING_RIGHTS { K_castle = 1, Q_castle = 2, k_castle = 4, q_castle = 8};
+enum CASTLING_RIGHTS { K_CASTLE= 1, Q_CASTLE= 2, k_CASTLE = 4, q_CASTLE = 8};
 
 enum SQUARES {
     A1 = 21, B1, C1, D1, E1, F1, G1, H1,
@@ -52,4 +52,4 @@ struct UNDO_MOVE {
 };
 
 const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
+const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";

@@ -1,7 +1,12 @@
 #include <iostream>
 
+extern string pieceChar;
+extern string sideChar;
+extern string rankChar;
+extern string fileChar;
 
-const string pieceChar = ".PNBRQKpnbrqk";
-const string sideChar = "wb-";
-const string rankChar = "12345678";
-const string fileChar = "abcdefgh";
+extern int pieceBig[13];
+extern int pieceMaj[13];
+extern int pieceVal[13];
+extern int pieceCol[13];
+

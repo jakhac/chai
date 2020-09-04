@@ -55,7 +55,90 @@ void Board::printBitBoard(U64 bb) {
 	}
 }
 
+int Board::checkBoard(Board* board) {
 
+	// set up temporary variables to capture current state
+	int t_pieceNumber[13] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	int t_bigPiece[2] = { 0, 0 };
+	int t_majPiece[2] = { 0, 0 };
+	int t_minPiece[2] = { 0, 0 };
+	int t_material[2] = { 0, 0 };
+
+	int sq64, t_piece, t_pce_num, sq120, color, pcount;
+
+	U64 t_pawns[3] = { 0ULL, 0ULL, 0ULL };
+
+	t_pawns[WHITE] = board->pawns[WHITE];
+	t_pawns[BLACK] = board->pawns[BLACK];
+	t_pawns[BOTH] = board->pawns[BOTH];
+
+	// check piece lists
+	for (t_piece = P; t_piece <= k; t_piece++) {
+		for (t_pce_num = 0; t_pce_num < board->pieceNumber[t_piece]; t_pce_num++) {
+			sq120 = board->pieceList[t_piece][t_pce_num];
+			ASSERT(board->pieces[sq120]==t_piece);
+		}
+	}
+
+	// check piece counters
+	for (sq64 = 0; sq64 < 64; sq64++) {
+		sq120 = SQ_120(sq64);
+		t_piece = board->pieces[sq120];
+		t_pieceNumber[t_piece]++;
+		color = pieceCol[t_piece];
+
+		if (pieceBig[t_piece]) t_bigPiece[color]++;
+		if (pieceMaj[t_piece]) t_majPiece[color]++;
+		if (pieceMin[t_piece]) t_minPiece[color]++;
+
+		t_material[color] += pieceVal[t_piece];
+	}
+
+	// check if counted pieces of each type are equal to stored pieces on board
+	for (t_piece = P; t_piece <= k; t_piece++) {
+		ASSERT(t_pieceNumber[t_piece]==board->pieceNumber[t_piece]);
+	}
+
+	// check pawn bitboards
+	ASSERT(countBits(t_pawns[WHITE]) == board->pieceNumber[P]);
+	ASSERT(countBits(t_pawns[BLACK]) == board->pieceNumber[p]);
+	ASSERT(countBits(t_pawns[BOTH])==board->pieceNumber[p] + board->pieceNumber[P]);
+
+	// check pawn bits and squares
+	while (t_pawns[WHITE]) {
+		sq64 = popBit(&t_pawns[WHITE]);
+		ASSERT(P==board->pieces[SQ_120(sq64)]);
+	}
+	while (t_pawns[BLACK]) {
+		sq64 = popBit(&t_pawns[BLACK]);
+		ASSERT(p==board->pieces[SQ_120(sq64)]);
+	}
+	while (t_pawns[BOTH]) {
+		sq64 = popBit(&t_pawns[BOTH]);
+		ASSERT(P==board->pieces[SQ_120(sq64)] || p==board->pieces[SQ_120(sq64)]);
+	}
+
+	// check material counter and piece counts of each type
+	ASSERT(t_material[WHITE] == board->material[WHITE] && t_material[BLACK] == board->material[BLACK]);
+	ASSERT(t_minPiece[WHITE] == board->minPieces[WHITE] && t_minPiece[BLACK] == board->minPieces[BLACK]);
+	ASSERT(t_majPiece[WHITE] == board->majPieces[WHITE] && t_majPiece[BLACK] == board->majPieces[BLACK]);
+	ASSERT(t_bigPiece[WHITE] == board->bigPieces[WHITE] && t_bigPiece[BLACK] == board->bigPieces[BLACK]);
+
+	// check defined side
+	ASSERT(board->side == WHITE || board->side == BLACK);
+
+	// check equal zobrist hash
+	ASSERT(generateZobristHash(board) == board->posKey);
+
+	// check if enPas is not valid or on valid rank
+	ASSERT(board->enPas == NO_SQ || (rankBoard[board->enPas] == RANK_6 && board->side == WHITE) || (rankBoard[board->enPas] == RANK_3 && board->side == BLACK));
+
+	// check king squares
+	ASSERT(board->pieces[board->KingSquares[WHITE]] == K);
+	ASSERT(board->pieces[board->KingSquares[BLACK]] == k);
+
+	return true;
+}
 
 int Board::file_rank_2_sq(int f, int r) {
 	return (21 + f) + (r * 10);
@@ -100,10 +183,87 @@ void Board::clearBit(U64 bb, int square) {
 	bb &= clearMask[square];
 }
 
-void Board::setBit(U64 bb, int square) {
-	bb |= setMask[square];
+void Board::setBit(U64* bb, int square) {
+	*bb |= setMask[square];
 }
 
+/*
+Update the list of materials on the referenced board.
+*/
+void Board::updateListsMaterial(Board* b) {
+	int piece, color;
+
+	for (int sq = 0; sq < NUM_SQUARES; sq++) {
+		piece = b->pieces[sq];
+		if (piece != OFFBOARD && piece != EMPTY) {
+			color = pieceCol[piece];
+
+			// count the mterials in Pieces array according to side
+			if (pieceBig[piece]) b->bigPieces[color]++;
+			if (pieceMin[piece]) b->minPieces[color]++;
+			if (pieceMaj[piece]) b->majPieces[color]++;
+
+			// add up material values
+			b->material[color] += pieceVal[piece];
+
+			// store found piece in pieceList and increment for next storage
+			b->pieceList[piece][b->pieceNumber[piece]] = sq;
+			b->pieceNumber[piece]++;
+
+			if (piece == K) b->KingSquares[color] = sq;
+			if (piece == k) b->KingSquares[color] = sq;
+
+			//set bits for pawns
+			if (piece == P) {
+				setBit(&b->pawns[WHITE], SQ_64(sq));
+				setBit(&b->pawns[BOTH], SQ_64(sq));
+			}
+			if (piece == p) {
+				setBit(&b->pawns[BLACK], SQ_64(sq));
+				setBit(&b->pawns[BOTH], SQ_64(sq));
+			}
+		}
+	}
+}
+
+/*
+Initialize rank and file arrays.
+*/
+void Board::initRankFileArrays() {
+	int square = A1;
+
+	for (int i = 0; i < NUM_SQUARES; i++) {
+		fileBoard[i] = OFFBOARD;
+		rankBoard[i] = OFFBOARD;
+	}
+
+	for (int rank = RANK_1; rank <= RANK_8; rank++) {
+		for (int file = FILE_A; file <= FILE_H; file++) {
+			square = file_rank_2_sq(file, rank);
+			fileBoard[square] = file;
+			rankBoard[square] = rank;
+		}
+	}
+}
+
+/*
+Convert 120 based index into 64 based index.
+*/
+int Board::SQ_64(int sq120) {
+	return sq120ToSq64[(sq120)];
+}
+
+/*
+Convert 64 based index into 120 based index.
+*/
+int Board::SQ_120(int sq64) {
+	return sq64ToSq120[(sq64)];
+}
+
+
+/*
+Generate a random 64bit integer for zobrist hashing
+*/
 U64 Board::rand64() {
 	return (U64)rand() |
 		((U64)rand() << 15) | 
@@ -173,8 +333,8 @@ void Board::resetBoard(Board *b) {
 
 	for (index = 0; index < 2; ++index) {
 		b->bigPieces[index] = 0;
-		b->majorPieces[index] = 0;
-		b->minorPieces[index] = 0;
+		b->majPieces[index] = 0;
+		b->minPieces[index] = 0;
 	}
 
 	for (index = 0; index < 3; ++index) {
@@ -199,121 +359,109 @@ void Board::resetBoard(Board *b) {
 	b->posKey = 0ULL;
 }
 
-int Board::parseFen(char *fen, Board *board) {
+int Board::parseFen(char* fen, Board* pos) {
 
-	ASSERT(fen!=NULL);
-	ASSERT(board!=NULL);
+	ASSERT(fen != NULL);
+	ASSERT(pos != NULL);
 
-	int rank = RANK_8;
-	int file = FILE_A;
-	int piece = 0;
-	int count = 0;
-	int i = 0;
-	int sq64 = 0;
-	int sq120 = 0;
+	int  rank = RANK_8;
+	int  file = FILE_A;
+	int  piece = 0;
+	int  count = 0;
+	int  i = 0;
+	int  sq64 = 0;
+	int  sq120 = 0;
+
+	resetBoard(pos);
 
 	while ((rank >= RANK_1) && *fen) {
+		count = 1;
+		switch (*fen) {
+			case 'p': piece = p; break;
+			case 'r': piece = r; break;
+			case 'n': piece = n; break;
+			case 'b': piece = b; break;
+			case 'k': piece = k; break;
+			case 'q': piece = q; break;
+			case 'P': piece = P; break;
+			case 'R': piece = R; break;
+			case 'N': piece = N; break;
+			case 'B': piece = B; break;
+			case 'K': piece = K; break;
+			case 'Q': piece = Q; break;
 
-		ASSERT(fen!= NULL);
-		ASSERT(board!= NULL);
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+				piece = EMPTY;
+				count = *fen - '0';
+				break;
 
-		int  rank = RANK_8;
-		int  file = FILE_A;
-		int  piece = 0;
-		int  count = 0;
-		int  i = 0;
-		int  sq64 = 0;
-		int  sq120 = 0;
+			case '/':
+			case ' ':
+				rank--;
+				file = FILE_A;
+				fen++;
+				continue;
 
-		resetBoard(board);
-
-		while ((rank >= RANK_1) && *fen) {
-			count = 1;
-			switch (*fen) {
-				case 'p': piece = p; break;
-				case 'r': piece = r; break;
-				case 'n': piece = n; break;
-				case 'b': piece = b; break;
-				case 'k': piece = k; break;
-				case 'q': piece = q; break;
-				case 'P': piece = P; break;
-				case 'R': piece = R; break;
-				case 'N': piece = N; break;
-				case 'B': piece = B; break;
-				case 'K': piece = K; break;
-				case 'Q': piece = Q; break;
-
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-					piece = EMPTY;
-					count = *fen - '0';
-					break;
-
-				case '/':
-				case ' ':
-					rank--;
-					file = FILE_A;
-					fen++;
-					continue;
-
-				default:
-					printf("FEN error \n");
-					return -1;
-			}
-
-			for (i = 0; i < count; i++) {
-				sq64 = rank * 8 + file;
-				sq120 = sq64ToSq120[sq64];
-				if (piece != EMPTY) {
-					board->pieces[sq120] = piece;
-				}
-				file++;
-			}
-			fen++;
+			default:
+				printf("FEN error \n");
+				return -1;
 		}
 
-		ASSERT(*fen == 'w' || *fen == 'b');
-
-		board->side = (*fen == 'w') ? WHITE : BLACK;
-		fen += 2;
-
-		for (i = 0; i < 4; i++) {
-			if (*fen == ' ') {
-				break;
+		for (i = 0; i < count; i++) {
+			sq64 = rank * 8 + file;
+			sq120 = SQ_120(sq64);
+			if (piece != EMPTY) {
+				pos->pieces[sq120] = piece;
 			}
-			switch (*fen) {
-				case 'K': board->castlePermission |= K_castle; break;
-				case 'Q': board->castlePermission |= Q_castle; break;
-				case 'k': board->castlePermission |= k_castle; break;
-				case 'q': board->castlePermission |= q_castle; break;
-				default: break;
-			}
-			fen++;
+			file++;
 		}
 		fen++;
-
-		ASSERT(board->castlePermission >= 0 && board->castlePermission <= 15);
-
-		if (*fen != '-') {
-			file = fen[0] - 'a';
-			rank = fen[1] - '1';
-
-			ASSERT(file >= FILE_A && file <= FILE_H);
-			ASSERT(rank >= RANK_1 && rank <= RANK_8);
-
-			board->enPas = file_rank_2_sq(file, rank);
-		}
-
-		board->posKey = generateZobristHash(board);
-	
-		return 0;
 	}
+
+	ASSERT(*fen == 'w' || *fen == 'b');
+
+	pos->side = (*fen == 'w') ? WHITE : BLACK;
+	fen += 2;
+
+	for (i = 0; i < 4; i++) {
+		if (*fen == ' ') {
+			break;
+		}
+		switch (*fen) {
+			case 'K': pos->castlePermission |= K_CASTLE; break;
+			case 'Q': pos->castlePermission |= Q_CASTLE; break;
+			case 'k': pos->castlePermission |= k_CASTLE; break;
+			case 'q': pos->castlePermission |= q_CASTLE; break;
+			default: break;
+		}
+		fen++;
+	}
+	fen++;
+
+	ASSERT(pos->castlePermission >= 0 && pos->castlePermission <= 15);
+
+	if (*fen != '-') {
+		file = fen[0] - 'a';
+		rank = fen[1] - '1';
+
+		ASSERT(file >= FILE_A && file <= FILE_H);
+		ASSERT(rank >= RANK_1 && rank <= RANK_8);
+
+		pos->enPas = file_rank_2_sq(file, rank);
+	}
+
+	pos->posKey = generateZobristHash(pos);
+
+	updateListsMaterial(pos);
+
+	return 0;
 }
 
 void Board::printBoard(const Board* board) {
@@ -341,19 +489,21 @@ void Board::printBoard(const Board* board) {
 	printf("side:%c\n", sideChar[board->side]);
 	printf("enPas:%d\n", board->enPas);
 	printf("castle:%c%c%c%c\n",
-		board->castlePermission & K_castle ? 'K' : '-',
-		board->castlePermission & Q_castle ? 'Q' : '-',
-		board->castlePermission & k_castle ? 'k' : '-',
-		board->castlePermission & q_castle? 'q' : '-'
+		board->castlePermission & K_CASTLE ? 'K' : '-',
+		board->castlePermission & Q_CASTLE ? 'Q' : '-',
+		board->castlePermission & k_CASTLE ? 'k' : '-',
+		board->castlePermission & q_CASTLE ? 'q' : '-'
 	);
 	printf("ZobristHash:%llX\n", board->posKey);
 }
 
 
-
-
+/*
+Initialize all arrays and masks. Must be called before using board.
+*/
 void Board::init() {
 	init120To64();
 	initClearSetMask();
 	initHashKeys();
+	initRankFileArrays();
 }
