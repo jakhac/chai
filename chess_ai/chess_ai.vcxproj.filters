@@ -21,6 +21,21 @@
     <ClCompile Include="board.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="move.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="UndoMove.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="BoardData.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="BitBoard.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="IO.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h">
@@ -32,7 +47,19 @@
     <ClInclude Include="defs.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="init_data.h">
+    <ClInclude Include="move.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="UndoMove.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="BoardData.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="BitBoard.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="IO.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

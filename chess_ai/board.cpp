@@ -1,58 +1,13 @@
 #include "Board.h"
 
-void Board::init120To64() {
-	int index = 0;
-	int file = FILE_A;
-	int rank = RANK_1;
-	int sq = A1;
-	int squareCounter = 0;
-
-	// Set both arrays non-legal values to prevent errors
-	for (index = 0; index < NUM_SQUARES; index++) {
-		sq120ToSq64[index] = 65;
-	}
-
-	for (rank = RANK_1; rank <= RANK_8; rank++) {
-		sq64ToSq120[rank] = 120;
-	}
-
-	// Fill arrays with indices
-	for (rank = RANK_1; rank <= RANK_8; ++rank) {
-		for (file = FILE_A; file <= FILE_H; ++file) {
-			sq = file_rank_2_sq(file, rank);
-
-			sq120ToSq64[sq] = squareCounter;
-			sq64ToSq120[squareCounter] = sq;
-
-			squareCounter++;
-		}
-	}
-}
-
-void Board::printBitBoard(U64 bb) {
-
-	U64 shiftBit = 1ULL;
-
-	int rank = 0;
-	int file = 0;
-	int sq = 0;
-	int sq64= 0;
-
-	std::cout << std::endl;
-	for (rank = RANK_8; rank >= RANK_1; rank--) {
-		for (file = FILE_A; file <= FILE_H; file++) {
-			sq = file_rank_2_sq(file, rank); // 120 based index
-			sq64 = sq120ToSq64[sq]; // 63 based index
-
-			if (shiftBit << sq64 & bb) {
-				std::cout << "1 ";
-			}
-			else {
-				std::cout << ". ";
-			}
-		}
-		std::cout << std::endl;
-	}
+/*
+Initialize all arrays and masks. Must be called before using board.
+*/
+void Board::init() {
+	bd.init120To64();
+	bb.initClearSetMask();
+	bd.initRankFileArrays();
+	initHashKeys();
 }
 
 int Board::checkBoard(Board* board) {
@@ -64,7 +19,7 @@ int Board::checkBoard(Board* board) {
 	int t_minPiece[2] = { 0, 0 };
 	int t_material[2] = { 0, 0 };
 
-	int sq64, t_piece, t_pce_num, sq120, color, pcount;
+	int sq64, t_piece, t_pce_num, sq120, color;
 
 	U64 t_pawns[3] = { 0ULL, 0ULL, 0ULL };
 
@@ -82,16 +37,16 @@ int Board::checkBoard(Board* board) {
 
 	// check piece counters
 	for (sq64 = 0; sq64 < 64; sq64++) {
-		sq120 = SQ_120(sq64);
+		sq120 = bd.SQ_120(sq64);
 		t_piece = board->pieces[sq120];
 		t_pieceNumber[t_piece]++;
 		color = pieceCol[t_piece];
 
-		if (pieceBig[t_piece]) t_bigPiece[color]++;
-		if (pieceMaj[t_piece]) t_majPiece[color]++;
-		if (pieceMin[t_piece]) t_minPiece[color]++;
+		if (bd.pieceBig[t_piece]) t_bigPiece[color]++;
+		if (bd.pieceMaj[t_piece]) t_majPiece[color]++;
+		if (bd.pieceMin[t_piece]) t_minPiece[color]++;
 
-		t_material[color] += pieceVal[t_piece];
+		t_material[color] += bd.pieceVal[t_piece];
 	}
 
 	// check if counted pieces of each type are equal to stored pieces on board
@@ -100,22 +55,22 @@ int Board::checkBoard(Board* board) {
 	}
 
 	// check pawn bitboards
-	ASSERT(countBits(t_pawns[WHITE]) == board->pieceNumber[P]);
-	ASSERT(countBits(t_pawns[BLACK]) == board->pieceNumber[p]);
-	ASSERT(countBits(t_pawns[BOTH])==board->pieceNumber[p] + board->pieceNumber[P]);
+	ASSERT(bb.countBits(t_pawns[WHITE]) == board->pieceNumber[P]);
+	ASSERT(bb.countBits(t_pawns[BLACK]) == board->pieceNumber[p]);
+	ASSERT(bb.countBits(t_pawns[BOTH])==board->pieceNumber[p] + board->pieceNumber[P]);
 
 	// check pawn bits and squares
 	while (t_pawns[WHITE]) {
-		sq64 = popBit(&t_pawns[WHITE]);
-		ASSERT(P==board->pieces[SQ_120(sq64)]);
+		sq64 = bb.popBit(&t_pawns[WHITE]);
+		ASSERT(P==board->pieces[bd.SQ_120(sq64)]);
 	}
 	while (t_pawns[BLACK]) {
-		sq64 = popBit(&t_pawns[BLACK]);
-		ASSERT(p==board->pieces[SQ_120(sq64)]);
+		sq64 = bb.popBit(&t_pawns[BLACK]);
+		ASSERT(p==board->pieces[bd.SQ_120(sq64)]);
 	}
 	while (t_pawns[BOTH]) {
-		sq64 = popBit(&t_pawns[BOTH]);
-		ASSERT(P==board->pieces[SQ_120(sq64)] || p==board->pieces[SQ_120(sq64)]);
+		sq64 = bb.popBit(&t_pawns[BOTH]);
+		ASSERT(P==board->pieces[bd.SQ_120(sq64)] || p==board->pieces[bd.SQ_120(sq64)]);
 	}
 
 	// check material counter and piece counts of each type
@@ -140,53 +95,6 @@ int Board::checkBoard(Board* board) {
 	return true;
 }
 
-int Board::file_rank_2_sq(int f, int r) {
-	return (21 + f) + (r * 10);
-}
-
-int Board::squareConstantsTo64(int square) {
-	return sq120ToSq64[square];
-}
-
-int Board::countBits(U64 bb) {
-	int cnt = 0;
-	while (bb) {
-		cnt += bb & 1;
-		bb >>= 1;
-	}
-	return cnt;
-}
-
-int Board::popBit(U64 *bb) {
-	U64 b = *bb ^ (*bb - 1);
-	unsigned int fold = (unsigned)((b & 0xffffffff) ^ (b >> 32));
-	*bb &= (*bb - 1);
-	return bitTable[(fold * 0x783a9b23) >> 26];
-}
-
-void Board::initClearSetMask() {
-	int index = 0;
-
-	// Zero both arrays
-	for (index = 0; index < 64; index++) {
-		setMask[index] = 0ULL << index;
-		clearMask[index] = 0ULL << index;
-	}
-
-	for (index = 0; index < 64; index++) {
-		setMask[index] |= (1ULL << index);
-		clearMask[index] = ~setMask[index];
-	}
-}
-
-void Board::clearBit(U64 bb, int square) {
-	bb &= clearMask[square];
-}
-
-void Board::setBit(U64* bb, int square) {
-	*bb |= setMask[square];
-}
-
 /*
 Update the list of materials on the referenced board.
 */
@@ -199,12 +107,12 @@ void Board::updateListsMaterial(Board* b) {
 			color = pieceCol[piece];
 
 			// count the mterials in Pieces array according to side
-			if (pieceBig[piece]) b->bigPieces[color]++;
-			if (pieceMin[piece]) b->minPieces[color]++;
-			if (pieceMaj[piece]) b->majPieces[color]++;
+			if (bd.pieceBig[piece]) b->bigPieces[color]++;
+			if (bd.pieceMin[piece]) b->minPieces[color]++;
+			if (bd.pieceMaj[piece]) b->majPieces[color]++;
 
 			// add up material values
-			b->material[color] += pieceVal[piece];
+			b->material[color] += bd.pieceVal[piece];
 
 			// store found piece in pieceList and increment for next storage
 			b->pieceList[piece][b->pieceNumber[piece]] = sq;
@@ -215,79 +123,40 @@ void Board::updateListsMaterial(Board* b) {
 
 			//set bits for pawns
 			if (piece == P) {
-				setBit(&b->pawns[WHITE], SQ_64(sq));
-				setBit(&b->pawns[BOTH], SQ_64(sq));
+				bb.setBit(&b->pawns[WHITE], bd.SQ_64(sq));
+				bb.setBit(&b->pawns[BOTH], bd.SQ_64(sq));
 			}
 			if (piece == p) {
-				setBit(&b->pawns[BLACK], SQ_64(sq));
-				setBit(&b->pawns[BOTH], SQ_64(sq));
+				bb.setBit(&b->pawns[BLACK], bd.SQ_64(sq));
+				bb.setBit(&b->pawns[BOTH], bd.SQ_64(sq));
 			}
 		}
 	}
 }
 
-/*
-Initialize rank and file arrays.
-*/
-void Board::initRankFileArrays() {
-	int square = A1;
-
-	for (int i = 0; i < NUM_SQUARES; i++) {
-		fileBoard[i] = OFFBOARD;
-		rankBoard[i] = OFFBOARD;
-	}
-
-	for (int rank = RANK_1; rank <= RANK_8; rank++) {
-		for (int file = FILE_A; file <= FILE_H; file++) {
-			square = file_rank_2_sq(file, rank);
-			fileBoard[square] = file;
-			rankBoard[square] = rank;
-		}
-	}
-}
 
 /*
-Convert 120 based index into 64 based index.
+Initiliaze hash keys for zobrist hashing
 */
-int Board::SQ_64(int sq120) {
-	return sq120ToSq64[(sq120)];
-}
-
-/*
-Convert 64 based index into 120 based index.
-*/
-int Board::SQ_120(int sq64) {
-	return sq64ToSq120[(sq64)];
-}
-
-
-/*
-Generate a random 64bit integer for zobrist hashing
-*/
-U64 Board::rand64() {
-	return (U64)rand() |
-		((U64)rand() << 15) | 
-		((U64)rand() << 30) | 
-		((U64)rand() << 45) | 
-		(((U64)rand() & 0xf) << 60);
-}
-
 void Board::initHashKeys() {
 
 	// every piece on every square with a random 64bit number
 	for (int i = 0; i < 13; i++) {
 		for (int j = 0; j < 120; j++) {
-			pieceKeys[i][j] = rand64();
+			pieceKeys[i][j] = bd.rand64();
 		}
 	}
 
-	sideKey = rand64();
+	sideKey = bd.rand64();
 	for (int i = 0; i < 16; i++) {
-		castleKeys[i] = rand64();
+		castleKeys[i] = bd.rand64();
 	}
 
 }
 
+/*
+Generate a zobrist hash for referenced board
+*/
 U64 Board::generateZobristHash(Board *b) {
 
 	int sq = 0;
@@ -319,6 +188,9 @@ U64 Board::generateZobristHash(Board *b) {
 	return finalKey;
 }
 
+/*
+Reset all board variables
+*/
 void Board::resetBoard(Board *b) {
 
 	int index = 0;
@@ -328,7 +200,7 @@ void Board::resetBoard(Board *b) {
 	}
 
 	for (index = 0; index < 64; ++index) {
-		b->pieces[sq64ToSq120[index]] = EMPTY;
+		b->pieces[bd.SQ_120(index)] = EMPTY;
 	}
 
 	for (index = 0; index < 2; ++index) {
@@ -359,6 +231,9 @@ void Board::resetBoard(Board *b) {
 	b->posKey = 0ULL;
 }
 
+/*
+Parse a referenced fen into the boards pieces arrays.
+*/
 int Board::parseFen(char* fen, Board* pos) {
 
 	ASSERT(fen != NULL);
@@ -416,7 +291,7 @@ int Board::parseFen(char* fen, Board* pos) {
 
 		for (i = 0; i < count; i++) {
 			sq64 = rank * 8 + file;
-			sq120 = SQ_120(sq64);
+			sq120 = bd.SQ_120(sq64);
 			if (piece != EMPTY) {
 				pos->pieces[sq120] = piece;
 			}
@@ -454,7 +329,7 @@ int Board::parseFen(char* fen, Board* pos) {
 		ASSERT(file >= FILE_A && file <= FILE_H);
 		ASSERT(rank >= RANK_1 && rank <= RANK_8);
 
-		pos->enPas = file_rank_2_sq(file, rank);
+		pos->enPas = bd.file_rank_2_sq(file, rank);
 	}
 
 	pos->posKey = generateZobristHash(pos);
@@ -464,6 +339,9 @@ int Board::parseFen(char* fen, Board* pos) {
 	return 0;
 }
 
+/*
+Print a referenced board.
+*/
 void Board::printBoard(const Board* board) {
 
 	int sq, file, rank, piece;
@@ -472,9 +350,9 @@ void Board::printBoard(const Board* board) {
 	for (rank = RANK_8; rank >= RANK_1; rank--) {
 		printf("%d  ", rank + 1);
 		for (file = FILE_A; file <= FILE_H; file++) {
-			sq = file_rank_2_sq(file, rank);
+			sq = bd.file_rank_2_sq(file, rank);
 			piece = board->pieces[sq];
-			printf("%3c", pieceChar[piece]);
+			printf("%3c", bd.pieceChar[piece]);
 		}
 		printf("\n");
 	}
@@ -486,7 +364,7 @@ void Board::printBoard(const Board* board) {
 
 	// print stats
 	printf("\n");
-	printf("side:%c\n", sideChar[board->side]);
+	printf("side:%c\n", bd.sideChar[board->side]);
 	printf("enPas:%d\n", board->enPas);
 	printf("castle:%c%c%c%c\n",
 		board->castlePermission & K_CASTLE ? 'K' : '-',
@@ -497,13 +375,104 @@ void Board::printBoard(const Board* board) {
 	printf("ZobristHash:%llX\n", board->posKey);
 }
 
+/*
+Returns true if the given squared is attacked by side.
+*/
+int Board::squareAttacked(const int sq, const int side, Board* board) {
+
+	int pce, index, t_sq, dir;
+
+	//ASSERT(SqOnBoard(sq));
+	//ASSERT(SideValid(side));
+	//ASSERT(CheckBoard(board));
+
+	// pawns
+	if (side == WHITE) {
+		if (board->pieces[sq - 11] == P || board->pieces[sq - 9] == P) {
+			return 1;
+		}
+	}
+	else {
+		if (board->pieces[sq + 11] == p || board->pieces[sq + 9] == p) {
+			return 1;
+		}
+	}
+
+	// knights
+	for (index = 0; index < 8; ++index) {
+		pce = board->pieces[sq + bd.kDir[index]];
+		if (pce != OFFBOARD && bd.isK(pce) && pieceCol[pce] == side) {
+			return 1;
+		}
+	}
+
+	// rooks, queens
+	for (index = 0; index < 4; ++index) {
+		dir = bd.rDir[index];
+		t_sq = sq + dir;
+		pce = board->pieces[t_sq];
+		while (pce != OFFBOARD) {
+			if (pce != EMPTY) {
+				if (bd.isRQ(pce) && pieceCol[pce] == side) {
+					return 1;
+				}
+				break;
+			}
+			t_sq += dir;
+			pce = board->pieces[t_sq];
+		}
+	}
+
+	// bishops, queens
+	for (index = 0; index < 4; ++index) {
+		dir = bd.bDir[index];
+		t_sq = sq + dir;
+		pce = board->pieces[t_sq];
+		while (pce != OFFBOARD) {
+			if (pce != EMPTY) {
+				if (bd.isBQ(pce) && pieceCol[pce] == side) {
+					return 1;
+				}
+				break;
+			}
+			t_sq += dir;
+			pce = board->pieces[t_sq];
+		}
+	}
+
+	// kings
+	for (index = 0; index < 8; ++index) {
+		pce = board->pieces[sq + bd.kDir[index]];
+		if (pce != OFFBOARD && bd.isK(pce) && pieceCol[pce] == side) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
 
 /*
-Initialize all arrays and masks. Must be called before using board.
+Print attackers for given side.
 */
-void Board::init() {
-	init120To64();
-	initClearSetMask();
-	initHashKeys();
-	initRankFileArrays();
+void Board::printAttackers(const int side, Board* b) {
+
+	int rank = 0;
+	int file = 0;
+	int square = 0;
+
+	std::cout << "Attacked squares by " << side << endl;
+
+	for (rank = RANK_8; rank >= RANK_1; rank--) {
+		for (file = FILE_A; file <= FILE_H; file++) {
+			square = b->bd.file_rank_2_sq(file, rank);
+			if (squareAttacked(square, side, b)) {
+				std::cout << "1 ";
+			}
+			else {
+				std::cout << ". ";
+			}
+		}
+		std::cout << "\n";
+	}
+	std::cout << "\n";
 }
