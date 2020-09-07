@@ -1,9 +1,12 @@
 #pragma once
 
 #include "BoardData.h"
+#include "move.h"
 
 class IO
 {
+
+public:
 
 	BoardData bd = BoardData();
 	

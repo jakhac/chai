@@ -2,8 +2,8 @@
 
 #include "move.h"
 #include "Board.h"
-#include <vector>
-#include <list>
+#include "IO.h"
+#include "defs.h"
 
 
 class MoveGenerator
@@ -11,18 +11,21 @@ class MoveGenerator
 public:
 
 	Move moveList[MAX_POSITION_MOVES];
-	//vector<Move> moveList = vector<Move>(MAX_POSITION_MOVES);
-
-	//std::list<Move> moveList;
-
 	int moveCounter = 0;
+
+	//IO io;
 
 	void addQuietMove(const Board* b, int move);
 	void addCaptureMove(const Board* b, int move);
 	void addEnPasMove(const Board* b, int move);
 
-	void generateAllMoves(const Board* b);
-	void printMoveList(const Move* mList);
+	void printMoveList(Board* b);
+
+	void generateAllMoves(Board* b);
+
+	void addWhitePawnCapMove(Board* b, const int from, const int to, const int cap);
+	void addWhitePawnMove(Board* b, const int from, const int to);
+
 
 };
 

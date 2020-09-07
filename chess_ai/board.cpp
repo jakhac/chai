@@ -1,8 +1,40 @@
 #include "Board.h"
 
-/*
-Initialize all arrays and masks. Must be called before using board.
-*/
+char* Board::printMove(const int move) {
+
+	static char moveStr[6];
+
+	int ff = fileBoard[FROMSQ(move)];
+	int rf = rankBoard[FROMSQ(move)];
+	int ft = fileBoard[TOSQ(move)];
+	int rt = rankBoard[TOSQ(move)];
+
+	int promoted = PROMOTED(move);
+
+	if (promoted) {
+		char pchar = 'q';
+		if (bd.isN(promoted)) {
+			pchar = 'n';
+		}
+		else if (bd.isRQ(promoted) && !bd.isBQ(promoted)) {
+			pchar = 'r';
+		}
+		else if (!bd.isRQ(promoted) && bd.isBQ(promoted)) {
+			pchar = 'b';
+		}
+		sprintf_s(moveStr, "%c%c%c%c%c", ('a' + ff), ('1' + rf), ('a' + ft), ('1' + rt), pchar);
+	}
+	else {
+		sprintf_s(moveStr, "%c%c%c%c", ('a' + ff), ('1' + rf), ('a' + ft), ('1' + rt));
+	}
+
+	return moveStr;
+}
+
+int Board::sqOnBoard(int sq) {
+	return fileBoard[sq] == OFFBOARD ? 0 : 1;
+}
+
 void Board::init() {
 	bd.init120To64();
 	bb.initClearSetMask();
@@ -382,7 +414,7 @@ int Board::squareAttacked(const int sq, const int side, Board* board) {
 
 	int pce, index, t_sq, dir;
 
-	ASSERT(sqOnBoard(sq, &fileBoard));
+	ASSERT(board->sqOnBoard(sq));
 	ASSERT(sideValid(side));
 	ASSERT(checkBoard(board));
 

@@ -11,6 +11,7 @@
 class Board
 {
 private:
+public:
 
 	// store all 120 squares from big board
 	int pieces[NUM_SQUARES];
@@ -43,7 +44,6 @@ private:
 
 	U64 posKey;
 
-public:
 
 	int pieceCol[13] = { BOTH, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK };
 
@@ -59,6 +59,9 @@ public:
 	int* fileBoard = bd.fileBoard;
 	int* rankBoard = bd.rankBoard;
 
+	char* printMove(const int move);
+	int sqOnBoard(int sq);
+	
 	void init();
 	
 	void resetBoard(Board* bb);

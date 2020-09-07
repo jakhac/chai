@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdlib.h"
+#include "defs.h"
 #include <iostream>
 
 /*
@@ -23,29 +24,14 @@ class Move
 
 public:
 
-	//Move(const int _move, const int _score)
-	//	: move(_move)
-	//	, score(_score)
-	//{ }
-
 	int move;
 	int score;
 
-	
-	//Move() { };
+	Move() = default;
 	Move(int _move, int _score) {
-		this->move = _move;
-		this->score = _score;
+		move = _move;
+		score = _score;
 	}
 
-	~Move() = default;
-	Move(const Move&) = default;
-	Move& operator=(const Move&) = default;
-	Move(Move&&) = default;
-
-
-
-
-
-
+	int createBitMove(int from, int to, int cap, int prom, int flag);
 };

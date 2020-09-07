@@ -54,11 +54,8 @@ struct UNDO_MOVE {
 
 const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-
 const string QUEEN_FEN = "8/3q1p2/8/5P2/4Q3/8/8/8 w - - 0 1";
-
-extern int pieceCol[13];
-
+const string PAWN_FEN = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w - e6 0 1";
 
 /* Macros for int Move data */
 #define FROMSQ(m) ((m) & 0x7F)
@@ -75,3 +72,4 @@ extern int pieceCol[13];
 
 #define NOMOVE 0
 
+#define MOVE(f,t,ca,pro,fl) ( (f) | ((t) << 7) | ( (ca) << 14 ) | ( (pro) << 20 ) | (fl))
