@@ -382,9 +382,9 @@ int Board::squareAttacked(const int sq, const int side, Board* board) {
 
 	int pce, index, t_sq, dir;
 
-	//ASSERT(SqOnBoard(sq));
-	//ASSERT(SideValid(side));
-	//ASSERT(CheckBoard(board));
+	ASSERT(sqOnBoard(sq, &fileBoard));
+	ASSERT(sideValid(side));
+	ASSERT(checkBoard(board));
 
 	// pawns
 	if (side == WHITE) {

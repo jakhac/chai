@@ -145,7 +145,9 @@
     <ClCompile Include="IO.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="move.cpp" />
+    <ClCompile Include="MoveGenerator.cpp" />
     <ClCompile Include="UndoMove.cpp" />
+    <ClCompile Include="Validator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BitBoard.h" />
@@ -155,7 +157,9 @@
     <ClInclude Include="IO.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="move.h" />
+    <ClInclude Include="MoveGenerator.h" />
     <ClInclude Include="UndoMove.h" />
+    <ClInclude Include="Validator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

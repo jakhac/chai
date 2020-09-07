@@ -5,6 +5,7 @@
 #include "UndoMove.h"
 #include "BoardData.h"
 #include "BitBoard.h"
+#include "Validator.h"
 #include <iostream>
 
 class Board

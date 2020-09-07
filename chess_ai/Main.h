@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Board.h"
-#include "move.h"
-
+#include "BoardData.h"
+#include "MoveGenerator.h"
 
 int main();

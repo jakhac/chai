@@ -23,6 +23,7 @@ typedef unsigned long long U64;
 
 const int NUM_SQUARES = 120;
 const int MAX_GAME_MOVES = 2048;
+const int MAX_POSITION_MOVES = 256;
 
 enum PIECE_VALUES { EMPTY, P, N, B, R, Q, K, p, n, b, r, q, k };
 enum FILES { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };

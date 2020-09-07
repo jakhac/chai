@@ -1,6 +1,9 @@
 #pragma once
 
-#include "BoardData.h"
+#ifndef U64
+typedef unsigned long long U64;
+#endif // !U64
+
 
 class BitBoard
 {
