@@ -1,9 +1,8 @@
 #pragma once
 
 #include "stdlib.h"
-#include "defs.h"
+#include "Definition.h"
 #include "UndoMove.h"
-#include "BoardData.h"
 #include "BitBoard.h"
 #include "Validator.h"
 #include <iostream>
@@ -44,25 +43,33 @@ public:
 
 	U64 posKey;
 
-
-	int pieceCol[13] = { BOTH, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK };
-
-	void initHashKeys();
 	U64 pieceKeys[13][120];
 	U64 sideKey;
 	U64 castleKeys[16];
 	U64 generateZobristHash(Board* b);
 
-	BoardData bd = BoardData();
 	BitBoard bb = BitBoard();
 
-	int* fileBoard = bd.fileBoard;
-	int* rankBoard = bd.rankBoard;
-
 	char* printMove(const int move);
+	char* getSquareStr(const int sq);
+
 	int sqOnBoard(int sq);
+
+	/* Address small and big board squares with each board type square as index */
+	int sq120ToSq64[NUM_SQUARES];
+	int sq64ToSq120[64];
+
+	/* Address file and rank with given square as index */
+	int fileBoard[NUM_SQUARES];
+	int rankBoard[NUM_SQUARES];
 	
 	void init();
+	void initHashKeys();
+	void initRankFileArrays();
+	void init120To64();
+
+	int SQ_120(int sq64);
+	int SQ_64(int sq120);
 	
 	void resetBoard(Board* bb);
 	void printBoard(const Board *board);

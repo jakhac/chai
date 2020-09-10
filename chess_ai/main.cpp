@@ -8,7 +8,7 @@ int main() {
 	Board b;
 	b.init();
 
-	string fen = PAWN_FEN;
+	string fen = MOVES_48;
 
 	char* fen_ = new char[fen.size() + 1];
 	std::copy(fen.begin(), fen.end(), fen_);
@@ -16,8 +16,9 @@ int main() {
 
 	// parse fen and print board
 	b.parseFen(fen_, &b);
-	b.printBoard(&b);
-	b.checkBoard(&b);
+
+	//b.printBoard(&b);
+	//b.checkBoard(&b);
 
 	MoveGenerator moveGenerator;
 	moveGenerator.generateAllMoves(&b);

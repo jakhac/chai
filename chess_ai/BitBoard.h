@@ -15,11 +15,9 @@ public:
 	void clearBit(U64 bb, int square);
 	void setBit(U64* bb, int square);
 
-
 	void initClearSetMask();
 	U64 setMask[64];
 	U64 clearMask[64];
-
 
 	const int bitTable[64] = {
 		63, 30, 3, 32, 25, 41, 22, 33, 15, 50, 42, 13, 11, 53, 19, 34, 61, 29, 2,

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "defs.h"
+#include "Definition.h"
 
-int sqOnBoard(const int sq, int* fileBoard[]);
 int sideValid(const int side);
 int fileRankValid(const int fr);
 int pieceValidEmpty(const int pce);
