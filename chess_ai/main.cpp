@@ -8,7 +8,7 @@ int main() {
 	Board b;
 	b.init();
 
-	string fen = MOVES_48;
+	string fen = STARTING_FEN;
 
 	char* fen_ = new char[fen.size() + 1];
 	std::copy(fen.begin(), fen.end(), fen_);

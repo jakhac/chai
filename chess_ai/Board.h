@@ -79,4 +79,12 @@ public:
 	int squareAttacked(const int sq, const int side, Board* board);
 	void printAttackers(const int side, Board* b);
 	void updateListsMaterial(Board* b);
+
+	void clearPiece(Board* b, int sq);
+	void addPiece(Board* b, const int sq, const int piece);
+	void movePiece(Board* b, const int from, const int to);
+
+	int push(Board* b, int move);
+	void pop(Board* b);
+
 };

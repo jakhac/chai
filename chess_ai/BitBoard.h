@@ -9,10 +9,10 @@ class BitBoard
 {
 public:
 
-	int countBits(U64 bb);
+	int countBits(U64* bb);
 	int popBit(U64* bb);
 
-	void clearBit(U64 bb, int square);
+	void clearBit(U64* bb, int square);
 	void setBit(U64* bb, int square);
 
 	void initClearSetMask();

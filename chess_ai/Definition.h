@@ -53,7 +53,7 @@ struct UNDO_MOVE {
     U64 posKey;
 };
 
-const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1";
 const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string QUEEN_FEN = "8/3q1p2/8/5P2/4Q3/8/8/8 w - - 0 1";
 const string PAWN_FEN_W = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
@@ -64,7 +64,7 @@ const string QUEENS = "6k1/8/4nq2/8/1nQ5/5N2/1N6/6K1 b - - 0 1";
 const string BISHOPS = "6k1/1b6/4n3/8/1n4B1/1B3N2/1N6/2b3K1 b - - 0 1";
 const string CASTLE = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
 const string CASTLE2 = "3rk2r/8/8/8/8/8/6p1/R3K2R b KQkq - 0 1";
-const string MOVES_48 = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+const string MOVES_48 = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
 
 // index is true if the piece is knight / king / bishop / rook
 const int pieceKnight[13] = { 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 };
@@ -82,6 +82,7 @@ const int pieceBig[13] = { 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1 };
 const int pieceMaj[13] = { 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1 };
 const int pieceMin[13] = { 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0 };
 const int pieceVal[13] = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
+const int piecePawn[13] = { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
 
 /* color for given index */
 const int pieceCol[13] = { BOTH, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK };
@@ -100,6 +101,22 @@ const int nDir[8] = { -8, -19, -21, -12, 8, 19, 21, 12 };
 const int rDir[4] = { -1, -10, 1, 10 };
 const int bDir[4] = { -9, -11, 11, 9 };
 const int kDir[8] = { -1, -10, 1, 10, -9, -11, 11, 9 };
+
+// bitwise and operation with from / to square results in 1111==KQkq representation
+const int castlePerm[120] = {
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 13, 15, 15, 15, 12, 15, 15, 14, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15,  7, 15, 15, 15,  3, 15, 15, 11, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15
+};
 
 const U64 rand64();
 const int file_rank_2_sq(int f, int r);
@@ -120,3 +137,8 @@ const int file_rank_2_sq(int f, int r);
 #define NOMOVE 0
 
 #define MOVE(f,t,ca,pro,fl) ( (f) | ((t) << 7) | ( (ca) << 14 ) | ( (pro) << 20 ) | (fl))
+
+//#define HASH_PCE(pce,sq) (pos->posKey ^= (PieceKeys[(pce)][(sq)]))
+//#define HASH_CA (pos->posKey ^= (CastleKeys[(pos->castlePerm)]))
+//#define HASH_SIDE (pos->posKey ^= (SideKey))
+//#define HASH_EP (pos->posKey ^= (PieceKeys[EMPTY][(pos->enPas)]))

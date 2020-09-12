@@ -6,7 +6,7 @@ class UndoMove
 {
 public:
     int move;
-    int castle;
+    int castlePermission;
     int enPas;
     int fiftyMove;
     U64 posKey;

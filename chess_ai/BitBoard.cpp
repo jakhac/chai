@@ -1,10 +1,10 @@
 #include "BitBoard.h"
 
-int BitBoard::countBits(U64 bb) {
+int BitBoard::countBits(U64* bb) {
 	int cnt = 0;
-	while (bb) {
-		cnt += bb & 1;
-		bb >>= 1;
+	while (*bb) {
+		cnt += *bb & 1;
+		*bb >>= 1;
 	}
 	return cnt;
 }
@@ -45,8 +45,8 @@ int BitBoard::popBit(U64* bb) {
 //	}
 //}
 
-void BitBoard::clearBit(U64 bb, int square) {
-	bb &= clearMask[square];
+void BitBoard::clearBit(U64* bb, int square) {
+	*bb &= clearMask[square];
 }
 
 void BitBoard::setBit(U64* bb, int square) {

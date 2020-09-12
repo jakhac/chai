@@ -162,9 +162,9 @@ int Board::checkBoard(Board* board) {
 	}
 
 	// check pawn bitboards
-	ASSERT(bb.countBits(t_pawns[WHITE]) == board->pieceNumber[P]);
-	ASSERT(bb.countBits(t_pawns[BLACK]) == board->pieceNumber[p]);
-	ASSERT(bb.countBits(t_pawns[BOTH]) == board->pieceNumber[p] + board->pieceNumber[P]);
+	ASSERT(bb.countBits(&t_pawns[WHITE]) == board->pieceNumber[P]);
+	ASSERT(bb.countBits(&t_pawns[BLACK]) == board->pieceNumber[p]);
+	ASSERT(bb.countBits(&t_pawns[BOTH]) == board->pieceNumber[p] + board->pieceNumber[P]);
 
 	// check pawn bits and squares
 	while (t_pawns[WHITE]) {
@@ -240,7 +240,6 @@ void Board::updateListsMaterial(Board* b) {
 		}
 	}
 }
-
 
 /*
 Initiliaze hash keys for zobrist hashing
@@ -583,4 +582,330 @@ void Board::printAttackers(const int side, Board* b) {
 		std::cout << "\n";
 	}
 	std::cout << "\n";
+}
+
+/*
+Clear piece of board and update arrays and zobrist key
+*/
+void Board::clearPiece(Board* b, const int sq) {
+
+	ASSERT(sqOnBoard(sq));
+	int piece = b->pieces[sq];
+	ASSERT(pieceValid(piece));
+
+	int side = pieceCol[piece];
+	int t_pieceNum = -1;
+
+	// hash piece out of zobrist key
+	b->posKey ^= pieceKeys[piece][sq];
+
+	b->pieces[sq] = EMPTY;
+	b->material[side] -= pieceVal[piece];
+
+	// update counters for big pieces
+	if (pieceBig[piece]) {
+		b->bigPieces[side]--;
+		if (pieceMaj[piece]) b->majPieces[side]--;
+		if (pieceMin[piece]) b->minPieces[side]--;
+	}
+	else {
+		// clear bits from pawn bitboards
+		bb.clearBit(&b->pawns[side], SQ_64(sq));
+		bb.clearBit(&b->pawns[BOTH], SQ_64(sq));
+	}
+
+	for (int i = 0; i < b->pieceNumber[piece]; i++) {
+		if (b->pieceList[piece][i] == sq) {
+			t_pieceNum = i;
+			break;
+		}
+	}
+
+	ASSERT(t_pieceNum != -1);
+
+
+	// decrement piece counter of deleted piece
+	b->pieceNumber[piece]--; 
+
+	// overwrite deleted index with last elem from pieceList
+	b->pieceList[piece][t_pieceNum] = b->pieceList[piece][b->pieceNumber[piece]]; 
+}
+
+/*
+Add piece on board and update pieceLists and hash.
+*/
+void Board::addPiece(Board* b, const int sq, const int piece) {
+
+	ASSERT(pieceValid(piece));
+	ASSERT(sqOnBoard(sq));
+
+	int side = pieceCol[piece];
+
+	// add piece to pieces
+	b->pieces[sq] = piece;
+
+	// update counters for big pieces
+	if (pieceBig[piece]) {
+		b->bigPieces[side]++;
+		if (pieceMaj[piece]) b->majPieces[side]++;
+		if (pieceMin[piece]) b->minPieces[side]++;
+	}
+	else {
+		// clear bits from pawn bitboards
+		bb.setBit(&b->pawns[side], SQ_64(sq));
+		bb.setBit(&b->pawns[BOTH], SQ_64(sq));
+	}
+
+	b->material[side] += pieceVal[piece]; // add material values
+	b->pieceList[piece][b->pieceNumber[piece]++] = sq; // add and increment after
+
+}
+
+/*
+Move piece on board and update pieceLists and hash.
+*/
+void Board::movePiece(Board* b, const int from, const int to) {
+
+	ASSERT(sqOnBoard(from));
+	ASSERT(sqOnBoard(to));
+
+	const int piece = b->pieces[from];
+	const int side = pieceCol[piece];
+
+	// hash from sq out of key
+	b->posKey ^= b->pieceKeys[piece][from];
+	b->pieces[from] = EMPTY;
+
+	// hash piece into key
+	b->posKey ^= b->pieceKeys[piece][to];
+	b->pieces[to] = EMPTY;
+
+#ifdef DEBUG
+	int t_pieceNum = 0;
+#endif
+
+	if (!pieceBig[piece]) {
+		//  clear bits from pawn bitboards
+		bb.clearBit(&b->pawns[side], SQ_64(from));
+		bb.clearBit(&b->pawns[BOTH], SQ_64(from));
+
+		// add bits to pawn bitboards
+		bb.setBit(&b->pawns[side], SQ_64(to));
+		bb.setBit(&b->pawns[BOTH], SQ_64(to));
+	}
+
+	for (int i = 0; i < b->pieceNumber[piece]; i++) {
+		if (b->pieceList[piece][i] == from) {
+			b->pieceList[piece][i] = to;
+
+#ifdef DEBUG
+			t_pieceNum = 1;
+#endif
+
+			break;
+		}
+	}
+
+	// assert that moved piece is found in piece list
+	ASSERT(t_pieceNum);
+}
+
+/*
+Push a move on board. Return 0 if move would leave the moved side in check, else 1 for valid move.
+*/
+int Board::push(Board* b, const int move)
+{
+
+	ASSERT(checkBoard(b));
+
+	int from = FROMSQ(move);
+	int to = TOSQ(move);
+	int side = b->side;
+
+	ASSERT(sqOnBoard(from));
+	ASSERT(sqOnBoard(to));
+	ASSERT(sideValid(side));
+	ASSERT(pieceValid(b->pieces[from]));
+
+	b->history[b->hisPly].posKey = posKey;
+
+	// if move is en passant capture
+	if (move & MFLAGEP) {
+		if (side == WHITE) clearPiece(b, to - 10);
+		if (side == BLACK) clearPiece(b, to + 10);
+	}
+	// castle move
+	else if (move & MFLAGCA) {
+		switch (to)
+		{
+			case C1: movePiece(b, A1, D1); break;
+			case C8: movePiece(b, A8, D8); break;
+			case G1: movePiece(b, H1, F1); break;
+			case G8: movePiece(b, H8, F8); break;
+			default: ASSERT(0) break;
+		}
+	}
+
+	// if en passant square is set, hash out
+	if (b->enPas != NO_SQ) {
+		b->posKey ^= b->pieceKeys[EMPTY][b->enPas];
+	}
+
+	// hash castle out
+	b->posKey ^= castleKeys[b->castlePermission];
+
+	// store data in history array
+	b->history[b->hisPly].move = move;
+	b->history[b->hisPly].fiftyMove = b->fiftyMove;
+	b->history[b->hisPly].enPas = b->enPas;
+	b->history[b->hisPly].castlePermission = b->castlePermission;
+
+	b->castlePermission &= castlePerm[from];
+	b->castlePermission &= castlePerm[to];
+	b->enPas = NO_SQ;
+
+	// hash castle in
+	b->posKey ^= castleKeys[b->castlePermission];
+
+	int cap = CAPTURED(move);
+	b->fiftyMove++;
+
+	if (cap != EMPTY) {
+		ASSERT(pieceValid(cap));
+		clearPiece(b, to);
+		b->fiftyMove = 0;
+	}
+
+	b->hisPly++;
+	b->ply++;
+
+	if (piecePawn[b->pieces[from]]) {
+		b->fiftyMove = 0;
+		if (move & MFLAGPS) {
+			if (b->side == WHITE) {
+				b->enPas = from + 10;
+				ASSERT(rankBoard[b->enPas] == RANK_3);
+			}
+			else {
+				b->enPas = from - 10;
+				ASSERT(rankBoard[b->enPas] == RANK_6);
+			}
+			// hash en passant in key
+			b->posKey ^= pieceKeys[EMPTY][b->enPas];
+		}
+	}
+
+	movePiece(b, from, to);
+
+	// handle promotions
+	int promPiece = PROMOTED(move);
+	if (promPiece != EMPTY) {
+		ASSERT(pieceValid(promPiece) && !piecePawn[promPiece]);
+		clearPiece(b, to);
+		addPiece(b, to, promPiece);
+	}
+
+	// update king square
+	if (pieceKing[b->pieces[to]]) {
+		b->KingSquares[b->side] = to;
+	}
+
+	b->side ^= 1;
+	b->posKey ^= sideKey;
+
+	ASSERT(checkBoard(b));
+
+	// if side to move now is giving check, move is not valid
+	if (squareAttacked(b->KingSquares[side], b->side, b)) {
+		//takeMove
+		return 0;
+	}
+	
+	return 1;
+}
+
+/*
+Undo a move and pop from the history. TODO maybe use zobrist hash from stored undmove object
+*/
+void Board::pop(Board* b) {
+
+	ASSERT(checkBoard(b));
+
+	b->hisPly--;
+	b->ply--;
+
+	int move = b->history[b->hisPly].move;
+	int from = FROMSQ(move);
+	int to = TOSQ(move);
+
+	ASSERT(sqOnBoard(from));
+	ASSERT(sqOnBoard(to));
+
+	// if en pas is set, hash out 
+	if (b->enPas != NO_SQ)  {
+		b->posKey ^= pieceKeys[EMPTY][b->enPas];
+	}
+	// hash out castle
+	b->posKey ^= castleKeys[b->castlePermission];
+
+	// set new castle and en pas permissions in board
+	b->castlePermission = b->history[b->hisPly].castlePermission;
+	b->fiftyMove = b->history[b->hisPly].fiftyMove;
+	b->enPas= b->history[b->hisPly].enPas;
+
+	// if en pas is set, hash in 
+	if (b->enPas != NO_SQ) {
+		b->posKey ^= pieceKeys[EMPTY][b->enPas];
+	}
+	// hash in new castle perms
+	b->posKey ^= castleKeys[b->castlePermission];
+
+	b->side ^= 1;
+	b->posKey ^= sideKey;
+
+	// if en pas
+	if (MFLAGEP & move) {
+		if (b->side == WHITE) {
+			addPiece(b, to - 10, p);
+		}
+		else {
+			addPiece(b, to + 10, P);
+		}
+	}
+	else if (MFLAGCA & move) {
+		switch (to) {
+			// rook moves
+			case C1: movePiece(b, D1, A1); break;
+			case C8: movePiece(b, D8, A8); break;
+			case G1: movePiece(b, F1, H1); break;
+			case G8: movePiece(b, F8, H8); break;
+			default: ASSERT(0); break;
+		}
+	}
+
+	// move capturer back to from square
+	movePiece(b, to, from);
+
+	// update king squares
+	if (pieceKing[b->pieces[from]]) {
+		b->KingSquares[b->side] = from;
+	}
+
+	// add captured piece if possible
+	int cap = CAPTURED(move);
+	if (cap != EMPTY) {
+		ASSERT(pieceValid(cap));
+		addPiece(b, to, cap);
+	}
+
+	// add promoted pawn if promotion
+	int prom = PROMOTED(move);
+	if (prom != EMPTY) {
+		ASSERT(pieceValid(prom) && !piecePawn[prom]);
+		clearPiece(b, from);
+		int pawn = (pieceCol[prom]) == WHITE ? P : p;
+		addPiece(b, from, pawn);
+	}
+
+	ASSERT(checkBoard(b));
 }

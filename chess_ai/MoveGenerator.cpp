@@ -135,7 +135,6 @@ void MoveGenerator::generateAllMoves(Board* b) {
 
 	/* pls refactor me */
 	if (side == WHITE) {
-		std::cout << "\nGenerate white moves." << endl;
 
 		// loop through all white pawns on board
 		for (i = 0; i < b->pieceNumber[P]; i++) {
@@ -187,7 +186,6 @@ void MoveGenerator::generateAllMoves(Board* b) {
 
 	}
 	else {
-		std::cout << "\nGenerate black moves." << endl;
 
 		// loop through all black pawns on board
 		for (i = 0; i < b->pieceNumber[p]; i++) {
