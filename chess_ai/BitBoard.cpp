@@ -1,4 +1,22 @@
 #include "BitBoard.h"
+#include <stdexcept>
+
+
+U64 BitBoard::getPieceSet(PIECE_VALUES p)
+{
+	// C26812: Enum class instead of enum
+
+	int color = p / 7;
+	int piece = p % 7 + 2;
+	if (piece < 8) 
+	{
+		return allPiecesBB[color] & allPiecesBB[piece];
+	}
+	else 
+	{
+		throw std::invalid_argument("Piece type does not exist");
+	}
+}
 
 int BitBoard::countBits(U64* bb) {
 	int cnt = 0;
