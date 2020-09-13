@@ -73,6 +73,7 @@ public:
 	
 	void resetBoard(Board* bb);
 	void printBoard(const Board *board);
+	void printBitBoard(U64 bb);
 	int parseFen(char* fen, Board* board);
 
 	int checkBoard(Board* board);
@@ -86,5 +87,6 @@ public:
 
 	int push(Board* b, int move);
 	void pop(Board* b);
+
 
 };

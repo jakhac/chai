@@ -17,13 +17,30 @@ int main() {
 	// parse fen and print board
 	b.parseFen(fen_, &b);
 
+	int m = MOVE(A6, A7, EMPTY, EMPTY, EMPTY);
+
+	Perft perft;
+	perft.perftRoot(b, 2);
+
+
 	//b.printBoard(&b);
-	//b.checkBoard(&b);
+	//for (int i = 0; i < numMoves; i++) {
+	//	cout << "\n----------------\n";
 
-	MoveGenerator moveGenerator;
-	moveGenerator.generateAllMoves(&b);
+	//	int move = moves[i].move;
 
-	moveGenerator.printMoveList(&b);
+	//	// if push returns false -> move is illegal
+	//	if (!b.push(&b, move)) continue;
+
+	//	cout << "Make move " << b.printMove(move) << endl;
+	//	b.printBoard(&b);
+
+	//	b.pop(&b);
+	//	cout << "\nUnmake move " << b.printMove(move) << endl;
+	//	b.printBoard(&b);
+
+	//	getchar();
+	//}
 
 	return 0;
 }

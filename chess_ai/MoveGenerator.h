@@ -48,14 +48,15 @@ public:
 	void addEnPasMove(int move);
 
 	void printMoveList(Board* b);
+	Move* getMoves();
 
-	void generateAllMoves(Board* b);
+	int generateAllMoves(Board b);
 
-	void addWhitePawnCapMove(Board* b, const int from, const int to, const int cap);
-	void addWhitePawnMove(Board* b,  const int from, const int to);
+	void addWhitePawnCapMove(Board b, const int from, const int to, const int cap);
+	void addWhitePawnMove(Board b,  const int from, const int to);
 
-	void addBlackPawnCapMove(Board* b,  const int from, const int to, const int cap);
-	void addBlackPawnMove(Board* b,  const int from, const int to);
+	void addBlackPawnCapMove(Board b,  const int from, const int to, const int cap);
+	void addBlackPawnMove(Board b,  const int from, const int to);
 
 
 };

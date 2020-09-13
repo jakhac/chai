@@ -27,13 +27,13 @@ void MoveGenerator::addEnPasMove(int move) {
 /*
 Add all white pawn capture moves.
 */
-void MoveGenerator::addWhitePawnCapMove(Board* board, const int from, const int to, const int cap) {
+void MoveGenerator::addWhitePawnCapMove(Board board, const int from, const int to, const int cap) {
 
 	ASSERT(pieceValidEmpty(cap));
-	ASSERT(board->sqOnBoard(from));
-	ASSERT(board->sqOnBoard(to));
+	ASSERT(board.sqOnBoard(from));
+	ASSERT(board.sqOnBoard(to));
 
-	if (board->rankBoard[from] == RANK_7) {
+	if (board.rankBoard[from] == RANK_7) {
 		// promote if possible
 		addCaptureMove(MOVE(from, to, cap, Q, 0));
 		addCaptureMove(MOVE(from, to, cap, R, 0));
@@ -48,12 +48,12 @@ void MoveGenerator::addWhitePawnCapMove(Board* board, const int from, const int 
 /*
 Add all white pawn moves.
 */
-void MoveGenerator::addWhitePawnMove(Board* board, const int from, const int to) {
+void MoveGenerator::addWhitePawnMove(Board board, const int from, const int to) {
 
-	ASSERT(board->sqOnBoard(from));
-	ASSERT(board->sqOnBoard(to));
+	ASSERT(board.sqOnBoard(from));
+	ASSERT(board.sqOnBoard(to));
 
-	if (board->rankBoard[from] == RANK_7) {
+	if (board.rankBoard[from] == RANK_7) {
 		// promote if possible
 		addQuietMove(MOVE(from, to, EMPTY, Q, 0));
 		addQuietMove(MOVE(from, to, EMPTY, R, 0));
@@ -68,13 +68,13 @@ void MoveGenerator::addWhitePawnMove(Board* board, const int from, const int to)
 /*
 Add all black pawn capture moves.
 */
-void MoveGenerator::addBlackPawnCapMove(Board* board, const int from, const int to, const int cap) {
+void MoveGenerator::addBlackPawnCapMove(Board board, const int from, const int to, const int cap) {
 
 	ASSERT(pieceValidEmpty(cap));
-	ASSERT(board->sqOnBoard(from));
-	ASSERT(board->sqOnBoard(to));
+	ASSERT(board.sqOnBoard(from));
+	ASSERT(board.sqOnBoard(to));
 
-	if (board->rankBoard[from] == RANK_2) {
+	if (board.rankBoard[from] == RANK_2) {
 		// promote if possible
 		addCaptureMove(MOVE(from, to, cap, q, 0));
 		addCaptureMove(MOVE(from, to, cap, r, 0));
@@ -89,12 +89,12 @@ void MoveGenerator::addBlackPawnCapMove(Board* board, const int from, const int 
 /*
 Add all black pawn moves.
 */
-void MoveGenerator::addBlackPawnMove(Board* board, const int from, const int to) {
+void MoveGenerator::addBlackPawnMove(Board board, const int from, const int to) {
 
-	ASSERT(board->sqOnBoard(from));
-	ASSERT(board->sqOnBoard(to));
+	ASSERT(board.sqOnBoard(from));
+	ASSERT(board.sqOnBoard(to));
 
-	if (board->rankBoard[from] == RANK_2) {
+	if (board.rankBoard[from] == RANK_2) {
 		// promote if possible
 		addQuietMove(MOVE(from, to, EMPTY, q, 0));
 		addQuietMove(MOVE(from, to, EMPTY, r, 0));
@@ -117,68 +117,75 @@ void MoveGenerator::printMoveList(Board* b) {
 
 }
 
+Move* MoveGenerator::getMoves()
+{
+	return moveList;
+}
+
 /*
-Generate all moves for referenced board.
+Generate all moves for referenced board and return number of generated moves.
 */
-void MoveGenerator::generateAllMoves(Board* b) {
+int MoveGenerator::generateAllMoves(Board b) {
 
 	moveCounter = 0;
 
-	ASSERT(b->checkBoard(b));
+	ASSERT(b.checkBoard(&b));
 
 	int piece = EMPTY;
-	int side = b->side;
+	int side = b.side;
 	int sq = 0, t_sq = 0;
 	int i = 0, j = 0;
 	int dir = 0, pieceIndex = 0;
+
+	cout << "Generate moves for " << side << endl;
 
 
 	/* pls refactor me */
 	if (side == WHITE) {
 
 		// loop through all white pawns on board
-		for (i = 0; i < b->pieceNumber[P]; i++) {
-			sq = b->pieceList[P][i];
+		for (i = 0; i < b.pieceNumber[P]; i++) {
+			sq = b.pieceList[P][i];
 
-			ASSERT(b->sqOnBoard(sq));
+			ASSERT(b.sqOnBoard(sq));
 
 			// pawn non capture moves
-			if (b->pieces[sq + 10] == EMPTY) {
+			if (b.pieces[sq + 10] == EMPTY) {
 				addWhitePawnMove(b, sq, sq+10);
-				if (b->rankBoard[sq] == RANK_2 && b->pieces[sq + 20] == EMPTY) {
+				if (b.rankBoard[sq] == RANK_2 && b.pieces[sq + 20] == EMPTY) {
 					addQuietMove(MOVE(sq, sq+20, EMPTY, EMPTY, MFLAGPS));
 				}
 			}
 
 			// pawn capture move diagonals
-			if (b->sqOnBoard(sq + 9) && pieceCol[b->pieces[sq + 9]] == BLACK) {
-				addWhitePawnCapMove(b, sq, sq+9, b->pieces[sq + 9]);
+			if (b.sqOnBoard(sq + 9) && pieceCol[b.pieces[sq + 9]] == BLACK) {
+				addWhitePawnCapMove(b, sq, sq+9, b.pieces[sq + 9]);
 			}
-			if (b->sqOnBoard(sq + 11) && pieceCol[b->pieces[sq + 11]] == BLACK) {
-				addWhitePawnCapMove(b, sq, sq + 11, b->pieces[sq + 11]);
+			if (b.sqOnBoard(sq + 11) && pieceCol[b.pieces[sq + 11]] == BLACK) {
+				addWhitePawnCapMove(b, sq, sq + 11, b.pieces[sq + 11]);
 			}
 
 			// pawn en passant captures
-			if (sq + 9 == b->enPas) {
+			if (sq + 9 == b.enPas) {
 				addCaptureMove(MOVE(sq, sq + 9, EMPTY, EMPTY, MFLAGEP));
 			}
-			if (sq + 11 == b->enPas) {
+			if (sq + 11 == b.enPas) {
 				addCaptureMove(MOVE(sq, sq + 11, EMPTY, EMPTY, MFLAGEP));
 			}
 		}
 
 		// castle moves
-		if (b->castlePermission & K_CASTLE) {
-			if (b->pieces[F1] == EMPTY && b->pieces[G1] == EMPTY) {
-				if (!b->squareAttacked(E1, BLACK, b) && !b->squareAttacked(F1, BLACK, b)) {
+		if (b.castlePermission & K_CASTLE) {
+			if (b.pieces[F1] == EMPTY && b.pieces[G1] == EMPTY) {
+				if (!b.squareAttacked(E1, BLACK, &b) && !b.squareAttacked(F1, BLACK, &b)) {
 					addQuietMove(MOVE(E1, G1, EMPTY, EMPTY, MFLAGCA));
 				}
 			}
 		}
 
-		if (b->castlePermission & Q_CASTLE) {
-			if (b->pieces[D1] == EMPTY && b->pieces[C1] == EMPTY && b->pieces[B1] == EMPTY) {
-				if (!b->squareAttacked(E1, BLACK, b) && !b->squareAttacked(D1, BLACK, b)) {
+		if (b.castlePermission & Q_CASTLE) {
+			if (b.pieces[D1] == EMPTY && b.pieces[C1] == EMPTY && b.pieces[B1] == EMPTY) {
+				if (!b.squareAttacked(E1, BLACK, &b) && !b.squareAttacked(D1, BLACK, &b)) {
 					addQuietMove(MOVE(E1, C1, EMPTY, EMPTY, MFLAGCA));
 				}
 			}
@@ -188,47 +195,47 @@ void MoveGenerator::generateAllMoves(Board* b) {
 	else {
 
 		// loop through all black pawns on board
-		for (i = 0; i < b->pieceNumber[p]; i++) {
-			sq = b->pieceList[p][i];
+		for (i = 0; i < b.pieceNumber[p]; i++) {
+			sq = b.pieceList[p][i];
 
 
-			if (b->pieces[sq - 10] == EMPTY) {
+			if (b.pieces[sq - 10] == EMPTY) {
 				addBlackPawnMove(b, sq, sq - 10);
-				if (b->rankBoard[sq] == RANK_7 && b->pieces[sq - 20] == EMPTY) {
+				if (b.rankBoard[sq] == RANK_7 && b.pieces[sq - 20] == EMPTY) {
 					addQuietMove(MOVE(sq, sq - 20, EMPTY, EMPTY, MFLAGPS));
 				}
 			}
 
 			// black pawn capture move diagonals
-			if (b->sqOnBoard(sq - 9) && pieceCol[b->pieces[sq - 9]] == WHITE) {
-				addBlackPawnCapMove(b, sq, sq - 9, b->pieces[sq - 9]);
+			if (b.sqOnBoard(sq - 9) && pieceCol[b.pieces[sq - 9]] == WHITE) {
+				addBlackPawnCapMove(b, sq, sq - 9, b.pieces[sq - 9]);
 			}
-			if (b->sqOnBoard(sq - 11) && pieceCol[b->pieces[sq - 11]] == WHITE) {
-				addBlackPawnCapMove(b, sq, sq - 11, b->pieces[sq - 11]);
+			if (b.sqOnBoard(sq - 11) && pieceCol[b.pieces[sq - 11]] == WHITE) {
+				addBlackPawnCapMove(b, sq, sq - 11, b.pieces[sq - 11]);
 			}
 
 			// black pawn en passant captures
-			if (sq - 9 == b->enPas) {
+			if (sq - 9 == b.enPas) {
 				addCaptureMove(MOVE(sq, sq - 9, EMPTY, EMPTY, MFLAGEP));
 			}
-			if (sq - 11 == b->enPas) {
+			if (sq - 11 == b.enPas) {
 				addCaptureMove(MOVE(sq, sq - 11, EMPTY, EMPTY, MFLAGEP));
 			}
 		}
 
 		
 		// castle moves
-		if (b->castlePermission & k_CASTLE) {
-			if (b->pieces[F8] == EMPTY && b->pieces[G8] == EMPTY) {
-				if (!b->squareAttacked(E8, WHITE, b) && !b->squareAttacked(F8, WHITE, b)) {
+		if (b.castlePermission & k_CASTLE) {
+			if (b.pieces[F8] == EMPTY && b.pieces[G8] == EMPTY) {
+				if (!b.squareAttacked(E8, WHITE, &b) && !b.squareAttacked(F8, WHITE, &b)) {
 					addQuietMove(MOVE(E8, C8, EMPTY, EMPTY, MFLAGCA));
 				}
 			}
 		}
 
-		if (b->castlePermission & q_CASTLE) {
-			if (b->pieces[D8] == EMPTY && b->pieces[C8] == EMPTY && b->pieces[B8] == EMPTY) {
-				if (!b->squareAttacked(E8, WHITE, b) && !b->squareAttacked(D8, WHITE, b)) {
+		if (b.castlePermission & q_CASTLE) {
+			if (b.pieces[D8] == EMPTY && b.pieces[C8] == EMPTY && b.pieces[B8] == EMPTY) {
+				if (!b.squareAttacked(E8, WHITE, &b) && !b.squareAttacked(D8, WHITE, &b)) {
 					addQuietMove(MOVE(E8, C8, EMPTY, EMPTY, MFLAGCA));
 				}
 			}
@@ -242,19 +249,19 @@ void MoveGenerator::generateAllMoves(Board* b) {
 	while (piece != 0) {
 		ASSERT(pieceValid(piece));
 
-		for (i = 0; i < b->pieceNumber[piece]; i++) {
-			sq = b->pieceList[piece][i];
-			ASSERT(b->sqOnBoard(sq));
+		for (i = 0; i < b.pieceNumber[piece]; i++) {
+			sq = b.pieceList[piece][i];
+			ASSERT(b.sqOnBoard(sq));
 
 			for (j = 0; j < numDir[piece]; ++j) {
 				dir = pieceDir[piece][j];
 				t_sq = sq + dir;
 
-				while (b->sqOnBoard(t_sq)) {
-					if (b->pieces[t_sq] != EMPTY) {
-						if (pieceCol[b->pieces[t_sq]] == (side ^ 1)) {
+				while (b.sqOnBoard(t_sq)) {
+					if (b.pieces[t_sq] != EMPTY) {
+						if (pieceCol[b.pieces[t_sq]] == (side ^ 1)) {
 							//printf("\t\tCapture move on %s\n", b->getSquareStr(t_sq));
-							addCaptureMove(MOVE(sq, t_sq, b->pieces[t_sq], EMPTY, 0));
+							addCaptureMove(MOVE(sq, t_sq, b.pieces[t_sq], EMPTY, 0));
 						}
 						break;
 					}
@@ -276,22 +283,22 @@ void MoveGenerator::generateAllMoves(Board* b) {
 	while (piece != 0) {
 		ASSERT(pieceValid(piece));
 
-		for (i = 0; i < b->pieceNumber[piece]; i++) {
-			sq = b->pieceList[piece][i];
-			ASSERT(b->sqOnBoard(sq));
+		for (i = 0; i < b.pieceNumber[piece]; i++) {
+			sq = b.pieceList[piece][i];
+			ASSERT(b.sqOnBoard(sq));
 
 			for (j = 0; j < numDir[piece]; ++j) {
 				dir = pieceDir[piece][j];
 				t_sq = sq + dir;
 
-				if (!b->sqOnBoard(t_sq)) {
+				if (!b.sqOnBoard(t_sq)) {
 					continue;
 				}
 
-				if (b->pieces[t_sq] != EMPTY) {
-					if (pieceCol[b->pieces[t_sq]] == (side ^ 1)) {
+				if (b.pieces[t_sq] != EMPTY) {
+					if (pieceCol[b.pieces[t_sq]] == (side ^ 1)) {
 						//printf("\t\tCapture move on %s\n", b->getSquareStr(t_sq));
-						addCaptureMove(MOVE(sq, t_sq, b->pieces[t_sq], EMPTY, 0));
+						addCaptureMove(MOVE(sq, t_sq, b.pieces[t_sq], EMPTY, 0));
 					}
 					continue;
 				}
@@ -302,6 +309,9 @@ void MoveGenerator::generateAllMoves(Board* b) {
 	
 		piece = loopNonSlidingPiece[pieceIndex++];
 	}
+
+	// return number of generated moves
+	return moveCounter;
 }
 
 

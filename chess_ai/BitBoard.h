@@ -2,9 +2,12 @@
 #include "Definition.h"
 
 #ifndef U64
-typedef unsigned long long U64;
+//typedef unsigned long long U64;
 #endif // !U64
 
+#include "Definition.h"
+
+using namespace std;
 
 class BitBoard
 {

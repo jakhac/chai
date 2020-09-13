@@ -678,7 +678,7 @@ void Board::movePiece(Board* b, const int from, const int to) {
 
 	// hash piece into key
 	b->posKey ^= b->pieceKeys[piece][to];
-	b->pieces[to] = EMPTY;
+	b->pieces[to] = piece;
 
 #ifdef DEBUG
 	int t_pieceNum = 0;
@@ -701,7 +701,6 @@ void Board::movePiece(Board* b, const int from, const int to) {
 #ifdef DEBUG
 			t_pieceNum = 1;
 #endif
-
 			break;
 		}
 	}
@@ -711,11 +710,39 @@ void Board::movePiece(Board* b, const int from, const int to) {
 }
 
 /*
+Print a bitboard.
+*/
+void Board::printBitBoard(U64 bb) {
+
+	U64 shiftBit = 1ULL;
+
+	int rank = 0;
+	int file = 0;
+	int sq = 0;
+	int sq64 = 0;
+
+	std::cout << std::endl;
+	for (rank = RANK_8; rank >= RANK_1; rank--) {
+		for (file = FILE_A; file <= FILE_H; file++) {
+			sq = file_rank_2_sq(file, rank); // 120 based index
+			sq64 = sq120ToSq64[sq]; // 63 based index
+
+			if (shiftBit << sq64 & bb) {
+				std::cout << "1 ";
+			}
+			else {
+				std::cout << ". ";
+			}
+		}
+		std::cout << std::endl;
+	}
+}
+
+/*
 Push a move on board. Return 0 if move would leave the moved side in check, else 1 for valid move.
 */
 int Board::push(Board* b, const int move)
 {
-
 	ASSERT(checkBoard(b));
 
 	int from = FROMSQ(move);
@@ -727,13 +754,14 @@ int Board::push(Board* b, const int move)
 	ASSERT(sideValid(side));
 	ASSERT(pieceValid(b->pieces[from]));
 
-	b->history[b->hisPly].posKey = posKey;
+	b->history[b->hisPly].posKey = b->posKey;
 
 	// if move is en passant capture
 	if (move & MFLAGEP) {
 		if (side == WHITE) clearPiece(b, to - 10);
 		if (side == BLACK) clearPiece(b, to + 10);
 	}
+
 	// castle move
 	else if (move & MFLAGCA) {
 		switch (to)
@@ -768,8 +796,8 @@ int Board::push(Board* b, const int move)
 	b->posKey ^= castleKeys[b->castlePermission];
 
 	int cap = CAPTURED(move);
-	b->fiftyMove++;
 
+	b->fiftyMove++;
 	if (cap != EMPTY) {
 		ASSERT(pieceValid(cap));
 		clearPiece(b, to);
@@ -782,6 +810,8 @@ int Board::push(Board* b, const int move)
 	if (piecePawn[b->pieces[from]]) {
 		b->fiftyMove = 0;
 		if (move & MFLAGPS) {
+			cout << "Push move: PS Flag " << printMove(move) << endl;
+			printBoard(b);
 			if (b->side == WHITE) {
 				b->enPas = from + 10;
 				ASSERT(rankBoard[b->enPas] == RANK_3);
@@ -817,7 +847,7 @@ int Board::push(Board* b, const int move)
 
 	// if side to move now is giving check, move is not valid
 	if (squareAttacked(b->KingSquares[side], b->side, b)) {
-		//takeMove
+		pop(b);
 		return 0;
 	}
 	
