@@ -20,7 +20,8 @@ const int isK(int p) {
 Converts a file and a rank into the corresponding square.
 */
 const int file_rank_2_sq(int f, int r) {
-	return (21 + f) + (r * 10);
+	return 8 * r + f;
+	//return (21 + f) + (r * 10);
 }
 
 /*

@@ -28,23 +28,12 @@ const int MAX_GAME_MOVES = 2048;
 const int MAX_POSITION_MOVES = 256;
 
 enum PIECE_VALUES { EMPTY, P, N, B, R, Q, K, p, n, b, r, q, k };
-enum PIECES { NO_PIECE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
+enum PIECES_TYPES { NO_PIECE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 enum FILES { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
 enum RANKS { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
 enum COLORS { WHITE, BLACK, BOTH };
 
 enum CASTLING_RIGHTS { K_CASTLE = 1, Q_CASTLE = 2, k_CASTLE = 4, q_CASTLE = 8 };
-
-//enum SQUARES {
-//    A1 = 21, B1, C1, D1, E1, F1, G1, H1,
-//    A2 = 31, B2, C2, D2, E2, F2, G2, H2,
-//    A3 = 41, B3, C3, D3, E3, F3, G3, H3,
-//    A4 = 51, B4, C4, D4, E4, F4, G4, H4,
-//    A5 = 61, B5, C5, D5, E5, F5, G5, H5,
-//    A6 = 71, B6, C6, D6, E6, F6, G6, H6,
-//    A7 = 81, B7, C7, D7, E7, F7, G7, H7,
-//    A8 = 91, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD
-//};
 
 enum SQUARES {
         A8 = 56, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD,
@@ -57,6 +46,7 @@ enum SQUARES {
         A1 = 0, B1, C1, D1, E1, F1, G1, H1
     };
 
+/* test fens to check parse function */
 const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string QUEEN_FEN = "8/3q1p2/8/5P2/4Q3/8/8/8 w - - 0 1";
@@ -91,10 +81,13 @@ const int piecePawn[13] = { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
 /* color for given index */
 const int pieceCol[13] = { BOTH, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK };
 
+/* Converts piece 1..12 to 1..6 */
+const int pieceType[13] = { 0, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6};
+
 /* contains piece slides for indexed piece */
 const int pieceSlides[13] = { 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0 };
 
-/* variables to parse fen into board variables */
+/* variables to parse fen into board variables and print in console */
 const string pieceChar = ".PNBRQKpnbrqk";
 const string sideChar = "wb-";
 const string rankChar = "12345678";

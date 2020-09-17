@@ -24,7 +24,7 @@ int Board::popBit(U64* bb) {
 }
 
 /// <summary>
-/// Clear bit at given bitboard.
+/// Set bit at given bitboard.
 /// </summary>
 void Board::setBit(U64* bb, int i) {
 	*bb |= setMask[i];
@@ -38,21 +38,21 @@ void Board::clearBit(U64* bb, int i) {
 }
 
 /// <summary>
+/// Set bit at given index to 1 in side, occupied and piece bitboard.
+/// </summary>
+void Board::setPiece(int piece, int square, int side) {
+	pieces[pieceType[piece]] |= setMask[square];
+	color[side] |= setMask[square];
+	occupied |= setMask[square];
+}
+
+/// /// <summary>
 /// Set bit at given index to 0 in side, occupied and piece bitboard.
 /// </summary>
 void Board::clearPiece(int piece, int square, int side) {
 	pieces[piece] &= clearMask[square];
 	color[side] &= clearMask[square];
 	occupied &= clearMask[square];
-}
-
-/// <summary>
-/// Set bit at given index to 1 in side, occupied and piece bitboard.
-/// </summary>
-void Board::setPiece(int piece, int square, int side) {
-	pieces[piece] |= setMask[square];
-	color[side] |= setMask[square];
-	occupied |= setMask[square];
 }
 
 /// <summary>
@@ -105,14 +105,13 @@ void Board::reset() {
 	side = WHITE;
 	enPas = -1;
 	ply = 0;
-	zobristKey = 0ULL;
+	zobristKey = 0x0;
+	castlePermission = 0;
 
 	color[0] = 0ULL;
 	color[1] = 0ULL;
 
-	for (int i = NO_PIECE; i <= KING; i++) {
-		pieces[i] = 0ULL;
-	}
+	for (int i = NO_PIECE; i <= KING; i++) pieces[i] = 0ULL;
 
 	occupied = 0ULL;
 }
@@ -156,8 +155,7 @@ void Board::printBitBoard(U64* bb) {
 
 			if ((shiftBit << sq) & *bb) {
 				std::cout << "1 ";
-			}
-			else {
+			} else {
 				std::cout << ". ";
 			}
 		}
@@ -192,7 +190,7 @@ void Board::printBoard() {
 	for (rank = RANK_8; rank >= RANK_1; rank--) {
 		printf("%d  ", rank + 1);
 		for (file = FILE_A; file <= FILE_H; file++) {
-			sq = 8 * rank + file;
+			sq = file_rank_2_sq(file, rank);
 			piece = pieceAt(sq);
 			printf("%2c", pieceChar[piece]);
 		}
@@ -204,18 +202,27 @@ void Board::printBoard() {
 		printf("%2c", 'a' + file);
 	}
 
+	cout << "\n\nPlayer to move: " << side << endl;
+	printf("Zobrist key: %llX\n", zobristKey);
+	cout << "En passant square: " << enPas << endl;
+	printf("Castle permission: %c%c%c%c\n",
+		castlePermission & K_CASTLE ? 'K' : ' ',
+		castlePermission & Q_CASTLE ? 'Q' : ' ',
+		castlePermission & k_CASTLE ? 'k' : ' ',
+		castlePermission & q_CASTLE ? 'q' : ' '
+	);
 }
 
+/// <summary>
+/// Parse fen notation into bitboards and board variables.
+/// </summary>
 void Board::parseFen(string fen) {
 
-	int file = FILE_A;
-	int rank = RANK_8;
-	int index = 0;
-	int piece = 0;
-	int emptySquares;
+	int file = FILE_A, rank = RANK_8;
+	int index = 0, square = 0, piece = 0, count = 0;
 
 	while (rank >= RANK_1) {
-
+		count = 1;
 		switch (fen[index]) {
 			case 'p': piece = p; break;
 			case 'r': piece = r; break;
@@ -238,8 +245,8 @@ void Board::parseFen(string fen) {
 			case '6':
 			case '7':
 			case '8':
-				piece = EMPTY;
-				emptySquares = fen[index] - '0';
+				piece = NO_PIECE;
+				count = fen[index] - '0';
 				break;
 
 			case '/':
@@ -250,20 +257,79 @@ void Board::parseFen(string fen) {
 				continue;
 
 			default:
-				printf("FEN error \n");
-				return -1;
+				cout << "FEN error: " << fen[index] << endl;
+				return;
 		}
 
-		for (i = 0; i < emptySquares; i++) {
-			sq64 = rank * 8 + file;
-			sq120 = SQ_120(sq64);
-			if (piece != EMPTY) {
-				pos->pieces[sq120] = piece;
+		for (int i = 0; i < count; i++) {
+			square = rank * 8 + file;
+			if (piece != NO_PIECE) {
+				setPiece(piece, square, pieceCol[piece]);
 			}
 			file++;
 		}
-		fen++;
+		index++;
 	}
 
+	// assert for correct position
+	ASSERT(fen[index] == 'w' || fen[index] == 'b');
+	side = fen[index] == 'w' ? WHITE : BLACK;
+	index += 2;
 
+	// castle permission
+	for (int i = 0; i < 4; i++) {
+		if (fen[index] == ' ') {
+			break;
+		}
+		switch (fen[index]) {
+			case 'K': castlePermission |= K_CASTLE; break;
+			case 'Q': castlePermission |= Q_CASTLE; break;
+			case 'k': castlePermission |= k_CASTLE; break;
+			case 'q': castlePermission |= q_CASTLE; break;
+			default: break;
+		}
+		index++;
+	}
+	index++;
+	ASSERT(castlePermission >= 0 && castlePermission <= 15);
+
+	// en passant square
+	if (fen[index] != '-') {
+		file = fen[index] - 'a';
+		rank = fen[index+1] - '1';
+		ASSERT(file >= FILE_A && file <= FILE_H);
+		ASSERT(rank >= RANK_1 && rank <= RANK_8);
+
+		enPas = file_rank_2_sq(file, rank);
+	}
+
+}
+
+/// <summary>
+/// Check board for valid bitboard entries and board variables
+/// </summary>
+int Board::checkBoard() {
+
+	// check castle permission
+	ASSERT(castlePermission >= 0 && castlePermission <= 15);
+
+	// check min/max pieces on board
+	ASSERT(countBits(&occupied) >= 2 && countBits(&occupied) <= 24);
+
+	// check valid en pas square and rank regarding side
+	if (side == WHITE) {
+		ASSERT(enPas == -1 || ((enPas <= H6) && (enPas >= A6)));
+	} else {
+		ASSERT(enPas == -1 || ((enPas <= H3) && (enPas >= A3)));
+	}
+
+	// check non overlapping squares in bitboards
+	ASSERT(!((color[WHITE] & pieces[PAWN]) & (color[BLACK] & pieces[PAWN])));
+	ASSERT(!((color[WHITE] & pieces[KNIGHT]) & (color[BLACK] & pieces[KNIGHT])));
+	ASSERT(!((color[WHITE] & pieces[BISHOP]) & (color[BLACK] & pieces[BISHOP])));
+	ASSERT(!((color[WHITE] & pieces[ROOK]) & (color[BLACK] & pieces[ROOK])));
+	ASSERT(!((color[WHITE] & pieces[QUEEN]) & (color[BLACK] & pieces[QUEEN])));
+	ASSERT(!((color[WHITE] & pieces[KING]) & (color[BLACK] & pieces[KING])));
+
+	return 1;
 }

@@ -3,9 +3,6 @@
 #include "defs.h"
 
 /*
-- Board representation with 8 bitboards for each piece and each color
-- Parse fen in boards
-- Clear / Reset
 - Check board function
 
 - Castling rights
@@ -14,10 +11,8 @@
 
 - Parse Algebraic notation
 - Push Pop moves, move stack
-
-
-
 */
+
 
 class Board
 {
@@ -26,12 +21,12 @@ public:
 	int side;
 	int enPas = -1;
 	int ply;
-	U64 zobristKey;
+	int castlePermission = 0;
+	U64 zobristKey = 0x0;
 
 	U64 color[2] = { 0ULL, 0ULL }; // { WHITE, BLACK }
 	U64 pieces[7] = { EMPTY, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL };
 	U64 occupied = 0ULL;
-
 
 	const int bitTable[64] = {
 	63, 30, 3, 32, 25, 41, 22, 33, 15, 50, 42, 13, 11, 53, 19, 34, 61, 29, 2,
@@ -70,7 +65,7 @@ public:
 	void printBoard();
 
 	void parseFen(string fen);
-
+	int checkBoard();
 
 };
 
