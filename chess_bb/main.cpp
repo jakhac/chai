@@ -9,6 +9,7 @@ int main()
 	b.init();
 
 	b.parseFen(PAWN_FEN_W);
+	b.generateZobristKey();
 
 	b.printBoard();
 

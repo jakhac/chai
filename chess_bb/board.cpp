@@ -82,23 +82,6 @@ void Board::initClearSetMask() {
 }
 
 /// <summary>
-/// Initialize hash keys on each square for each piece.
-/// </summary>
-void Board::initHashKeys() {
-	// every piece on every square with a random 64bit number
-	for (int i = 0; i < 13; i++) {
-		for (int j = 0; j < NUM_SQUARES; j++) {
-			pieceKeys[i][j] = rand64();
-		}
-	}
-
-	sideKey = rand64();
-	for (int i = 0; i < 16; i++) {
-		castleKeys[i] = rand64();
-	}
-}
-
-/// <summary>
 /// Reset board values to default.
 /// </summary>
 void Board::reset() {
@@ -117,21 +100,62 @@ void Board::reset() {
 }
 
 /// <summary>
+/// Initialize hash keys on each square for each piece.
+/// </summary>
+void Board::initHashKeys() {
+	// every piece on every square with a random 64bit number
+	for (int i = 0; i < 13; i++) {
+		for (int j = 0; j < NUM_SQUARES; j++) {
+			pieceKeys[i][j] = rand64();
+		}
+	}
+
+	// random key if white to move
+	sideKey = rand64();
+
+	for (int i = 0; i < 16; i++) {
+		castleKeys[i] = rand64();
+	}
+}
+
+/// <summary>
 /// Generate a unique key to describe current board state.
 /// </summary>
-U64 Board::generateZobristHash(Board* b) {
-	U64 zobristKey = 0;
+U64 Board::generateZobristKey() {
+	U64 finalZobristKey = 0;
 
 	// hash all pieces on current square
 
-	// hash in side to play
+	U64 occ = occupied;
+	U64 empty = ~occupied;
+	int square = 0;
+	int piece = 0;
+
+	while (occ) {
+		square = popBit(&occ);
+		piece = pieceAt(square);
+		finalZobristKey ^= pieceKeys[piece][square];
+	}
+
+	while (empty) {
+		square = popBit(&empty);
+		piece = pieceAt(square);
+		finalZobristKey ^= pieceKeys[piece][square];
+	}
+
+	// hash in sideKey if white plays
+	finalZobristKey ^= sideKey;
 
 	// hash in en passant square
+	if (enPas != -1) {
+		finalZobristKey ^= pieceKeys[EMPTY][enPas];
+	}
 
 	// hash in castlePermission
+	finalZobristKey ^= castleKeys[castlePermission];
 
-
-	return zobristKey;
+	zobristKey = finalZobristKey;
+	return finalZobristKey;
 }
 
 /// <summary>
@@ -330,6 +354,9 @@ int Board::checkBoard() {
 	ASSERT(!((color[WHITE] & pieces[ROOK]) & (color[BLACK] & pieces[ROOK])));
 	ASSERT(!((color[WHITE] & pieces[QUEEN]) & (color[BLACK] & pieces[QUEEN])));
 	ASSERT(!((color[WHITE] & pieces[KING]) & (color[BLACK] & pieces[KING])));
+
+	// check correct zobrist hash
+	ASSERT(zobristKey == generateZobristKey());
 
 	return 1;
 }

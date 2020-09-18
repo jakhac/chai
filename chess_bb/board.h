@@ -1,16 +1,15 @@
 #pragma once
 
 #include "defs.h"
+#include <bitset>
 
 /*
-- Check board function
+- Parse Algebraic notation
+- Push / Pop move
+- Check valid zobrist key
 
 - Castling rights
 - En Passant squares
-- Generate zobrist key
-
-- Parse Algebraic notation
-- Push Pop moves, move stack
 */
 
 
@@ -20,7 +19,7 @@ public:
 
 	int side;
 	int enPas = -1;
-	int ply;
+	int ply = 0;
 	int castlePermission = 0;
 	U64 zobristKey = 0x0;
 
@@ -54,7 +53,7 @@ public:
 	U64 pieceKeys[13][64];
 	U64 sideKey;
 	U64 castleKeys[16];
-	U64 generateZobristHash(Board* b);
+	U64 generateZobristKey();
 	void initHashKeys();
 
 	U64 getPiecesByColor(int piece, int side);
