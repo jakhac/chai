@@ -1,11 +1,13 @@
 #pragma once
 
 #include "defs.h"
+#include "validate.h"
 #include <bitset>
 
 /*
-- Parse Algebraic notation
 - Push / Pop move
+- Move stack with UndoStructs / Class
+- Parse Algebraic notation
 - Check valid zobrist key
 
 - Castling rights
@@ -34,6 +36,10 @@ public:
 	58, 20, 37, 17, 36, 8
 	};
 
+	int squareToRank[64];
+	int squareToFile[64];
+	void initSquareToRankFile();
+
 	int countBits(U64* bb);
 	int popBit(U64* bb);
 
@@ -59,12 +65,15 @@ public:
 	U64 getPiecesByColor(int piece, int side);
 	int pieceAt(int square);
 
-	void printAttackers(U64* bb);
+	//void printAttackers(U64* bb);
 	void printBitBoard(U64* bb);
 	void printBoard();
+	void printMove(const int move);
 
 	void parseFen(string fen);
 	int checkBoard();
+
+	void push(int move);
 
 };
 

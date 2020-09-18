@@ -2,6 +2,20 @@
 #include <iostream>
 
 /// <summary>
+/// Initialize arrays to index square to files and ranks.
+/// </summary>
+void Board::initSquareToRankFile() {
+	int sq;
+	for (int rank = RANK_8; rank >= RANK_1; rank--) {
+		for (int file = FILE_A; file <= FILE_H; file++) {
+			sq = file_rank_2_sq(file, rank);
+			squareToFile[sq] = file;
+			squareToRank[sq] = rank;
+		}
+	}
+}
+
+/// <summary>
 /// Counts bits of given ULL integer.
 /// </summary>
 int Board::countBits(U64* bb) {
@@ -61,6 +75,7 @@ void Board::clearPiece(int piece, int square, int side) {
 void Board::init() {
 	initClearSetMask();
 	initHashKeys();
+	initSquareToRankFile();
 }
 
 /// <summary>
@@ -238,6 +253,33 @@ void Board::printBoard() {
 }
 
 /// <summary>
+/// Print move in algebraic notation and promotions if possible
+/// </summary>
+void Board::printMove(const int move) {
+
+	int promoted = PROMOTED(move);
+	char promChar = ' ';
+
+	if (promoted) {
+		promChar = 'q';
+		if (isN(promoted)) {
+			promChar = 'n';
+		} else if (isRQ(promoted) && !isBQ(promoted)) {
+			promChar = 'r';
+		} else if (!isRQ(promoted) && isBQ(promoted)) {
+			promChar = 'b';
+		}
+	}
+
+	cout << "Move: "
+		<< (char) ('a' + squareToFile[FROMSQ(move)])
+		<< (char) ('1' + squareToRank[FROMSQ(move)])
+		<< (char) ('a' + squareToFile[TOSQ(move)])
+		<< (char) ('1' + squareToRank[TOSQ(move)])
+		<< promChar << endl;
+}
+
+/// <summary>
 /// Parse fen notation into bitboards and board variables.
 /// </summary>
 void Board::parseFen(string fen) {
@@ -348,15 +390,58 @@ int Board::checkBoard() {
 	}
 
 	// check non overlapping squares in bitboards
-	ASSERT(!((color[WHITE] & pieces[PAWN]) & (color[BLACK] & pieces[PAWN])));
-	ASSERT(!((color[WHITE] & pieces[KNIGHT]) & (color[BLACK] & pieces[KNIGHT])));
-	ASSERT(!((color[WHITE] & pieces[BISHOP]) & (color[BLACK] & pieces[BISHOP])));
-	ASSERT(!((color[WHITE] & pieces[ROOK]) & (color[BLACK] & pieces[ROOK])));
-	ASSERT(!((color[WHITE] & pieces[QUEEN]) & (color[BLACK] & pieces[QUEEN])));
-	ASSERT(!((color[WHITE] & pieces[KING]) & (color[BLACK] & pieces[KING])));
+	// TODO
 
 	// check correct zobrist hash
 	ASSERT(zobristKey == generateZobristKey());
 
 	return 1;
+}
+
+/// <summary>
+/// Push a move on bitboard and update bitboard lists.
+/// </summary>
+void Board::push(int move) {
+
+	int from_square = FROMSQ(move);
+	int to_square = TOSQ(move);
+	int cap = CAPTURED(move);
+	int promoted = PROMOTED(move);
+	int pawnStart = MFLAGPS & move;
+	int movingPiece = pieceAt(from_square);
+
+	cout << "\nPush move: ";
+	printMove(move);
+
+	// assert valid from to squares and pieces
+	ASSERT(squareOnBoard(from_square));
+	ASSERT(squareOnBoard(to_square));
+	ASSERT(pieceValid(movingPiece));
+
+	// check valid to square: empty or ^side
+	if (CAPTURED(move)) {
+		ASSERT(pieceValid(pieceAt(to_square)));
+	}
+
+	/* clear and set piece (TODO updatePiece method?) */ 
+	// always clear to_square on opponent bitboards 
+	clearPiece(pieceAt(to_square), to_square, side^1);
+
+	// set at to_square and clear from_square position
+	setPiece(movingPiece, to_square, side);
+	clearPiece(movingPiece, from_square, side);
+
+	// set enpas if pawn start
+	if (MFLAGPS & move) {
+		if (side == WHITE) enPas = from_square - 8;
+		else enPas = from_square + 8;
+	}
+
+	// handle promotions
+
+	// check if move leaves king in check
+	//if (is_check) {
+	//	undoMove
+	//}
+
 }

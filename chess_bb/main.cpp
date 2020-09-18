@@ -14,6 +14,10 @@ int main()
 	b.printBoard();
 
 	b.checkBoard();
+
+	int move = MOVE(8, 24, EMPTY, EMPTY, EMPTY);
+
+	b.push(move);
 	
 	return 0;
 }

@@ -118,7 +118,7 @@ const int castlePerm[120] = {
 const U64 rand64();
 const int file_rank_2_sq(int f, int r);
 
-/* Macros for int Move data */
+/* Macros for int move bits */
 #define FROMSQ(m) ((m) & 0x7F)
 #define TOSQ(m) (((m)>>7) & 0x7F)
 #define CAPTURED(m) (((m)>>14) & 0xF)
@@ -131,6 +131,6 @@ const int file_rank_2_sq(int f, int r);
 #define MFLAGCAP 0x7C000
 #define MFLAGPROM 0xF00000
 
-#define NOMOVE 0
+#define NULLMOVE 0
 
 #define MOVE(f,t,ca,pro,fl) ( (f) | ((t) << 7) | ( (ca) << 14 ) | ( (pro) << 20 ) | fl )

@@ -27,6 +27,9 @@
     <ClInclude Include="board.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="validate.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -39,6 +42,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="board.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="validate.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
