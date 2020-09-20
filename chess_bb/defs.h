@@ -22,7 +22,6 @@ exit(1);}
 
 typedef unsigned long long U64;
 
-//const int NUM_SQUARES = 120;
 const int NUM_SQUARES = 64;
 const int MAX_GAME_MOVES = 2048;
 const int MAX_POSITION_MOVES = 256;
@@ -48,7 +47,7 @@ enum SQUARES {
 
 /* test fens to check parse function */
 const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
 const string QUEEN_FEN = "8/3q1p2/8/5P2/4Q3/8/8/8 w - - 0 1";
 const string PAWN_FEN_W = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
 const string PAWN_FEN_B = "rnbqkbnr/p1p1p3/3p3p/1p1p4/2P1Pp2/8/PP1P1PpP/RNBQKB1R b KQkq e3 0 1";
@@ -129,7 +128,7 @@ const int file_rank_2_sq(int f, int r);
 #define MFLAGCA 0x1000000
 
 #define MFLAGCAP 0x7C000
-#define MFLAGPROM 0xF00000
+//#define MFLAGPROM 0xF00000
 
 #define NULLMOVE 0
 

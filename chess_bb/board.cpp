@@ -2,6 +2,34 @@
 #include <iostream>
 
 /// <summary>
+/// Check board for valid bitboard entries and board variables
+/// </summary>
+int Board::checkBoard() {
+
+	// check castle permission
+	ASSERT(castlePermission >= 0 && castlePermission <= 15);
+
+	// check min/max pieces on board
+	ASSERT(countBits(occupied) >= 2 && countBits(occupied) <= 32);
+
+	// check valid en pas square and rank regarding side
+	if (side == WHITE) {
+		ASSERT(enPas == -1 || ((enPas <= H6) && (enPas >= A6)));
+	} else {
+		ASSERT(enPas == -1 || ((enPas <= H3) && (enPas >= A3)));
+	}
+
+	// check non overlapping squares in bitboards
+	// TODO
+
+
+	// check correct zobrist hash
+	ASSERT(zobristKey == generateZobristKey());
+
+	return 1;
+}
+
+/// <summary>
 /// Initialize arrays to index square to files and ranks.
 /// </summary>
 void Board::initSquareToRankFile() {
@@ -18,11 +46,11 @@ void Board::initSquareToRankFile() {
 /// <summary>
 /// Counts bits of given ULL integer.
 /// </summary>
-int Board::countBits(U64* bb) {
+int Board::countBits(U64 bb) {
 	int cnt = 0;
-	while (*bb) {
-		cnt += *bb & 1;
-		*bb >>= 1;
+	while (bb) {
+		cnt += bb & 1;
+		bb >>= 1;
 	}
 	return cnt;
 }
@@ -139,19 +167,20 @@ void Board::initHashKeys() {
 U64 Board::generateZobristKey() {
 	U64 finalZobristKey = 0;
 
-	// hash all pieces on current square
 
 	U64 occ = occupied;
 	U64 empty = ~occupied;
 	int square = 0;
 	int piece = 0;
 
+	// hash all pieces on current square
 	while (occ) {
 		square = popBit(&occ);
 		piece = pieceAt(square);
 		finalZobristKey ^= pieceKeys[piece][square];
 	}
 
+	// hash in empty squares
 	while (empty) {
 		square = popBit(&empty);
 		piece = pieceAt(square);
@@ -203,7 +232,7 @@ void Board::printBitBoard(U64* bb) {
 }
 
 /// <summary>
-/// Return the piece index at given square.
+/// Return the piece index at given square or 0 if empty.
 /// </summary>
 int Board::pieceAt(int square) {
 
@@ -372,30 +401,56 @@ void Board::parseFen(string fen) {
 }
 
 /// <summary>
-/// Check board for valid bitboard entries and board variables
+/// Parse a move in algebraic form and set move flags.
 /// </summary>
-int Board::checkBoard() {
+int Board::parseMove(string move) {
 
-	// check castle permission
-	ASSERT(castlePermission >= 0 && castlePermission <= 15);
+	// trivial case for null move
+	if (move == "0000") return 0;
 
-	// check min/max pieces on board
-	ASSERT(countBits(&occupied) >= 2 && countBits(&occupied) <= 24);
+	// TODO check moveValidator for pseudo-legal move: color, capture
 
-	// check valid en pas square and rank regarding side
-	if (side == WHITE) {
-		ASSERT(enPas == -1 || ((enPas <= H6) && (enPas >= A6)));
-	} else {
-		ASSERT(enPas == -1 || ((enPas <= H3) && (enPas >= A3)));
+	// convert a1-a2 to square-square
+	int fromFile = move[0] - 97;
+	int fromRank = move[1] - 49;
+	int toFile = move[2] - 97;
+	int toRank = move[3] - 49;
+
+	int from = file_rank_2_sq(fromFile, fromRank);
+	int to = file_rank_2_sq(toFile, toRank);
+	int flag = 0, promPiece = 0;
+
+	// check pawn flags
+	if (piecePawn[pieceAt(from)]) {
+		// set pawnStart flag if square difference is 16
+		if (abs(from - to) == 16) flag |= MFLAGPS;
+
+		// set ep flag if to square is en passant (ep capture)
+		if (to == enPas) flag |= MFLAGEP;
+
+		// set prom flag if first / last rank
+		if (squareToRank[to] == RANK_1 || squareToRank[to] == RANK_8) {
+			//flag |= MFLAGPROM;
+
+			switch (move[4]) {
+				case 'n': promPiece = 2; break;
+				case 'b': promPiece = 3; break;
+				case 'r': promPiece = 4; break;
+				case 'q': promPiece = 5; break;
+				default: promPiece = 5; break;
+			}
+			// add 6 to address black pieces
+			if (side == BLACK) promPiece += 6;
+		}
 	}
 
-	// check non overlapping squares in bitboards
-	// TODO
+	// set capture flag if to square is not empty
+	if (pieceAt(to)) flag |= MFLAGCAP;
 
-	// check correct zobrist hash
-	ASSERT(zobristKey == generateZobristKey());
+	// TODO set castle flag
 
-	return 1;
+
+	return MOVE(from, to, pieceAt(to), promPiece, flag);
 }
 
 /// <summary>
@@ -424,7 +479,7 @@ void Board::push(int move) {
 	}
 
 	/* clear and set piece (TODO updatePiece method?) */ 
-	// always clear to_square on opponent bitboards 
+	// always clear to_square on opponent bitboards
 	clearPiece(pieceAt(to_square), to_square, side^1);
 
 	// set at to_square and clear from_square position
@@ -433,8 +488,8 @@ void Board::push(int move) {
 
 	// set enpas if pawn start
 	if (MFLAGPS & move) {
-		if (side == WHITE) enPas = from_square - 8;
-		else enPas = from_square + 8;
+		if (side == WHITE) enPas = to_square - 8;
+		else enPas = to_square + 8;
 	}
 
 	// handle promotions
@@ -443,5 +498,7 @@ void Board::push(int move) {
 	//if (is_check) {
 	//	undoMove
 	//}
+
+	// check legal board state: fiftyMove rule, stalemate
 
 }
