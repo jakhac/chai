@@ -92,7 +92,7 @@ void Board::setPiece(int piece, int square, int side) {
 /// Set bit at given index to 0 in side, occupied and piece bitboard.
 /// </summary>
 void Board::clearPiece(int piece, int square, int side) {
-	pieces[piece] &= clearMask[square];
+	pieces[pieceType[piece]] &= clearMask[square];
 	color[side] &= clearMask[square];
 	occupied &= clearMask[square];
 }
@@ -104,6 +104,7 @@ void Board::init() {
 	initClearSetMask();
 	initHashKeys();
 	initSquareToRankFile();
+	generateZobristKey();
 }
 
 /// <summary>
@@ -131,6 +132,7 @@ void Board::reset() {
 	side = WHITE;
 	enPas = -1;
 	ply = 0;
+	fiftyMove = 0;
 	zobristKey = 0x0;
 	castlePermission = 0;
 
@@ -206,7 +208,7 @@ U64 Board::generateZobristKey() {
 /// Returns a bitboard of given pieces of given side.
 /// </summary>
 U64 Board::getPiecesByColor(int piece, int side) {
-	return pieces[piece] & color[side];
+	return pieces[pieceType[piece]] & color[side];
 }
 
 /// <summary>
@@ -309,6 +311,29 @@ void Board::printMove(const int move) {
 }
 
 /// <summary>
+/// Print all flags and attributes of given move.
+/// </summary>
+void Board::printMoveStatus(int move) {
+	cout << endl;
+	cout << "From " << FROMSQ(move) << " to " << TOSQ(move) << endl;
+	cout << "Pawn start " << (move & MFLAGPS) << endl;
+	cout << "EP capture " << (move & MFLAGEP) << endl;
+	cout << "Castle move " << (move & MFLAGCA) << endl;
+	cout << "Promoted " << (move & MCHECKPROM) << endl;
+	cout << "Promoted piece " << (PROMOTED(move)) << endl;
+	cout << "Capture " << (move & MCHECKCAP) << " with captured piece " << CAPTURED(move) << endl;
+	cout << endl;
+}
+
+/// <summary>
+/// Print binary format of given integer.
+/// </summary>
+void printBinary(int x) {
+	std::bitset<64> b(x);
+	cout << b << endl;
+}
+
+/// <summary>
 /// Parse fen notation into bitboards and board variables.
 /// </summary>
 void Board::parseFen(string fen) {
@@ -398,6 +423,8 @@ void Board::parseFen(string fen) {
 		enPas = file_rank_2_sq(file, rank);
 	}
 
+	// TODO parse ply?
+
 }
 
 /// <summary>
@@ -420,7 +447,7 @@ int Board::parseMove(string move) {
 	int to = file_rank_2_sq(toFile, toRank);
 	int flag = 0, promPiece = 0;
 
-	// check pawn flags
+	// set possible pawn flags
 	if (piecePawn[pieceAt(from)]) {
 		// set pawnStart flag if square difference is 16
 		if (abs(from - to) == 16) flag |= MFLAGPS;
@@ -430,8 +457,6 @@ int Board::parseMove(string move) {
 
 		// set prom flag if first / last rank
 		if (squareToRank[to] == RANK_1 || squareToRank[to] == RANK_8) {
-			//flag |= MFLAGPROM;
-
 			switch (move[4]) {
 				case 'n': promPiece = 2; break;
 				case 'b': promPiece = 3; break;
@@ -439,13 +464,10 @@ int Board::parseMove(string move) {
 				case 'q': promPiece = 5; break;
 				default: promPiece = 5; break;
 			}
-			// add 6 to address black pieces
+			// add 6 to address black piece indices
 			if (side == BLACK) promPiece += 6;
 		}
 	}
-
-	// set capture flag if to square is not empty
-	if (pieceAt(to)) flag |= MFLAGCAP;
 
 	// TODO set castle flag
 
@@ -454,18 +476,15 @@ int Board::parseMove(string move) {
 }
 
 /// <summary>
-/// Push a move on bitboard and update bitboard lists.
+/// Push a move on bitboard and update bitboard lists. Update zobrist key.
 /// </summary>
 void Board::push(int move) {
-
-	int from_square = FROMSQ(move);
-	int to_square = TOSQ(move);
+	int from_square = FROMSQ(move), to_square = TOSQ(move);
 	int cap = CAPTURED(move);
 	int promoted = PROMOTED(move);
 	int pawnStart = MFLAGPS & move;
 	int movingPiece = pieceAt(from_square);
 
-	cout << "\nPush move: ";
 	printMove(move);
 
 	// assert valid from to squares and pieces
@@ -473,32 +492,40 @@ void Board::push(int move) {
 	ASSERT(squareOnBoard(to_square));
 	ASSERT(pieceValid(movingPiece));
 
-	// check valid to square: empty or ^side
-	if (CAPTURED(move)) {
-		ASSERT(pieceValid(pieceAt(to_square)));
-	}
-
-	/* clear and set piece (TODO updatePiece method?) */ 
-	// always clear to_square on opponent bitboards
+	// clear to_square and move piece (TODO updatePiece method?)
 	clearPiece(pieceAt(to_square), to_square, side^1);
-
-	// set at to_square and clear from_square position
 	setPiece(movingPiece, to_square, side);
 	clearPiece(movingPiece, from_square, side);
 
-	// set enpas if pawn start
+	// if en passant capture, delete pawn
+	if (MFLAGEP & move) {
+		if (side == WHITE) clearPiece(PAWN, to_square - 8, side^1);
+		else clearPiece(PAWN, to_square + 8, side^1);
+	}
+
+	// set enPas sq if pawn start or maintain default
+	enPas = -1;
 	if (MFLAGPS & move) {
 		if (side == WHITE) enPas = to_square - 8;
 		else enPas = to_square + 8;
 	}
 
 	// handle promotions
+	if (MCHECKPROM & move) {
+		clearPiece(movingPiece, to_square, side);
+		setPiece(PROMOTED(move), to_square, side);
+	}
 
-	// check if move leaves king in check
-	//if (is_check) {
-	//	undoMove
-	//}
+	// TODO check if move leaves king in check <=> generatedMoves == |0|
 
-	// check legal board state: fiftyMove rule, stalemate
 
+	// TODO check legal board state: fifty move rule, stalemate, draw, win loss
+
+
+	// update game state variables
+	side ^= 1;
+	ply++;
+	fiftyMove++;
+
+	printBoard();
 }

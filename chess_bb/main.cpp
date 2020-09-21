@@ -1,33 +1,31 @@
 #include "main.h"
+#include "move.h"
 
 /// <summary>
 /// Main function to run program.
 /// </summary>
-int main()
-{
+int main() {
+
 	Board b;
+	string m;
+
 	b.init();
 
 	b.parseFen(STARTING_FEN);
-	b.generateZobristKey();
-
 	b.printBoard();
-
 	b.checkBoard();
-	
+
+	//int move = b.parseMove("d5c6");
+	//b.printMoveStatus(move);
 	//b.push(move);
 
-	string m = "e2e4";
-	int parsedMove = b.parseMove(m);
+	while (true) {
+		std::getline(cin, m);
 
-	cout << "Pawn start " << (parsedMove & MFLAGPS) << endl;
-	cout << "EP capture " << (parsedMove & MFLAGEP) << endl;
-	cout << "Castle move " << (parsedMove & MFLAGCA) << endl;
-	cout << "Promoted piece " << PROMOTED(parsedMove) << endl;
-	cout << "Capture " << (parsedMove & MFLAGCAP) << endl;
-
-	b.push(parsedMove);
-	b.printBoard();
+		int parsedMove = b.parseMove(m);
+		b.printMoveStatus(parsedMove);
+		b.push(parsedMove);
+	}
 
 	return 0;
 }

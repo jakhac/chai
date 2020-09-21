@@ -25,6 +25,7 @@ public:
 	int side;
 	int enPas = -1;
 	int ply = 0;
+	int fiftyMove = 0;
 	int castlePermission = 0;
 	U64 zobristKey = 0x0;
 
@@ -72,6 +73,7 @@ public:
 	void printBitBoard(U64* bb);
 	void printBoard();
 	void printMove(const int move);
+	void printMoveStatus(int move);
 
 	void parseFen(string fen);
 	int parseMove(string move);
