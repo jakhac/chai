@@ -104,7 +104,7 @@ void Board::init() {
 	initClearSetMask();
 	initHashKeys();
 	initSquareToRankFile();
-	generateZobristKey();
+
 }
 
 /// <summary>
@@ -182,15 +182,10 @@ U64 Board::generateZobristKey() {
 		finalZobristKey ^= pieceKeys[piece][square];
 	}
 
-	// hash in empty squares
-	while (empty) {
-		square = popBit(&empty);
-		piece = pieceAt(square);
-		finalZobristKey ^= pieceKeys[piece][square];
-	}
-
 	// hash in sideKey if white plays
-	finalZobristKey ^= sideKey;
+	if (side == WHITE) {
+		finalZobristKey ^= sideKey;
+	}
 
 	// hash in en passant square
 	if (enPas != -1) {
@@ -200,7 +195,6 @@ U64 Board::generateZobristKey() {
 	// hash in castlePermission
 	finalZobristKey ^= castleKeys[castlePermission];
 
-	zobristKey = finalZobristKey;
 	return finalZobristKey;
 }
 
@@ -334,7 +328,7 @@ void printBinary(int x) {
 }
 
 /// <summary>
-/// Parse fen notation into bitboards and board variables.
+/// Parse fen notation into bitboards and board variables. Update zobristKey to given FEN.
 /// </summary>
 void Board::parseFen(string fen) {
 
@@ -424,7 +418,7 @@ void Board::parseFen(string fen) {
 	}
 
 	// TODO parse ply?
-
+	zobristKey = generateZobristKey();
 }
 
 /// <summary>
@@ -437,18 +431,13 @@ int Board::parseMove(string move) {
 
 	// TODO check moveValidator for pseudo-legal move: color, capture
 
-	// convert a1-a2 to square-square
-	int fromFile = move[0] - 97;
-	int fromRank = move[1] - 49;
-	int toFile = move[2] - 97;
-	int toRank = move[3] - 49;
-
-	int from = file_rank_2_sq(fromFile, fromRank);
-	int to = file_rank_2_sq(toFile, toRank);
+	int from = file_rank_2_sq(move[0] - 97, move[1] - 49);
+	int to = file_rank_2_sq(move[2] - 97, move[3] - 49);
+	int movingPiece = pieceAt(from);
 	int flag = 0, promPiece = 0;
 
 	// set possible pawn flags
-	if (piecePawn[pieceAt(from)]) {
+	if (piecePawn[movingPiece]) {
 		// set pawnStart flag if square difference is 16
 		if (abs(from - to) == 16) flag |= MFLAGPS;
 
@@ -461,7 +450,6 @@ int Board::parseMove(string move) {
 				case 'n': promPiece = 2; break;
 				case 'b': promPiece = 3; break;
 				case 'r': promPiece = 4; break;
-				case 'q': promPiece = 5; break;
 				default: promPiece = 5; break;
 			}
 			// add 6 to address black piece indices
@@ -470,13 +458,15 @@ int Board::parseMove(string move) {
 	}
 
 	// TODO set castle flag
-
+	if (pieceKing[movingPiece] && abs(from - to) == 2) {
+		flag |= MFLAGCA;
+	}
 
 	return MOVE(from, to, pieceAt(to), promPiece, flag);
 }
 
 /// <summary>
-/// Push a move on bitboard and update bitboard lists. Update zobrist key.
+/// Push a move on bitboard and update bitboard lists. Update zobrist key. Assumes correct move.
 /// </summary>
 void Board::push(int move) {
 	int from_square = FROMSQ(move), to_square = TOSQ(move);
@@ -493,9 +483,17 @@ void Board::push(int move) {
 	ASSERT(pieceValid(movingPiece));
 
 	// clear to_square and move piece (TODO updatePiece method?)
-	clearPiece(pieceAt(to_square), to_square, side^1);
+	if (MCHECKCAP & move) {
+		clearPiece(CAPTURED(move), to_square, side^1);
+		zobristKey ^= pieceKeys[CAPTURED(move)][to_square];
+	}
+
 	setPiece(movingPiece, to_square, side);
+	zobristKey ^= pieceKeys[movingPiece][to_square];
+
 	clearPiece(movingPiece, from_square, side);
+	zobristKey ^= pieceKeys[movingPiece][from_square];
+
 
 	// if en passant capture, delete pawn
 	if (MFLAGEP & move) {
@@ -503,29 +501,86 @@ void Board::push(int move) {
 		else clearPiece(PAWN, to_square + 8, side^1);
 	}
 
-	// set enPas sq if pawn start or maintain default
-	enPas = -1;
+	// handle en passant square
+	if (enPas != -1) {
+		// hash out if possible
+		zobristKey ^= pieceKeys[EMPTY][enPas]; // out
+		enPas = -1;
+	}
 	if (MFLAGPS & move) {
+		// set en passant square and hash in
 		if (side == WHITE) enPas = to_square - 8;
 		else enPas = to_square + 8;
+		zobristKey ^= pieceKeys[EMPTY][enPas]; // in
 	}
 
 	// handle promotions
 	if (MCHECKPROM & move) {
 		clearPiece(movingPiece, to_square, side);
+		zobristKey ^= pieceKeys[movingPiece][to_square];
+
 		setPiece(PROMOTED(move), to_square, side);
+		zobristKey ^= pieceKeys[PROMOTED(move)][to_square];
+	}
+
+	// handle castling and castle permission
+	if (MFLAGCA & move) {
+		switch (to_square) {
+			case C1: pushCastle(A1, D1, side); break;
+			case G1: pushCastle(H1, F1, side); break;
+			case C8: pushCastle(A8, D8, side); break;
+			case G8: pushCastle(H8, F8, side); break;
+			default: ASSERT(0); break;
+		}
+	} else if (pieceRook[movingPiece]) {
+		switch (from_square) {
+			case A1: castlePermission &= ~Q_CASTLE;
+			case H1: castlePermission &= ~K_CASTLE;
+			case A8: castlePermission &= ~q_CASTLE;
+			case H8: castlePermission &= ~k_CASTLE;
+			default: break;
+		}
+	} else if (pieceKing[movingPiece]) {
+		clearCastlePermission(side);
 	}
 
 	// TODO check if move leaves king in check <=> generatedMoves == |0|
-
-
-	// TODO check legal board state: fifty move rule, stalemate, draw, win loss
+	// TODO check legal board state
+	if (MCHECKCAP & move) {
+		fiftyMove = 0;
+	} else if (false) {
+		// TODO stalemate, draw, win loss
+	}
 
 
 	// update game state variables
 	side ^= 1;
+	zobristKey ^= sideKey;
+
 	ply++;
 	fiftyMove++;
 
 	printBoard();
+	printf("\nIs: %llX\nGe: %llX\n\n", zobristKey, generateZobristKey());
+	ASSERT(zobristKey == generateZobristKey());
+}
+
+/// <summary>
+/// Push castle move on board and update castle permission. Clears and sets rook.
+/// </summary>
+void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
+	// update rook position on boards
+	clearPiece(ROOK, clearRookSq, side);
+	setPiece(ROOK, setRookSq, side);
+	clearCastlePermission(side);
+}
+
+void Board::clearCastlePermission(int side) {
+	if (side == WHITE) {
+		castlePermission &= ~K_CASTLE;
+		castlePermission &= ~Q_CASTLE;
+	} else {
+		castlePermission &= ~k_CASTLE;
+		castlePermission &= ~q_CASTLE;
+	}
 }

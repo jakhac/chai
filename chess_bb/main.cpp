@@ -2,7 +2,7 @@
 #include "move.h"
 
 /// <summary>
-/// Main function to run program.
+/// Main function to run chess in console.
 /// </summary>
 int main() {
 
@@ -11,7 +11,7 @@ int main() {
 
 	b.init();
 
-	b.parseFen(STARTING_FEN);
+	b.parseFen(PROM_FEN);
 	b.printBoard();
 	b.checkBoard();
 
@@ -20,7 +20,7 @@ int main() {
 	//b.push(move);
 
 	while (true) {
-		std::getline(cin, m);
+		getline(cin, m);
 
 		int parsedMove = b.parseMove(m);
 		b.printMoveStatus(parsedMove);

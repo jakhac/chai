@@ -5,16 +5,14 @@
 #include <bitset>
 
 /*
-- Push / Create / Pop move
-- Move stack with UndoStructs / Class
-- Parse Algebraic notation
+- Push: update zobrist castle keys
+- Pop move: undo class / struct, update zobrist keys (?)
+- Move stack
 - Check valid zobrist key
 
 - Castling rights
 - En Passant squares
 
-
- - Board => GenerateAllMoves => Push Moves in SearchTree => Push Best move => 
 */
 
 
@@ -29,7 +27,7 @@ public:
 	int castlePermission = 0;
 	U64 zobristKey = 0x0;
 
-	U64 color[2] = { 0ULL, 0ULL }; // { WHITE, BLACK }
+	U64 color[2] = { 0ULL, 0ULL };
 	U64 pieces[7] = { EMPTY, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL };
 	U64 occupied = 0ULL;
 
@@ -68,6 +66,7 @@ public:
 
 	U64 getPiecesByColor(int piece, int side);
 	int pieceAt(int square);
+	void clearCastlePermission(int side);
 
 	//void printAttackers(U64* bb);
 	void printBitBoard(U64* bb);
@@ -81,6 +80,7 @@ public:
 	int checkBoard();
 
 	void push(int move);
+	void pushCastle(int clearRookSq, int setRookSq, int side);
 
 };
 
