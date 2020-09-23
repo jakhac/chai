@@ -504,14 +504,14 @@ void Board::push(int move) {
 	// handle en passant square
 	if (enPas != -1) {
 		// hash out if possible
-		zobristKey ^= pieceKeys[EMPTY][enPas]; // out
+		zobristKey ^= pieceKeys[EMPTY][enPas]; // ep out
 		enPas = -1;
 	}
 	if (MFLAGPS & move) {
 		// set en passant square and hash in
 		if (side == WHITE) enPas = to_square - 8;
 		else enPas = to_square + 8;
-		zobristKey ^= pieceKeys[EMPTY][enPas]; // in
+		zobristKey ^= pieceKeys[EMPTY][enPas]; // ep in
 	}
 
 	// handle promotions
@@ -524,7 +524,7 @@ void Board::push(int move) {
 	}
 
 	// handle castling and castle permission
-	zobristKey ^= castleKeys[castlePermission];
+	zobristKey ^= castleKeys[castlePermission]; // hash CA out
 	if (MFLAGCA & move) {
 		switch (to_square) {
 			case C1: pushCastle(A1, D1, side); break;
@@ -544,7 +544,7 @@ void Board::push(int move) {
 	} else if (pieceKing[movingPiece]) {
 		clearCastlePermission(side);
 	}
-	zobristKey ^= castleKeys[castlePermission];
+	zobristKey ^= castleKeys[castlePermission]; // hash CA in
 
 	// TODO check if move leaves king in check <=> generatedMoves == |0|
 	// TODO check legal board state
@@ -554,7 +554,6 @@ void Board::push(int move) {
 		// TODO stalemate, draw, win loss
 	}
 
-
 	// update game state variables
 	side ^= 1;
 	zobristKey ^= sideKey;
@@ -563,7 +562,6 @@ void Board::push(int move) {
 	fiftyMove++;
 
 	printBoard();
-	printf("\nIs: %llX\nGe: %llX\n\n", zobristKey, generateZobristKey());
 	ASSERT(zobristKey == generateZobristKey());
 }
 

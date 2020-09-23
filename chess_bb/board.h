@@ -2,17 +2,15 @@
 
 #include "defs.h"
 #include "validate.h"
+#include "undo.h"
+#include <stack>
 #include <bitset>
 
+
 /*
-- Push: update zobrist castle keys
-- Pop move: undo class / struct, update zobrist keys (?)
 - Move stack
+- Pop move: undo class / struct, update zobrist keys (?)
 - Check valid zobrist key
-
-- Castling rights
-- En Passant squares
-
 */
 
 
@@ -31,12 +29,7 @@ public:
 	U64 pieces[7] = { EMPTY, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL };
 	U64 occupied = 0ULL;
 
-	const int bitTable[64] = {
-		63, 30, 3, 32, 25, 41, 22, 33, 15, 50, 42, 13, 11, 53, 19, 34, 61, 29, 2,
-		51, 21, 43, 45, 10, 18, 47, 1, 54, 9, 57, 0, 35, 62, 31, 40, 4, 49, 5, 52,
-		26, 60, 6, 23, 44, 46, 27, 56, 16, 7, 39, 48, 24, 59, 14, 12, 55, 38, 28,
-		58, 20, 37, 17, 36, 8
-	};
+	stack <Undo> undoStack;
 
 	int squareToRank[64];
 	int squareToFile[64];
@@ -68,7 +61,6 @@ public:
 	int pieceAt(int square);
 	void clearCastlePermission(int side);
 
-	//void printAttackers(U64* bb);
 	void printBitBoard(U64* bb);
 	void printBoard();
 	void printMove(const int move);

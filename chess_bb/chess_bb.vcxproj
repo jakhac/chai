@@ -144,6 +144,7 @@
     <ClInclude Include="defs.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="move.h" />
+    <ClInclude Include="undo.h" />
     <ClInclude Include="validate.h" />
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +152,7 @@
     <ClCompile Include="defs.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="move.cpp" />
+    <ClCompile Include="undo.cpp" />
     <ClCompile Include="validate.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

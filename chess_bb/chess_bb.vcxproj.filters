@@ -30,6 +30,9 @@
     <ClInclude Include="validate.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="undo.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -45,6 +48,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="validate.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="undo.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
