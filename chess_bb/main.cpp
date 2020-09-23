@@ -11,7 +11,7 @@ int main() {
 
 	b.init();
 
-	b.parseFen(PROM_FEN);
+	b.parseFen(CASTLE);
 	b.printBoard();
 	b.checkBoard();
 

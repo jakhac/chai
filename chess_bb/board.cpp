@@ -484,15 +484,15 @@ void Board::push(int move) {
 
 	// clear to_square and move piece (TODO updatePiece method?)
 	if (MCHECKCAP & move) {
-		clearPiece(CAPTURED(move), to_square, side^1);
 		zobristKey ^= pieceKeys[CAPTURED(move)][to_square];
+		clearPiece(CAPTURED(move), to_square, side^1);
 	}
 
-	setPiece(movingPiece, to_square, side);
 	zobristKey ^= pieceKeys[movingPiece][to_square];
+	setPiece(movingPiece, to_square, side);
 
-	clearPiece(movingPiece, from_square, side);
 	zobristKey ^= pieceKeys[movingPiece][from_square];
+	clearPiece(movingPiece, from_square, side);
 
 
 	// if en passant capture, delete pawn
@@ -516,14 +516,15 @@ void Board::push(int move) {
 
 	// handle promotions
 	if (MCHECKPROM & move) {
-		clearPiece(movingPiece, to_square, side);
 		zobristKey ^= pieceKeys[movingPiece][to_square];
+		clearPiece(movingPiece, to_square, side);
 
-		setPiece(PROMOTED(move), to_square, side);
 		zobristKey ^= pieceKeys[PROMOTED(move)][to_square];
+		setPiece(PROMOTED(move), to_square, side);
 	}
 
 	// handle castling and castle permission
+	zobristKey ^= castleKeys[castlePermission];
 	if (MFLAGCA & move) {
 		switch (to_square) {
 			case C1: pushCastle(A1, D1, side); break;
@@ -543,6 +544,7 @@ void Board::push(int move) {
 	} else if (pieceKing[movingPiece]) {
 		clearCastlePermission(side);
 	}
+	zobristKey ^= castleKeys[castlePermission];
 
 	// TODO check if move leaves king in check <=> generatedMoves == |0|
 	// TODO check legal board state
@@ -569,9 +571,13 @@ void Board::push(int move) {
 /// Push castle move on board and update castle permission. Clears and sets rook.
 /// </summary>
 void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
-	// update rook position on boards
+	int rook = pieceAt(clearRookSq);
+	zobristKey ^= pieceKeys[rook][clearRookSq];
 	clearPiece(ROOK, clearRookSq, side);
+
+	zobristKey ^= pieceKeys[rook][setRookSq];
 	setPiece(ROOK, setRookSq, side);
+
 	clearCastlePermission(side);
 }
 
