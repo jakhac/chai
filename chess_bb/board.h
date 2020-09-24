@@ -7,20 +7,12 @@
 #include <stack>
 #include <bitset>
 
-
-/*
-- Move stack
-- Pop move: undo class / struct, update zobrist keys (?)
-- Check valid zobrist key
-*/
-
-
 class Board
 {
 public:
 
 	int side;
-	int enPas = -1;
+	int enPas = 0;
 	int ply = 0;
 	int fiftyMove = 0;
 	int castlePermission = 0;
@@ -74,8 +66,9 @@ public:
 	int checkBoard();
 
 	void push(int move);
-	Undo pop();
 	void pushCastle(int clearRookSq, int setRookSq, int side);
+	Undo pop();
+	void popCastle(int clearRookSq, int setRookSq, int side);
 
 };
 

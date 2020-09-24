@@ -612,10 +612,10 @@ Undo Board::pop() {
 	side ^= 1;
 
 	// reset board variables
-	zobristKey = undo.zobKey;
 	castlePermission = undo.castle;
-	enPas = undo.enPas;
 	fiftyMove = undo.fiftyMove;
+	zobristKey = undo.zobKey;
+	enPas = undo.enPas;
 
 	int from_square = FROMSQ(undo.move);
 	int to_square = TOSQ(undo.move);
@@ -636,11 +636,22 @@ Undo Board::pop() {
 		else setPiece(PAWN, to_square + 8, side^1);
 	}
 
-	// undo castles
-
-
 	// undo promotions
+	if (MCHECKPROM & undo.move) {
+		clearPiece(movingPiece, from_square, side);
+		setPiece(PAWN, from_square, side);
+	}
 
+	// undo castles
+	if (MFLAGCA & undo.move) {
+		switch (to_square) {
+			case C1: popCastle(D1, A1, WHITE); break;
+			case G1: popCastle(F1, H1, WHITE); break;
+			case C8: popCastle(D8, A8, BLACK); break;
+			case G8: popCastle(F8, H8, BLACK); break;
+			default: ASSERT(0);
+		}
+	}
 
 	cout << "\nPopped move: ";
 	printMove(undo.move);
@@ -649,3 +660,15 @@ Undo Board::pop() {
 	ASSERT(checkBoard());
 	return undo;
 }
+
+/// <summary>
+/// Undo castle move. Set and clear pieces given side and squares.
+/// </summary>
+void Board::popCastle(int clearRookSq, int setRookSq, int side) {
+	ASSERT(pieceAt(clearRookSq) == R || pieceAt(clearRookSq) == r);
+
+	clearPiece(ROOK, clearRookSq, side);
+	setPiece(ROOK, setRookSq, side);
+}
+
+

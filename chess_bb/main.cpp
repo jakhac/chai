@@ -10,7 +10,7 @@ int main() {
 
 	b.init();
 
-	b.parseFen(EP_FEN);
+	b.parseFen(CASTLE);
 	b.printBoard();
 	b.checkBoard();
 
