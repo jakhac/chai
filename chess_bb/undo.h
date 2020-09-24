@@ -4,8 +4,9 @@
 
 class Undo {
 
+public:
 	int move;
-	int CA;
+	int castle;
 	int enPas;
 	int fiftyMove;
 	U64 zobKey;

@@ -1,5 +1,4 @@
 #include "main.h"
-#include "move.h"
 
 /// <summary>
 /// Main function to run chess in console.
@@ -11,7 +10,7 @@ int main() {
 
 	b.init();
 
-	b.parseFen(CASTLE);
+	b.parseFen(EP_FEN);
 	b.printBoard();
 	b.checkBoard();
 
@@ -21,6 +20,11 @@ int main() {
 
 	while (true) {
 		getline(cin, m);
+
+		if (m == "pop") {
+			b.pop();
+			continue;
+		}
 
 		int parsedMove = b.parseMove(m);
 		b.printMoveStatus(parsedMove);

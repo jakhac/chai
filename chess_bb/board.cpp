@@ -14,9 +14,9 @@ int Board::checkBoard() {
 
 	// check valid en pas square and rank regarding side
 	if (side == WHITE) {
-		ASSERT(enPas == -1 || ((enPas <= H6) && (enPas >= A6)));
+		ASSERT(enPas == 0 || ((enPas <= H6) && (enPas >= A6)));
 	} else {
-		ASSERT(enPas == -1 || ((enPas <= H3) && (enPas >= A3)));
+		ASSERT(enPas == 0 || ((enPas <= H3) && (enPas >= A3)));
 	}
 
 	// check non overlapping squares in bitboards
@@ -130,7 +130,7 @@ void Board::initClearSetMask() {
 /// </summary>
 void Board::reset() {
 	side = WHITE;
-	enPas = -1;
+	enPas = 0;
 	ply = 0;
 	fiftyMove = 0;
 	zobristKey = 0x0;
@@ -188,9 +188,7 @@ U64 Board::generateZobristKey() {
 	}
 
 	// hash in en passant square
-	if (enPas != -1) {
-		finalZobristKey ^= pieceKeys[EMPTY][enPas];
-	}
+	finalZobristKey ^= pieceKeys[EMPTY][enPas];
 
 	// hash in castlePermission
 	finalZobristKey ^= castleKeys[castlePermission];
@@ -296,19 +294,20 @@ void Board::printMove(const int move) {
 		}
 	}
 
-	cout << "Move: "
-		<< (char) ('a' + squareToFile[FROMSQ(move)])
-		<< (char) ('1' + squareToRank[FROMSQ(move)])
-		<< (char) ('a' + squareToFile[TOSQ(move)])
-		<< (char) ('1' + squareToRank[TOSQ(move)])
-		<< promChar << endl;
+	string ret = "";
+	ret += ('a' + squareToFile[FROMSQ(move)]);
+	ret += ('1' + squareToRank[FROMSQ(move)]);
+	ret += ('a' + squareToFile[TOSQ(move)]);
+	ret += ('1' + squareToRank[TOSQ(move)]);
+
+	cout << ret << promChar << endl;
 }
 
 /// <summary>
 /// Print all flags and attributes of given move.
 /// </summary>
 void Board::printMoveStatus(int move) {
-	cout << endl;
+	cout << "\n#### - Move Status" << endl;
 	cout << "From " << FROMSQ(move) << " to " << TOSQ(move) << endl;
 	cout << "Pawn start " << (move & MFLAGPS) << endl;
 	cout << "EP capture " << (move & MFLAGEP) << endl;
@@ -316,13 +315,13 @@ void Board::printMoveStatus(int move) {
 	cout << "Promoted " << (move & MCHECKPROM) << endl;
 	cout << "Promoted piece " << (PROMOTED(move)) << endl;
 	cout << "Capture " << (move & MCHECKCAP) << " with captured piece " << CAPTURED(move) << endl;
-	cout << endl;
+	cout << "####\n" << endl;
 }
 
 /// <summary>
 /// Print binary format of given integer.
 /// </summary>
-void printBinary(int x) {
+void Board::printBinary(int x) {
 	std::bitset<64> b(x);
 	cout << b << endl;
 }
@@ -470,12 +469,17 @@ int Board::parseMove(string move) {
 /// </summary>
 void Board::push(int move) {
 	int from_square = FROMSQ(move), to_square = TOSQ(move);
-	int cap = CAPTURED(move);
 	int promoted = PROMOTED(move);
-	int pawnStart = MFLAGPS & move;
 	int movingPiece = pieceAt(from_square);
 
+	cout << "\nPush move: ";
 	printMove(move);
+
+	Undo undo;
+	undo.enPas = enPas;
+	undo.castle = castlePermission;
+	undo.zobKey = zobristKey;
+	undo.move = move;
 
 	// assert valid from to squares and pieces
 	ASSERT(squareOnBoard(from_square));
@@ -494,25 +498,24 @@ void Board::push(int move) {
 	zobristKey ^= pieceKeys[movingPiece][from_square];
 	clearPiece(movingPiece, from_square, side);
 
-
 	// if en passant capture, delete pawn
 	if (MFLAGEP & move) {
-		if (side == WHITE) clearPiece(PAWN, to_square - 8, side^1);
-		else clearPiece(PAWN, to_square + 8, side^1);
+		int sq = (side == WHITE) ? -8 : 8;
+		sq += to_square;
+
+		zobristKey ^= pieceKeys[pieceAt(sq)][sq];
+		clearPiece(PAWN, sq, side^1);
 	}
 
 	// handle en passant square
-	if (enPas != -1) {
-		// hash out if possible
-		zobristKey ^= pieceKeys[EMPTY][enPas]; // ep out
-		enPas = -1;
-	}
+	zobristKey ^= pieceKeys[EMPTY][enPas]; // ep out
 	if (MFLAGPS & move) {
-		// set en passant square and hash in
 		if (side == WHITE) enPas = to_square - 8;
 		else enPas = to_square + 8;
-		zobristKey ^= pieceKeys[EMPTY][enPas]; // ep in
+	} else {
+		enPas = 0;
 	}
+	zobristKey ^= pieceKeys[EMPTY][enPas]; // ep in
 
 	// handle promotions
 	if (MCHECKPROM & move) {
@@ -563,6 +566,8 @@ void Board::push(int move) {
 
 	printBoard();
 	ASSERT(zobristKey == generateZobristKey());
+
+	undoStack.push(undo);
 }
 
 /// <summary>
@@ -570,6 +575,8 @@ void Board::push(int move) {
 /// </summary>
 void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 	int rook = pieceAt(clearRookSq);
+	ASSERT(rook == r || rook == R);
+
 	zobristKey ^= pieceKeys[rook][clearRookSq];
 	clearPiece(ROOK, clearRookSq, side);
 
@@ -579,6 +586,9 @@ void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 	clearCastlePermission(side);
 }
 
+/// <summary>
+/// Clears both castle permissions for given side.
+/// </summary>
 void Board::clearCastlePermission(int side) {
 	if (side == WHITE) {
 		castlePermission &= ~K_CASTLE;
@@ -587,4 +597,55 @@ void Board::clearCastlePermission(int side) {
 		castlePermission &= ~k_CASTLE;
 		castlePermission &= ~q_CASTLE;
 	}
+}
+
+/// <summary>
+/// Pop move from move stack and return undo object.
+/// </summary>
+Undo Board::pop() {
+	ASSERT(!undoStack.empty());
+
+	Undo undo = undoStack.top();
+	undoStack.pop();
+
+	// change side before clear and set pieces
+	side ^= 1;
+
+	// reset board variables
+	zobristKey = undo.zobKey;
+	castlePermission = undo.castle;
+	enPas = undo.enPas;
+	fiftyMove = undo.fiftyMove;
+
+	int from_square = FROMSQ(undo.move);
+	int to_square = TOSQ(undo.move);
+	int movingPiece = pieceAt(to_square);
+
+	// draw back moving piece
+	setPiece(movingPiece, from_square, side);
+	clearPiece(movingPiece, to_square, side);
+
+	// reset captured piece
+	if (MCHECKCAP & undo.move) {
+		setPiece(CAPTURED(undo.move), to_square, side^1);
+	}
+
+	// undo ep captures
+	if (MFLAGEP & undo.move) {
+		if (side == WHITE) setPiece(PAWN, to_square - 8, side^1);
+		else setPiece(PAWN, to_square + 8, side^1);
+	}
+
+	// undo castles
+
+
+	// undo promotions
+
+
+	cout << "\nPopped move: ";
+	printMove(undo.move);
+	printBoard();
+
+	ASSERT(checkBoard());
+	return undo;
 }

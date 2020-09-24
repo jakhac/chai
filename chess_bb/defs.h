@@ -102,16 +102,16 @@ const int bDir[4] = { -9, -11, 11, 9 };
 const int kDir[8] = { -1, -10, 1, 10, -9, -11, 11, 9 };
 
 // bitwise and operation with from / to square results in 1111==KQkq representation
-const int castlePerm[64] = {
-    13, 15, 15, 15, 12, 15, 15, 14, // A1 ... H1
-    15, 15, 15, 15, 15, 15, 15, 15,
-    15, 15, 15, 15, 15, 15, 15, 15,
-    15, 15, 15, 15, 15, 15, 15, 15,
-    15, 15, 15, 15, 15, 15, 15, 15,
-    15, 15, 15, 15, 15, 15, 15, 15,
-    15, 15, 15, 15, 15, 15, 15, 15,
-     7, 15, 15, 15,  3, 15, 15, 11  // A8 ... H8
-};
+//const int castlePerm[64] = {
+//    13, 15, 15, 15, 12, 15, 15, 14, // A1 ... H1
+//    15, 15, 15, 15, 15, 15, 15, 15,
+//    15, 15, 15, 15, 15, 15, 15, 15,
+//    15, 15, 15, 15, 15, 15, 15, 15,
+//    15, 15, 15, 15, 15, 15, 15, 15,
+//    15, 15, 15, 15, 15, 15, 15, 15,
+//    15, 15, 15, 15, 15, 15, 15, 15,
+//     7, 15, 15, 15,  3, 15, 15, 11  // A8 ... H8
+//};
 
 // bit table used in pop bit
 const int bitTable[64] = {
@@ -136,7 +136,7 @@ const int file_rank_2_sq(int f, int r);
 #define MFLAGCA 0x1000000
 
 // check only, do not set bits
-#define MCHECKCAP 0x7C000
+#define MCHECKCAP 0x3C000
 #define MCHECKPROM 0xF00000
 
 #define NULLMOVE 0

@@ -3,6 +3,7 @@
 #include "defs.h"
 #include "validate.h"
 #include "undo.h"
+#include <stdexcept>
 #include <stack>
 #include <bitset>
 
@@ -65,6 +66,7 @@ public:
 	void printBoard();
 	void printMove(const int move);
 	void printMoveStatus(int move);
+	void printBinary(int x);
 
 	void parseFen(string fen);
 	int parseMove(string move);
@@ -72,6 +74,7 @@ public:
 	int checkBoard();
 
 	void push(int move);
+	Undo pop();
 	void pushCastle(int clearRookSq, int setRookSq, int side);
 
 };
