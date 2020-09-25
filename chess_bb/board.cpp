@@ -666,7 +666,6 @@ Undo Board::pop() {
 /// </summary>
 void Board::popCastle(int clearRookSq, int setRookSq, int side) {
 	ASSERT(pieceAt(clearRookSq) == R || pieceAt(clearRookSq) == r);
-
 	clearPiece(ROOK, clearRookSq, side);
 	setPiece(ROOK, setRookSq, side);
 }

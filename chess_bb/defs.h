@@ -45,12 +45,22 @@ enum SQUARES {
         A1 = 0, B1, C1, D1, E1, F1, G1, H1
     };
 
+const U64 RANK_1_HEX = 0xFF;
+const U64 RANK_2_HEX = 0xFF00;
+const U64 RANK_3_HEX = 0xFF0000;
+const U64 RANK_4_HEX = 0xFF000000;
+const U64 RANK_5_HEX = 0xFF00000000;
+const U64 RANK_6_HEX = 0xFF0000000000;
+const U64 RANK_7_HEX = 0xFF000000000000;
+const U64 RANK_8_HEX = 0xFF00000000000000;
+
 /* test fens to check parse function */
 const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string EP_FEN = "rnbqkbnr/pp1p1ppp/8/2pPp3/8/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 1";
 const string PROM_FEN = "r3k2r/pPpppppp/8/8/8/8/P1PPPPPP/R3K2R w KQkq - 0 1";
 const string QUEEN_FEN = "8/3q1p2/8/5P2/4Q3/8/8/8 w - - 0 1";
+const string PAWN_PUSH_FEN = "r3k2r/pp1p1p1p/R1p1p2n/5p2/1P6/2P2n2/P1NPPPPP/R3K3 b Qkq - 0 1";
 const string PAWN_FEN_W = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
 const string PAWN_FEN_B = "rnbqkbnr/p1p1p3/3p3p/1p1p4/2P1Pp2/8/PP1P1PpP/RNBQKB1R b KQkq e3 0 1";
 const string KNIGHT_KINGS = "5k2/1n6/4n3/6N1/8/3N4/8/5K2 w - - 0 1";

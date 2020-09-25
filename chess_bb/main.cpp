@@ -10,13 +10,19 @@ int main() {
 
 	b.init();
 
-	b.parseFen(CASTLE);
+	b.parseFen(PAWN_PUSH_FEN);
 	b.printBoard();
 	b.checkBoard();
 
 	//int move = b.parseMove("d5c6");
 	//b.printMoveStatus(move);
 	//b.push(move);
+
+	MoveGenerator moveGenerator;
+	moveGenerator.generatePawnMoves(b);
+	moveGenerator.printGeneratedMoves(b);
+
+	return 0;
 
 	while (true) {
 		getline(cin, m);

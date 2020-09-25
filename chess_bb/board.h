@@ -9,6 +9,7 @@
 
 class Board
 {
+
 public:
 
 	int side;

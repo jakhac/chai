@@ -144,6 +144,7 @@
     <ClInclude Include="defs.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="move.h" />
+    <ClInclude Include="moveGenerator.h" />
     <ClInclude Include="undo.h" />
     <ClInclude Include="validate.h" />
   </ItemGroup>
@@ -152,6 +153,7 @@
     <ClCompile Include="defs.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="move.cpp" />
+    <ClCompile Include="moveGenerator.cpp" />
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="validate.cpp" />
   </ItemGroup>

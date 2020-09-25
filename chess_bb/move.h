@@ -23,6 +23,8 @@ Move format is bits in hex
 class Move
 {
 
+public:
+
 	int move;
 	int score;
 

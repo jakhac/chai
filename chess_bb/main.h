@@ -1,8 +1,10 @@
 #pragma once
 
 #include "board.h"
-#include <iostream>
 #include "defs.h"
+#include "moveGenerator.h"
+
+#include <iostream>
 #include <bitset>
 #include <string>
 
