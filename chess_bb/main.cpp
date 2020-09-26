@@ -10,13 +10,9 @@ int main() {
 
 	b.init();
 
-	b.parseFen(PAWN_PUSH_FEN);
+	b.parseFen(PAWN_TEST_B);
 	b.printBoard();
 	b.checkBoard();
-
-	//int move = b.parseMove("d5c6");
-	//b.printMoveStatus(move);
-	//b.push(move);
 
 	MoveGenerator moveGenerator;
 	moveGenerator.generatePawnMoves(b);

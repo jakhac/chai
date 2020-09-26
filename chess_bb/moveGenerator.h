@@ -13,8 +13,6 @@ public:
 	Move moveList[MAX_GAME_MOVES];
 	int moves = 0;
 
-	void northOne(U64* bb);
-
 	void generatePawnMoves(Board b);
 
 	void whiteSinglePawnPush(Board b);
@@ -22,6 +20,9 @@ public:
 
 	void whiteDoublePawnPush(Board b);
 	void blackDoublePawnPush(Board b);
+
+	void whitePawnAttacks(Board b, int shift, U64 forbiddenFile);
+	void blackPawnAttacks(Board b, int shift, U64 forbiddenFile);
 
 	void printGeneratedMoves(Board b);
 
