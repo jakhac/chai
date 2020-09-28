@@ -63,11 +63,15 @@ const U64 FILE_F_HEX = 0x2020202020202020;
 const U64 FILE_G_HEX = 0x4040404040404040;
 const U64 FILE_H_HEX = 0x8080808080808080;
 
+const U64 BLACK_SQUARES = 0xAA55AA55AA55AA55;
+const U64 WHITE_SQUARES = 0x55AA55AA55AA55AA;
+
 /* test fens to check parse function */
 const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string PAWN_TEST = "r3k2r/pP1pqpb1/1n2pnp1/1bpPN3/1p2P3/P1N2Q1p/2PBBPPP/R3K2R w KQkq c6 0 1";
 const string PAWN_TEST_B = "r3k2r/pP1pqpb1/1n2pn2/1bpPNQ2/Pp1NP3/8/2PBBPpP/R3K2R b KQkq a3 0 1";
+const string KINGS_FEN = "r3kQ1r/p1qN1ppp/1p2pn2/5b2/2PpP3/4B3/PPPb1PPP/R3KB1R w KQkq - 2 3";
 const string EP_FEN = "rnbqkbnr/pp1p1ppp/8/2pPp3/8/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 1";
 const string PROM_FEN = "r3k2r/pPpppppp/8/8/8/8/P1PPPPPP/R3K2R w KQkq - 0 1";
 const string QUEEN_FEN = "8/3q1p2/8/5P2/4Q3/8/8/8 w - - 0 1";
@@ -79,7 +83,7 @@ const string ROOKS = "6k1/8/5r2/8/1nR5/5N2/8/6K1 b - - 0 1";
 const string QUEENS = "6k1/8/4nq2/8/1nQ5/5N2/1N6/6K1 b - - 0 1";
 const string BISHOPS = "6k1/1b6/4n3/8/1n4B1/1B3N2/1N6/2b3K1 b - - 0 1";
 const string CASTLE = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
-const string CASTLE2 = "3rk2r/8/8/8/8/8/6p1/R3K2R b KQkq - 0 1";
+const string CASTLE2 = "3rk2r/8/8/8/8/8/6p1/R3K2R b KQk - 0 1";
 const string MOVES_48 = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
 
 // index is true if the piece is knight / king / bishop / rook
@@ -140,6 +144,17 @@ const int bitTable[64] = {
     51, 21, 43, 45, 10, 18, 47, 1, 54, 9, 57, 0, 35, 62, 31, 40, 4, 49, 5, 52,
     26, 60, 6, 23, 44, 46, 27, 56, 16, 7, 39, 48, 24, 59, 14, 12, 55, 38, 28,
     58, 20, 37, 17, 36, 8
+};
+
+enum {
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST,
+    NORTH_EAST,
+    NORTH_WEST,
+    SOUTH_EAST,
+    SOUTH_WEST
 };
 
 const U64 rand64();

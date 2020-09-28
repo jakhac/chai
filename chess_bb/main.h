@@ -10,3 +10,5 @@
 
 int main();
 
+void init(Board* b);
+

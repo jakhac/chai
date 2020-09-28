@@ -2,29 +2,42 @@
 
 #include "board.h"
 #include "move.h"
+#include <vector>
 
 class MoveGenerator {
 
 public:
 
-	MoveGenerator() = default;
-
-	// TODO use stack on move generation?
-	Move moveList[MAX_GAME_MOVES];
-	int moves = 0;
+	vector <Move> quietMoveList;
+	vector <Move> capMoveList;
 
 	void generatePawnMoves(Board b);
 
+	// pawn
 	void whiteSinglePawnPush(Board b);
 	void blackSinglePawnPush(Board b);
-
 	void whiteDoublePawnPush(Board b);
 	void blackDoublePawnPush(Board b);
+	void whitePawnCaptures(Board b);
+	void blackPawnCaptures(Board b);
 
-	void whitePawnAttacks(Board b, int shift, U64 forbiddenFile);
-	void blackPawnAttacks(Board b, int shift, U64 forbiddenFile);
+	// knight
+	void whiteKnightMoves(Board b);
+	void blackKnightMoves(Board b);
+	void whiteKnightCaptures(Board b);
+	void blackKnightCaptures(Board b);
+
+	// king
+	void whiteKingMoves(Board b); // TODO CASTLE PERM FUN
+	void blackKingMoves(Board b); // TODO CASTLE PERM FUN
+
+	void whiteKingCaptures(Board b); // TODO SQ ATTACKED
+	void blackKingCaptures(Board b); // TODO SQ ATTACKED
 
 	void printGeneratedMoves(Board b);
+
+	int castleValid();
+	int squareAttacked();
 
 };
 

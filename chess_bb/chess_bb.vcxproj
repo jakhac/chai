@@ -140,11 +140,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="info.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="board.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="mask.h" />
     <ClInclude Include="move.h" />
     <ClInclude Include="moveGenerator.h" />
+    <ClInclude Include="rays.h" />
     <ClInclude Include="undo.h" />
     <ClInclude Include="validate.h" />
   </ItemGroup>
@@ -154,6 +158,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="move.cpp" />
     <ClCompile Include="moveGenerator.cpp" />
+    <ClCompile Include="rays.cpp" />
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="validate.cpp" />
   </ItemGroup>

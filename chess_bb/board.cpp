@@ -1,5 +1,15 @@
 #include "board.h"
-#include <iostream>
+
+// include extern vars
+U64 setMask[64];
+U64 clearMask[64];
+
+int squareToRank[64];
+int squareToFile[64];
+
+U64 pawnAtkMask[2][64];
+U64 knightAtkMask[64];
+U64 kingAtkMask[64];
 
 /// <summary>
 /// Check board for valid bitboard entries and board variables
@@ -22,61 +32,10 @@ int Board::checkBoard() {
 	// check non overlapping squares in bitboards
 	// TODO
 
-
 	// check correct zobrist hash
 	ASSERT(zobristKey == generateZobristKey());
 
 	return 1;
-}
-
-/// <summary>
-/// Initialize arrays to index square to files and ranks.
-/// </summary>
-void Board::initSquareToRankFile() {
-	int sq;
-	for (int rank = RANK_8; rank >= RANK_1; rank--) {
-		for (int file = FILE_A; file <= FILE_H; file++) {
-			sq = file_rank_2_sq(file, rank);
-			squareToFile[sq] = file;
-			squareToRank[sq] = rank;
-		}
-	}
-}
-
-/// <summary>
-/// Counts bits of given ULL integer.
-/// </summary>
-int Board::countBits(U64 bb) {
-	int cnt = 0;
-	while (bb) {
-		cnt += bb & 1;
-		bb >>= 1;
-	}
-	return cnt;
-}
-
-/// <summary>
-/// Pops least significant bit and returns index.
-/// </summary>
-int Board::popBit(U64* bb) {
-	U64 b = *bb ^ (*bb - 1);
-	unsigned int fold = (unsigned)((b & 0xffffffff) ^ (b >> 32));
-	*bb &= (*bb - 1);
-	return bitTable[(fold * 0x783a9b23) >> 26];
-}
-
-/// <summary>
-/// Set bit at given bitboard.
-/// </summary>
-void Board::setBit(U64* bb, int i) {
-	*bb |= setMask[i];
-}
-
-/// <summary>
-/// Clear bit at given bitboard.
-/// </summary>
-void Board::clearBit(U64* bb, int i) {
-	*bb &= clearMask[i];
 }
 
 /// <summary>
@@ -88,41 +47,13 @@ void Board::setPiece(int piece, int square, int side) {
 	occupied |= setMask[square];
 }
 
-/// /// <summary>
+/// <summary>
 /// Set bit at given index to 0 in side, occupied and piece bitboard.
 /// </summary>
 void Board::clearPiece(int piece, int square, int side) {
 	pieces[pieceType[piece]] &= clearMask[square];
 	color[side] &= clearMask[square];
 	occupied &= clearMask[square];
-}
-
-/// <summary>
-/// Initialize all masks, keys and arrays.
-/// </summary>
-void Board::init() {
-	initClearSetMask();
-	initHashKeys();
-	initSquareToRankFile();
-
-}
-
-/// <summary>
-/// Initialize clear and set mask arrays for usage.
-/// </summary>
-void Board::initClearSetMask() {
-	int index = 0;
-
-	// Zero both arrays
-	for (index = 0; index < 64; index++) {
-		setMask[index] = 0ULL << index;
-		clearMask[index] = 0ULL << index;
-	}
-
-	for (index = 0; index < 64; index++) {
-		setMask[index] |= (1ULL << index);
-		clearMask[index] = ~setMask[index];
-	}
 }
 
 /// <summary>
@@ -204,28 +135,6 @@ U64 Board::getPiecesByColor(int piece, int side) {
 }
 
 /// <summary>
-/// Print given bitboard.
-/// </summary>
-void Board::printBitBoard(U64* bb) {
-	U64 shiftBit = 1ULL;
-	int sq;
-
-	std::cout << std::endl;
-	for (int rank = RANK_8; rank >= RANK_1; rank--) {
-		for (int file = FILE_A; file <= FILE_H; file++) {
-			sq = 8 * rank + file;
-
-			if ((shiftBit << sq) & *bb) {
-				std::cout << "1 ";
-			} else {
-				std::cout << ". ";
-			}
-		}
-		std::cout << std::endl;
-	}
-}
-
-/// <summary>
 /// Return the piece index at given square or 0 if empty.
 /// </summary>
 int Board::pieceAt(int square) {
@@ -273,57 +182,6 @@ void Board::printBoard() {
 		castlePermission & k_CASTLE ? 'k' : ' ',
 		castlePermission & q_CASTLE ? 'q' : ' '
 	);
-}
-
-/// <summary>
-/// Print move in algebraic notation and promotions if possible
-/// </summary>
-void Board::printMove(const int move) {
-
-	int promoted = PROMOTED(move);
-	char promChar = ' ';
-
-	if (promoted) {
-		promChar = 'q';
-		if (isN(promoted)) {
-			promChar = 'n';
-		} else if (isRQ(promoted) && !isBQ(promoted)) {
-			promChar = 'r';
-		} else if (!isRQ(promoted) && isBQ(promoted)) {
-			promChar = 'b';
-		}
-	}
-
-	string ret = "";
-	ret += ('a' + squareToFile[FROMSQ(move)]);
-	ret += ('1' + squareToRank[FROMSQ(move)]);
-	ret += ('a' + squareToFile[TOSQ(move)]);
-	ret += ('1' + squareToRank[TOSQ(move)]);
-
-	cout << ret << promChar << endl;
-}
-
-/// <summary>
-/// Print all flags and attributes of given move.
-/// </summary>
-void Board::printMoveStatus(int move) {
-	cout << "\n#### - Move Status" << endl;
-	cout << "From " << FROMSQ(move) << " to " << TOSQ(move) << endl;
-	cout << "Pawn start " << (move & MFLAGPS) << endl;
-	cout << "EP capture " << (move & MFLAGEP) << endl;
-	cout << "Castle move " << (move & MFLAGCA) << endl;
-	cout << "Promoted " << (move & MCHECKPROM) << endl;
-	cout << "Promoted piece " << (PROMOTED(move)) << endl;
-	cout << "Capture " << (move & MCHECKCAP) << " with captured piece " << CAPTURED(move) << endl;
-	cout << "####\n" << endl;
-}
-
-/// <summary>
-/// Print binary format of given integer.
-/// </summary>
-void Board::printBinary(int x) {
-	std::bitset<64> b(x);
-	cout << b << endl;
 }
 
 /// <summary>

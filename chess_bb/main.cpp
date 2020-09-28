@@ -1,22 +1,36 @@
 #include "main.h"
 
+
+void init(Board* b) {
+	initClearSetMask();
+	b->initHashKeys();
+	initSquareToRankFile();
+	Rays::initRays();
+	initAttackerMasks();
+}
+
 /// <summary>
 /// Main function to run chess in console.
 /// </summary>
 int main() {
 
-	Board b;
 	string m;
+	Board b;
+	init(&b);
 
-	b.init();
-
-	b.parseFen(PAWN_TEST_B);
+	b.parseFen(STARTING_FEN);
 	b.printBoard();
 	b.checkBoard();
 
-	MoveGenerator moveGenerator;
-	moveGenerator.generatePawnMoves(b);
-	moveGenerator.printGeneratedMoves(b);
+	///*for (int i = 0; i < 64; i++) {
+	//	cout << "Square " << i << endl;
+	//	b.printBitBoard(&b.kingAtkMask[i]);
+	//}*/
+
+	//MoveGenerator moveGenerator;
+	//moveGenerator.blackKingCaptures(b);
+	//moveGenerator.blackKingCaptures(b);
+	//moveGenerator.printGeneratedMoves(b);
 
 	return 0;
 
@@ -29,7 +43,7 @@ int main() {
 		}
 
 		int parsedMove = b.parseMove(m);
-		b.printMoveStatus(parsedMove);
+		printMoveStatus(parsedMove);
 		b.push(parsedMove);
 	}
 
