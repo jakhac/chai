@@ -11,9 +11,6 @@ U64 pawnAtkMask[2][64];
 U64 knightAtkMask[64];
 U64 kingAtkMask[64];
 
-/// <summary>
-/// Check board for valid bitboard entries and board variables
-/// </summary>
 int Board::checkBoard() {
 
 	// check castle permission
@@ -38,27 +35,18 @@ int Board::checkBoard() {
 	return 1;
 }
 
-/// <summary>
-/// Set bit at given index to 1 in side, occupied and piece bitboard.
-/// </summary>
 void Board::setPiece(int piece, int square, int side) {
 	pieces[pieceType[piece]] |= setMask[square];
 	color[side] |= setMask[square];
 	occupied |= setMask[square];
 }
 
-/// <summary>
-/// Set bit at given index to 0 in side, occupied and piece bitboard.
-/// </summary>
 void Board::clearPiece(int piece, int square, int side) {
 	pieces[pieceType[piece]] &= clearMask[square];
 	color[side] &= clearMask[square];
 	occupied &= clearMask[square];
 }
 
-/// <summary>
-/// Reset board values to default.
-/// </summary>
 void Board::reset() {
 	side = WHITE;
 	enPas = 0;
@@ -75,9 +63,6 @@ void Board::reset() {
 	occupied = 0ULL;
 }
 
-/// <summary>
-/// Initialize hash keys on each square for each piece.
-/// </summary>
 void Board::initHashKeys() {
 	// every piece on every square with a random 64bit number
 	for (int i = 0; i < 13; i++) {
@@ -94,9 +79,6 @@ void Board::initHashKeys() {
 	}
 }
 
-/// <summary>
-/// Generate a unique key to describe current board state.
-/// </summary>
 U64 Board::generateZobristKey() {
 	U64 finalZobristKey = 0;
 
@@ -127,16 +109,10 @@ U64 Board::generateZobristKey() {
 	return finalZobristKey;
 }
 
-/// <summary>
-/// Returns a bitboard of given pieces of given side.
-/// </summary>
-U64 Board::getPiecesByColor(int piece, int side) {
+U64 Board::getPieces(int piece, int side) {
 	return pieces[pieceType[piece]] & color[side];
 }
 
-/// <summary>
-/// Return the piece index at given square or 0 if empty.
-/// </summary>
 int Board::pieceAt(int square) {
 
 	for (int i = 0; i < 7; i++) {
@@ -150,9 +126,6 @@ int Board::pieceAt(int square) {
 	return 0;
 }
 
-/// <summary>
-/// Print current board with piece chars, rank and file indication.
-/// </summary>
 void Board::printBoard() {
 
 	int sq, file, rank, piece;
@@ -184,9 +157,6 @@ void Board::printBoard() {
 	);
 }
 
-/// <summary>
-/// Parse fen notation into bitboards and board variables. Update zobristKey to given FEN.
-/// </summary>
 void Board::parseFen(string fen) {
 
 	int file = FILE_A, rank = RANK_8;
@@ -275,12 +245,12 @@ void Board::parseFen(string fen) {
 	}
 
 	// TODO parse ply?
+
+	//attackedSquares[WHITE] = attackerSet(WHITE);
+	//attackedSquares[BLACK] = attackerSet(BLACK);
 	zobristKey = generateZobristKey();
 }
 
-/// <summary>
-/// Parse a move in algebraic form and set move flags.
-/// </summary>
 int Board::parseMove(string move) {
 
 	// trivial case for null move
@@ -322,10 +292,7 @@ int Board::parseMove(string move) {
 	return MOVE(from, to, pieceAt(to), promPiece, flag);
 }
 
-/// <summary>
-/// Push a move on bitboard and update bitboard lists. Update zobrist key. Assumes correct move.
-/// </summary>
-void Board::push(int move) {
+bool Board::push(int move) {
 	int from_square = FROMSQ(move), to_square = TOSQ(move);
 	int promoted = PROMOTED(move);
 	int movingPiece = pieceAt(from_square);
@@ -337,6 +304,8 @@ void Board::push(int move) {
 	undo.enPas = enPas;
 	undo.castle = castlePermission;
 	undo.zobKey = zobristKey;
+	//undo.attackedSquares[0] = attackedSquares[0];
+	//undo.attackedSquares[1] = attackedSquares[1];
 	undo.move = move;
 
 	// assert valid from to squares and pieces
@@ -407,8 +376,6 @@ void Board::push(int move) {
 	}
 	zobristKey ^= castleKeys[castlePermission]; // hash CA in
 
-	// TODO check if move leaves king in check <=> generatedMoves == |0|
-	// TODO check legal board state
 	if (MCHECKCAP & move) {
 		fiftyMove = 0;
 	} else if (false) {
@@ -426,11 +393,16 @@ void Board::push(int move) {
 	ASSERT(zobristKey == generateZobristKey());
 
 	undoStack.push(undo);
+
+	if (isCheck(side ^ 1)) {
+		cout << "Move leaves " << (side^1) << " in check. Popped move from stack." << endl;
+		pop();
+		return 0;
+	}
+
+	return 1;
 }
 
-/// <summary>
-/// Push castle move on board and update castle permission. Clears and sets rook.
-/// </summary>
 void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 	int rook = pieceAt(clearRookSq);
 	ASSERT(rook == r || rook == R);
@@ -444,9 +416,6 @@ void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 	clearCastlePermission(side);
 }
 
-/// <summary>
-/// Clears both castle permissions for given side.
-/// </summary>
 void Board::clearCastlePermission(int side) {
 	if (side == WHITE) {
 		castlePermission &= ~K_CASTLE;
@@ -457,9 +426,6 @@ void Board::clearCastlePermission(int side) {
 	}
 }
 
-/// <summary>
-/// Pop move from move stack and return undo object.
-/// </summary>
 Undo Board::pop() {
 	ASSERT(!undoStack.empty());
 
@@ -519,13 +485,84 @@ Undo Board::pop() {
 	return undo;
 }
 
-/// <summary>
-/// Undo castle move. Set and clear pieces given side and squares.
-/// </summary>
 void Board::popCastle(int clearRookSq, int setRookSq, int side) {
 	ASSERT(pieceAt(clearRookSq) == R || pieceAt(clearRookSq) == r);
 	clearPiece(ROOK, clearRookSq, side);
 	setPiece(ROOK, setRookSq, side);
+}
+
+U64 Board::attackerSet(int side) {
+	int sq;
+	U64 attackerSet = 0ULL, piece;
+
+	// pawn attacks
+	piece = getPieces(PAWN, side);
+	while (piece) {
+		sq = popBit(&piece);
+		attackerSet |= pawnAtkMask[side][sq];
+	}
+
+	// knight attacks
+	piece = getPieces(KNIGHT, side);
+	while (piece) {
+		sq = popBit(&piece);
+		attackerSet |= knightAtkMask[sq];
+	}
+
+	// bishop attacks OR in queen square
+	piece = getPieces(BISHOP, side) | getPieces(QUEEN, side);
+	while (piece) {
+		sq = popBit(&piece);
+		attackerSet |= lookUpBishopMoves(sq, occupied);
+	}
+
+	// rook attacks OR in queen square
+	piece = getPieces(ROOK, side) | getPieces(QUEEN, side);
+	while (piece) {
+		sq = popBit(&piece);
+		attackerSet |= lookUpRookMoves(sq, occupied);
+	}
+
+	return attackerSet;
+}
+
+bool Board::squareAttacked(int square, int side) {
+	return attackerSet(side) & setMask[square];
+}
+
+bool Board::isCheck(int side) {
+	U64 kingBB = getPieces(KING, side);
+	return squareAttacked(popBit(&kingBB), side^1);
+}
+
+bool Board::castleValid(int castle) {
+	castle = K_CASTLE;
+
+	if (isCheck(side)) return false;
+
+	if (!(castlePermission & castle)) return false;
+
+	switch (castle) {
+		case K_CASTLE: 
+			if (setMask[F1] & setMask[G1] & occupied) return false; 
+			if (squareAttacked(F1, BLACK)) return false;
+			break;
+		case Q_CASTLE: 
+			if (setMask[D1] & setMask[C1] & occupied) return false; 
+			if (squareAttacked(D1, BLACK)) return false;
+			break;
+		case k_CASTLE: 
+			if (setMask[F8] & setMask[G8] & occupied) return false; 
+			if (squareAttacked(F8, WHITE)) return false;
+			break;
+		case q_CASTLE: 
+			if (setMask[D8] & setMask[C8] & occupied) return false; 
+			if (squareAttacked(D8, WHITE)) return false;
+			break;
+		default: return false; break;
+	}
+
+	return true;
 }
 
 

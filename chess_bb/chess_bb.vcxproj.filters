@@ -48,6 +48,12 @@
     <ClInclude Include="info.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="attacks.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="magics.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -72,6 +78,12 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="rays.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="attacks.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="magics.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

@@ -34,3 +34,7 @@ const U64 rand64() {
 		(((U64)rand() & 0xf) << 60);
 }
 
+const U64 randomFewBits() {
+	return rand64() & rand64() & rand64();
+}
+

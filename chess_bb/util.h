@@ -2,68 +2,90 @@
 
 #include "defs.h"
 #include "mask.h"
+#include <iostream>
 
 #ifndef UTIL_H
-
 #define UTIL_H
 
-/**
- * @brief Moves all set bits in the given bitboard n squares west and returns the new
- * bitboard, discarding those that fall off the edge.
- *
- * @param board Board to move bits west on
- * @param n Number of squares to move west
- * @return A bitboard with all set bits moved one square west, bits falling off the edge discarded
- */
-inline U64 _westN(U64 board, int n) {
+/// <summary>
+/// Moves all set bits in the given bitboard n squares west and returns the new
+/// bitboard, discarding those that fall off the edge.
+/// </summary>
+/// <param name="board">Board to move bits west on</param>
+/// <param name="n">Number of squares to move west</param>
+/// <returns>New bitboard with shifted bits to west</returns>
+inline U64 westN(U64 board, int n) {
 	U64 newBoard = board;
 	for (int i = 0; i < n; i++) {
 		newBoard = ((newBoard >> 1) & (~FILE_H));
 	}
-
 	return newBoard;
 }
 
-/**
-* @brief Moves all set bits in the given bitboard n squares east and returns
-* the new bitboard, discarding those that fall off the edge.
-*
-* @param board Board to move bits east on
-* @param n Number of squares to move east
-* @return A bitboard with all set bits moved one square east, bits falling off the edge discarded
-*/
-inline U64 _eastN(U64 board, int n) {
+/// <summary>
+/// Moves all set bits in the given bitboard n squares east and returns the new
+/// bitboard, discarding those that fall off the edge.
+/// </summary>
+/// <param name="board">Board to move bits east on</param>
+/// <param name="n">Number of squares to move east</param>
+/// <returns>New bitboard with shifted bits to east</returns>
+inline U64 eastN(U64 board, int n) {
 	U64 newBoard = board;
 	for (int i = 0; i < n; i++) {
 		newBoard = ((newBoard << 1) & (~FILE_A));
 	}
-
 	return newBoard;
 }
 
-/**
- * @brief Returns the zero indexed row of the given square
- *
- * @param square A square in little endian rank file mapping form
- * @return The zero indexed row of the square
- */
-inline int _row(int square) {
+/// <summary>
+/// Return zero indexed row of given square.
+/// </summary>
+/// <param name="square">Square to check row on</param>
+/// <returns>Zero indexed row</returns>
+inline int row(int square) {
 	return square / 8;
 }
 
-/**
- * @brief Returns the zero indexed column of the given square.
- *
- * @param square A square in little endian rank file mapping form
- * @return The zero indexed row of the squares
- */
-inline int _col(int square) {
+/// <summary>
+/// Return zero indexed column of given square.
+/// </summary>
+/// <param name="square">Square to check column on</param>
+/// <returns>Zero indexed column</returns>
+inline int col(int square) {
 	return square % 8;
+}
+
+/// <summary>
+/// Bit scan forward and return index. If Board is 0 return -1. Uses compiler bitscan.
+/// </summary>
+/// <param name="board">Board</param>
+/// <returns>INdex of first found bit</returns>
+inline int bitscanForward(U64 board) {
+	if (board == 0ULL) return -1;
+
+	unsigned long ret;
+	_BitScanForward64(&ret, board);
+	return (int)ret;
+}
+
+/// <summary>
+/// Reversed bit scan forward amd return index. If Board is 0 return -1.
+/// </summary>
+/// <param name="board">Board</param>
+/// <returns>Index of first found bit</returns>
+inline int bitscanReverse(U64 board) {
+	if (board == 0ULL) return -1;
+
+	unsigned long ret;
+	_BitScanReverse64(&ret, board);
+	return (int)ret;
 }
 
 /// <summary>
 /// Counts bits of given ULL integer.
 /// </summary>
+/// <param name="bb">Bitboard to count bits on</param>
+/// <returns>Amount of bits set to 1 in bb</returns>
 inline int countBits(U64 bb) {
 	int cnt = 0;
 	while (bb) {
@@ -74,8 +96,10 @@ inline int countBits(U64 bb) {
 }
 
 /// <summary>
-/// Pops least significant bit and returns index.
+/// Pops least significant bit from bitboard and returns index.
 /// </summary>
+/// <param name="bb">Bitboard to pop lsb on</param>
+/// <returns>Index of popped bit</returns>
 inline int popBit(U64* bb) {
 	U64 b = *bb ^ (*bb - 1);
 	unsigned int fold = (unsigned)((b & 0xffffffff) ^ (b >> 32));
@@ -86,6 +110,8 @@ inline int popBit(U64* bb) {
 /// <summary>
 /// Set bit at given bitboard.
 /// </summary>
+/// <param name="bb">Bitboard to set bit on</param>
+/// <param name="i">Index of bit that is set to 1</param>
 inline void setBit(U64* bb, int i) {
 	*bb |= setMask[i];
 }
@@ -93,6 +119,8 @@ inline void setBit(U64* bb, int i) {
 /// <summary>
 /// Clear bit at given bitboard.
 /// </summary>
+/// <param name="bb">Bitboard to clear bit on</param>
+/// <param name="i">Index of bit that is set to 0</param>
 inline void clearBit(U64* bb, int i) {
 	*bb &= clearMask[i];
 }

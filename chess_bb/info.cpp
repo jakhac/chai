@@ -1,15 +1,10 @@
-#pragma once
+#include "info.h"
 
-#include "defs.h"
-#include "mask.h"
-#include <iostream>
-#include <bitset>
+// declare extern vars
+int squareToRank[64];
+int squareToFile[64];
 
-/// <summary>
-/// Print referenced bitboard.
-/// </summary>
-/// <param name="bb">Bitboard</param>
-inline void printBitBoard(U64* bb) {
+void printBitBoard(U64* bb) {
 	U64 shiftBit = 1ULL;
 	int sq;
 
@@ -31,8 +26,7 @@ inline void printBitBoard(U64* bb) {
 /// <summary>
 /// Print move in algebraic notation and promotions if possible
 /// </summary>
-/// <param name="move">Move</param>
-inline void printMove(const int move) {
+void printMove(const int move) {
 
 	int promoted = PROMOTED(move);
 	char promChar = ' ';
@@ -60,8 +54,7 @@ inline void printMove(const int move) {
 /// <summary>
 /// Print all flags and attributes of given move.
 /// </summary>
-/// <param name="move">Move</param>
-inline void printMoveStatus(int move) {
+void printMoveStatus(int move) {
 	cout << "\n#### - Move Status" << endl;
 	cout << "From " << FROMSQ(move) << " to " << TOSQ(move) << endl;
 	cout << "Pawn start " << (move & MFLAGPS) << endl;
@@ -76,8 +69,7 @@ inline void printMoveStatus(int move) {
 /// <summary>
 /// Print binary format of given integer.
 /// </summary>
-/// /// <param name="x">unsigned long long number</param>
-inline void printBinary(U64 x) {
+void printBinary(int x) {
 	std::bitset<64> b(x);
 	cout << b << endl;
 }

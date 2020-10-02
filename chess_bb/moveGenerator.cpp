@@ -1,7 +1,57 @@
 #include "moveGenerator.h"
 
-void MoveGenerator::generatePawnMoves(Board b) {
-	if (b.side == WHITE) {
+void MoveGenerator::generateMoves(Board b) {
+	// clear move lists
+	capMoveList = {};
+	quietMoveList = {};
+
+	const int playerToMove = b.side;
+
+	// pawns
+	addPawnMoves(b, playerToMove);
+
+	// knights
+	addKnightMoves(b, playerToMove);
+	addKnightCaptures(b, playerToMove);
+
+	// bishops
+	addBishopMoves(b, playerToMove);
+	addBishopCaptures(b, playerToMove);
+
+	// king
+	addKingMoves(b, playerToMove);
+	addKingCaptures(b, playerToMove);
+
+	// rooks
+	addRookMoves(b, playerToMove);
+	addRookCaptures(b, playerToMove);
+
+	// queens
+	addQueenMoves(b, playerToMove);
+	addQueenCaptures(b, playerToMove);
+
+}
+
+vector<Move> MoveGenerator::getAllMoves() {
+	vector <Move> allMoves;
+	allMoves.reserve(capMoveList.size() + quietMoveList.size()); // preallocate memory
+	allMoves.insert(allMoves.end(), capMoveList.begin(), capMoveList.end()); // copy
+	allMoves.insert(allMoves.end(), quietMoveList.begin(), quietMoveList.end()); // copy
+
+	return allMoves;
+}
+
+void MoveGenerator::resetMoveLists() {
+	quietMoveList = {};
+	capMoveList = {};
+}
+
+/// <summary>
+/// Generate all possible pawn moves for given board. Side is retrieved with board instance.
+/// </summary>
+/// <param name="b">Board</param>
+void MoveGenerator::addPawnMoves(Board b, const int side) {
+	if (side) {
 		whiteSinglePawnPush(b);
 		whiteDoublePawnPush(b);
 		whitePawnCaptures(b);
@@ -15,9 +65,10 @@ void MoveGenerator::generatePawnMoves(Board b) {
 /// <summary>
 /// Calculate possible single push pawn moves for white.
 /// </summary>
+/// <param name="board">Board</param>
 void MoveGenerator::whiteSinglePawnPush(Board board) {
 	int sq;
-	U64 pushedPawns = (board.getPiecesByColor(PAWN, WHITE) << 8) & ~board.occupied;
+	U64 pushedPawns = (board.getPieces(PAWN, WHITE) << 8) & ~board.occupied;
 
 	// divide proms and normal pushes
 	U64 promPawns = pushedPawns & RANK_8_HEX;
@@ -42,9 +93,10 @@ void MoveGenerator::whiteSinglePawnPush(Board board) {
 /// <summary>
 /// Calculate possible single push pawn moves for black.
 /// </summary>
+/// <param name="board">Board</param> 
 void MoveGenerator::blackSinglePawnPush(Board board) {
 	int sq;
-	U64 pushedPawns = (board.getPiecesByColor(PAWN, BLACK) >> 8) & ~board.occupied;
+	U64 pushedPawns = (board.getPieces(PAWN, BLACK) >> 8) & ~board.occupied;
 
 	// divide proms and normal pushes
 	U64 promPawns = pushedPawns & RANK_1_HEX;
@@ -69,9 +121,10 @@ void MoveGenerator::blackSinglePawnPush(Board board) {
 /// <summary>
 /// Calculate all possible moves with pawnstart for white.
 /// </summary>
+/// <param name="board">Board</param>
 void MoveGenerator::whiteDoublePawnPush(Board board) {
 	int sq;
-	U64 pushedPawns = (board.getPiecesByColor(PAWN, WHITE) << 8) & ~board.occupied;
+	U64 pushedPawns = (board.getPieces(PAWN, WHITE) << 8) & ~board.occupied;
 	pushedPawns = (pushedPawns << 8) & ~board.occupied & RANK_4_HEX;
 
 	while (pushedPawns) {
@@ -83,9 +136,10 @@ void MoveGenerator::whiteDoublePawnPush(Board board) {
 /// <summary>
 /// Calculate all possible moves with pawnstart for black.
 /// </summary>
+/// <param name="board">Board</param>
 void MoveGenerator::blackDoublePawnPush(Board board) {
 	int sq;
-	U64 pushedPawns = (board.getPiecesByColor(PAWN, BLACK) >> 8) & ~board.occupied;
+	U64 pushedPawns = (board.getPieces(PAWN, BLACK) >> 8) & ~board.occupied;
 	pushedPawns = (pushedPawns >> 8) & ~board.occupied & RANK_5_HEX;
 
 	while (pushedPawns) {
@@ -97,12 +151,13 @@ void MoveGenerator::blackDoublePawnPush(Board board) {
 /// <summary>
 /// Generate all possible east attacks for white pawns
 /// </summary>
+/// <param name="board">Board</param>
 void MoveGenerator::whitePawnCaptures(Board board) {
 	int sq, atk_sq;
 	U64 atks;
 
 	//divide in prom and non prom attacks
-	U64 whitePawns = board.getPiecesByColor(PAWN, WHITE);
+	U64 whitePawns = board.getPieces(PAWN, WHITE);
 	U64 whitePawnProm = whitePawns & RANK_7_HEX;
 	whitePawns &= ~RANK_7_HEX;
 
@@ -137,14 +192,15 @@ void MoveGenerator::whitePawnCaptures(Board board) {
 }
 
 /// <summary>
-/// Generate all possible east attacks for white pawns
+/// Generate all possible east attacks for white pawns.
 /// </summary>
+/// <param name="board">Board</param>
 void MoveGenerator::blackPawnCaptures(Board board) {
 	int sq, atk_sq;
 	U64 atks;
 
 	//divide in prom and non prom attacks
-	U64 blackPawns = board.getPiecesByColor(PAWN, BLACK);
+	U64 blackPawns = board.getPieces(PAWN, BLACK);
 	U64 blackPawnProm = blackPawns & RANK_2_HEX;
 	blackPawns &= ~RANK_2_HEX;
 
@@ -178,17 +234,14 @@ void MoveGenerator::blackPawnCaptures(Board board) {
 	}
 }
 
-/// <summary>
-/// Generate all white quiet knight moves.
-/// </summary>
-void MoveGenerator::whiteKnightMoves(Board board) {
+void MoveGenerator::addKnightMoves(Board b, const int side) {
 	int sq, atk_sq;
-	U64 whiteKnights = board.getPiecesByColor(KNIGHT, WHITE);
+	U64 knights = b.getPieces(KNIGHT, side);
 	U64 atks;
 
-	while (whiteKnights) {
-		sq = popBit(&whiteKnights);
-		atks = knightAtkMask[sq] & ~board.occupied;
+	while (knights) {
+		sq = popBit(&knights);
+		atks = knightAtkMask[sq] & ~b.occupied;
 		while (atks) {
 			atk_sq = popBit(&atks);
 			quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
@@ -196,35 +249,14 @@ void MoveGenerator::whiteKnightMoves(Board board) {
 	}
 }
 
-/// <summary>
-/// Generate all black quiet knight moves.
-/// </summary>
-void MoveGenerator::blackKnightMoves(Board board) {
+void MoveGenerator::addKnightCaptures(Board b, const int side) {
 	int sq, atk_sq;
-	U64 blackKnights = board.getPiecesByColor(KNIGHT, BLACK);
+	U64 knights = b.getPieces(KNIGHT, side);
 	U64 atks;
 
-	while (blackKnights) {
-		sq = popBit(&blackKnights);
-		atks = knightAtkMask[sq] & ~board.occupied;
-		while (atks) {
-			atk_sq = popBit(&atks);
-			quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
-		}
-	}
-}
-
-/// <summary>
-/// Generate white knight attacks
-/// </summary>
-void MoveGenerator::whiteKnightCaptures(Board board) {
-	int sq, atk_sq;
-	U64 whiteKnights = board.getPiecesByColor(KNIGHT, WHITE);
-	U64 atks;
-
-	while (whiteKnights) {
-		sq = popBit(&whiteKnights);
-		atks = knightAtkMask[sq] & board.color[BLACK];
+	while (knights) {
+		sq = popBit(&knights);
+		atks = knightAtkMask[sq] & b.color[side^1];
 		while (atks) {
 			atk_sq = popBit(&atks);
 			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
@@ -232,33 +264,16 @@ void MoveGenerator::whiteKnightCaptures(Board board) {
 	}
 }
 
-/// <summary>
-/// Generate black knight attacks
-/// </summary>
-void MoveGenerator::blackKnightCaptures(Board board) {
-	int sq, atk_sq;
-	U64 blackKnights = board.getPiecesByColor(KNIGHT, BLACK);
-	U64 atks;
-
-	while (blackKnights) {
-		sq = popBit(&blackKnights);
-		atks = knightAtkMask[sq] & board.color[WHITE];
-		while (atks) {
-			atk_sq = popBit(&atks);
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
-		}
-	}
+void MoveGenerator::addKingMoves(Board b, const int side) {
+	if (side == WHITE) addWhiteKingMoves(b);
+	else addBlackKingMoves(b);
 }
 
-/// <summary>
-/// Generate all white king moves. Kings cannot move into squares attacked by opposite king.
-/// King moves includes castling.
-/// </summary>
-void MoveGenerator::whiteKingMoves(Board board) {
-	U64 wKing = board.getPiecesByColor(KING, WHITE);
+void MoveGenerator::addWhiteKingMoves(Board board) {
+	U64 wKing = board.getPieces(KING, WHITE);
 	int wSq = popBit(&wKing);
 
-	U64 bKing = board.getPiecesByColor(KING, BLACK);
+	U64 bKing = board.getPieces(KING, BLACK);
 	int bSq = popBit(&bKing);
 
 	U64 kingMoves = kingAtkMask[wSq] & ~kingAtkMask[bSq] & ~board.occupied;
@@ -266,32 +281,28 @@ void MoveGenerator::whiteKingMoves(Board board) {
 
 	while (kingMoves) {
 		sq = popBit(&kingMoves);
-		if (!squareAttacked()) continue; // TODO CHECK IF TO_SQUARE IS ATTACKED
+
+		// check for non attacked square
+		if (board.squareAttacked(sq, board.side^1)) continue;
 		quietMoveList.push_back(Move(MOVE(wSq, sq, EMPTY, EMPTY, EMPTY), 0));
 	}
 
-	// TODO CHECK IF CASTLE SQUARES ARE ATTACKED
-	if ((board.castlePermission & K_CASTLE) && castleValid()) {
+	if (board.castleValid(K_CASTLE)) {
 		ASSERT(wSq == E1);
 		quietMoveList.push_back(Move(MOVE(wSq, G1, EMPTY, EMPTY, MFLAGCA), 0));
 	}
 
-	// TODO CHECK IF CASTLE SQUARES ARE ATTACKED
-	if ((board.castlePermission & Q_CASTLE) && castleValid()) {
+	if (board.castleValid(Q_CASTLE)) {
 		ASSERT(wSq == E1);
 		quietMoveList.push_back(Move(MOVE(wSq, C1, EMPTY, EMPTY, MFLAGCA), 0));
 	}
 }
 
-/// <summary>
-/// Generate all black king moves. Kings cannot move into squares attacked by opposite king.
-/// King moves includes castling.
-/// </summary>
-void MoveGenerator::blackKingMoves(Board board) {
-	U64 bKing = board.getPiecesByColor(KING, BLACK);
+void MoveGenerator::addBlackKingMoves(Board board) {
+	U64 bKing = board.getPieces(KING, BLACK);
 	int bSq = popBit(&bKing);
 
-	U64 wKing = board.getPiecesByColor(KING, WHITE);
+	U64 wKing = board.getPieces(KING, WHITE);
 	int wSq = popBit(&wKing);
 
 	U64 kingMoves = kingAtkMask[bSq] & ~kingAtkMask[wSq] & ~board.occupied;
@@ -299,31 +310,33 @@ void MoveGenerator::blackKingMoves(Board board) {
 
 	while (kingMoves) {
 		sq = popBit(&kingMoves);
-		if (!squareAttacked()) continue; // TODO CHECK IF TO_SQUARE IS ATTACKED
+
+		// check for non attacked square
+		if (board.squareAttacked(sq, board.side ^ 1)) continue;
 		quietMoveList.push_back(Move(MOVE(bSq, sq, EMPTY, EMPTY, EMPTY), 0));
 	}
 
-	// TODO CHECK IF CASTLE SQUARES ARE ATTACKED
-	if ((board.castlePermission & k_CASTLE) && castleValid()) {
+	if (board.castleValid(k_CASTLE)) {
 		ASSERT(bSq == E8);
 		quietMoveList.push_back(Move(MOVE(bSq, G8, EMPTY, EMPTY, MFLAGCA), 0));
 	}
 
-	// TODO CHECK IF CASTLE SQUARES ARE ATTACKED
-	if ((board.castlePermission & q_CASTLE) && castleValid()) {
+	if (board.castleValid(q_CASTLE)) {
 		ASSERT(bSq == E8);
 		quietMoveList.push_back(Move(MOVE(bSq, C8, EMPTY, EMPTY, MFLAGCA), 0));
 	}
 }
 
-/// <summary>
-/// Generate all white attacking king moves.
-/// </summary>
-void MoveGenerator::whiteKingCaptures(Board board) {
-	U64 wKing = board.getPiecesByColor(KING, WHITE);
+void MoveGenerator::addKingCaptures(Board b, const int side) {
+	if (side == WHITE) addWhiteKingCaptures(b);
+	else addBlackKingCaptures(b);
+}
+
+void MoveGenerator::addWhiteKingCaptures(Board board) {
+	U64 wKing = board.getPieces(KING, WHITE);
 	int wSq = popBit(&wKing);
 
-	U64 bKing = board.getPiecesByColor(KING, BLACK);
+	U64 bKing = board.getPieces(KING, BLACK);
 	int bSq = popBit(&bKing);
 
 	U64 whiteKingAttacks = kingAtkMask[wSq] & ~kingAtkMask[bSq] & board.color[BLACK];
@@ -331,19 +344,18 @@ void MoveGenerator::whiteKingCaptures(Board board) {
 
 	while (whiteKingAttacks) {
 		sq = popBit(&whiteKingAttacks);
-		if (!squareAttacked()) continue; // TODO CHECK IF TO_SQUARE IS ATTACKED
+
+		// check for non attacked square
+		if (board.squareAttacked(sq, board.side ^ 1)) continue;
 		capMoveList.push_back(Move(MOVE(bSq, sq, board.pieceAt(sq), EMPTY, EMPTY), 0));
 	}
 }
 
-/// <summary>
-/// Generate all black attacking king moves.
-/// </summary>
-void MoveGenerator::blackKingCaptures(Board board) {
-	U64 bKing = board.getPiecesByColor(KING, BLACK);
+void MoveGenerator::addBlackKingCaptures(Board board) {
+	U64 bKing = board.getPieces(KING, BLACK);
 	int bSq = popBit(&bKing);
 
-	U64 wKing = board.getPiecesByColor(KING, WHITE);
+	U64 wKing = board.getPieces(KING, WHITE);
 	int wSq = popBit(&wKing);
 
 	U64 blackKingAttacks = kingAtkMask[bSq] & ~kingAtkMask[wSq] & board.color[WHITE];
@@ -351,17 +363,113 @@ void MoveGenerator::blackKingCaptures(Board board) {
 
 	while (blackKingAttacks) {
 		sq = popBit(&blackKingAttacks);
-		if (!squareAttacked()) continue; // TODO CHECK IF TO_SQUARE IS ATTACKED
+
+		// check for non attacked square
+		if (board.squareAttacked(sq, board.side ^ 1)) continue;
 		capMoveList.push_back(Move(MOVE(bSq, sq, board.pieceAt(sq), EMPTY, EMPTY), 0));
 	}
 }
 
-/// <summary>
-/// Print all generated moves.
-/// </summary>
+void MoveGenerator::addRookMoves(Board b, const int side) {
+	int sq, atk_sq;
+	U64 attackSet;
+	U64 rooks = b.getPieces(ROOK, side);
+	while (rooks) {
+		sq = popBit(&rooks);
+		attackSet = lookUpRookMoves(sq, b.occupied);
+		ASSERT(attackSet == calculateRookMoves(sq, b.occupied));
+		attackSet &= ~b.occupied;
+		while (attackSet) {
+			atk_sq = popBit(&attackSet);
+			quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+		}
+	}
+}
+
+void MoveGenerator::addBishopMoves(Board b, const int side) {
+	int sq, atk_sq;
+	U64 bishops = b.getPieces(BISHOP, side);
+	U64 attackSet;
+	while (bishops) {
+		sq = popBit(&bishops);
+		attackSet = lookUpBishopMoves(sq, b.occupied);
+		attackSet &= ~b.occupied;
+
+		while (attackSet) {
+			atk_sq = popBit(&attackSet);
+			quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+		}
+	}
+}
+
+void MoveGenerator::addRookCaptures(Board b, const int side) {
+	int sq, atk_sq;
+	U64 captureSet;
+	U64 rooks = b.getPieces(ROOK, side);
+	while (rooks) {
+		sq = popBit(&rooks);
+		captureSet = lookUpRookMoves(sq, b.occupied);
+		captureSet = captureSet & b.color[side^1];
+
+		while (captureSet) {
+			atk_sq = popBit(&captureSet);
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+		}
+	}
+}
+
+void MoveGenerator::addBishopCaptures(Board b, const int side) {
+	int sq, atk_sq;
+	U64 captureSet;
+	U64 bishops = b.getPieces(BISHOP, side);
+	while (bishops) {
+		sq = popBit(&bishops);
+		captureSet = lookUpBishopMoves(sq, b.occupied);
+		captureSet &= b.occupied;
+
+		while (captureSet) {
+			atk_sq = popBit(&captureSet);
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+		}
+	}
+
+}
+
+void MoveGenerator::addQueenMoves(Board b, const int side) {
+	int sq, atk_sq;
+	U64 attackSet;
+	U64 queen = b.getPieces(QUEEN, side);
+	while (queen) {
+		sq = popBit(&queen);
+		attackSet = lookUpRookMoves(sq, b.occupied) ^ lookUpBishopMoves(sq, b.occupied);
+		attackSet &= ~b.occupied;
+
+		while (attackSet) {
+			atk_sq = popBit(&attackSet);
+			quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+		}
+	}
+}
+
+void MoveGenerator::addQueenCaptures(Board b, const int side) {
+	int sq, atk_sq;
+	U64 attackSet;
+	U64 queen = b.getPieces(QUEEN, side);
+	while (queen) {
+		sq = popBit(&queen);
+		attackSet = lookUpRookMoves(sq, b.occupied) ^ lookUpBishopMoves(sq, b.occupied);
+		attackSet &= b.color[side^1];
+
+		while (attackSet) {
+			atk_sq = popBit(&attackSet);
+			quietMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+		}
+	}
+}
+
 void MoveGenerator::printGeneratedMoves(Board b) {
 
-	cout << "\nGenerated " << capMoveList.size() + quietMoveList.size() << " moves:" << endl;
+	cout << "\nGenerated " << capMoveList.size() + quietMoveList.size() << " moves for: " << colorString[b.side] << endl;
 
 	vector <Move> allMoves;
 	allMoves.reserve(capMoveList.size() + quietMoveList.size()); // preallocate memory
@@ -371,12 +479,4 @@ void MoveGenerator::printGeneratedMoves(Board b) {
 	for (Move move : allMoves) {
 		printMove(move.move);
 	}
-}
-
-int MoveGenerator::castleValid() {
-	return 1;
-}
-
-int MoveGenerator::squareAttacked() {
-	return 1;
 }

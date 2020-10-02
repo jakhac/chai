@@ -68,7 +68,7 @@ const U64 WHITE_SQUARES = 0x55AA55AA55AA55AA;
 
 /* test fens to check parse function */
 const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPB1PPP/R2BK2R w KQkq - 0 1";
 const string PAWN_TEST = "r3k2r/pP1pqpb1/1n2pnp1/1bpPN3/1p2P3/P1N2Q1p/2PBBPPP/R3K2R w KQkq c6 0 1";
 const string PAWN_TEST_B = "r3k2r/pP1pqpb1/1n2pn2/1bpPNQ2/Pp1NP3/8/2PBBPpP/R3K2R b KQkq a3 0 1";
 const string KINGS_FEN = "r3kQ1r/p1qN1ppp/1p2pn2/5b2/2PpP3/4B3/PPPb1PPP/R3KB1R w KQkq - 2 3";
@@ -79,12 +79,15 @@ const string PAWN_PUSH_FEN = "r3k2r/pp1p1p1p/R1p1p2n/5p2/1P6/2P2n2/P1NPPPPP/R3K3
 const string PAWN_FEN_W = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
 const string PAWN_FEN_B = "rnbqkbnr/p1p1p3/3p3p/1p1p4/2P1Pp2/8/PP1P1PpP/RNBQKB1R b KQkq e3 0 1";
 const string KNIGHT_KINGS = "5k2/1n6/4n3/6N1/8/3N4/8/5K2 w - - 0 1";
-const string ROOKS = "6k1/8/5r2/8/1nR5/5N2/8/6K1 b - - 0 1";
+const string ROOKS = "6k1/2b5/5r2/8/1nR5/5N2/8/6K1 b - - 0 1";
+const string ROOKS_BUG_FEN = "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR w KQkq - 0 1";
 const string QUEENS = "6k1/8/4nq2/8/1nQ5/5N2/1N6/6K1 b - - 0 1";
 const string BISHOPS = "6k1/1b6/4n3/8/1n4B1/1B3N2/1N6/2b3K1 b - - 0 1";
 const string CASTLE = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
-const string CASTLE2 = "3rk2r/8/8/8/8/8/6p1/R3K2R b KQk - 0 1";
+const string CASTLE2 = "r3k2r/p1pp1pb1/bn2pnp1/3PN3/1p2P1q1/2N2Q1P/PPPB1P1P/R2BK2R w KQkq - 0 1";
 const string MOVES_48 = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
+const string ROOK_CENTER_FEN = "r3k3/p1ppqpb1/bn2pnp1/1R1PN3/1p2P3/2N1rQ1p/PPPBBPPP/4K2R b Kq - 0 1";
+const string WHITE_CHECK_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPB1PPP/R2B1K1R w KQkq - 0 1";
 
 // index is true if the piece is knight / king / bishop / rook
 const int pieceKnight[13] = { 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 };
@@ -113,6 +116,9 @@ const int pieceType[13] = { 0, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6};
 
 /* contains piece slides for indexed piece */
 const int pieceSlides[13] = { 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0 };
+
+/* color to string */
+const string colorString[2] = { "BLACK", "WHITE" };
 
 /* variables to parse fen into board variables and print in console */
 const string pieceChar = ".PNBRQKpnbrqk";
@@ -158,6 +164,7 @@ enum {
 };
 
 const U64 rand64();
+const U64 randomFewBits();
 const int file_rank_2_sq(int f, int r);
 
 /* Macros for int move bits */

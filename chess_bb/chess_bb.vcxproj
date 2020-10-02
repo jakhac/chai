@@ -45,6 +45,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <SpectreMitigation>false</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -140,7 +141,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="attacks.h" />
     <ClInclude Include="info.h" />
+    <ClInclude Include="magics.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="board.h" />
     <ClInclude Include="defs.h" />
@@ -153,8 +156,10 @@
     <ClInclude Include="validate.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="attacks.cpp" />
     <ClCompile Include="board.cpp" />
     <ClCompile Include="defs.cpp" />
+    <ClCompile Include="magics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="move.cpp" />
     <ClCompile Include="moveGenerator.cpp" />
