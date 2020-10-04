@@ -13,4 +13,3 @@ public:
 	U64 zobKey;
 
 };
-

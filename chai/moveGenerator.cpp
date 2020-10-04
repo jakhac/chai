@@ -1,9 +1,7 @@
 #include "moveGenerator.h"
 
 void MoveGenerator::generateMoves(Board b) {
-	// clear move lists
-	capMoveList = {};
-	quietMoveList = {};
+	resetMoveLists();
 
 	const int playerToMove = b.side;
 
@@ -162,9 +160,10 @@ void MoveGenerator::whitePawnCaptures(Board board) {
 	whitePawns &= ~RANK_7_HEX;
 
 	// en passant square
-	if ((whitePawns << 7) & setMask[board.enPas]) {
+	if ((whitePawns << 7 & ~FILE_H_HEX) & setMask[board.enPas]) {
 		capMoveList.push_back(Move(MOVE(board.enPas - 7, board.enPas, EMPTY, EMPTY, MFLAGEP), 0));
-	} else if ((whitePawns << 9) & setMask[board.enPas]) {
+	}
+	if ((whitePawns << 9 & ~FILE_A_HEX) & setMask[board.enPas]) {
 		capMoveList.push_back(Move(MOVE(board.enPas - 9, board.enPas, EMPTY, EMPTY, MFLAGEP), 0));
 	}
 
@@ -173,7 +172,7 @@ void MoveGenerator::whitePawnCaptures(Board board) {
 		atks = pawnAtkMask[WHITE][sq] & board.color[BLACK];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(sq), EMPTY, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), EMPTY, EMPTY), 0));
 		}
 	}
 
@@ -183,10 +182,10 @@ void MoveGenerator::whitePawnCaptures(Board board) {
 		atks = pawnAtkMask[WHITE][sq] & board.color[BLACK];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, Q, EMPTY), 0));
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, R, EMPTY), 0));
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, B, EMPTY), 0));
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, N, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), Q, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), R, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), B, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), N, EMPTY), 0));
 		}
 	}
 }
@@ -205,9 +204,10 @@ void MoveGenerator::blackPawnCaptures(Board board) {
 	blackPawns &= ~RANK_2_HEX;
 
 	// en passant square
-	if ((blackPawns >> 7) & setMask[board.enPas]) {
+	if ((blackPawns >> 7 & ~FILE_A_HEX) & setMask[board.enPas]) {
 		capMoveList.push_back(Move(MOVE(board.enPas + 7, board.enPas, EMPTY, EMPTY, MFLAGEP), 0));
-	} else if ((blackPawns >> 9) & setMask[board.enPas]) {
+	}
+	if ((blackPawns >> 9 & ~FILE_H_HEX) & setMask[board.enPas]) {
 		capMoveList.push_back(Move(MOVE(board.enPas + 9, board.enPas, EMPTY, EMPTY, MFLAGEP), 0));
 	}
 
@@ -216,7 +216,7 @@ void MoveGenerator::blackPawnCaptures(Board board) {
 		atks = pawnAtkMask[BLACK][sq] & board.color[WHITE];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(sq), EMPTY, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), EMPTY, EMPTY), 0));
 		}
 	}
 
@@ -226,10 +226,10 @@ void MoveGenerator::blackPawnCaptures(Board board) {
 		atks = pawnAtkMask[BLACK][sq] & board.color[WHITE];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, q, EMPTY), 0));
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, r, EMPTY), 0));
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, b, EMPTY), 0));
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, n, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), q, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), r, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), b, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), n, EMPTY), 0));
 		}
 	}
 }
@@ -256,10 +256,10 @@ void MoveGenerator::addKnightCaptures(Board b, const int side) {
 
 	while (knights) {
 		sq = popBit(&knights);
-		atks = knightAtkMask[sq] & b.color[side^1];
+		atks = knightAtkMask[sq] & b.color[side ^ 1];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			capMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+			capMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
 		}
 	}
 }
@@ -283,7 +283,7 @@ void MoveGenerator::addWhiteKingMoves(Board board) {
 		sq = popBit(&kingMoves);
 
 		// check for non attacked square
-		if (board.squareAttacked(sq, board.side^1)) continue;
+		if (board.squareAttacked(sq, board.side ^ 1)) continue;
 		quietMoveList.push_back(Move(MOVE(wSq, sq, EMPTY, EMPTY, EMPTY), 0));
 	}
 
@@ -340,14 +340,14 @@ void MoveGenerator::addWhiteKingCaptures(Board board) {
 	int bSq = popBit(&bKing);
 
 	U64 whiteKingAttacks = kingAtkMask[wSq] & ~kingAtkMask[bSq] & board.color[BLACK];
-	int sq;
+	int atk_sq;
 
 	while (whiteKingAttacks) {
-		sq = popBit(&whiteKingAttacks);
+		atk_sq = popBit(&whiteKingAttacks);
 
 		// check for non attacked square
-		if (board.squareAttacked(sq, board.side ^ 1)) continue;
-		capMoveList.push_back(Move(MOVE(bSq, sq, board.pieceAt(sq), EMPTY, EMPTY), 0));
+		if (board.squareAttacked(atk_sq, board.side ^ 1)) continue;
+		capMoveList.push_back(Move(MOVE(wSq, atk_sq, board.pieceAt(atk_sq), EMPTY, EMPTY), 0));
 	}
 }
 
@@ -359,14 +359,14 @@ void MoveGenerator::addBlackKingCaptures(Board board) {
 	int wSq = popBit(&wKing);
 
 	U64 blackKingAttacks = kingAtkMask[bSq] & ~kingAtkMask[wSq] & board.color[WHITE];
-	int sq;
+	int atk_sq;
 
 	while (blackKingAttacks) {
-		sq = popBit(&blackKingAttacks);
+		atk_sq = popBit(&blackKingAttacks);
 
 		// check for non attacked square
-		if (board.squareAttacked(sq, board.side ^ 1)) continue;
-		capMoveList.push_back(Move(MOVE(bSq, sq, board.pieceAt(sq), EMPTY, EMPTY), 0));
+		if (board.squareAttacked(atk_sq, board.side ^ 1)) continue;
+		capMoveList.push_back(Move(MOVE(bSq, atk_sq, board.pieceAt(atk_sq), EMPTY, EMPTY), 0));
 	}
 }
 
@@ -409,7 +409,7 @@ void MoveGenerator::addRookCaptures(Board b, const int side) {
 	while (rooks) {
 		sq = popBit(&rooks);
 		captureSet = lookUpRookMoves(sq, b.occupied);
-		captureSet = captureSet & b.color[side^1];
+		captureSet = captureSet & b.color[side ^ 1];
 
 		while (captureSet) {
 			atk_sq = popBit(&captureSet);
@@ -425,7 +425,7 @@ void MoveGenerator::addBishopCaptures(Board b, const int side) {
 	while (bishops) {
 		sq = popBit(&bishops);
 		captureSet = lookUpBishopMoves(sq, b.occupied);
-		captureSet &= b.occupied;
+		captureSet &= b.color[side ^ 1];
 
 		while (captureSet) {
 			atk_sq = popBit(&captureSet);
@@ -458,7 +458,7 @@ void MoveGenerator::addQueenCaptures(Board b, const int side) {
 	while (queen) {
 		sq = popBit(&queen);
 		attackSet = lookUpRookMoves(sq, b.occupied) ^ lookUpBishopMoves(sq, b.occupied);
-		attackSet &= b.color[side^1];
+		attackSet &= b.color[side ^ 1];
 
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);

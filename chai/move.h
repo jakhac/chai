@@ -20,8 +20,7 @@ Move format is bits in hex
 
 //0000 0111 1100 0000 0000 0000
 //0000 0011 1100 0000 0000 0000
-class Move
-{
+class Move {
 
 public:
 

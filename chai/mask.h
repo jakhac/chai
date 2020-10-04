@@ -1,61 +1,27 @@
-#include "mask.h"
+#pragma once
+
+#include "defs.h"
+
+#ifndef MASK_H
+#define MASK_H
 
 // clear set bit masks
-U64 setMask[64];
-U64 clearMask[64];
+extern U64 setMask[64];
+extern U64 clearMask[64];
 
 // convert sq to rank or file
-int squareToRank[64];
-int squareToFile[64];
+extern int squareToRank[64];
+extern int squareToFile[64];
 
 // attacker mask for pieces
-U64 pawnAtkMask[2][64];
-U64 knightAtkMask[64];
-U64 kingAtkMask[64];
-
-// rook masks
-U64 rays[8][64];
-U64 rookMasks[64];
-
-/// <summary>
-/// Generate rays for rays array for each direction on each square.
-/// </summary>
-void initRays() {
-	for (int sq = 0; sq < 64; sq++) {
-		rays[NORTH][sq] = 0x0101010101010100ULL << sq;
-		rays[SOUTH][sq] = 0x0080808080808080ULL >> (63 - sq);
-		rays[EAST][sq] = 2 * ((1ULL << (sq | 7)) - (1ULL << sq));
-		rays[WEST][sq] = (1ULL << sq) - (1ULL << (sq & 56));
-		rays[NORTH_WEST][sq] = _westN(0x102040810204000ULL, 7 - _col(sq)) << (_row(sq) * 8);
-		rays[NORTH_EAST][sq] = _eastN(0x8040201008040200ULL, _col(sq)) << (_row(sq) * 8);
-		rays[SOUTH_WEST][sq] = _westN(0x40201008040201ULL, 7 - _col(sq)) >> ((7 - _row(sq)) * 8);
-		rays[SOUTH_EAST][sq] = _eastN(0x2040810204080ULL, _col(sq)) >> ((7 - _row(sq)) * 8);
-	}
-}
-
-/// <summary>
-/// Get rays in given direction of given square.
-/// </summary>
-/// <param name="dir">Direction (use enum Dir)</param>
-/// <param name="sq">Starting square, is not included  in return</param>
-/// <returns>Bitboard with set bits in given direction</returns>
-U64 getRay(int dir, int sq) {
-	return rays[dir][sq];
-}
-
-void initRookMasks() {
-	for (int i = 0; i < 64; i++) {
-		rookMasks[i] = (getRay(NORTH, i) & ~RANK_8_HEX) |
-			(getRay(SOUTH, i) & ~RANK_1_HEX) |
-			(getRay(EAST, i) & ~FILE_H_HEX) |
-			(getRay(WEST, i) & ~FILE_A_HEX);
-	}
-}
+extern U64 pawnAtkMask[2][64];
+extern U64 knightAtkMask[64];
+extern U64 kingAtkMask[64];
 
 /// <summary>
 /// Initialize clear and set mask arrays for usage.
 /// </summary>
-void initClearSetMask() {
+inline void initClearSetMask() {
 	int index = 0;
 
 	// Zero both arrays
@@ -73,11 +39,12 @@ void initClearSetMask() {
 /// <summary>
 /// Initialize arrays to index square to files and ranks.
 /// </summary>
-void initSquareToRankFile() {
+inline void initSquareToRankFile() {
 	int sq;
 	for (int rank = RANK_8; rank >= RANK_1; rank--) {
 		for (int file = FILE_A; file <= FILE_H; file++) {
-			sq = file_rank_2_sq(file, rank);
+			//sq = file_rank_2_sq(file, rank);
+			sq = 8 * rank + file;
 			squareToFile[sq] = file;
 			squareToRank[sq] = rank;
 		}
@@ -87,7 +54,7 @@ void initSquareToRankFile() {
 /// <summary>
 /// Initialize attacker mask for all pieces.
 /// </summary>
-void initAttackerMasks() {
+inline void initAttackerMasks() {
 	int offSet = 0;
 
 	// pawns
@@ -119,3 +86,5 @@ void initAttackerMasks() {
 		kingAtkMask[i] = attacks;
 	}
 }
+
+#endif // !MASK_H

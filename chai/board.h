@@ -11,6 +11,7 @@
 #include "info.h"
 #include "attacks.h"
 
+
 /*
 * - Pawn Shield Pattern for king safety
 * - Distance to king for safety
@@ -20,8 +21,7 @@
 /// Board uses 8 bitboards to store each piece and squares occupied by each color. A chess game should only uses 
 /// one board instance since push/pop moves in recursive ssearch trees do not require new boards.
 /// </summary>
-class Board
-{
+class Board {
 public:
 
 	/// <summary>Current side, 0 for black and 1 for white. Use enums for debug purpose.</summary>

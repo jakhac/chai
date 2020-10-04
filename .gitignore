@@ -13,9 +13,6 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
-# Mono auto generated files
-mono_crash.*
-
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -29,7 +26,6 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-[Ll]ogs/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -46,7 +42,6 @@ Generated\ Files/
 # NUNIT
 *.VisualState.xml
 TestResult.xml
-nunit-*.xml
 
 # Build Results of an ATL Project
 [Dd]ebugPS/
@@ -211,11 +206,6 @@ BundleArtifacts/
 Package.StoreAssociation.xml
 _pkginfo.txt
 *.appx
-<<<<<<< HEAD
-*.appxbundle
-*.appxupload
-=======
->>>>>>> GITIGNORE und GITATTRIBUTES hinzufügen.
 
 # Visual Studio cache files
 # files ending in .cache can be ignored

@@ -1,10 +1,15 @@
-#include "info.h"
+#pragma once
 
-// declare extern vars
-int squareToRank[64];
-int squareToFile[64];
+#include "defs.h"
+#include "mask.h"
+#include <iostream>
+#include <bitset>
 
-void printBitBoard(U64* bb) {
+/// <summary>
+/// Print referenced bitboard.
+/// </summary>
+/// <param name="bb">Bitboard</param>
+inline void printBitBoard(U64* bb) {
 	U64 shiftBit = 1ULL;
 	int sq;
 
@@ -26,7 +31,8 @@ void printBitBoard(U64* bb) {
 /// <summary>
 /// Print move in algebraic notation and promotions if possible
 /// </summary>
-void printMove(const int move) {
+/// <param name="move">Move</param>
+inline void printMove(const int move) {
 
 	int promoted = PROMOTED(move);
 	char promChar = ' ';
@@ -51,10 +57,36 @@ void printMove(const int move) {
 	cout << ret << promChar << endl;
 }
 
+inline string getStringMove(const int move) {
+	int promoted = PROMOTED(move);
+	char promChar = ' ';
+
+	if (promoted) {
+		promChar = 'q';
+		if (isN(promoted)) {
+			promChar = 'n';
+		} else if (isRQ(promoted) && !isBQ(promoted)) {
+			promChar = 'r';
+		} else if (!isRQ(promoted) && isBQ(promoted)) {
+			promChar = 'b';
+		}
+	}
+
+	string ret = "";
+	ret += ('a' + squareToFile[FROMSQ(move)]);
+	ret += ('1' + squareToRank[FROMSQ(move)]);
+	ret += ('a' + squareToFile[TOSQ(move)]);
+	ret += ('1' + squareToRank[TOSQ(move)]);
+
+	ret += promChar;
+	return ret;
+}
+
 /// <summary>
 /// Print all flags and attributes of given move.
 /// </summary>
-void printMoveStatus(int move) {
+/// <param name="move">Move</param>
+inline void printMoveStatus(int move) {
 	cout << "\n#### - Move Status" << endl;
 	cout << "From " << FROMSQ(move) << " to " << TOSQ(move) << endl;
 	cout << "Pawn start " << (move & MFLAGPS) << endl;
@@ -69,7 +101,8 @@ void printMoveStatus(int move) {
 /// <summary>
 /// Print binary format of given integer.
 /// </summary>
-void printBinary(int x) {
+/// /// <param name="x">unsigned long long number</param>
+inline void printBinary(U64 x) {
 	std::bitset<64> b(x);
 	cout << b << endl;
 }

@@ -155,6 +155,8 @@ void Board::printBoard() {
 		castlePermission & k_CASTLE ? 'k' : ' ',
 		castlePermission & q_CASTLE ? 'q' : ' '
 	);
+
+	cout << endl;
 }
 
 void Board::parseFen(string fen) {
@@ -237,7 +239,7 @@ void Board::parseFen(string fen) {
 	// en passant square
 	if (fen[index] != '-') {
 		file = fen[index] - 'a';
-		rank = fen[index+1] - '1';
+		rank = fen[index + 1] - '1';
 		ASSERT(file >= FILE_A && file <= FILE_H);
 		ASSERT(rank >= RANK_1 && rank <= RANK_8);
 
@@ -297,8 +299,8 @@ bool Board::push(int move) {
 	int promoted = PROMOTED(move);
 	int movingPiece = pieceAt(from_square);
 
-	cout << "\nPush move: ";
-	printMove(move);
+	//cout << "\nPush move: ";
+	//printMove(move);
 
 	Undo undo;
 	undo.enPas = enPas;
@@ -316,7 +318,7 @@ bool Board::push(int move) {
 	// clear to_square and move piece (TODO updatePiece method?)
 	if (MCHECKCAP & move) {
 		zobristKey ^= pieceKeys[CAPTURED(move)][to_square];
-		clearPiece(CAPTURED(move), to_square, side^1);
+		clearPiece(CAPTURED(move), to_square, side ^ 1);
 	}
 
 	zobristKey ^= pieceKeys[movingPiece][to_square];
@@ -331,7 +333,7 @@ bool Board::push(int move) {
 		sq += to_square;
 
 		zobristKey ^= pieceKeys[pieceAt(sq)][sq];
-		clearPiece(PAWN, sq, side^1);
+		clearPiece(PAWN, sq, side ^ 1);
 	}
 
 	// handle en passant square
@@ -365,10 +367,10 @@ bool Board::push(int move) {
 		}
 	} else if (pieceRook[movingPiece]) {
 		switch (from_square) {
-			case A1: castlePermission &= ~Q_CASTLE;
-			case H1: castlePermission &= ~K_CASTLE;
-			case A8: castlePermission &= ~q_CASTLE;
-			case H8: castlePermission &= ~k_CASTLE;
+			case A1: castlePermission &= ~Q_CASTLE; break;
+			case H1: castlePermission &= ~K_CASTLE; break;
+			case A8: castlePermission &= ~q_CASTLE; break;
+			case H8: castlePermission &= ~k_CASTLE; break;
 			default: break;
 		}
 	} else if (pieceKing[movingPiece]) {
@@ -389,13 +391,20 @@ bool Board::push(int move) {
 	ply++;
 	fiftyMove++;
 
-	printBoard();
-	ASSERT(zobristKey == generateZobristKey());
+	if (zobristKey != generateZobristKey()) {
+		//printBoard();
+		while (!undoStack.empty()) {
+			Undo lastMove = undoStack.top();
+			undoStack.pop();
+			cout << getStringMove(lastMove.move) << endl;
+		}
+		ASSERT(zobristKey == generateZobristKey());
+	}
 
 	undoStack.push(undo);
 
 	if (isCheck(side ^ 1)) {
-		cout << "Move leaves " << (side^1) << " in check. Popped move from stack." << endl;
+		//cout << "Move leaves " << (side^1) << " in check. Popped move from stack." << endl;
 		pop();
 		return 0;
 	}
@@ -405,7 +414,17 @@ bool Board::push(int move) {
 
 void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 	int rook = pieceAt(clearRookSq);
-	ASSERT(rook == r || rook == R);
+
+	if (!(rook == r || rook == R)) {
+		printBoard();
+		while (!undoStack.empty()) {
+			Undo lastMove = undoStack.top();
+			undoStack.pop();
+			cout << getStringMove(lastMove.move) << endl;
+		}
+		ASSERT(rook == r || rook == R);
+	}
+
 
 	zobristKey ^= pieceKeys[rook][clearRookSq];
 	clearPiece(ROOK, clearRookSq, side);
@@ -451,13 +470,13 @@ Undo Board::pop() {
 
 	// reset captured piece
 	if (MCHECKCAP & undo.move) {
-		setPiece(CAPTURED(undo.move), to_square, side^1);
+		setPiece(CAPTURED(undo.move), to_square, side ^ 1);
 	}
 
 	// undo ep captures
 	if (MFLAGEP & undo.move) {
-		if (side == WHITE) setPiece(PAWN, to_square - 8, side^1);
-		else setPiece(PAWN, to_square + 8, side^1);
+		if (side == WHITE) setPiece(PAWN, to_square - 8, side ^ 1);
+		else setPiece(PAWN, to_square + 8, side ^ 1);
 	}
 
 	// undo promotions
@@ -477,9 +496,9 @@ Undo Board::pop() {
 		}
 	}
 
-	cout << "\nPopped move: ";
-	printMove(undo.move);
-	printBoard();
+	//cout << "\nPopped move: ";
+	//printMove(undo.move);
+	//printBoard();
 
 	ASSERT(checkBoard());
 	return undo;
@@ -532,31 +551,33 @@ bool Board::squareAttacked(int square, int side) {
 
 bool Board::isCheck(int side) {
 	U64 kingBB = getPieces(KING, side);
-	return squareAttacked(popBit(&kingBB), side^1);
+	return squareAttacked(popBit(&kingBB), side ^ 1);
 }
 
 bool Board::castleValid(int castle) {
-	castle = K_CASTLE;
-
 	if (isCheck(side)) return false;
 
 	if (!(castlePermission & castle)) return false;
 
 	switch (castle) {
-		case K_CASTLE: 
-			if (setMask[F1] & setMask[G1] & occupied) return false; 
+		case K_CASTLE:
+			if ((setMask[F1] | setMask[G1]) & occupied) return false;
+			if (pieceAt(H1) != R) return false;
 			if (squareAttacked(F1, BLACK)) return false;
 			break;
-		case Q_CASTLE: 
-			if (setMask[D1] & setMask[C1] & occupied) return false; 
+		case Q_CASTLE:
+			if ((setMask[D1] | setMask[C1] | setMask[B1]) & occupied) return false;
+			if (pieceAt(A1) != R) return false;
 			if (squareAttacked(D1, BLACK)) return false;
 			break;
-		case k_CASTLE: 
-			if (setMask[F8] & setMask[G8] & occupied) return false; 
+		case k_CASTLE:
+			if ((setMask[F8] | setMask[G8]) & occupied) return false;
+			if (pieceAt(H8) != r) return false;
 			if (squareAttacked(F8, WHITE)) return false;
 			break;
-		case q_CASTLE: 
-			if (setMask[D8] & setMask[C8] & occupied) return false; 
+		case q_CASTLE:
+			if ((setMask[D8] | setMask[C8] | setMask[B8]) & occupied) return false;
+			if (pieceAt(A8) != r) return false;
 			if (squareAttacked(D8, WHITE)) return false;
 			break;
 		default: return false; break;

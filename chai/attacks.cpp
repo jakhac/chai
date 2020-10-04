@@ -77,7 +77,7 @@ void initRookMagicTable() {
             rookMoves = calculateRookMoves(sq, blockers);
 
             // check for desired hash collision
-            if (rookTable[sq][tableIndex] != 0) ASSERT(rookMoves == rookTable[sq][tableIndex]);
+            if (rookTable[sq][tableIndex] != 0) ASSERT(rookMoves == rookTable[sq][tableIndex])
             rookTable[sq][tableIndex] = rookMoves;
         }
     }
@@ -103,7 +103,7 @@ void initBishopMagicTable() {
 U64 calculateRookMoves(int square, U64 blockers) {
     U64 result = 0ULL;
     int rk = square / 8;
-    int fl = square% 8, r, f;
+    int fl = square % 8, r, f;
     for (r = rk + 1; r <= 7; r++) {
         result |= (1ULL << (fl + r * 8));
         if (blockers & (1ULL << (fl + r * 8))) break;

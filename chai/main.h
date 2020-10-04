@@ -3,6 +3,7 @@
 #include "board.h"
 #include "defs.h"
 #include "moveGenerator.h"
+#include "perft.h"
 
 #include <algorithm>
 #include <iostream>
@@ -20,4 +21,11 @@ int main();
 /// </summary>
 /// <param name="b">Board</param>
 void init(Board* b);
+
+/// <summary>
+/// Start a game in console.
+/// </summary>
+/// <param name="b">Board instance</param>
+/// <param name="moveGenerator">MoveGenrator instance</param>
+void play(Board b, MoveGenerator moveGenerator);
 
