@@ -68,7 +68,12 @@ const U64 WHITE_SQUARES = 0x55AA55AA55AA55AA;
 
 /* test fens to check parse function */
 const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPB1PPP/R2BK2R w KQkq - 0 1";
+const string MID_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+const string END_FEN_1 = "8/PPP4k/8/8/8/8/4Kppp/8 w - - 0 1";
+const string END_FEN_2 = "8/3K4/2p5/p2b2r1/5k2/8/8/1q6 b - - 1 67";
+const string END_FEN_3 = "8/7p/p5pb/4k3/P1pPn3/8/P5PP/1rB2RK1 b - d3 0 28";
+
+const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string PAWN_TEST = "r3k2r/pP1pqpb1/1n2pnp1/1bpPN3/1p2P3/P1N2Q1p/2PBBPPP/R3K2R w KQkq c6 0 1";
 const string PAWN_TEST_B = "r3k2r/pP1pqpb1/1n2pn2/1bpPNQ2/Pp1NP3/8/2PBBPpP/R3K2R b KQkq a3 0 1";
 const string KINGS_FEN = "r3kQ1r/p1qN1ppp/1p2pn2/5b2/2PpP3/4B3/PPPb1PPP/R3KB1R w KQkq - 2 3";

@@ -2,6 +2,7 @@
 
 #include "defs.h"
 #include "mask.h"
+#include <intrin.h>
 #include <iostream>
 
 #ifndef UTIL_H
@@ -87,13 +88,15 @@ inline int bitscanReverse(U64 board) {
 /// <param name="bb">Bitboard to count bits on</param>
 /// <returns>Amount of bits set to 1 in bb</returns>
 inline int countBits(U64 bb) {
-	int cnt = 0;
-	while (bb) {
-		cnt += bb & 1;
-		bb >>= 1;
-	}
-	return cnt;
+	return __popcnt64(bb);
+	//int cnt = 0;
+	//while (bb) {
+	//	cnt += bb & 1;
+	//	bb >>= 1;
+	//}
+	//return cnt;
 }
+
 
 /// <summary>
 /// Pops least significant bit from bitboard and returns index.
@@ -101,10 +104,10 @@ inline int countBits(U64 bb) {
 /// <param name="bb">Bitboard to pop lsb on</param>
 /// <returns>Index of popped bit</returns>
 inline int popBit(U64* bb) {
-	U64 b = *bb ^ (*bb - 1);
-	unsigned int fold = (unsigned)((b & 0xffffffff) ^ (b >> 32));
+	unsigned long ret;
+	_BitScanForward64(&ret, *bb);
 	*bb &= (*bb - 1);
-	return bitTable[(fold * 0x783a9b23) >> 26];
+	return (int)ret;
 }
 
 /// <summary>

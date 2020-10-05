@@ -3,6 +3,7 @@
 #include "board.h"
 #include "defs.h"
 #include "moveGenerator.h"
+#include "legalMoveGenerator.h"
 #include "perft.h"
 
 #include <algorithm>

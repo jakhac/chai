@@ -7,26 +7,18 @@ int main() {
 	MoveGenerator mg;
 
 	init(&b);
-
 	b.parseFen(STARTING_FEN);
-	//b.parseFen("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
 
 	b.printBoard();
 	b.checkBoard();
 
-	mg.generateMoves(b);
+	//mg.generateMoves(b);
 	//mg.printGeneratedMoves(b);
 
 	//play(b, mg);
-	//p.perftRoot(b, 4);
 
 	auto start = std::chrono::high_resolution_clock::now();
-
-	p.perftRoot(b, 4);
-
-	// with debug 7524ms
-	// wout debug 
-
+	p.perftRoot(b, 5);
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 	cout << duration.count() << "ms\n";

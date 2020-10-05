@@ -391,15 +391,20 @@ bool Board::push(int move) {
 	ply++;
 	fiftyMove++;
 
-	if (zobristKey != generateZobristKey()) {
-		//printBoard();
-		while (!undoStack.empty()) {
-			Undo lastMove = undoStack.top();
-			undoStack.pop();
-			cout << getStringMove(lastMove.move) << endl;
-		}
-		ASSERT(zobristKey == generateZobristKey());
-	}
+	ASSERT(zobristKey == generateZobristKey());
+	//if (zobristKey != generateZobristKey()) {
+	//	cout << "ZOBRIST KEY FAILED" << endl;
+	//	printBoard();
+	//	printBitBoard(&occupied);
+	//	cout << getStringMove(move) << endl;
+	//	while (!undoStack.empty()) {
+	//		Undo lastMove = undoStack.top();
+	//		undoStack.pop();
+	//		cout << getStringMove(lastMove.move) << endl;
+	//	}
+	//	ASSERT(zobristKey == generateZobristKey());
+	//	exit(1);
+	//}
 
 	undoStack.push(undo);
 
@@ -415,16 +420,7 @@ bool Board::push(int move) {
 void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 	int rook = pieceAt(clearRookSq);
 
-	if (!(rook == r || rook == R)) {
-		printBoard();
-		while (!undoStack.empty()) {
-			Undo lastMove = undoStack.top();
-			undoStack.pop();
-			cout << getStringMove(lastMove.move) << endl;
-		}
-		ASSERT(rook == r || rook == R);
-	}
-
+	ASSERT(rook == r || rook == R);
 
 	zobristKey ^= pieceKeys[rook][clearRookSq];
 	clearPiece(ROOK, clearRookSq, side);
@@ -546,7 +542,17 @@ U64 Board::attackerSet(int side) {
 }
 
 bool Board::squareAttacked(int square, int side) {
-	return attackerSet(side) & setMask[square];
+	//return attackerSet(side) & setMask[square];
+
+	// TODO
+	U64 attacker = 0ULL;
+
+	attacker |= pawnAtkMask[side^1][square] & getPieces(PAWN, side);
+	attacker |= knightAtkMask[square] & getPieces(KNIGHT, side);
+	attacker |= lookUpBishopMoves(square, occupied) & (getPieces(BISHOP, side) | getPieces(QUEEN, side));
+	attacker |= lookUpRookMoves(square, occupied) & (getPieces(ROOK, side) | getPieces(QUEEN, side));
+	return attacker;
+
 }
 
 bool Board::isCheck(int side) {

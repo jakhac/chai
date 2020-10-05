@@ -77,7 +77,9 @@ void initRookMagicTable() {
             rookMoves = calculateRookMoves(sq, blockers);
 
             // check for desired hash collision
-            if (rookTable[sq][tableIndex] != 0) ASSERT(rookMoves == rookTable[sq][tableIndex])
+            if (rookTable[sq][tableIndex] != 0) {
+                ASSERT(rookMoves == rookTable[sq][tableIndex])
+            }
             rookTable[sq][tableIndex] = rookMoves;
         }
     }

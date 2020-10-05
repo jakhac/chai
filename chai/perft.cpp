@@ -12,6 +12,7 @@ long Perft::perftRoot(Board b, int depth) {
     ASSERT(b.checkBoard());
 
     printf("\nPerft to depth %d\n", depth);
+
     leafNodes = 0;
 
     MoveGenerator moveGenerator;
@@ -31,9 +32,12 @@ long Perft::perftRoot(Board b, int depth) {
         perft(b, depth - 1);
         b.pop();
         long oldnodes = leafNodes - cumnodes;
-        //cout << "Move " << moveNum++ << " : " << getStringMove(move) << " : " << oldnodes << endl;
+
         cout << getStringMove(move) << " : " << oldnodes << endl;
+
+
     }
+
     printf("\nTest Complete : %ld nodes visited\n", leafNodes);
 
     return leafNodes;
@@ -61,4 +65,25 @@ void Perft::perft(Board b, int depth) {
         perft(b, depth - 1);
         b.pop();
     }
+}
+
+U64 Perft::perftBulk(Board b, int depth) {
+    return -1;
+    int n_moves, i;
+    U64 nodes = 0;
+
+    MoveGenerator mg;
+    mg.generateMoves(b);
+    n_moves = mg.capMoveList.size() + mg.quietMoveList.size();
+
+    if (depth == 1) {
+         return (U64)n_moves;
+    }
+
+    for (auto move : mg.getAllMoves()) {
+        if (!b.push(move.move)) continue;
+        nodes += perftBulk(b, depth - 1);
+        b.pop();
+    }
+    return nodes;
 }

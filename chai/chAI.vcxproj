@@ -144,6 +144,7 @@
     <ClInclude Include="board.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="info.h" />
+    <ClInclude Include="legalMoveGenerator.h" />
     <ClInclude Include="magics.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="mask.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="attacks.cpp" />
     <ClCompile Include="board.cpp" />
     <ClCompile Include="defs.cpp" />
+    <ClCompile Include="legalMoveGenerator.cpp" />
     <ClCompile Include="magics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="move.cpp" />
