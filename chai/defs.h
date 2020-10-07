@@ -63,6 +63,11 @@ const U64 FILE_F_HEX = 0x2020202020202020;
 const U64 FILE_G_HEX = 0x4040404040404040;
 const U64 FILE_H_HEX = 0x8080808080808080;
 
+const U64 FILE_LIST[8] = { 
+    FILE_A_HEX, FILE_B_HEX , FILE_C_HEX , 
+    FILE_D_HEX , FILE_E_HEX , FILE_F_HEX, 
+    FILE_G_HEX, FILE_H_HEX };
+
 const U64 BLACK_SQUARES = 0xAA55AA55AA55AA55;
 const U64 WHITE_SQUARES = 0x55AA55AA55AA55AA;
 
@@ -74,6 +79,8 @@ const string END_FEN_2 = "8/3K4/2p5/p2b2r1/5k2/8/8/1q6 b - - 1 67";
 const string END_FEN_3 = "8/7p/p5pb/4k3/P1pPn3/8/P5PP/1rB2RK1 b - d3 0 28";
 
 const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+const string PIN_FEN = "r3k3/p1pp1p2/bn2pnp1/3PN3/Nb2r3/5Q1p/PPPBBPPP/R3K2R w KQq - 0 1";
+const string EP_CHECK_EVA = "r3k2r/pp1n1ppp/8/2pP1b2/2PK1NqP/1Q2P3/P5P1/2B2B1R w - c6 0 1";
 const string PAWN_TEST = "r3k2r/pP1pqpb1/1n2pnp1/1bpPN3/1p2P3/P1N2Q1p/2PBBPPP/R3K2R w KQkq c6 0 1";
 const string PAWN_TEST_B = "r3k2r/pP1pqpb1/1n2pn2/1bpPNQ2/Pp1NP3/8/2PBBPpP/R3K2R b KQkq a3 0 1";
 const string KINGS_FEN = "r3kQ1r/p1qN1ppp/1p2pn2/5b2/2PpP3/4B3/PPPb1PPP/R3KB1R w KQkq - 2 3";
@@ -136,18 +143,6 @@ const int nDir[8] = { -8, -19, -21, -12, 8, 19, 21, 12 };
 const int rDir[4] = { -1, -10, 1, 10 };
 const int bDir[4] = { -9, -11, 11, 9 };
 const int kDir[8] = { -1, -10, 1, 10, -9, -11, 11, 9 };
-
-// bitwise and operation with from / to square results in 1111==KQkq representation
-//const int castlePerm[64] = {
-//    13, 15, 15, 15, 12, 15, 15, 14, // A1 ... H1
-//    15, 15, 15, 15, 15, 15, 15, 15,
-//    15, 15, 15, 15, 15, 15, 15, 15,
-//    15, 15, 15, 15, 15, 15, 15, 15,
-//    15, 15, 15, 15, 15, 15, 15, 15,
-//    15, 15, 15, 15, 15, 15, 15, 15,
-//    15, 15, 15, 15, 15, 15, 15, 15,
-//     7, 15, 15, 15,  3, 15, 15, 11  // A8 ... H8
-//};
 
 // bit table used in pop bit
 const int bitTable[64] = {

@@ -11,6 +11,12 @@ U64 pawnAtkMask[2][64];
 U64 knightAtkMask[64];
 U64 kingAtkMask[64];
 
+U64 dirBitmap[64][8];
+U64 inBetween[64][64];
+int dirFromTo[64][64];
+U64 lineBB[64][64];
+
+
 int Board::checkBoard() {
 
 	// check castle permission
@@ -160,6 +166,7 @@ void Board::printBoard() {
 }
 
 void Board::parseFen(string fen) {
+	reset();
 
 	int file = FILE_A, rank = RANK_8;
 	int index = 0, square = 0, piece = 0, count = 0;
@@ -317,6 +324,7 @@ bool Board::push(int move) {
 
 	// clear to_square and move piece (TODO updatePiece method?)
 	if (MCHECKCAP & move) {
+		ASSERT(CAPTURED(move) != K || CAPTURED(move) != k);
 		zobristKey ^= pieceKeys[CAPTURED(move)][to_square];
 		clearPiece(CAPTURED(move), to_square, side ^ 1);
 	}
@@ -408,11 +416,10 @@ bool Board::push(int move) {
 
 	undoStack.push(undo);
 
-	if (isCheck(side ^ 1)) {
-		//cout << "Move leaves " << (side^1) << " in check. Popped move from stack." << endl;
+	/*if (isCheck(side ^ 1)) {
 		pop();
 		return 0;
-	}
+	}*/
 
 	return 1;
 }
@@ -429,6 +436,51 @@ void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 	setPiece(ROOK, setRookSq, side);
 
 	clearCastlePermission(side);
+}
+
+U64 Board::pinners(int kSq, int kSide) {
+	U64 kingSlider = lookUpRookMoves(kSq, occupied);
+	U64 potPinned = kingSlider & color[kSide];
+	U64 xrays = kingSlider ^ lookUpRookMoves(kSq, occupied ^ potPinned);
+
+	U64 pinners = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(ROOK, kSide ^ 1)));
+
+	kingSlider = lookUpBishopMoves(kSq, occupied);
+	potPinned = kingSlider & color[kSide];
+	xrays = kingSlider ^ lookUpBishopMoves(kSq, occupied ^ potPinned);
+	pinners |= xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(BISHOP, kSide ^ 1)));
+
+	return pinners;
+}
+
+U64 Board::pinned(int kSq, int kSide) {
+	U64 pinned = 0;
+	
+	U64 kingSlider = lookUpRookMoves(kSq, occupied);
+	U64 potPinned = kingSlider & color[kSide];
+	U64 xrays = kingSlider ^ lookUpRookMoves(kSq, occupied ^ potPinned);
+	U64 pinners = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(ROOK, kSide ^ 1)));
+
+	while (pinners) {
+		int sq = popBit(&pinners);
+		pinned |= obstructed(sq, kSq) & color[kSide];
+	}
+
+	kingSlider = lookUpBishopMoves(kSq, occupied);
+	potPinned = kingSlider & color[kSide];
+	xrays = kingSlider ^ lookUpBishopMoves(kSq, occupied ^ potPinned);
+	pinners = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(BISHOP, kSide ^ 1)));
+
+	while (pinners) {
+		int sq = popBit(&pinners);
+		pinned |= obstructed(sq, kSq) & color[kSide];
+	}
+
+	return pinned;
+}
+
+int Board::getKingSquare(int side) {
+	return bitscanForward(getPieces(KING, side));
 }
 
 void Board::clearCastlePermission(int side) {
@@ -541,7 +593,7 @@ U64 Board::attackerSet(int side) {
 	return attackerSet;
 }
 
-bool Board::squareAttacked(int square, int side) {
+U64 Board::squareAttacked(int square, int side) {
 	//return attackerSet(side) & setMask[square];
 
 	// TODO
@@ -555,9 +607,8 @@ bool Board::squareAttacked(int square, int side) {
 
 }
 
-bool Board::isCheck(int side) {
-	U64 kingBB = getPieces(KING, side);
-	return squareAttacked(popBit(&kingBB), side ^ 1);
+U64 Board::isCheck(int side) {
+	return squareAttacked(getKingSquare(side), side ^ 1);
 }
 
 bool Board::castleValid(int castle) {
@@ -569,22 +620,22 @@ bool Board::castleValid(int castle) {
 		case K_CASTLE:
 			if ((setMask[F1] | setMask[G1]) & occupied) return false;
 			if (pieceAt(H1) != R) return false;
-			if (squareAttacked(F1, BLACK)) return false;
+			if (squareAttacked(F1, BLACK) || squareAttacked(G1, BLACK)) return false;
 			break;
 		case Q_CASTLE:
 			if ((setMask[D1] | setMask[C1] | setMask[B1]) & occupied) return false;
 			if (pieceAt(A1) != R) return false;
-			if (squareAttacked(D1, BLACK)) return false;
+			if (squareAttacked(D1, BLACK) || squareAttacked(C1, BLACK)) return false;
 			break;
 		case k_CASTLE:
 			if ((setMask[F8] | setMask[G8]) & occupied) return false;
 			if (pieceAt(H8) != r) return false;
-			if (squareAttacked(F8, WHITE)) return false;
+			if (squareAttacked(F8, WHITE) || squareAttacked(G8, WHITE)) return false;
 			break;
 		case q_CASTLE:
 			if ((setMask[D8] | setMask[C8] | setMask[B8]) & occupied) return false;
 			if (pieceAt(A8) != r) return false;
-			if (squareAttacked(D8, WHITE)) return false;
+			if (squareAttacked(D8, WHITE) || squareAttacked(C8, WHITE)) return false;
 			break;
 		default: return false; break;
 	}

@@ -113,6 +113,25 @@ public:
 	/// <returns>Piece index or zero if empty</returns>
 	int pieceAt(int square);
 
+	//TODO doc
+	U64 pinners(int kSq, int kSide);
+
+	/// <summary>
+	/// Generate bitboard with pinned pieces according to king square and king side. Includes rook
+	/// and bishop moves.
+	/// </summary>
+	/// <param name="kSq">Square of king</param>
+	/// <param name="side">Side of pinned pieces (king side)</param>
+	/// <returns></returns>
+	U64 pinned(int kSq, int side);
+
+	/// <summary>
+	/// Get king of given side as square index.
+	/// </summary>
+	/// <param name="side">Side of king</param>
+	/// <returns>Index of king</returns>
+	int getKingSquare(int side);
+
 	/// <summary>
 	/// Removes both castle rights for given side.
 	/// </summary>
@@ -190,14 +209,14 @@ public:
 	/// <param name="square">Square to check attacks on</param>
 	/// <param name="side">Side that might attack the square</param>
 	/// <returns></returns>
-	bool squareAttacked(int square, int side);
+	U64 squareAttacked(int square, int side);
 
 	/// <summary>
 	/// Check if given side is currently in check.
 	/// </summary>
 	/// <param name="side">Side to check state</param>
-	/// <returns>Return true if side is in check, else false</returns>
-	bool isCheck(int side);
+	/// <returns>Returns the mask of pieces giving check</returns>
+	U64 isCheck(int side);
 
 	/// <summary>
 	/// Check if castle move is valid: castle permission, current check, empty squares

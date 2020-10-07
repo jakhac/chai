@@ -1,5 +1,12 @@
 #include "main.h"
 
+/*
+* - Refactor code: Types, Constants, del magics & rays?
+* - Benchmark LegalMoveGen vs PseudoLegalMoveGen
+* - Combine White Black Pawn
+* - Test Board functionality: castle push pop pinned pinners zobristkey
+*/
+
 int main() {
 
 	Board b;
@@ -7,18 +14,23 @@ int main() {
 	MoveGenerator mg;
 
 	init(&b);
-	b.parseFen(STARTING_FEN);
+	//b.parseFen(STARTING_FEN);
+	b.parseFen(MID_FEN);
 
 	b.printBoard();
 	b.checkBoard();
 
-	//mg.generateMoves(b);
-	//mg.printGeneratedMoves(b);
-
 	//play(b, mg);
 
+	//LegalMoveGenerator lmg;
+	//lmg._addBlackKingMoves(b);
+	//lmg._printGeneratedMoves(b);
+	//return 0;
+
 	auto start = std::chrono::high_resolution_clock::now();
-	p.perftRoot(b, 5);
+
+	p.perftBulkRootLegal(b, 5);
+
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 	cout << duration.count() << "ms\n";
@@ -78,6 +90,11 @@ void init(Board* b) {
 	initSquareToRankFile();
 	b->initHashKeys();
 	initAttackerMasks();
+
+	// TODO performance
+	initObstructed();
+	initLine();
+
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 	cout << duration.count() << "ms\n";

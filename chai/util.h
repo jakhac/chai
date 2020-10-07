@@ -88,7 +88,7 @@ inline int bitscanReverse(U64 board) {
 /// <param name="bb">Bitboard to count bits on</param>
 /// <returns>Amount of bits set to 1 in bb</returns>
 inline int countBits(U64 bb) {
-	return __popcnt64(bb);
+	return (int)__popcnt64(bb);
 	//int cnt = 0;
 	//while (bb) {
 	//	cnt += bb & 1;

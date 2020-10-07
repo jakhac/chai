@@ -21,6 +21,9 @@ namespace {
             initRookMagicTable();
             initBishopMasks();
             initBishopMagicTable();
+
+            initObstructed();
+            initLine();
         }
 
         virtual void TearDown() {
