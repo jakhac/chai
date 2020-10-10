@@ -26,6 +26,15 @@ const int NUM_SQUARES = 64;
 const int MAX_GAME_MOVES = 2048;
 const int MAX_POSITION_MOVES = 256;
 
+struct MOVE_S {
+    int moveCounter = 0; // moves generated
+
+    int moveList[MAX_POSITION_MOVES]; // acutal moves
+    //int moveScore[MAX_POSITION_MOVES]; // store score of each move?
+
+    U64 attackedSquares = 0ULL;
+};
+
 enum PIECE_VALUES { EMPTY, P, N, B, R, Q, K, p, n, b, r, q, k };
 enum PIECES_TYPES { NO_PIECE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 enum FILES { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };

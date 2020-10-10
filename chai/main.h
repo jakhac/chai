@@ -28,5 +28,7 @@ void init(Board* b);
 /// </summary>
 /// <param name="b">Board instance</param>
 /// <param name="moveGenerator">MoveGenrator instance</param>
-void play(Board b, MoveGenerator moveGenerator);
+void play(Board* b);
+
+void dividePerft(Board* b, string fen, int depth);
 

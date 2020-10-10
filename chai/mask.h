@@ -69,7 +69,7 @@ inline void initAttackerMasks() {
 	for (int i = 0; i < 64; i++) {
 		pawnAtkMask[WHITE][i] = (setMask[i] << 7 & ~FILE_H_HEX) | (setMask[i] << 9 & ~FILE_A_HEX);
 	}
-	for (int i = 64; i > 0; i--) {
+	for (int i = 63; i >= 0; i--) {
 		pawnAtkMask[BLACK][i] = (setMask[i] >> 7 & ~FILE_A_HEX) | (setMask[i] >> 9 & ~FILE_H_HEX);
 	}
 

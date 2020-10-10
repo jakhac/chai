@@ -34,27 +34,27 @@ namespace {
     };
     TEST_F(PerftTest, START_POS) {
         pBoard->parseFen(STARTING_FEN);
-        EXPECT_EQ(pPerft->perftRoot(*pBoard, 4), 197281);
+        EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 197281);
     }
 
     TEST_F(PerftTest, MID_POS) {
         pBoard->parseFen(MID_FEN);
-        EXPECT_EQ(pPerft->perftRoot(*pBoard, 3), 97862);
+        EXPECT_EQ(pPerft->perftRoot(pBoard, 3), 97862);
     }
 
     TEST_F(PerftTest, END_POS_1) {
         pBoard->parseFen(END_FEN_1);
-        EXPECT_EQ(pPerft->perftRoot(*pBoard, 4), 89363);
+        EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 89363);
     }
 
     TEST_F(PerftTest, END_POS_2) {
         pBoard->parseFen(END_FEN_2);
-        EXPECT_EQ(pPerft->perftRoot(*pBoard, 4), 54703);
+        EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 54703);
     }
 
     TEST_F(PerftTest, END_POS_3) {
         pBoard->parseFen(END_FEN_3);
-        EXPECT_EQ(pPerft->perftRoot(*pBoard, 4), 67197);
+        EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 67197);
     }
 
 }

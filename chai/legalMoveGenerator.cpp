@@ -1,105 +1,128 @@
 #include "legalMoveGenerator.h"
 
-void LegalMoveGenerator::_generateMoves(Board b) {
-	_resetMoveLists();
+void _generateMoves(Board* b, MOVE_S* move_s) {
+	move_s->attackedSquares = b->attackerSet(b->side^1);
 
-	const int playerToMove = b.side;
-
-	// pawns
-	_addPawnMoves(b, playerToMove);
+	//pawns
+	if (b->side == WHITE) {
+		_whiteSinglePawnPush(b, move_s);
+		_whiteDoublePawnPush(b, move_s);
+		_whitePawnCaptures(b, move_s);
+	} else {
+		_blackSinglePawnPush(b, move_s);
+		_blackDoublePawnPush(b, move_s);
+		_blackPawnCaptures(b, move_s);
+	}
 
 	//knights
-	_addKnightMoves(b, playerToMove);
-	_addKnightCaptures(b, playerToMove);
+	_addKnightMoves(b, move_s);
+	_addKnightCaptures(b, move_s);
 
 	// bishops
-	_addBishopMoves(b, playerToMove);
-	_addBishopCaptures(b, playerToMove);
+	_addBishopMoves(b, move_s);
+	_addBishopCaptures(b, move_s);
 
 	// king
-	_addKingMoves(b, playerToMove);
-	_addKingCaptures(b, playerToMove);
+	_addKingMoves(b, move_s);
+	_addKingCaptures(b, move_s);
 
 	// rooks
-	_addRookMoves(b, playerToMove);
-	_addRookCaptures(b, playerToMove);
+	_addRookMoves(b, move_s);
+	_addRookCaptures(b, move_s);
 
 	// queens
-	_addQueenMoves(b, playerToMove);
-	_addQueenCaptures(b, playerToMove);
-}
+	_addQueenMoves(b, move_s);
+	_addQueenCaptures(b, move_s);
 
-vector<Move> LegalMoveGenerator::_getAllMoves(Board b) {
-	vector <Move> allMoves;
-	allMoves.reserve(_capMoveList.size() + _quietMoveList.size()); // preallocate memory
-	allMoves.insert(allMoves.end(), _capMoveList.begin(), _capMoveList.end()); // copy
-	allMoves.insert(allMoves.end(), _quietMoveList.begin(), _quietMoveList.end()); // copy
-
-	int currentSide = b.side;
-	if (b.isCheck(currentSide)) {
-		vector<Move> checkEvaMoves;
-		for (Move m : allMoves) {
-			b.push(m.move);
-
-			if (b.isCheck(currentSide)) {
-				b.pop();
-				continue;
+	// if check filter moves
+	if (b->getPieces(KING, b->side) & move_s->attackedSquares) {
+		int validMoves = 0;
+		for (int i = 0; i < move_s->moveCounter; i++) {
+			b->push(move_s->moveList[i]);
+			if (b->isCheck(b->side ^ 1)) {
+				// no add
+			} else {
+				move_s->moveList[validMoves++] = move_s->moveList[i];
 			}
-
-			checkEvaMoves.push_back(m);
-			b.pop();
+			b->pop();
 		}
-		return checkEvaMoves;
+		move_s->moveCounter = validMoves;
 	}
 
-	return allMoves;
-}
+	//MOVE_S pseudo[1];
+	//generateMoves(b, pseudo);
+	//int legalMovesCounter = 0;
+	//int legalMoves[MAX_POSITION_MOVES];
+	//for (int i = 0; i < pseudo->moveCounter; i++) {
+	//	b->push(pseudo->moveList[i]);
+	//	if (b->isCheck(b->side ^ 1)) {
+	//		// non valid move leaves side in check
+	//	} else {
+	//		legalMoves[legalMovesCounter++] = pseudo->moveList[i];
+	//	}
+	//	b->pop();
+	//}
+	//for (int i = 0; i < legalMovesCounter; i++) {
+	//	bool found = false;
+	//	int findMe = legalMoves[i];
+	//	for (int j = 0; j < move_s->moveCounter; j++) {
+	//		if (findMe == move_s->moveList[j]) {
+	//			found = true;
+	//		}
+	//	}
+	//	if (!found) {
+	//		cout << "Should be " << endl;
+	//		for (int i = 0; i < legalMovesCounter; i++) {
+	//			printMove(legalMoves[i]);
+	//		}
+	//		cout << "\n\nBut is" << endl;
+	//		for (int i = 0; i < move_s->moveCounter; i++) {
+	//			printMove(move_s->moveList[i]);
+	//		}
+	//		exit(1);
+	//	}
+	//}
 
-void LegalMoveGenerator::_resetMoveLists() {
-	_quietMoveList = {};
-	_capMoveList = {};
-}
-
-/// <summary>
-/// Generate all possible pawn moves for given board. Side is retrieved with board instance.
-/// </summary>
-/// <param name="b">Board</param>
-void LegalMoveGenerator::_addPawnMoves(Board b, const int side) {
-	if (side) {
-		_whiteSinglePawnPush(b); // #legal
-		_whiteDoublePawnPush(b); // #legal
-		_whitePawnCaptures(b); // #legal
-	} else {
-		_blackSinglePawnPush(b); // #legal
-		_blackDoublePawnPush(b); // #legal
-		_blackPawnCaptures(b); // #legal
-	}
 }
 
 /// <summary>
 /// Calculate possible single push pawn moves for white.
 /// </summary>
 /// <param name="board">Board</param>
-void LegalMoveGenerator::_whiteSinglePawnPush(Board board) {
-	int potPinnedSq, sq, kSq = board.getKingSquare(WHITE);
-	U64 pinners = board.pinners(kSq, WHITE);
-	U64 pinned = board.pinned(kSq, WHITE);
+void _whiteSinglePawnPush(Board* board, MOVE_S* move_s) {
+	int potPinnedSq, sq, kSq = board->getKingSquare(WHITE);
+	U64 pinners = board->pinners(kSq, WHITE);
+	U64 pinned = board->pinned(kSq, WHITE);
 
-	U64 whitePawns = board.getPieces(PAWN, WHITE);
+	U64 whitePawns = board->getPieces(PAWN, WHITE);
 	U64 potPinned = whitePawns & pinned;
 	whitePawns = whitePawns & ~pinned;
 
 	// iterate pinned pawns
-	while (potPinned) {
-		potPinnedSq = popBit(&potPinned);
+	//while (potPinned) {
+	//	potPinnedSq = popBit(&potPinned);
+	//	if (FILE_LIST[squareToFile[potPinnedSq]] & pinners) {
+	//		whitePawns |= setMask[potPinnedSq];
+	//	}
+	//}
 
-		// if there is a pinner on same file as pinned pawn, push is allowed
-		if (FILE_LIST[squareToFile[potPinnedSq]] & pinners) {
-			whitePawns |= setMask[potPinnedSq];
+	while (potPinned) {
+		U64 _pinners = pinners;
+		sq = popBit(&potPinned);
+
+		// for each pawn try to find pinner
+		while (_pinners) {
+			int pinnerSq = popBit(&_pinners);
+			U64 attackLine = obstructed(kSq, pinnerSq) | setMask[kSq] | setMask[pinnerSq];
+
+			// pinned piece found, check for same file (diagonal pins do not allow pushes)
+			if ((setMask[sq] & attackLine) && squareToFile[pinnerSq] == squareToFile[sq]) {
+				whitePawns |= setMask[sq];
+			}
 		}
 	}
 
-	U64 pushedPawns = (whitePawns << 8) & ~board.occupied;
+	U64 pushedPawns = (whitePawns << 8) & ~board->occupied;
 
 	// divide proms and normal pushes
 	U64 promPawns = pushedPawns & RANK_8_HEX;
@@ -108,16 +131,16 @@ void LegalMoveGenerator::_whiteSinglePawnPush(Board board) {
 	// normal pawn pushes
 	while (pushedPawns) {
 		sq = popBit(&pushedPawns);
-		_quietMoveList.push_back(Move(MOVE(sq - 8, sq, EMPTY, EMPTY, EMPTY), 0));
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq - 8, sq, EMPTY, EMPTY, EMPTY);
 	}
 
 	// prom pawn pushes
 	while (promPawns) {
 		sq = popBit(&promPawns);
-		_quietMoveList.push_back(Move(MOVE(sq - 8, sq, EMPTY, Q, EMPTY), 0));
-		_quietMoveList.push_back(Move(MOVE(sq - 8, sq, EMPTY, R, EMPTY), 0));
-		_quietMoveList.push_back(Move(MOVE(sq - 8, sq, EMPTY, B, EMPTY), 0));
-		_quietMoveList.push_back(Move(MOVE(sq - 8, sq, EMPTY, N, EMPTY), 0));
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq - 8, sq, EMPTY, Q, EMPTY);
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq - 8, sq, EMPTY, R, EMPTY);
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq - 8, sq, EMPTY, B, EMPTY);
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq - 8, sq, EMPTY, N, EMPTY);
 	}
 }
 
@@ -125,24 +148,40 @@ void LegalMoveGenerator::_whiteSinglePawnPush(Board board) {
 /// Calculate possible single push pawn moves for black.
 /// </summary>
 /// <param name="board">Board</param> 
-void LegalMoveGenerator::_blackSinglePawnPush(Board board) {
-	int sq, kSq = board.getKingSquare(BLACK);
+void _blackSinglePawnPush(Board* board, MOVE_S* move_s) {
+	int sq, kSq = board->getKingSquare(BLACK);
 
-	U64 pinners = board.pinners(kSq, BLACK);
-	U64 pinned = board.pinned(kSq, BLACK);
-	U64 blackPawns = board.getPieces(PAWN, BLACK);
+	U64 pinners = board->pinners(kSq, BLACK);
+	U64 pinned = board->pinned(kSq, BLACK);
+	U64 blackPawns = board->getPieces(PAWN, BLACK);
 	U64 potPinned = blackPawns & pinned;
 	blackPawns &= ~pinned;
 
-	// if there is a pinner on same file as pinned pawn, push is allowed
+	 //if there is a pinner on same file as pinned pawn, push is allowed
+	//while (potPinned) {
+	//	int potPinnedSq = popBit(&potPinned);
+	//	if (FILE_LIST[squareToFile[potPinnedSq]] & pinners) {
+	//		blackPawns |= setMask[potPinnedSq];
+	//	}
+	//}
+
 	while (potPinned) {
-		int potPinnedSq = popBit(&potPinned);
-		if (FILE_LIST[squareToFile[potPinnedSq]] & pinners) {
-			blackPawns |= setMask[potPinnedSq];
+		U64 _pinners = pinners;
+		sq = popBit(&potPinned);
+
+		// for each pawn try to find pinner
+		while (_pinners) {
+			int pinnerSq = popBit(&_pinners);
+			U64 attackLine = obstructed(kSq, pinnerSq) | setMask[kSq] | setMask[pinnerSq];
+
+			// pinned piece found, check for same file (diagonal pins do not allow pushes)
+			if ((setMask[sq] & attackLine) && squareToFile[pinnerSq]  == squareToFile[sq]) {
+				blackPawns |= setMask[sq];
+			}
 		}
 	}
 
-	U64 pushedPawns = (blackPawns >> 8) & ~board.occupied;
+	U64 pushedPawns = (blackPawns >> 8) & ~board->occupied;
 
 	// divide proms and normal pushes
 	U64 promPawns = pushedPawns & RANK_1_HEX;
@@ -151,16 +190,16 @@ void LegalMoveGenerator::_blackSinglePawnPush(Board board) {
 	// normal pawn pushes
 	while (pushedPawns) {
 		sq = popBit(&pushedPawns);
-		_quietMoveList.push_back(Move(MOVE(sq + 8, sq, EMPTY, EMPTY, EMPTY), 0));
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq + 8, sq, EMPTY, EMPTY, EMPTY);
 	}
 
 	// prom pawn pushes
 	while (promPawns) {
 		sq = popBit(&promPawns);
-		_quietMoveList.push_back(Move(MOVE(sq + 8, sq, EMPTY, q, EMPTY), 0));
-		_quietMoveList.push_back(Move(MOVE(sq + 8, sq, EMPTY, r, EMPTY), 0));
-		_quietMoveList.push_back(Move(MOVE(sq + 8, sq, EMPTY, b, EMPTY), 0));
-		_quietMoveList.push_back(Move(MOVE(sq + 8, sq, EMPTY, n, EMPTY), 0));
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq + 8, sq, EMPTY, q, EMPTY);
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq + 8, sq, EMPTY, r, EMPTY);
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq + 8, sq, EMPTY, b, EMPTY);
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq + 8, sq, EMPTY, n, EMPTY);
 	}
 }
 
@@ -168,12 +207,12 @@ void LegalMoveGenerator::_blackSinglePawnPush(Board board) {
 /// Calculate all possible moves with pawnstart for white.
 /// </summary>
 /// <param name="board">Board</param>
-void LegalMoveGenerator::_whiteDoublePawnPush(Board board) {
-	int potPinnedSq, sq, kSq = board.getKingSquare(WHITE);
-	U64 pinners = board.pinners(kSq, WHITE);
-	U64 pinned = board.pinned(kSq, WHITE);
+void _whiteDoublePawnPush(Board* board, MOVE_S* move_s) {
+	int potPinnedSq, sq, kSq = board->getKingSquare(WHITE);
+	U64 pinners = board->pinners(kSq, WHITE);
+	U64 pinned = board->pinned(kSq, WHITE);
 
-	U64 whitePawns = board.getPieces(PAWN, WHITE);
+	U64 whitePawns = board->getPieces(PAWN, WHITE);
 	U64 potPinned = whitePawns & pinned;
 	whitePawns &= ~pinned;
 
@@ -187,12 +226,12 @@ void LegalMoveGenerator::_whiteDoublePawnPush(Board board) {
 		}
 	}
 
-	U64 pushedPawns = (whitePawns << 8) & ~board.occupied;
-	pushedPawns = (pushedPawns << 8) & ~board.occupied & RANK_4_HEX;
+	U64 pushedPawns = (whitePawns << 8) & ~board->occupied;
+	pushedPawns = (pushedPawns << 8) & ~board->occupied & RANK_4_HEX;
 
 	while (pushedPawns) {
 		sq = popBit(&pushedPawns);
-		_quietMoveList.push_back(Move(MOVE(sq - 16, sq, EMPTY, EMPTY, MFLAGPS), 0));
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq - 16, sq, EMPTY, EMPTY, MFLAGPS);
 	}
 }
 
@@ -200,12 +239,12 @@ void LegalMoveGenerator::_whiteDoublePawnPush(Board board) {
 /// Calculate all possible moves with pawnstart for black.
 /// </summary>
 /// <param name="board">Board</param>
-void LegalMoveGenerator::_blackDoublePawnPush(Board board) {
-	int sq, kSq = board.getKingSquare(BLACK);
+void _blackDoublePawnPush(Board* board, MOVE_S* move_s) {
+	int sq, kSq = board->getKingSquare(BLACK);
 
-	U64 pinners = board.pinners(kSq, BLACK);
-	U64 pinned = board.pinned(kSq, BLACK);
-	U64 blackPawns = board.getPieces(PAWN, BLACK);
+	U64 pinners = board->pinners(kSq, BLACK);
+	U64 pinned = board->pinned(kSq, BLACK);
+	U64 blackPawns = board->getPieces(PAWN, BLACK);
 	U64 potPinned = blackPawns & pinned;
 	blackPawns &= ~pinned;
 
@@ -217,12 +256,12 @@ void LegalMoveGenerator::_blackDoublePawnPush(Board board) {
 		}
 	}
 
-	U64 pushedPawns = (blackPawns >> 8) & ~board.occupied;
-	pushedPawns = (pushedPawns >> 8) & ~board.occupied & RANK_5_HEX;
+	U64 pushedPawns = (blackPawns >> 8) & ~board->occupied;
+	pushedPawns = (pushedPawns >> 8) & ~board->occupied & RANK_5_HEX;
 
 	while (pushedPawns) {
 		sq = popBit(&pushedPawns);
-		_quietMoveList.push_back(Move(MOVE(sq + 16, sq, EMPTY, EMPTY, MFLAGPS), 0));
+		move_s->moveList[move_s->moveCounter++] = MOVE(sq + 16, sq, EMPTY, EMPTY, MFLAGPS);
 	}
 }
 
@@ -230,13 +269,13 @@ void LegalMoveGenerator::_blackDoublePawnPush(Board board) {
 /// Generate all possible east attacks for white pawns
 /// </summary>
 /// <param name="board">Board</param>
-void LegalMoveGenerator::_whitePawnCaptures(Board board) {
-	int sq, atk_sq, kSq = board.getKingSquare(WHITE);
+void _whitePawnCaptures(Board* board, MOVE_S* move_s) {
+	int sq, atk_sq, kSq = board->getKingSquare(WHITE);
 
 	U64 atks;
-	U64 pinners = board.pinners(kSq, WHITE);
-	U64 pinned = board.pinned(kSq, WHITE);
-	U64 whitePawns = board.getPieces(PAWN, WHITE);
+	U64 pinners = board->pinners(kSq, WHITE);
+	U64 pinned = board->pinned(kSq, WHITE);
+	U64 whitePawns = board->getPieces(PAWN, WHITE);
 	U64 potPinned = whitePawns & pinned;
 	whitePawns &= ~pinned;
 
@@ -254,7 +293,7 @@ void LegalMoveGenerator::_whitePawnCaptures(Board board) {
 			if (setMask[sq] & attackLine) {
 				if (pawnAtkMask[WHITE][sq] & setMask[pinnerSq]) {
 					// capture pinner
-					_capMoveList.push_back(Move(MOVE(sq, pinnerSq, board.pieceAt(pinnerSq), EMPTY, EMPTY), 0));
+					move_s->moveList[move_s->moveCounter++] = MOVE(sq, pinnerSq, board->pieceAt(pinnerSq), EMPTY, EMPTY);
 					_pinners = 0ULL;
 				}
 			}
@@ -266,50 +305,50 @@ void LegalMoveGenerator::_whitePawnCaptures(Board board) {
 	whitePawns &= ~RANK_7_HEX;
 
 	// en passant square
-	if ((whitePawns << 7 & ~FILE_H_HEX) & setMask[board.enPas]) {
+	if ((whitePawns << 7 & ~FILE_H_HEX) & setMask[board->enPas]) {
 		// set white pawn on enPas square and checkif it is pinned
-		board.clearPiece(PAWN, board.enPas - 8, BLACK);
-		board.setPiece(PAWN, board.enPas, WHITE);
+		board->clearPiece(PAWN, board->enPas - 8, BLACK);
+		board->setPiece(PAWN, board->enPas, WHITE);
 
-		if (!(board.squareAttacked(kSq, BLACK))) {
-			_capMoveList.push_back(Move(MOVE(board.enPas - 7, board.enPas, EMPTY, EMPTY, MFLAGEP), 0));
+		if (!(board->squareAttacked(kSq, BLACK))) {
+			move_s->moveList[move_s->moveCounter++] = MOVE(board->enPas - 7, board->enPas, EMPTY, EMPTY, MFLAGEP);
 		}
 
-		board.setPiece(PAWN, board.enPas - 8, BLACK);
-		board.clearPiece(PAWN, board.enPas, WHITE);
+		board->setPiece(PAWN, board->enPas - 8, BLACK);
+		board->clearPiece(PAWN, board->enPas, WHITE);
 	}
-	if ((whitePawns << 9 & ~FILE_A_HEX) & setMask[board.enPas]) {
+	if ((whitePawns << 9 & ~FILE_A_HEX) & setMask[board->enPas]) {
 		// set white pawn on enPas square and checkif it is pinned
-		board.clearPiece(PAWN, board.enPas - 8, BLACK);
-		board.setPiece(PAWN, board.enPas, WHITE);
+		board->clearPiece(PAWN, board->enPas - 8, BLACK);
+		board->setPiece(PAWN, board->enPas, WHITE);
 
-		if (!(board.squareAttacked(kSq, BLACK))) {
-			_capMoveList.push_back(Move(MOVE(board.enPas - 9, board.enPas, EMPTY, EMPTY, MFLAGEP), 0));
+		if (!(board->squareAttacked(kSq, BLACK))) {
+			move_s->moveList[move_s->moveCounter++] = MOVE(board->enPas - 9, board->enPas, EMPTY, EMPTY, MFLAGEP);
 		}
 
-		board.setPiece(PAWN, board.enPas - 8, BLACK);
-		board.clearPiece(PAWN, board.enPas, WHITE);
+		board->setPiece(PAWN, board->enPas - 8, BLACK);
+		board->clearPiece(PAWN, board->enPas, WHITE);
 	}
 
 	while (whitePawns) {
 		sq = popBit(&whitePawns);
-		atks = pawnAtkMask[WHITE][sq] & board.color[BLACK];
+		atks = pawnAtkMask[WHITE][sq] & board->color[BLACK];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 
 	// promoting attacks
 	while (whitePawnProm) {
 		sq = popBit(&whitePawnProm);
-		atks = pawnAtkMask[WHITE][sq] & board.color[BLACK];
+		atks = pawnAtkMask[WHITE][sq] & board->color[BLACK];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), Q, EMPTY), 0));
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), R, EMPTY), 0));
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), B, EMPTY), 0));
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), N, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), Q, EMPTY);
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), R, EMPTY);
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), B, EMPTY);
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), N, EMPTY);
 		}
 	}
 }
@@ -318,13 +357,13 @@ void LegalMoveGenerator::_whitePawnCaptures(Board board) {
 /// Generate all possible east attacks for white pawns.
 /// </summary>
 /// <param name="board">Board</param>
-void LegalMoveGenerator::_blackPawnCaptures(Board board) {
-	int sq, atk_sq, kSq = board.getKingSquare(BLACK);
+void _blackPawnCaptures(Board* board, MOVE_S* move_s) {
+	int sq, atk_sq, kSq = board->getKingSquare(BLACK);
 
 	U64 atks;
-	U64 pinners = board.pinners(kSq, BLACK);
-	U64 pinned = board.pinned(kSq, BLACK);
-	U64 blackPawns = board.getPieces(PAWN, BLACK);
+	U64 pinners = board->pinners(kSq, BLACK);
+	U64 pinned = board->pinned(kSq, BLACK);
+	U64 blackPawns = board->getPieces(PAWN, BLACK);
 	U64 potPinned = blackPawns & pinned;
 	blackPawns &= ~pinned;
 
@@ -342,7 +381,7 @@ void LegalMoveGenerator::_blackPawnCaptures(Board board) {
 			if (setMask[sq] & attackLine) {
 				if (pawnAtkMask[BLACK][sq] & setMask[pinnerSq]) {
 					// capture pinner
-					_capMoveList.push_back(Move(MOVE(sq, pinnerSq, board.pieceAt(pinnerSq), EMPTY, EMPTY), 0));
+					move_s->moveList[move_s->moveCounter++] = MOVE(sq, pinnerSq, board->pieceAt(pinnerSq), EMPTY, EMPTY);
 					_pinners = 0ULL;
 				}
 			}
@@ -354,385 +393,356 @@ void LegalMoveGenerator::_blackPawnCaptures(Board board) {
 	blackPawns &= ~RANK_2_HEX;
 
 	// en passant square
-	if ((blackPawns >> 7 & ~FILE_A_HEX) & setMask[board.enPas]) {
-		board.clearPiece(PAWN, board.enPas + 8, WHITE);
-		board.setPiece(PAWN, board.enPas, BLACK);
+	if ((blackPawns >> 7 & ~FILE_A_HEX) & setMask[board->enPas]) {
+		board->clearPiece(PAWN, board->enPas + 8, WHITE);
+		board->setPiece(PAWN, board->enPas, BLACK);
 
-		if (!(board.squareAttacked(kSq, WHITE))) {
-			_capMoveList.push_back(Move(MOVE(board.enPas + 7, board.enPas, EMPTY, EMPTY, MFLAGEP), 0));
+		if (!(board->squareAttacked(kSq, WHITE))) {
+			move_s->moveList[move_s->moveCounter++] = MOVE(board->enPas + 7, board->enPas, EMPTY, EMPTY, MFLAGEP);
 		}
 
-		board.setPiece(PAWN, board.enPas + 8, WHITE);
-		board.clearPiece(PAWN, board.enPas, BLACK);
+		board->setPiece(PAWN, board->enPas + 8, WHITE);
+		board->clearPiece(PAWN, board->enPas, BLACK);
 	}
-	if ((blackPawns >> 9 & ~FILE_H_HEX) & setMask[board.enPas]) {
-		board.clearPiece(PAWN, board.enPas + 8, WHITE);
-		board.setPiece(PAWN, board.enPas, BLACK);
+	if ((blackPawns >> 9 & ~FILE_H_HEX) & setMask[board->enPas]) {
+		board->clearPiece(PAWN, board->enPas + 8, WHITE);
+		board->setPiece(PAWN, board->enPas, BLACK);
 
-		if (!(board.squareAttacked(kSq, WHITE))) {
-			_capMoveList.push_back(Move(MOVE(board.enPas + 9, board.enPas, EMPTY, EMPTY, MFLAGEP), 0));
+		if (!(board->squareAttacked(kSq, WHITE))) {
+			move_s->moveList[move_s->moveCounter++] = MOVE(board->enPas + 9, board->enPas, EMPTY, EMPTY, MFLAGEP);
 		}
 
-		board.setPiece(PAWN, board.enPas + 8, WHITE);
-		board.clearPiece(PAWN, board.enPas, BLACK);
+		board->setPiece(PAWN, board->enPas + 8, WHITE);
+		board->clearPiece(PAWN, board->enPas, BLACK);
 	}
 
 	while (blackPawns) {
 		sq = popBit(&blackPawns);
-		atks = pawnAtkMask[BLACK][sq] & board.color[WHITE];
+		atks = pawnAtkMask[BLACK][sq] & board->color[WHITE];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 
 	// promoting attacks
 	while (blackPawnProm) {
 		sq = popBit(&blackPawnProm);
-		atks = pawnAtkMask[BLACK][sq] & board.color[WHITE];
+		atks = pawnAtkMask[BLACK][sq] & board->color[WHITE];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), q, EMPTY), 0));
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), r, EMPTY), 0));
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), b, EMPTY), 0));
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, board.pieceAt(atk_sq), n, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), q, EMPTY);
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), r, EMPTY);
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), b, EMPTY);
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), n, EMPTY);
 		}
 	}
 }
 
-void LegalMoveGenerator::_addKnightMoves(Board b, const int side) {
+void _addKnightMoves(Board* b, MOVE_S* move_s) {
 	int sq, atk_sq;
 
 	// LEGAL ADD leave pinned knights out of move gen, since the cant block / capture
-	U64 knights = b.getPieces(KNIGHT, side) & ~b.pinned(b.getKingSquare(side), side);
+	U64 knights = b->getPieces(KNIGHT, b->side) & ~b->pinned(b->getKingSquare(b->side), b->side);
 	U64 atks;
 
 	while (knights) {
 		sq = popBit(&knights);
-		atks = knightAtkMask[sq] & ~b.occupied;
+		atks = knightAtkMask[sq] & ~b->occupied;
 		while (atks) {
 			atk_sq = popBit(&atks);
-			_quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 }
 
-void LegalMoveGenerator::_addKnightCaptures(Board b, const int side) {
+void _addKnightCaptures(Board* b, MOVE_S* move_s) {
 	int sq, atk_sq;
 
 	// LEGAL ADD leave pinned knights out of move gen, since the cant block / capture
-	U64 knights = b.getPieces(KNIGHT, side) & ~b.pinned(b.getKingSquare(side), side);
+	U64 knights = b->getPieces(KNIGHT, b->side) & ~b->pinned(b->getKingSquare(b->side), b->side);
 	U64 atks;
 
 	while (knights) {
 		sq = popBit(&knights);
-		atks = knightAtkMask[sq] & b.color[side ^ 1];
+		atks = knightAtkMask[sq] & b->color[b->side ^ 1];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 }
 
-void LegalMoveGenerator::_addKingMoves(Board b, const int side) {
-	if (side == WHITE) _addWhiteKingMoves(b);
-	else _addBlackKingMoves(b);
-}
-
-void LegalMoveGenerator::_addWhiteKingMoves(Board board) {
-	U64 wKing = board.getPieces(KING, WHITE);
-	int wSq = popBit(&wKing);
-
-	U64 bKing = board.getPieces(KING, BLACK);
-	int bSq = popBit(&bKing);
-
-	// kings cant move on squares attacked by opp king
-	U64 kingMoves = kingAtkMask[wSq] & ~kingAtkMask[bSq] & ~board.occupied;
-	int sq;
+void _addKingMoves(Board* b, MOVE_S* move_s) {
+	int sq, kSq = b->getKingSquare(b->side);
+	U64 kingMoves = kingAtkMask[kSq] & ~move_s->attackedSquares & ~b->occupied;
 
 	while (kingMoves) {
 		sq = popBit(&kingMoves);
-
-		// check for non attacked square
-		if (board.squareAttacked(sq, board.side ^ 1)) continue;
-		_quietMoveList.push_back(Move(MOVE(wSq, sq, EMPTY, EMPTY, EMPTY), 0));
+		move_s->moveList[move_s->moveCounter++] = MOVE(kSq, sq, EMPTY, EMPTY, EMPTY);
 	}
 
-	if (board.castleValid(K_CASTLE)) {
-		ASSERT(wSq == E1);
-		_quietMoveList.push_back(Move(MOVE(wSq, G1, EMPTY, EMPTY, MFLAGCA), 0));
-	}
+	switch (b->side) {
+		case WHITE:
+			if (b->castleValid(K_CASTLE, &move_s->attackedSquares)) {
+				ASSERT(kSq == E1);
+				move_s->moveList[move_s->moveCounter++] = MOVE(kSq, G1, EMPTY, EMPTY, MFLAGCA);
+			}
+			if (b->castleValid(Q_CASTLE, &move_s->attackedSquares)) {
+				ASSERT(kSq == E1);
+				move_s->moveList[move_s->moveCounter++] = MOVE(kSq, C1, EMPTY, EMPTY, MFLAGCA);
+			}
+			break;
+		case BLACK:
+			if (b->castleValid(k_CASTLE, &move_s->attackedSquares)) {
+				ASSERT(kSq == E8);
+				move_s->moveList[move_s->moveCounter++] = MOVE(kSq, G8, EMPTY, EMPTY, MFLAGCA);
+			}
 
-	if (board.castleValid(Q_CASTLE)) {
-		ASSERT(wSq == E1);
-		_quietMoveList.push_back(Move(MOVE(wSq, C1, EMPTY, EMPTY, MFLAGCA), 0));
-	}
-}
-
-void LegalMoveGenerator::_addBlackKingMoves(Board board) {
-	U64 bKing = board.getPieces(KING, BLACK);
-	int bSq = popBit(&bKing);
-
-	U64 wKing = board.getPieces(KING, WHITE);
-	int wSq = popBit(&wKing);
-
-	U64 kingMoves = kingAtkMask[bSq] & ~kingAtkMask[wSq] & ~board.occupied;
-	int sq;
-
-	while (kingMoves) {
-		sq = popBit(&kingMoves);
-
-		// check for non attacked square
-		if (board.squareAttacked(sq, board.side ^ 1)) continue;
-		_quietMoveList.push_back(Move(MOVE(bSq, sq, EMPTY, EMPTY, EMPTY), 0));
-	}
-
-	if (board.castleValid(k_CASTLE)) {
-		ASSERT(bSq == E8);
-		_quietMoveList.push_back(Move(MOVE(bSq, G8, EMPTY, EMPTY, MFLAGCA), 0));
-	}
-
-	if (board.castleValid(q_CASTLE)) {
-		ASSERT(bSq == E8);
-		_quietMoveList.push_back(Move(MOVE(bSq, C8, EMPTY, EMPTY, MFLAGCA), 0));
+			if (b->castleValid(q_CASTLE, &move_s->attackedSquares)) {
+				ASSERT(kSq == E8);
+				move_s->moveList[move_s->moveCounter++] = MOVE(kSq, C8, EMPTY, EMPTY, MFLAGCA);
+			}
+			break;
+		default: break;
 	}
 }
 
-void LegalMoveGenerator::_addKingCaptures(Board b, const int side) {
-	if (side == WHITE) _addWhiteKingCaptures(b);
-	else _addBlackKingCaptures(b);
-}
-
-void LegalMoveGenerator::_addWhiteKingCaptures(Board board) {
-	U64 wKing = board.getPieces(KING, WHITE);
-	int wSq = popBit(&wKing);
-
-	U64 bKing = board.getPieces(KING, BLACK);
-	int bSq = popBit(&bKing);
-
-	U64 whiteKingAttacks = kingAtkMask[wSq] & ~kingAtkMask[bSq] & board.color[BLACK];
-	int atk_sq;
+void _addKingCaptures(Board* b, MOVE_S* move_s) {
+	int atk_sq, kSq = b->getKingSquare(b->side);
+	U64 whiteKingAttacks = kingAtkMask[kSq] & ~move_s->attackedSquares & b->color[b->side ^ 1];
 
 	while (whiteKingAttacks) {
 		atk_sq = popBit(&whiteKingAttacks);
-
-		// check for non attacked square
-		if (board.squareAttacked(atk_sq, board.side ^ 1)) continue;
-		_capMoveList.push_back(Move(MOVE(wSq, atk_sq, board.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+		move_s->moveList[move_s->moveCounter++] = MOVE(kSq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 	}
 }
 
-void LegalMoveGenerator::_addBlackKingCaptures(Board board) {
-	U64 bKing = board.getPieces(KING, BLACK);
-	int bSq = popBit(&bKing);
+//void _addWhiteKingCaptures(Board board) {
+//	U64 wKing = board.getPieces(KING, WHITE);
+//	int wSq = popBit(&wKing);
+//
+//	U64 bKing = board.getPieces(KING, BLACK);
+//	int bSq = popBit(&bKing);
+//
+//	U64 whiteKingAttacks = kingAtkMask[wSq] & ~kingAtkMask[bSq] & board.color[BLACK];
+//	int atk_sq;
+//
+//	while (whiteKingAttacks) {
+//		atk_sq = popBit(&whiteKingAttacks);
+//
+//		// check for non attacked square
+//		if (board.squareAttacked(atk_sq, board.side ^ 1)) continue;
+//		_capMoveList.push_back(Move(MOVE(wSq, atk_sq, board.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+//	}
+//}
+//
+//void _addBlackKingCaptures(Board board) {
+//	U64 bKing = board.getPieces(KING, BLACK);
+//	int bSq = popBit(&bKing);
+//
+//	U64 wKing = board.getPieces(KING, WHITE);
+//	int wSq = popBit(&wKing);
+//
+//	U64 blackKingAttacks = kingAtkMask[bSq] & ~kingAtkMask[wSq] & board.color[WHITE];
+//	int atk_sq;
+//
+//	while (blackKingAttacks) {
+//		atk_sq = popBit(&blackKingAttacks);
+//
+//		// check for non attacked square
+//		if (board.squareAttacked(atk_sq, board.side ^ 1)) continue;
+//		_capMoveList.push_back(Move(MOVE(bSq, atk_sq, board.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+//	}
+//}
 
-	U64 wKing = board.getPieces(KING, WHITE);
-	int wSq = popBit(&wKing);
-
-	U64 blackKingAttacks = kingAtkMask[bSq] & ~kingAtkMask[wSq] & board.color[WHITE];
-	int atk_sq;
-
-	while (blackKingAttacks) {
-		atk_sq = popBit(&blackKingAttacks);
-
-		// check for non attacked square
-		if (board.squareAttacked(atk_sq, board.side ^ 1)) continue;
-		_capMoveList.push_back(Move(MOVE(bSq, atk_sq, board.pieceAt(atk_sq), EMPTY, EMPTY), 0));
-	}
-}
-
-void LegalMoveGenerator::_addRookMoves(Board b, const int side) {
-	int sq, atk_sq, kSq = b.getKingSquare(side);
+void _addRookMoves(Board* b, MOVE_S* move_s) {
+	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 	U64 attackSet;
-	U64 pinned = b.pinned(kSq, side);
+	U64 pinned = b->pinned(kSq, b->side);
 
 	// LEGAL ADD, only use non pinned rooks in std gen
-	U64 rooks = b.getPieces(ROOK, side) & ~pinned;
+	U64 rooks = b->getPieces(ROOK, b->side) & ~pinned;
 	while (rooks) {
 		sq = popBit(&rooks);
-		attackSet = lookUpRookMoves(sq, b.occupied);
-		ASSERT(attackSet == calculateRookMoves(sq, b.occupied));
-		attackSet &= ~b.occupied;
+		attackSet = lookUpRookMoves(sq, b->occupied);
+		ASSERT(attackSet == calculateRookMoves(sq, b->occupied));
+		attackSet &= ~b->occupied;
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 
 	// pinned rooks only move in pinned direction
-	rooks = b.getPieces(ROOK, side) & pinned;
+	rooks = b->getPieces(ROOK, b->side) & pinned;
 	while (rooks) {
 		sq = popBit(&rooks);
-		attackSet = lookUpRookMoves(sq, b.occupied) & lineBB[sq][kSq];
-		attackSet &= ~b.occupied;
+		attackSet = lookUpRookMoves(sq, b->occupied) & lineBB[sq][kSq];
+		attackSet &= ~b->occupied;
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 }
 
-void LegalMoveGenerator::_addBishopMoves(Board b, const int side) {
-	int sq, atk_sq, kSq = b.getKingSquare(side);
-	U64 pinned = b.pinned(kSq, side);
+void _addBishopMoves(Board* b, MOVE_S* move_s) {
+	int sq, atk_sq, kSq = b->getKingSquare(b->side);
+	U64 pinned = b->pinned(kSq, b->side);
 
-	U64 bishops = b.getPieces(BISHOP, side) & ~pinned;
+	U64 bishops = b->getPieces(BISHOP, b->side) & ~pinned;
 	U64 attackSet;
 	while (bishops) {
 		sq = popBit(&bishops);
-		attackSet = lookUpBishopMoves(sq, b.occupied);
-		attackSet &= ~b.occupied;
+		attackSet = lookUpBishopMoves(sq, b->occupied);
+		attackSet &= ~b->occupied;
 
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 
 	// pinned bishops only move in pinned direction
-	bishops = b.getPieces(BISHOP, side) & pinned;
+	bishops = b->getPieces(BISHOP, b->side) & pinned;
 	while (bishops) {
 		sq = popBit(&bishops);
-		attackSet = lookUpBishopMoves(sq, b.occupied) & lineBB[sq][kSq];
-		attackSet &= ~b.occupied;
+		attackSet = lookUpBishopMoves(sq, b->occupied) & lineBB[sq][kSq];
+		attackSet &= ~b->occupied;
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 }
 
-void LegalMoveGenerator::_addRookCaptures(Board b, const int side) {
-	int sq, atk_sq, kSq = b.getKingSquare(side);
+void _addRookCaptures(Board* b, MOVE_S* move_s) {
+	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 	U64 attackSet;
-	U64 pinned = b.pinned(kSq, side);
+	U64 pinned = b->pinned(kSq, b->side);
 
 	// LEGAL ADD, only use non pinned rooks in std gen
-	U64 rooks = b.getPieces(ROOK, side) & ~pinned;
+	U64 rooks = b->getPieces(ROOK, b->side) & ~pinned;
 	while (rooks) {
 		sq = popBit(&rooks);
-		attackSet = lookUpRookMoves(sq, b.occupied);
-		ASSERT(attackSet == calculateRookMoves(sq, b.occupied));
-		attackSet &= b.color[side ^ 1];
+		attackSet = lookUpRookMoves(sq, b->occupied);
+		ASSERT(attackSet == calculateRookMoves(sq, b->occupied));
+		attackSet &= b->color[b->side ^ 1];
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 
 	// pinned rooks only move in pinned direction
-	rooks = b.getPieces(ROOK, side) & pinned;
+	rooks = b->getPieces(ROOK, b->side) & pinned;
 	while (rooks) {
 		sq = popBit(&rooks);
-		attackSet = lookUpRookMoves(sq, b.occupied) & lineBB[sq][kSq];
-		attackSet &= b.color[side ^ 1];
+		attackSet = lookUpRookMoves(sq, b->occupied) & lineBB[sq][kSq];
+		attackSet &= b->color[b->side ^ 1];
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 }
 
-void LegalMoveGenerator::_addBishopCaptures(Board b, const int side) {
-	int sq, atk_sq, kSq = b.getKingSquare(side);
+void _addBishopCaptures(Board* b, MOVE_S* move_s) {
+	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 	U64 attackSet;
-	U64 pinned = b.pinned(kSq, side);
+	U64 pinned = b->pinned(kSq, b->side);
 
-	U64 bishops = b.getPieces(BISHOP, side) & ~pinned;
+	U64 bishops = b->getPieces(BISHOP, b->side) & ~pinned;
 	while (bishops) {
 		sq = popBit(&bishops);
-		attackSet = lookUpBishopMoves(sq, b.occupied);
-		attackSet &= b.color[side ^ 1];
+		attackSet = lookUpBishopMoves(sq, b->occupied);
+		attackSet &= b->color[b->side ^ 1];
 
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 
 	// pinned bishops only move in pinned direction
-	bishops = b.getPieces(BISHOP, side) & pinned;
+	bishops = b->getPieces(BISHOP, b->side) & pinned;
 	while (bishops) {
 		sq = popBit(&bishops);
-		attackSet = lookUpBishopMoves(sq, b.occupied) & lineBB[sq][kSq];
-		attackSet &= b.color[side ^ 1];
+		attackSet = lookUpBishopMoves(sq, b->occupied) & lineBB[sq][kSq];
+		attackSet &= b->color[b->side ^ 1];
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 }
 
-void LegalMoveGenerator::_addQueenMoves(Board b, const int side) {
-	int sq, atk_sq, kSq = b.getKingSquare(side);
+void _addQueenMoves(Board* b, MOVE_S* move_s) {
+	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 	U64 attackSet;
-	U64 pinned = b.pinned(kSq, side);
+	U64 pinned = b->pinned(kSq, b->side);
 
-	U64 queens = b.getPieces(QUEEN, side) & ~pinned;
+	U64 queens = b->getPieces(QUEEN, b->side) & ~pinned;
 	while (queens) {
 		sq = popBit(&queens);
-		attackSet = lookUpRookMoves(sq, b.occupied) ^ lookUpBishopMoves(sq, b.occupied);
-		attackSet &= ~b.occupied;
+		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
+		attackSet &= ~b->occupied;
 
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 
-	queens = b.getPieces(QUEEN, side) & pinned;
+	queens = b->getPieces(QUEEN, b->side) & pinned;
 	while (queens) {
 		sq = popBit(&queens);
-		attackSet = lookUpRookMoves(sq, b.occupied) ^ lookUpBishopMoves(sq, b.occupied);
-		attackSet &= ~b.occupied & lineBB[sq][kSq];
+		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
+		attackSet &= ~b->occupied & lineBB[sq][kSq];
 
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_quietMoveList.push_back(Move(MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 }
 
-void LegalMoveGenerator::_addQueenCaptures(Board b, const int side) {
-	int sq, atk_sq, kSq = b.getKingSquare(side);
+void _addQueenCaptures(Board* b, MOVE_S* move_s) {
+	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 	U64 attackSet;
-	U64 pinned = b.pinned(kSq, side);
+	U64 pinned = b->pinned(kSq, b->side);
 
-	U64 queens = b.getPieces(QUEEN, side) & ~pinned;
+	U64 queens = b->getPieces(QUEEN, b->side) & ~pinned;
 	while (queens) {
 		sq = popBit(&queens);
-		attackSet = lookUpRookMoves(sq, b.occupied) ^ lookUpBishopMoves(sq, b.occupied);
-		attackSet &= b.color[side ^ 1];
+		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
+		attackSet &= b->color[b->side ^ 1];
 
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 
-	queens = b.getPieces(QUEEN, side) & pinned;
+	queens = b->getPieces(QUEEN, b->side) & pinned;
 	while (queens) {
 		sq = popBit(&queens);
-		attackSet = lookUpRookMoves(sq, b.occupied) ^ lookUpBishopMoves(sq, b.occupied);
-		attackSet &= b.color[side ^ 1] & lineBB[sq][kSq];
+		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
+		attackSet &= b->color[b->side ^ 1] & lineBB[sq][kSq];
 
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			_capMoveList.push_back(Move(MOVE(sq, atk_sq, b.pieceAt(atk_sq), EMPTY, EMPTY), 0));
+			move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 }
 
-void LegalMoveGenerator::_printGeneratedMoves(Board b) {
+void _printGeneratedMoves(MOVE_S* move_s) {
 
-	cout << "\nGenerated " << _capMoveList.size() + _quietMoveList.size() << " moves for: " << colorString[b.side] << endl;
+	cout << "\nGenerated " << move_s->moveCounter << " moves: " << endl;
 
-	vector <Move> allMoves;
-	allMoves.reserve(_capMoveList.size() + _quietMoveList.size()); // preallocate memory
-	allMoves.insert(allMoves.end(), _capMoveList.begin(), _capMoveList.end()); // copy
-	allMoves.insert(allMoves.end(), _quietMoveList.begin(), _quietMoveList.end()); // copy
-
-	for (Move move : allMoves) {
-		printMove(move.move);
+	for (int i = 0; i < move_s->moveCounter; i++) {
+		printMove(move_s->moveList[i]);
 	}
 }

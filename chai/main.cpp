@@ -1,85 +1,89 @@
 #include "main.h"
 
 /*
-* - Refactor code: Types, Constants, del magics & rays?
-* - Benchmark LegalMoveGen vs PseudoLegalMoveGen
-* - Combine White Black Pawn
-* - Test Board functionality: castle push pop pinned pinners zobristkey
+* - Elaborate tests
+* - Undo struct 
+* - Refactor code files: Types, Constants, del magics & rays?
+* - replace int return by bool
+* - Update documentation
 */
 
 int main() {
 
 	Board b;
 	Perft p;
-	MoveGenerator mg;
 
 	init(&b);
-	//b.parseFen(STARTING_FEN);
-	b.parseFen(MID_FEN);
-
+	b.parseFen(STARTING_FEN);
 	b.printBoard();
 	b.checkBoard();
 
-	//play(b, mg);
-
-	//LegalMoveGenerator lmg;
-	//lmg._addBlackKingMoves(b);
-	//lmg._printGeneratedMoves(b);
-	//return 0;
-
-	auto start = std::chrono::high_resolution_clock::now();
-
-	p.perftBulkRootLegal(b, 5);
-
-	auto stop = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-	cout << duration.count() << "ms\n";
+	p.perftBulkRoot(&b, 7);
 
 	return 0;
 }
 
-void play(Board b, MoveGenerator mg) {
+void play(Board* b) {
 	string m;
 
 	while (true) {
 		cout << "\n##################\n\n";
-		mg.resetMoveLists();
-		mg.generateMoves(b);
-
-		//mg.printGeneratedMoves(b);
-		vector<Move> allMoves = mg.getAllMoves();
-
 		getline(cin, m);
 
 		if (m == "pop") {
-			Undo pop = b.pop();
+			Undo pop = b->pop();
 			cout << "Popped " << getStringMove(pop.move) << " from stack." << endl;
-			b.printBoard();
+			b->printBoard();
 			continue;
 		}
 
-		int parsedMove = b.parseMove(m);
-		//printMoveStatus(parsedMove);
+		MOVE_S _move_s[1];
+		generateMoves(b, _move_s);
 
-		// try to find move
+		int parsedMove = b->parseMove(m);
 		bool flag_found = false;
-		for (auto m : allMoves) {
-			if (parsedMove == m.move) {
+		for (int i = 0; i < _move_s->moveCounter; i++) {
+			if (parsedMove == _move_s->moveList[i]) {
 				flag_found = true;
 
-				if (!b.push(parsedMove)) {
+				if (!b->push(parsedMove)) {
 					cout << "Move " << getStringMove(parsedMove) << " remains check. Try again." << endl;
 					continue;
 				}
 
 				cout << "Pushed " << getStringMove(parsedMove) << " on board." << endl;
-				b.printBoard();
+				b->printBoard();
 				break;
 			}
 		}
 
 		if (!flag_found) cout << "Tried to push non valid move on board. Try again." << endl;
 	}
+}
+
+void dividePerft(Board* b, string fen, int depth) {
+
+	string move = "";
+	Perft p;
+	b->parseFen(fen);
+
+	while (depth) {
+
+		if (move != "") {
+			int parsedMove = b->parseMove(move);
+			b->push(parsedMove);
+			depth--;
+		}
+
+		p.perftRoot(b, depth);
+
+		cout << "\nDivide at move ";
+		getline(cin, move);
+	}
+
+	cout << "Reached depth 0" << endl;
+	return;
+
 }
 
 void init(Board* b) {

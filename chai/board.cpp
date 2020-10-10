@@ -35,7 +35,6 @@ int Board::checkBoard() {
 	// check non overlapping squares in bitboards
 	// TODO
 
-	// check correct zobrist hash
 	ASSERT(zobristKey == generateZobristKey());
 
 	return 1;
@@ -313,8 +312,6 @@ bool Board::push(int move) {
 	undo.enPas = enPas;
 	undo.castle = castlePermission;
 	undo.zobKey = zobristKey;
-	//undo.attackedSquares[0] = attackedSquares[0];
-	//undo.attackedSquares[1] = attackedSquares[1];
 	undo.move = move;
 
 	// assert valid from to squares and pieces
@@ -324,12 +321,12 @@ bool Board::push(int move) {
 
 	// clear to_square and move piece (TODO updatePiece method?)
 	if (MCHECKCAP & move) {
-		ASSERT(CAPTURED(move) != K || CAPTURED(move) != k);
+		//ASSERT(CAPTURED(move) != K || CAPTURED(move) != k);
 		zobristKey ^= pieceKeys[CAPTURED(move)][to_square];
 		clearPiece(CAPTURED(move), to_square, side ^ 1);
 	}
 
-	zobristKey ^= pieceKeys[movingPiece][to_square];
+	zobristKey ^= pieceKeys[(int)movingPiece][(int)to_square];
 	setPiece(movingPiece, to_square, side);
 
 	zobristKey ^= pieceKeys[movingPiece][from_square];
@@ -416,10 +413,10 @@ bool Board::push(int move) {
 
 	undoStack.push(undo);
 
-	/*if (isCheck(side ^ 1)) {
-		pop();
-		return 0;
-	}*/
+	//if (isCheck(side ^ 1)) {
+		//pop();
+		//return 0;
+	//}
 
 	return 1;
 }
@@ -569,6 +566,10 @@ U64 Board::attackerSet(int side) {
 		attackerSet |= pawnAtkMask[side][sq];
 	}
 
+	// king
+	int kSq = getKingSquare(side);
+	attackerSet |= kingAtkMask[kSq];
+
 	// knight attacks
 	piece = getPieces(KNIGHT, side);
 	while (piece) {
@@ -594,11 +595,7 @@ U64 Board::attackerSet(int side) {
 }
 
 U64 Board::squareAttacked(int square, int side) {
-	//return attackerSet(side) & setMask[square];
-
-	// TODO
 	U64 attacker = 0ULL;
-
 	attacker |= pawnAtkMask[side^1][square] & getPieces(PAWN, side);
 	attacker |= knightAtkMask[square] & getPieces(KNIGHT, side);
 	attacker |= lookUpBishopMoves(square, occupied) & (getPieces(BISHOP, side) | getPieces(QUEEN, side));
@@ -611,7 +608,7 @@ U64 Board::isCheck(int side) {
 	return squareAttacked(getKingSquare(side), side ^ 1);
 }
 
-bool Board::castleValid(int castle) {
+bool Board::castleValid(int castle, U64* attackerSet) {
 	if (isCheck(side)) return false;
 
 	if (!(castlePermission & castle)) return false;
@@ -620,22 +617,22 @@ bool Board::castleValid(int castle) {
 		case K_CASTLE:
 			if ((setMask[F1] | setMask[G1]) & occupied) return false;
 			if (pieceAt(H1) != R) return false;
-			if (squareAttacked(F1, BLACK) || squareAttacked(G1, BLACK)) return false;
+			if ((*attackerSet & setMask[F1]) | (*attackerSet & setMask[G1])) return false;
 			break;
 		case Q_CASTLE:
 			if ((setMask[D1] | setMask[C1] | setMask[B1]) & occupied) return false;
 			if (pieceAt(A1) != R) return false;
-			if (squareAttacked(D1, BLACK) || squareAttacked(C1, BLACK)) return false;
+			if ((*attackerSet & setMask[D1]) | (*attackerSet & setMask[C1])) return false;
 			break;
 		case k_CASTLE:
 			if ((setMask[F8] | setMask[G8]) & occupied) return false;
 			if (pieceAt(H8) != r) return false;
-			if (squareAttacked(F8, WHITE) || squareAttacked(G8, WHITE)) return false;
+			if ((*attackerSet & setMask[F8]) | (*attackerSet & setMask[G8])) return false;
 			break;
 		case q_CASTLE:
 			if ((setMask[D8] | setMask[C8] | setMask[B8]) & occupied) return false;
 			if (pieceAt(A8) != r) return false;
-			if (squareAttacked(D8, WHITE) || squareAttacked(C8, WHITE)) return false;
+			if ((*attackerSet & setMask[D8]) | (*attackerSet & setMask[C8])) return false;
 			break;
 		default: return false; break;
 	}

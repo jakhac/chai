@@ -1,200 +1,110 @@
 #include "perft.h"
 
-long Perft::perftRoot(Board b, int depth) {
-    ASSERT(b.checkBoard());
+long long Perft::perftRoot(Board* b, int depth) {
+    ASSERT(b->checkBoard());
     printf("\nPerft to depth %d\n", depth);
+    auto start = std::chrono::high_resolution_clock::now();
 
     leafNodes = 0;
-    MoveGenerator moveGenerator;
-    moveGenerator.generateMoves(b);
+    MOVE_S _moveList[1];
+    generateMoves(b, _moveList);
 
     int move;
     int moveNum = 0;
-    for (auto m : moveGenerator.getAllMoves()) {
-        move = m.move;
+    for (int i = 0; i < _moveList->moveCounter; i++) {
+        move = _moveList->moveList[i];
 
         // skip illegal moves
-        if (!b.push(move)) continue;
+        if (!b->push(move)) continue;
 
-        long cumnodes = leafNodes;
+        long long cumnodes = leafNodes;
         perft(b, depth - 1);
-        b.pop();
-        long oldnodes = leafNodes - cumnodes;
+        b->pop();
+        long long oldnodes = leafNodes - cumnodes;
 
         cout << getStringMove(move) << " : " << oldnodes << endl;
     }
 
-    printf("\nTest Complete : %ld nodes visited\n", leafNodes);
+    cout << "\nTest Complete : " << leafNodes << " nodes visited" << endl;
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    cout << duration.count() << "ms\n";
     return leafNodes;
 }
 
-void Perft::perft(Board b, int depth) {
+void Perft::perft(Board* b, int depth) {
 
-    ASSERT(b.checkBoard());
+    ASSERT(b->checkBoard());
 
     if (depth == 0) {
         leafNodes++;
         return;
     }
 
-    MoveGenerator moveGenerator;
-    moveGenerator.generateMoves(b);
+    MOVE_S _moveList[1];
+    generateMoves(b, _moveList);
 
     int move;
-    for (auto m : moveGenerator.getAllMoves()) {
-        move = m.move;
+    //for (auto m : moveGenerator.getAllMoves()) {
+        //move = m.move;
+    for (int i = 0; i < _moveList->moveCounter; i++) {
+        move = _moveList->moveList[i];
 
         // skip illegal moves
-        if (!b.push(move)) continue;
+        if (!b->push(move)) continue;
 
         perft(b, depth - 1);
-        b.pop();
+        b->pop();
     }
 }
 
-long Perft::perftBulkRoot(Board b, int depth) {
-    ASSERT(b.checkBoard());
+long long Perft::perftBulkRoot(Board* b, int depth) {
+    ASSERT(b->checkBoard());
     printf("\nPerft to depth %d\n", depth);
+    auto start = std::chrono::high_resolution_clock::now();
 
     leafNodes = 0;
-    MoveGenerator moveGenerator;
-    moveGenerator.generateMoves(b);
+    MOVE_S _moveList[1];
+    _generateMoves(b, _moveList);
 
     int move;
     int moveNum = 0;
-    for (auto m : moveGenerator.getAllMoves()) {
-        move = m.move;
-        
-        b.push(move);
-        long cumnodes = leafNodes;
-        perft(b, depth - 1);
-        b.pop();
-        long oldnodes = leafNodes - cumnodes;
+    for (int i = 0; i < _moveList->moveCounter; i++) {
+        move = _moveList->moveList[i];
+
+        b->push(move);
+
+        long long cumnodes = leafNodes;
+        leafNodes += perftBulk(b, depth - 1);
+        b->pop();
+        long long oldnodes = leafNodes - cumnodes;
 
         cout << getStringMove(move) << " : " << oldnodes << endl;
     }
 
-    printf("\nTest Complete : %ld nodes visited\n", leafNodes);
+    cout << "\nTest Complete : " << leafNodes << " nodes visited" << endl;
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    cout << duration.count() << "ms\n";
     return leafNodes;
 }
 
-long Perft::perftBulk(Board b, int depth) {
 
-    ASSERT(b.checkBoard());
+long long Perft::perftBulk(Board* b, int depth) {
 
-    MoveGenerator moveGenerator;
-    moveGenerator.generateMoves(b);
-    vector<Move> allMoves = moveGenerator.getAllMoves();
+    long long nodes = 0;
 
-    if (depth == 1) {
-        return allMoves.size();
+    MOVE_S move_s[1];
+    _generateMoves(b, move_s);
+
+    if (depth == 1)
+        return move_s->moveCounter;
+
+    for (int i = 0; i < move_s->moveCounter; i++) {
+        b->push(move_s->moveList[i]);
+        nodes += perftBulk(b, depth - 1);
+        b->pop();
     }
 
-    int move;
-    for (auto m : allMoves) {
-        move = m.move;
-
-        b.push(move);
-        perft(b, depth - 1);
-        b.pop();
-    }
-}
-
-// legal move gen
-//      |
-//      v
-long Perft::perftRootLegal(Board b, int depth) {
-    ASSERT(b.checkBoard());
-    printf("\nPerft to depth %d\n", depth);
-
-    leafNodes = 0;
-    LegalMoveGenerator lmg;
-    lmg._generateMoves(b);
-
-    int move;
-    int moveNum = 0;
-    for (auto m : lmg._getAllMoves(b)) {
-        move = m.move;
-
-        b.push(move);
-        long cumnodes = leafNodes;
-        perftLegal(b, depth - 1);
-        b.pop();
-        long oldnodes = leafNodes - cumnodes;
-
-        cout << getStringMove(move) << " : " << oldnodes << endl;
-    }
-
-    printf("\nTest Complete : %ld nodes visited\n", leafNodes);
-    return leafNodes;
-}
-
-void Perft::perftLegal(Board b, int depth) {
-
-    ASSERT(b.checkBoard());
-
-    if (depth == 0) {
-        leafNodes++;
-        return;
-    }
-
-    LegalMoveGenerator lmg;
-    lmg._generateMoves(b);
-
-    int move;
-    for (auto m : lmg._getAllMoves(b)) {
-        move = m.move;
-
-        b.push(move);
-        perftLegal(b, depth - 1);
-        b.pop();
-    }
-}
-
-long Perft::perftBulkRootLegal(Board b, int depth) {
-    ASSERT(b.checkBoard());
-    printf("\nPerft to depth %d\n", depth);
-
-    leafNodes = 0;
-    LegalMoveGenerator lmg;
-    lmg._generateMoves(b);
-
-    int move;
-    int moveNum = 0;
-    for (auto m : lmg._getAllMoves(b)) {
-        move = m.move;
-
-        b.push(move);
-        long cumnodes = leafNodes;
-        perft(b, depth - 1);
-        b.pop();
-        long oldnodes = leafNodes - cumnodes;
-
-        cout << getStringMove(move) << " : " << oldnodes << endl;
-    }
-
-    printf("\nTest Complete : %ld nodes visited\n", leafNodes);
-    return leafNodes;
-}
-
-long Perft::perftBulkLegal(Board b, int depth) {
-
-    ASSERT(b.checkBoard());
-
-    LegalMoveGenerator lmg;
-    lmg._generateMoves(b);
-    vector<Move> allMoves = lmg._getAllMoves(b);
-
-    if (depth == 1) {
-        return allMoves.size();
-    }
-
-    int move;
-    for (auto m : allMoves) {
-        move = m.move;
-
-        b.push(move);
-        perftBulkLegal(b, depth - 1);
-        b.pop();
-    }
+    return nodes;
 }

@@ -2,25 +2,26 @@
 
 #include "moveGenerator.h"
 #include "legalMoveGenerator.h"
+#include <chrono>
+
 
 class Perft {
 
 public:
 
-	long leafNodes = 0;
+	long long leafNodes = 0;
 
-	long perftRoot(Board b, int depth);
-	void perft(Board b, int depth);
+	long long perftRoot(Board* b, int depth);
+	void perft(Board* b, int depth);
 
-	long perftBulk(Board b, int depth);
-	long perftBulkRoot(Board b, int depth);
+	//long long perftRootLegal(Board* b, int depth);
+	//void perftLegal(Board* b, int depth);
 
+	//long long perftBulkRootLegal(Board* b, int depth);
+	//long long perftBulk(Board* b, int depth);
 
-	long perftRootLegal(Board b, int depth);
-	void perftLegal(Board b, int depth);
-
-	long perftBulkRootLegal(Board b, int depth);
-	long perftBulkLegal(Board b, int depth);
+	long long perftBulkRoot(Board* b, int depth);
+	long long perftBulk(Board* b, int depth);
 
 
 };

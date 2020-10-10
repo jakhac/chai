@@ -7,7 +7,6 @@
 #include "defs.h"
 #include "validate.h"
 #include "undo.h"
-#include "rays.h"
 #include "info.h"
 #include "attacks.h"
 
@@ -19,7 +18,7 @@
 
 /// <summary>
 /// Board uses 8 bitboards to store each piece and squares occupied by each color. A chess game should only uses 
-/// one board instance since push/pop moves in recursive ssearch trees do not require new boards.
+/// one board instance since various push/pop moves in recursive search trees do not require new boards.
 /// </summary>
 class Board {
 public:
@@ -224,7 +223,7 @@ public:
 	/// </summary>
 	/// <param name="castle">Castle bit from board variable</param>
 	/// <returns>True if castling move is valid, else false</returns>
-	bool castleValid(int castle);
+	bool castleValid(int castle, U64* attackerSet);
 
 };
 
