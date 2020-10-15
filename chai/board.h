@@ -63,7 +63,23 @@ public:
 	U64 sideKey;
 
 	/// <summary>Stack stores pushed moves as Undo objects.</summary>
-	stack <Undo> undoStack;
+	UNDO_S undoHistory[MAX_GAME_MOVES];
+
+	/// <summary>PV Table -> TODO transposition table</summary>
+	PV_TABLE_S pvTable_s[1];
+
+	int pvArray[MAX_DEPTH];
+
+	int killer[2][MAX_DEPTH];
+
+	/// <summary>Stores the current game state, either START, MIDDLE or END</summary>
+	int gameState;
+
+	void updateGameState();
+
+	void pushNull();
+
+	void popNull();
 
 	/// <summary>
 	/// Set bit at given index to 0 in side, occupied and piece bitboard.
@@ -113,7 +129,7 @@ public:
 	int pieceAt(int square);
 
 	//TODO doc
-	U64 pinners(int kSq, int kSide);
+	U64 pinner(int kSq, int kSide);
 
 	/// <summary>
 	/// Generate bitboard with pinned pieces according to king square and king side. Includes rook
@@ -183,8 +199,8 @@ public:
 	/// Pops move from move stack and restores enPas square, castlePermission, zobristKey, 
 	/// captures and promotions. Assert for correct zobristKey.
 	/// </summary>
-	/// <returns>undo object popped from move stack</returns>
-	Undo pop();
+	/// <returns>undo struct</returns>
+	UNDO_S pop();
 
 	/// <summary>
 	/// Reverse pushed castle move from board. Resets rook on init square.
@@ -227,3 +243,4 @@ public:
 
 };
 
+;

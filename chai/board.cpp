@@ -46,6 +46,16 @@ void Board::setPiece(int piece, int square, int side) {
 	occupied |= setMask[square];
 }
 
+void Board::updateGameState() {
+	if (ply < 12) {
+		gameState = START;
+	} else if (ply >= 12) {
+		gameState = MID;
+	} else if (countBits(occupied) <= 7) {
+		gameState = END;
+	}
+}
+
 void Board::clearPiece(int piece, int square, int side) {
 	pieces[pieceType[piece]] &= clearMask[square];
 	color[side] &= clearMask[square];
@@ -154,6 +164,7 @@ void Board::printBoard() {
 	cout << "\n\nPlayer to move: " << side << endl;
 	printf("Zobrist key: %llX\n", zobristKey);
 	cout << "En passant square: " << enPas << endl;
+	cout << "Game State " << gameState << endl;
 	printf("Castle permission: %c%c%c%c\n",
 		castlePermission & K_CASTLE ? 'K' : ' ',
 		castlePermission & Q_CASTLE ? 'Q' : ' ',
@@ -254,15 +265,15 @@ void Board::parseFen(string fen) {
 
 	// TODO parse ply?
 
-	//attackedSquares[WHITE] = attackerSet(WHITE);
-	//attackedSquares[BLACK] = attackerSet(BLACK);
+	updateGameState();
 	zobristKey = generateZobristKey();
+	checkBoard();
 }
 
 int Board::parseMove(string move) {
 
 	// trivial case for null move
-	if (move == "0000") return 0;
+	if (move == "0000") return -1;
 
 	// TODO check moveValidator for pseudo-legal move: color, capture
 
@@ -305,23 +316,26 @@ bool Board::push(int move) {
 	int promoted = PROMOTED(move);
 	int movingPiece = pieceAt(from_square);
 
-	//cout << "\nPush move: ";
-	//printMove(move);
-
-	Undo undo;
-	undo.enPas = enPas;
-	undo.castle = castlePermission;
-	undo.zobKey = zobristKey;
-	undo.move = move;
+	UNDO_S undo_s[1];
+	undo_s->enPas = enPas;
+	undo_s->castle = castlePermission;
+	undo_s->zobKey = zobristKey;
+	undo_s->move = move;
 
 	// assert valid from to squares and pieces
 	ASSERT(squareOnBoard(from_square));
 	ASSERT(squareOnBoard(to_square));
 	ASSERT(pieceValid(movingPiece));
 
-	// clear to_square and move piece (TODO updatePiece method?)
+	fiftyMove++;
+	if (movingPiece == P || movingPiece == p) {
+		fiftyMove = 0;
+	}
+
+	// clear to_square and move piece
 	if (MCHECKCAP & move) {
-		//ASSERT(CAPTURED(move) != K || CAPTURED(move) != k);
+		ASSERT(CAPTURED(move) != K || CAPTURED(move) != k);
+		fiftyMove = 0;
 		zobristKey ^= pieceKeys[CAPTURED(move)][to_square];
 		clearPiece(CAPTURED(move), to_square, side ^ 1);
 	}
@@ -383,40 +397,21 @@ bool Board::push(int move) {
 	}
 	zobristKey ^= castleKeys[castlePermission]; // hash CA in
 
-	if (MCHECKCAP & move) {
-		fiftyMove = 0;
-	} else if (false) {
-		// TODO stalemate, draw, win loss
-	}
-
 	// update game state variables
 	side ^= 1;
 	zobristKey ^= sideKey;
+	updateGameState();
 
 	ply++;
-	fiftyMove++;
+	undo_s->fiftyMove = fiftyMove;
+	undo_s->gameState = gameState;
+	undoHistory[ply] = *undo_s;
 
 	ASSERT(zobristKey == generateZobristKey());
-	//if (zobristKey != generateZobristKey()) {
-	//	cout << "ZOBRIST KEY FAILED" << endl;
-	//	printBoard();
-	//	printBitBoard(&occupied);
-	//	cout << getStringMove(move) << endl;
-	//	while (!undoStack.empty()) {
-	//		Undo lastMove = undoStack.top();
-	//		undoStack.pop();
-	//		cout << getStringMove(lastMove.move) << endl;
-	//	}
-	//	ASSERT(zobristKey == generateZobristKey());
-	//	exit(1);
-	//}
-
-	undoStack.push(undo);
-
-	//if (isCheck(side ^ 1)) {
-		//pop();
-		//return 0;
-	//}
+	if (isCheck(side ^ 1)) {
+		pop();
+		return 0;
+	}
 
 	return 1;
 }
@@ -435,49 +430,35 @@ void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 	clearCastlePermission(side);
 }
 
-U64 Board::pinners(int kSq, int kSide) {
-	U64 kingSlider = lookUpRookMoves(kSq, occupied);
-	U64 potPinned = kingSlider & color[kSide];
-	U64 xrays = kingSlider ^ lookUpRookMoves(kSq, occupied ^ potPinned);
+void Board::pushNull() {
 
-	U64 pinners = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(ROOK, kSide ^ 1)));
+	ASSERT(!isCheck(side));
 
-	kingSlider = lookUpBishopMoves(kSq, occupied);
-	potPinned = kingSlider & color[kSide];
-	xrays = kingSlider ^ lookUpBishopMoves(kSq, occupied ^ potPinned);
-	pinners |= xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(BISHOP, kSide ^ 1)));
+	UNDO_S undo_s[1];
+	undo_s->enPas = enPas;
+	undo_s->castle = castlePermission;
+	undo_s->zobKey = zobristKey;
+	undo_s->move = -1;
 
-	return pinners;
-}
-
-U64 Board::pinned(int kSq, int kSide) {
-	U64 pinned = 0;
-	
-	U64 kingSlider = lookUpRookMoves(kSq, occupied);
-	U64 potPinned = kingSlider & color[kSide];
-	U64 xrays = kingSlider ^ lookUpRookMoves(kSq, occupied ^ potPinned);
-	U64 pinners = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(ROOK, kSide ^ 1)));
-
-	while (pinners) {
-		int sq = popBit(&pinners);
-		pinned |= obstructed(sq, kSq) & color[kSide];
+	// remove en pas if set, else leave as is
+	if (enPas != 0) {
+		zobristKey ^= pieceKeys[EMPTY][enPas]; // out 
+		enPas = 0;
 	}
 
-	kingSlider = lookUpBishopMoves(kSq, occupied);
-	potPinned = kingSlider & color[kSide];
-	xrays = kingSlider ^ lookUpBishopMoves(kSq, occupied ^ potPinned);
-	pinners = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(BISHOP, kSide ^ 1)));
+	// update game state variables
+	side ^= 1;
+	zobristKey ^= sideKey;
 
-	while (pinners) {
-		int sq = popBit(&pinners);
-		pinned |= obstructed(sq, kSq) & color[kSide];
-	}
+	ASSERT(zobristKey == generateZobristKey());
 
-	return pinned;
-}
+	// update gameState variable and store in undo struct
+	updateGameState();
 
-int Board::getKingSquare(int side) {
-	return bitscanForward(getPieces(KING, side));
+	ply++;
+	undo_s->fiftyMove = fiftyMove;
+	undo_s->gameState = gameState;
+	undoHistory[ply] = *undo_s;
 }
 
 void Board::clearCastlePermission(int side) {
@@ -490,11 +471,8 @@ void Board::clearCastlePermission(int side) {
 	}
 }
 
-Undo Board::pop() {
-	ASSERT(!undoStack.empty());
-
-	Undo undo = undoStack.top();
-	undoStack.pop();
+UNDO_S Board::pop() {
+	UNDO_S undo = undoHistory[ply--];
 
 	// change side before clear and set pieces
 	side ^= 1;
@@ -504,6 +482,13 @@ Undo Board::pop() {
 	fiftyMove = undo.fiftyMove;
 	zobristKey = undo.zobKey;
 	enPas = undo.enPas;
+	gameState = undo.gameState;
+
+	// trivial case for null moves
+	if (undo.move == -1) {
+		ASSERT(ply >= 1);
+		return undo;
+	}
 
 	int from_square = FROMSQ(undo.move);
 	int to_square = TOSQ(undo.move);
@@ -541,10 +526,6 @@ Undo Board::pop() {
 		}
 	}
 
-	//cout << "\nPopped move: ";
-	//printMove(undo.move);
-	//printBoard();
-
 	ASSERT(checkBoard());
 	return undo;
 }
@@ -553,6 +534,51 @@ void Board::popCastle(int clearRookSq, int setRookSq, int side) {
 	ASSERT(pieceAt(clearRookSq) == R || pieceAt(clearRookSq) == r);
 	clearPiece(ROOK, clearRookSq, side);
 	setPiece(ROOK, setRookSq, side);
+}
+
+U64 Board::pinner(int kSq, int kSide) {
+	U64 kingSlider = lookUpRookMoves(kSq, occupied);
+	U64 potPinned = kingSlider & color[kSide];
+	U64 xrays = kingSlider ^ lookUpRookMoves(kSq, occupied ^ potPinned);
+
+	U64 pinner = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(ROOK, kSide ^ 1)));
+
+	kingSlider = lookUpBishopMoves(kSq, occupied);
+	potPinned = kingSlider & color[kSide];
+	xrays = kingSlider ^ lookUpBishopMoves(kSq, occupied ^ potPinned);
+	pinner |= xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(BISHOP, kSide ^ 1)));
+
+	return pinner;
+}
+
+U64 Board::pinned(int kSq, int kSide) {
+	U64 pinned = 0;
+
+	U64 kingSlider = lookUpRookMoves(kSq, occupied);
+	U64 potPinned = kingSlider & color[kSide];
+	U64 xrays = kingSlider ^ lookUpRookMoves(kSq, occupied ^ potPinned);
+	U64 pinner = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(ROOK, kSide ^ 1)));
+
+	while (pinner) {
+		int sq = popBit(&pinner);
+		pinned |= obstructed(sq, kSq) & color[kSide];
+	}
+
+	kingSlider = lookUpBishopMoves(kSq, occupied);
+	potPinned = kingSlider & color[kSide];
+	xrays = kingSlider ^ lookUpBishopMoves(kSq, occupied ^ potPinned);
+	pinner = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(BISHOP, kSide ^ 1)));
+
+	while (pinner) {
+		int sq = popBit(&pinner);
+		pinned |= obstructed(sq, kSq) & color[kSide];
+	}
+
+	return pinned;
+}
+
+int Board::getKingSquare(int side) {
+	return bitscanForward(getPieces(KING, side));
 }
 
 U64 Board::attackerSet(int side) {

@@ -90,8 +90,8 @@ void _generateMoves(Board* b, MOVE_S* move_s) {
 /// </summary>
 /// <param name="board">Board</param>
 void _whiteSinglePawnPush(Board* board, MOVE_S* move_s) {
-	int potPinnedSq, sq, kSq = board->getKingSquare(WHITE);
-	U64 pinners = board->pinners(kSq, WHITE);
+	int sq, kSq = board->getKingSquare(WHITE);
+	U64 pinners = board->pinner(kSq, WHITE);
 	U64 pinned = board->pinned(kSq, WHITE);
 
 	U64 whitePawns = board->getPieces(PAWN, WHITE);
@@ -151,7 +151,7 @@ void _whiteSinglePawnPush(Board* board, MOVE_S* move_s) {
 void _blackSinglePawnPush(Board* board, MOVE_S* move_s) {
 	int sq, kSq = board->getKingSquare(BLACK);
 
-	U64 pinners = board->pinners(kSq, BLACK);
+	U64 pinners = board->pinner(kSq, BLACK);
 	U64 pinned = board->pinned(kSq, BLACK);
 	U64 blackPawns = board->getPieces(PAWN, BLACK);
 	U64 potPinned = blackPawns & pinned;
@@ -209,7 +209,7 @@ void _blackSinglePawnPush(Board* board, MOVE_S* move_s) {
 /// <param name="board">Board</param>
 void _whiteDoublePawnPush(Board* board, MOVE_S* move_s) {
 	int potPinnedSq, sq, kSq = board->getKingSquare(WHITE);
-	U64 pinners = board->pinners(kSq, WHITE);
+	U64 pinners = board->pinner(kSq, WHITE);
 	U64 pinned = board->pinned(kSq, WHITE);
 
 	U64 whitePawns = board->getPieces(PAWN, WHITE);
@@ -242,7 +242,7 @@ void _whiteDoublePawnPush(Board* board, MOVE_S* move_s) {
 void _blackDoublePawnPush(Board* board, MOVE_S* move_s) {
 	int sq, kSq = board->getKingSquare(BLACK);
 
-	U64 pinners = board->pinners(kSq, BLACK);
+	U64 pinners = board->pinner(kSq, BLACK);
 	U64 pinned = board->pinned(kSq, BLACK);
 	U64 blackPawns = board->getPieces(PAWN, BLACK);
 	U64 potPinned = blackPawns & pinned;
@@ -273,7 +273,7 @@ void _whitePawnCaptures(Board* board, MOVE_S* move_s) {
 	int sq, atk_sq, kSq = board->getKingSquare(WHITE);
 
 	U64 atks;
-	U64 pinners = board->pinners(kSq, WHITE);
+	U64 pinners = board->pinner(kSq, WHITE);
 	U64 pinned = board->pinned(kSq, WHITE);
 	U64 whitePawns = board->getPieces(PAWN, WHITE);
 	U64 potPinned = whitePawns & pinned;
@@ -361,7 +361,7 @@ void _blackPawnCaptures(Board* board, MOVE_S* move_s) {
 	int sq, atk_sq, kSq = board->getKingSquare(BLACK);
 
 	U64 atks;
-	U64 pinners = board->pinners(kSq, BLACK);
+	U64 pinners = board->pinner(kSq, BLACK);
 	U64 pinned = board->pinned(kSq, BLACK);
 	U64 blackPawns = board->getPieces(PAWN, BLACK);
 	U64 potPinned = blackPawns & pinned;

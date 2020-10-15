@@ -34,6 +34,11 @@ inline void printBitBoard(U64* bb) {
 /// <param name="move">Move</param>
 inline void printMove(const int move) {
 
+	if (move == -1) {
+		cout << "0000" << endl;
+		return;
+	}
+
 	int promoted = PROMOTED(move);
 	char promChar = ' ';
 
@@ -58,6 +63,11 @@ inline void printMove(const int move) {
 }
 
 inline string getStringMove(const int move) {
+	if (move == -1) {
+		return "0000";
+	}
+
+
 	int promoted = PROMOTED(move);
 	char promChar = ' ';
 

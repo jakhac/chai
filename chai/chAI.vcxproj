@@ -143,6 +143,7 @@
     <ClInclude Include="attacks.h" />
     <ClInclude Include="board.h" />
     <ClInclude Include="defs.h" />
+    <ClInclude Include="eval.h" />
     <ClInclude Include="info.h" />
     <ClInclude Include="legalMoveGenerator.h" />
     <ClInclude Include="magics.h" />
@@ -151,6 +152,10 @@
     <ClInclude Include="move.h" />
     <ClInclude Include="moveGenerator.h" />
     <ClInclude Include="perft.h" />
+    <ClInclude Include="search.h" />
+    <ClInclude Include="tt.h" />
+    <ClInclude Include="types.h" />
+    <ClInclude Include="uci.h" />
     <ClInclude Include="undo.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="validate.h" />
@@ -159,12 +164,15 @@
     <ClCompile Include="attacks.cpp" />
     <ClCompile Include="board.cpp" />
     <ClCompile Include="defs.cpp" />
+    <ClCompile Include="eval.cpp" />
     <ClCompile Include="legalMoveGenerator.cpp" />
-    <ClCompile Include="magics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="move.cpp" />
     <ClCompile Include="moveGenerator.cpp" />
     <ClCompile Include="perft.cpp" />
+    <ClCompile Include="search.cpp" />
+    <ClCompile Include="tt.cpp" />
+    <ClCompile Include="uci.cpp" />
     <ClCompile Include="validate.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -3,6 +3,8 @@
 #include "stdlib.h"
 #include <string>
 
+#include "types.h"
+
 using namespace std;
 
 //#define DEBUG
@@ -20,39 +22,14 @@ printf("At Line %d\n",__LINE__); \
 exit(1);}
 #endif
 
-typedef unsigned long long U64;
-
 const int NUM_SQUARES = 64;
 const int MAX_GAME_MOVES = 2048;
 const int MAX_POSITION_MOVES = 256;
+const int MAX_DEPTH = 64;
 
-struct MOVE_S {
-    int moveCounter = 0; // moves generated
-
-    int moveList[MAX_POSITION_MOVES]; // acutal moves
-    //int moveScore[MAX_POSITION_MOVES]; // store score of each move?
-
-    U64 attackedSquares = 0ULL;
-};
-
-enum PIECE_VALUES { EMPTY, P, N, B, R, Q, K, p, n, b, r, q, k };
-enum PIECES_TYPES { NO_PIECE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
-enum FILES { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
-enum RANKS { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
-enum COLORS { BLACK, WHITE, BOTH };
-
-enum CASTLING_RIGHTS { K_CASTLE = 1, Q_CASTLE = 2, k_CASTLE = 4, q_CASTLE = 8 };
-
-enum SQUARES {
-    A8 = 56, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD,
-    A7 = 48, B7, C7, D7, E7, F7, G7, H7,
-    A6 = 40, B6, C6, D6, E6, F6, G6, H6,
-    A5 = 32, B5, C5, D5, E5, F5, G5, H5,
-    A4 = 24, B4, C4, D4, E4, F4, G4, H4,
-    A3 = 16, B3, C3, D3, E3, F3, G3, H3,
-    A2 = 8, B2, C2, D2, E2, F2, G2, H2,
-    A1 = 0, B1, C1, D1, E1, F1, G1, H1
-};
+const int INF = 30000;
+const int MATE = 29000;
+const int R_NULL = 2;
 
 const U64 RANK_1_HEX = 0xFF;
 const U64 RANK_2_HEX = 0xFF00;
@@ -87,28 +64,11 @@ const string END_FEN_1 = "8/PPP4k/8/8/8/8/4Kppp/8 w - - 0 1";
 const string END_FEN_2 = "8/3K4/2p5/p2b2r1/5k2/8/8/1q6 b - - 1 67";
 const string END_FEN_3 = "8/7p/p5pb/4k3/P1pPn3/8/P5PP/1rB2RK1 b - d3 0 28";
 
+const string WAC11 = "r1b1k2r/ppppnppp/2n2q2/2b5/3NP3/2P1B3/PP3PPP/RN1QKB1R w KQkq - 0 1";
+const string WAC1 = "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - - 0 1";
 const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string PIN_FEN = "r3k3/p1pp1p2/bn2pnp1/3PN3/Nb2r3/5Q1p/PPPBBPPP/R3K2R w KQq - 0 1";
 const string EP_CHECK_EVA = "r3k2r/pp1n1ppp/8/2pP1b2/2PK1NqP/1Q2P3/P5P1/2B2B1R w - c6 0 1";
-const string PAWN_TEST = "r3k2r/pP1pqpb1/1n2pnp1/1bpPN3/1p2P3/P1N2Q1p/2PBBPPP/R3K2R w KQkq c6 0 1";
-const string PAWN_TEST_B = "r3k2r/pP1pqpb1/1n2pn2/1bpPNQ2/Pp1NP3/8/2PBBPpP/R3K2R b KQkq a3 0 1";
-const string KINGS_FEN = "r3kQ1r/p1qN1ppp/1p2pn2/5b2/2PpP3/4B3/PPPb1PPP/R3KB1R w KQkq - 2 3";
-const string EP_FEN = "rnbqkbnr/pp1p1ppp/8/2pPp3/8/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 1";
-const string PROM_FEN = "r3k2r/pPpppppp/8/8/8/8/P1PPPPPP/R3K2R w KQkq - 0 1";
-const string QUEEN_FEN = "8/3q1p2/8/5P2/4Q3/8/8/8 w - - 0 1";
-const string PAWN_PUSH_FEN = "r3k2r/pp1p1p1p/R1p1p2n/5p2/1P6/2P2n2/P1NPPPPP/R3K3 b Qkq - 0 1";
-const string PAWN_FEN_W = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
-const string PAWN_FEN_B = "rnbqkbnr/p1p1p3/3p3p/1p1p4/2P1Pp2/8/PP1P1PpP/RNBQKB1R b KQkq e3 0 1";
-const string KNIGHT_KINGS = "5k2/1n6/4n3/6N1/8/3N4/8/5K2 w - - 0 1";
-const string ROOKS = "6k1/2b5/5r2/8/1nR5/5N2/8/6K1 b - - 0 1";
-const string ROOKS_BUG_FEN = "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR w KQkq - 0 1";
-const string QUEENS = "6k1/8/4nq2/8/1nQ5/5N2/1N6/6K1 b - - 0 1";
-const string BISHOPS = "6k1/1b6/4n3/8/1n4B1/1B3N2/1N6/2b3K1 b - - 0 1";
-const string CASTLE = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
-const string CASTLE2 = "r3k2r/p1pp1pb1/bn2pnp1/3PN3/1p2P1q1/2N2Q1P/PPPB1P1P/R2BK2R w KQkq - 0 1";
-const string MOVES_48 = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
-const string ROOK_CENTER_FEN = "r3k3/p1ppqpb1/bn2pnp1/1R1PN3/1p2P3/2N1rQ1p/PPPBBPPP/4K2R b Kq - 0 1";
-const string WHITE_CHECK_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPB1PPP/R2B1K1R w KQkq - 0 1";
 
 // index is true if the piece is knight / king / bishop / rook
 const int pieceKnight[13] = { 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 };
@@ -117,16 +77,15 @@ const int pieceRookQueen[13] = { 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0 };
 const int pieceRook[13] = { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0 };
 const int pieceBishopQueen[13] = { 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0 };
 
+const int victimScore[13] = { 0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 };
+
 const int isBQ(int p);
 const int isRQ(int p);
 const int isN(int p);
 const int isK(int p);
 
 /* index true if piece is big / maj / min /wb and value */
-const int pieceBig[13] = { 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1 };
-const int pieceMaj[13] = { 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1 };
-const int pieceMin[13] = { 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0 };
-const int pieceVal[13] = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
+const int pieceScores[13] = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
 const int piecePawn[13] = { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
 
 /* color for given index */
@@ -146,31 +105,6 @@ const string pieceChar = ".PNBRQKpnbrqk";
 const string sideChar = "wb-";
 const string rankChar = "12345678";
 const string fileChar = "abcdefgh";
-
-/* Contains directions for pieces for move generation and attacks */
-const int nDir[8] = { -8, -19, -21, -12, 8, 19, 21, 12 };
-const int rDir[4] = { -1, -10, 1, 10 };
-const int bDir[4] = { -9, -11, 11, 9 };
-const int kDir[8] = { -1, -10, 1, 10, -9, -11, 11, 9 };
-
-// bit table used in pop bit
-const int bitTable[64] = {
-    63, 30, 3, 32, 25, 41, 22, 33, 15, 50, 42, 13, 11, 53, 19, 34, 61, 29, 2,
-    51, 21, 43, 45, 10, 18, 47, 1, 54, 9, 57, 0, 35, 62, 31, 40, 4, 49, 5, 52,
-    26, 60, 6, 23, 44, 46, 27, 56, 16, 7, 39, 48, 24, 59, 14, 12, 55, 38, 28,
-    58, 20, 37, 17, 36, 8
-};
-
-enum {
-    NORTH,
-    SOUTH,
-    EAST,
-    WEST,
-    NORTH_EAST,
-    NORTH_WEST,
-    SOUTH_EAST,
-    SOUTH_WEST
-};
 
 const U64 rand64();
 const U64 randomFewBits();

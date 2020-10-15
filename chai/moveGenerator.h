@@ -6,8 +6,15 @@
 #include "attacks.h"
 #include "move.h"
 
+void addCaptureMove(Board* b, MOVE_S* move_s, int move, int movingPiece);
+
+void initMVV_LVA();
 
 void generateMoves(Board* b, MOVE_S* move_s);
+
+void generateCaptures(Board* b, MOVE_S* move_s);
+
+bool moveLegal(Board* b, const int move);
 
 /* PAWN */
 void whiteSinglePawnPush(Board* b, MOVE_S* move_s);

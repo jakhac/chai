@@ -51,10 +51,25 @@
     <ClInclude Include="validate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="legalMoveGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="undo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="legalMoveGenerator.h">
+    <ClInclude Include="uci.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="search.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="eval.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -77,9 +92,6 @@
     <ClCompile Include="perft.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="magics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="validate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -87,6 +99,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="legalMoveGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uci.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="search.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="eval.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

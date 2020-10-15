@@ -4,6 +4,7 @@
 #include "mask.h"
 #include <intrin.h>
 #include <iostream>
+#include "io.h"
 
 #ifndef UTIL_H
 #define UTIL_H
@@ -21,6 +22,57 @@ inline U64 westN(U64 board, int n) {
 		newBoard = ((newBoard >> 1) & (~FILE_H));
 	}
 	return newBoard;
+}
+
+#include "windows.h"
+inline int getTimeMs() {
+	return (int) GetTickCount64();
+}
+
+inline bool inputWaiting() {
+	static int init = 0, pipe;
+	static HANDLE inh;
+	DWORD dw;
+
+	if (!init) {
+		init = 1;
+		inh = GetStdHandle(STD_INPUT_HANDLE);
+		pipe = !GetConsoleMode(inh, &dw);
+		if (!pipe) {
+			SetConsoleMode(inh, dw & ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT));
+			FlushConsoleInputBuffer(inh);
+		}
+	}
+	if (pipe) {
+		if (!PeekNamedPipe(inh, NULL, 0, NULL, &dw, NULL))
+			return 1;
+		return dw;
+	} else {
+		GetNumberOfConsoleInputEvents(inh, &dw);
+		return dw <= 1 ? 0 : dw;
+	}
+}
+
+inline void readInput(SEARCH_INFO_S* s) {
+	int bytes;
+	char input[256] = "", * endc;
+
+	if (inputWaiting()) {
+		s->stopped = TRUE;
+		do {
+			bytes = _read(_fileno(stdin), input, 256);
+		} while (bytes < 0);
+		endc = strchr(input, '\n');
+		if (endc)
+			*endc = 0;
+
+		if (strlen(input) > 0) {
+			if (!strncmp(input, "quit", 4)) {
+				s->quit = TRUE;
+			}
+		}
+		return;
+	}
 }
 
 /// <summary>
@@ -89,12 +141,6 @@ inline int bitscanReverse(U64 board) {
 /// <returns>Amount of bits set to 1 in bb</returns>
 inline int countBits(U64 bb) {
 	return (int)__popcnt64(bb);
-	//int cnt = 0;
-	//while (bb) {
-	//	cnt += bb & 1;
-	//	bb >>= 1;
-	//}
-	//return cnt;
 }
 
 
