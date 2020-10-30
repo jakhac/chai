@@ -11,11 +11,11 @@
 #include "board.h"
 #include "search.h"
 
-void uciMode(Board* b, SEARCH_INFO_S* s);
+void uciMode(Board* b, SEARCH_S* s);
 
 void uciParsePosition(Board* b, string cmd);
 
-void uciParseGo(Board* b, SEARCH_INFO_S* s, string cmd);
+void uciParseGo(Board* b, SEARCH_S* s, string cmd);
 
 /// <summary>
 /// Initialize keys, masks and magic bitboards.

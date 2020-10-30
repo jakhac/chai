@@ -10,6 +10,10 @@ void addCaptureMove(Board* b, MOVE_S* move_s, int move, int movingPiece);
 
 void initMVV_LVA();
 
+U64 getLeastValuablePiece(Board* b, U64 atkSet, int side, int atkPiece);
+
+int see(Board* b, const int move);
+
 void generateMoves(Board* b, MOVE_S* move_s);
 
 void generateCaptures(Board* b, MOVE_S* move_s);

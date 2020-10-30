@@ -1,10 +1,16 @@
 #pragma once
 
+#include <intrin.h>
+#include "io.h"
+#include <iostream>
+#include <fstream>
+#include <ctime>
+#include <chrono>  // chrono::system_clock
+#include <ctime>   // localtime
+#include <iomanip> // put_time
+
 #include "defs.h"
 #include "mask.h"
-#include <intrin.h>
-#include <iostream>
-#include "io.h"
 
 #ifndef UTIL_H
 #define UTIL_H
@@ -53,12 +59,12 @@ inline bool inputWaiting() {
 	}
 }
 
-inline void readInput(SEARCH_INFO_S* s) {
+inline void readInput(SEARCH_S* s) {
 	int bytes;
 	char input[256] = "", * endc;
 
 	if (inputWaiting()) {
-		s->stopped = TRUE;
+		s->stopped = true;
 		do {
 			bytes = _read(_fileno(stdin), input, 256);
 		} while (bytes < 0);
@@ -68,11 +74,27 @@ inline void readInput(SEARCH_INFO_S* s) {
 
 		if (strlen(input) > 0) {
 			if (!strncmp(input, "quit", 4)) {
-				s->quit = TRUE;
+				cout << "READ INPUT: quit" << endl;
+				s->quit = true;
 			}
 		}
 		return;
 	}
+}
+
+inline string getTime() {
+	char str[32]{};
+	time_t a = time(nullptr);
+	struct tm time_info;
+
+	if (localtime_s(&time_info, &a) == 0) strftime(str, sizeof(str), "%H:%M:%S", &time_info);
+	return str;
+}
+
+inline void log(string logMsg) {
+	ofstream ofs("log.txt", std::ios_base::out | std::ios_base::app);
+	ofs << getTime() << "\t" << logMsg << '\n';
+	ofs.close();
 }
 
 /// <summary>

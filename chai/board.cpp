@@ -32,10 +32,8 @@ int Board::checkBoard() {
 		ASSERT(enPas == 0 || ((enPas <= H3) && (enPas >= A3)));
 	}
 
-	// check non overlapping squares in bitboards
-	// TODO
-
 	ASSERT(zobristKey == generateZobristKey());
+	ASSERT(zobristPawnKey == generatePawnHashKey());
 
 	return 1;
 }
@@ -47,11 +45,13 @@ void Board::setPiece(int piece, int square, int side) {
 }
 
 void Board::updateGameState() {
-	if (ply < 12) {
+	if (halfMoves < 12) {
 		gameState = START;
-	} else if (ply >= 12) {
+	} 
+	if (halfMoves >= 12) {
 		gameState = MID;
-	} else if (countBits(occupied) <= 7) {
+	}
+	if (countBits(occupied) <= 7 || countMajorPieces(side) <= 6) {
 		gameState = END;
 	}
 }
@@ -65,9 +65,12 @@ void Board::clearPiece(int piece, int square, int side) {
 void Board::reset() {
 	side = WHITE;
 	enPas = 0;
+	halfMoves = 0;
 	ply = 0;
+	undoPly = 0;
 	fiftyMove = 0;
 	zobristKey = 0x0;
+	zobristPawnKey = 0x0;
 	castlePermission = 0;
 
 	color[0] = 0ULL;
@@ -96,10 +99,7 @@ void Board::initHashKeys() {
 
 U64 Board::generateZobristKey() {
 	U64 finalZobristKey = 0;
-
-
 	U64 occ = occupied;
-	U64 empty = ~occupied;
 	int square = 0;
 	int piece = 0;
 
@@ -124,6 +124,25 @@ U64 Board::generateZobristKey() {
 	return finalZobristKey;
 }
 
+U64 Board::generatePawnHashKey() {
+	int sq;
+	U64 finalPawnKey = 0x0;
+	U64 whitePawns = getPieces(PAWN, WHITE);
+	U64 blackPawns = getPieces(PAWN, BLACK);
+
+	while (whitePawns) {
+		sq = popBit(&whitePawns);
+		finalPawnKey ^= pieceKeys[P][sq];
+	}
+
+	while (blackPawns) {
+		sq = popBit(&blackPawns);
+		finalPawnKey ^= pieceKeys[p][sq];
+	}
+
+	return finalPawnKey;
+}
+
 U64 Board::getPieces(int piece, int side) {
 	return pieces[pieceType[piece]] & color[side];
 }
@@ -141,8 +160,16 @@ int Board::pieceAt(int square) {
 	return 0;
 }
 
-void Board::printBoard() {
+int Board::countMajorPieces(int side) {
+	int cnt = 0;
+	for (int i = 2; i < 7; i++) {
+		cnt += countBits(getPieces(i, side));
+	}
 
+	return cnt;
+}
+
+void Board::printBoard() {
 	int sq, file, rank, piece;
 
 	// print board
@@ -163,8 +190,10 @@ void Board::printBoard() {
 
 	cout << "\n\nPlayer to move: " << side << endl;
 	printf("Zobrist key: %llX\n", zobristKey);
+	printf("Pawn key: %llX\n", zobristPawnKey);
 	cout << "En passant square: " << enPas << endl;
-	cout << "Game State " << gameState << endl;
+	cout << "Halfmoves " << halfMoves << ", undoPly " << undoPly << ", ply " << ply << endl;
+	cout << "Game State " << gameStateStr[gameState] << endl;
 	printf("Castle permission: %c%c%c%c\n",
 		castlePermission & K_CASTLE ? 'K' : ' ',
 		castlePermission & Q_CASTLE ? 'Q' : ' ',
@@ -233,7 +262,7 @@ void Board::parseFen(string fen) {
 
 	// assert for correct position
 	ASSERT(fen[index] == 'w' || fen[index] == 'b');
-	side = fen[index] == 'w' ? WHITE : BLACK;
+	side = (fen[index] == 'w') ? WHITE : BLACK;
 	index += 2;
 
 	// castle permission
@@ -252,22 +281,39 @@ void Board::parseFen(string fen) {
 	}
 	index++;
 	ASSERT(castlePermission >= 0 && castlePermission <= 15);
-
+	
 	// en passant square
 	if (fen[index] != '-') {
 		file = fen[index] - 'a';
 		rank = fen[index + 1] - '1';
+
 		ASSERT(file >= FILE_A && file <= FILE_H);
 		ASSERT(rank >= RANK_1 && rank <= RANK_8);
 
 		enPas = file_rank_2_sq(file, rank);
+		index += 3;
+	} else {
+		index += 2;
 	}
 
 	// TODO parse ply?
+	halfMoves += atoi(&fen[index]);
+	index += 2;
+
+	string fullMoveStr = "";
+	while (fen[index]) {
+		fullMoveStr += fen[index];
+		index++;
+	}
+
+	halfMoves += stoi(fullMoveStr) * 2;
 
 	updateGameState();
+	zobristPawnKey = generatePawnHashKey();
 	zobristKey = generateZobristKey();
+
 	checkBoard();
+	log("parseFen() finished.");
 }
 
 int Board::parseMove(string move) {
@@ -284,11 +330,12 @@ int Board::parseMove(string move) {
 
 	// set possible pawn flags
 	if (piecePawn[movingPiece]) {
+		int moveDistance = abs(from - to);
 		// set pawnStart flag if square difference is 16
-		if (abs(from - to) == 16) flag |= MFLAGPS;
+		if (moveDistance == 16) flag |= MFLAGPS;
 
 		// set ep flag if to square is en passant (ep capture)
-		if (to == enPas) flag |= MFLAGEP;
+		if (to == enPas && (moveDistance == 7 || moveDistance == 9)) flag |= MFLAGEP;
 
 		// set prom flag if first / last rank
 		if (squareToRank[to] == RANK_1 || squareToRank[to] == RANK_8) {
@@ -316,46 +363,65 @@ bool Board::push(int move) {
 	int promoted = PROMOTED(move);
 	int movingPiece = pieceAt(from_square);
 
+	// trivial case, kings cannot be captured
+	if (CAPTURED(move) == K || CAPTURED(move) == k) {
+		return false;
+	}
+
 	UNDO_S undo_s[1];
 	undo_s->enPas = enPas;
 	undo_s->castle = castlePermission;
 	undo_s->zobKey = zobristKey;
+	undo_s->pawnKey = zobristPawnKey;
 	undo_s->move = move;
+	undo_s->fiftyMove = fiftyMove;
 
 	// assert valid from to squares and pieces
 	ASSERT(squareOnBoard(from_square));
 	ASSERT(squareOnBoard(to_square));
 	ASSERT(pieceValid(movingPiece));
+	ASSERT(undoPly >= 0 && undoPly <= MAX_GAME_MOVES);
 
 	fiftyMove++;
+
+	// pawn moves reset fiftyMove rule, update pawn key
 	if (movingPiece == P || movingPiece == p) {
+		zobristPawnKey ^= pieceKeys[movingPiece][to_square]; //set piece
+		zobristPawnKey ^= pieceKeys[movingPiece][from_square]; // clear piece
 		fiftyMove = 0;
 	}
 
 	// clear to_square and move piece
 	if (MCHECKCAP & move) {
-		ASSERT(CAPTURED(move) != K || CAPTURED(move) != k);
+		int captured = CAPTURED(move);
+		ASSERT(captured != K || captured != k);
 		fiftyMove = 0;
-		zobristKey ^= pieceKeys[CAPTURED(move)][to_square];
-		clearPiece(CAPTURED(move), to_square, side ^ 1);
+		zobristKey ^= pieceKeys[captured][to_square];
+		clearPiece(captured, to_square, side ^ 1);
+
+		// delete captured pawn from pawn key
+		if (captured == P || captured == p) {
+			zobristPawnKey ^= pieceKeys[captured][to_square];
+		}
 	}
 
-	zobristKey ^= pieceKeys[(int)movingPiece][(int)to_square];
+	zobristKey ^= pieceKeys[movingPiece][to_square];
 	setPiece(movingPiece, to_square, side);
 
 	zobristKey ^= pieceKeys[movingPiece][from_square];
 	clearPiece(movingPiece, from_square, side);
-
+	
 	// if en passant capture, delete pawn
 	if (MFLAGEP & move) {
 		int sq = (side == WHITE) ? -8 : 8;
 		sq += to_square;
 
 		zobristKey ^= pieceKeys[pieceAt(sq)][sq];
+		zobristPawnKey ^= pieceKeys[pieceAt(sq)][sq];
 		clearPiece(PAWN, sq, side ^ 1);
 	}
 
-	// handle en passant square
+	// handle ep key
 	zobristKey ^= pieceKeys[EMPTY][enPas]; // ep out
 	if (MFLAGPS & move) {
 		if (side == WHITE) enPas = to_square - 8;
@@ -368,6 +434,7 @@ bool Board::push(int move) {
 	// handle promotions
 	if (MCHECKPROM & move) {
 		zobristKey ^= pieceKeys[movingPiece][to_square];
+		zobristPawnKey ^= pieceKeys[movingPiece][to_square];
 		clearPiece(movingPiece, to_square, side);
 
 		zobristKey ^= pieceKeys[PROMOTED(move)][to_square];
@@ -401,19 +468,21 @@ bool Board::push(int move) {
 	side ^= 1;
 	zobristKey ^= sideKey;
 	updateGameState();
-
-	ply++;
-	undo_s->fiftyMove = fiftyMove;
 	undo_s->gameState = gameState;
-	undoHistory[ply] = *undo_s;
+	undoHistory[undoPly] = *undo_s;
 
+	halfMoves++;
+	undoPly++;
+	ply++;
+
+	ASSERT(zobristPawnKey == generatePawnHashKey());
 	ASSERT(zobristKey == generateZobristKey());
 	if (isCheck(side ^ 1)) {
 		pop();
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
@@ -431,34 +500,37 @@ void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 }
 
 void Board::pushNull() {
-
 	ASSERT(!isCheck(side));
 
 	UNDO_S undo_s[1];
 	undo_s->enPas = enPas;
 	undo_s->castle = castlePermission;
 	undo_s->zobKey = zobristKey;
+	undo_s->pawnKey = zobristPawnKey;
 	undo_s->move = -1;
 
-	// remove en pas if set, else leave as is
-	if (enPas != 0) {
-		zobristKey ^= pieceKeys[EMPTY][enPas]; // out 
-		enPas = 0;
-	}
+	zobristKey ^= pieceKeys[EMPTY][enPas]; // ep out
+	enPas = 0;
+	zobristKey ^= pieceKeys[EMPTY][enPas]; // ep in
 
 	// update game state variables
 	side ^= 1;
 	zobristKey ^= sideKey;
 
 	ASSERT(zobristKey == generateZobristKey());
+	ASSERT(zobristPawnKey == generatePawnHashKey());
 
 	// update gameState variable and store in undo struct
-	updateGameState();
 
-	ply++;
 	undo_s->fiftyMove = fiftyMove;
+	updateGameState();
 	undo_s->gameState = gameState;
-	undoHistory[ply] = *undo_s;
+	undoHistory[undoPly] = *undo_s;
+
+	fiftyMove++; // might cause negative ply in isRepetition() check
+	halfMoves++;
+	undoPly++;
+	ply++;
 }
 
 void Board::clearCastlePermission(int side) {
@@ -472,7 +544,13 @@ void Board::clearCastlePermission(int side) {
 }
 
 UNDO_S Board::pop() {
-	UNDO_S undo = undoHistory[ply--];
+	halfMoves--;
+	undoPly--;
+	ply--;
+
+	ASSERT(undoPly >= 0);
+
+	UNDO_S undo = undoHistory[undoPly];
 
 	// change side before clear and set pieces
 	side ^= 1;
@@ -481,12 +559,13 @@ UNDO_S Board::pop() {
 	castlePermission = undo.castle;
 	fiftyMove = undo.fiftyMove;
 	zobristKey = undo.zobKey;
+	zobristPawnKey = undo.pawnKey;
 	enPas = undo.enPas;
 	gameState = undo.gameState;
 
 	// trivial case for null moves
 	if (undo.move == -1) {
-		ASSERT(ply >= 1);
+		ASSERT(ply >= 0);
 		return undo;
 	}
 
@@ -620,18 +699,26 @@ U64 Board::attackerSet(int side) {
 	return attackerSet;
 }
 
-U64 Board::squareAttacked(int square, int side) {
+U64 Board::squareAttackedBy(int square, int side) {
 	U64 attacker = 0ULL;
 	attacker |= pawnAtkMask[side^1][square] & getPieces(PAWN, side);
 	attacker |= knightAtkMask[square] & getPieces(KNIGHT, side);
 	attacker |= lookUpBishopMoves(square, occupied) & (getPieces(BISHOP, side) | getPieces(QUEEN, side));
 	attacker |= lookUpRookMoves(square, occupied) & (getPieces(ROOK, side) | getPieces(QUEEN, side));
 	return attacker;
+}
 
+U64 Board::squareAttacked(int square) {
+	U64 attacker = 0ULL;
+	attacker |= (pawnAtkMask[side ^ 1][square] | pawnAtkMask[side][square]) & pieces[PAWN];
+	attacker |= knightAtkMask[square] & pieces[KNIGHT];
+	attacker |= lookUpBishopMoves(square, occupied) & (pieces[BISHOP] | pieces[QUEEN]);
+	attacker |= lookUpRookMoves(square, occupied) & (pieces[ROOK]| pieces[QUEEN]);
+	return attacker;
 }
 
 U64 Board::isCheck(int side) {
-	return squareAttacked(getKingSquare(side), side ^ 1);
+	return squareAttackedBy(getKingSquare(side), side ^ 1);
 }
 
 bool Board::castleValid(int castle, U64* attackerSet) {

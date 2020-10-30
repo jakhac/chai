@@ -310,7 +310,7 @@ void _whitePawnCaptures(Board* board, MOVE_S* move_s) {
 		board->clearPiece(PAWN, board->enPas - 8, BLACK);
 		board->setPiece(PAWN, board->enPas, WHITE);
 
-		if (!(board->squareAttacked(kSq, BLACK))) {
+		if (!(board->squareAttackedBy(kSq, BLACK))) {
 			move_s->moveList[move_s->moveCounter++] = MOVE(board->enPas - 7, board->enPas, EMPTY, EMPTY, MFLAGEP);
 		}
 
@@ -322,7 +322,7 @@ void _whitePawnCaptures(Board* board, MOVE_S* move_s) {
 		board->clearPiece(PAWN, board->enPas - 8, BLACK);
 		board->setPiece(PAWN, board->enPas, WHITE);
 
-		if (!(board->squareAttacked(kSq, BLACK))) {
+		if (!(board->squareAttackedBy(kSq, BLACK))) {
 			move_s->moveList[move_s->moveCounter++] = MOVE(board->enPas - 9, board->enPas, EMPTY, EMPTY, MFLAGEP);
 		}
 
@@ -397,7 +397,7 @@ void _blackPawnCaptures(Board* board, MOVE_S* move_s) {
 		board->clearPiece(PAWN, board->enPas + 8, WHITE);
 		board->setPiece(PAWN, board->enPas, BLACK);
 
-		if (!(board->squareAttacked(kSq, WHITE))) {
+		if (!(board->squareAttackedBy(kSq, WHITE))) {
 			move_s->moveList[move_s->moveCounter++] = MOVE(board->enPas + 7, board->enPas, EMPTY, EMPTY, MFLAGEP);
 		}
 
@@ -408,7 +408,7 @@ void _blackPawnCaptures(Board* board, MOVE_S* move_s) {
 		board->clearPiece(PAWN, board->enPas + 8, WHITE);
 		board->setPiece(PAWN, board->enPas, BLACK);
 
-		if (!(board->squareAttacked(kSq, WHITE))) {
+		if (!(board->squareAttackedBy(kSq, WHITE))) {
 			move_s->moveList[move_s->moveCounter++] = MOVE(board->enPas + 9, board->enPas, EMPTY, EMPTY, MFLAGEP);
 		}
 

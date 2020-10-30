@@ -8,15 +8,21 @@
 
 using namespace std;
 
-bool nullValid(Board* b, bool inCheck);
+extern int selDepth;
 
-int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_INFO_S* search_info_s, bool nullOk);
+extern int rootDepth;
 
-int quiesence(int alpha, int beta, Board* b, SEARCH_INFO_S* search_info_s);
+int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk, bool pvNode);
 
-void search(Board* b, SEARCH_INFO_S* s);
+int quiesence(int alpha, int beta, Board* b, SEARCH_S* s);
+
+void search(Board* b, SEARCH_S* s);
+
+int search_aspiration(Board* b, SEARCH_S* s, int depth, int bestScore);
 
 bool isRepetition(Board* b);
+
+bool isThreeFoldRepetition(Board* b);
 
 void moveSwapper(Board* b, MOVE_S* move_s, int curIdx);
 

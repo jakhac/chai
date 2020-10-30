@@ -1,0 +1,4333 @@
+15:33:25	
+
+Startup
+15:33:25	uci
+15:33:25	UCI MODE
+15:33:30	cmd received: isready
+15:33:37	cmd received: position startpos
+15:33:37	Parse position: position startpos
+15:33:37	Parsing complete
+15:33:39	cmd received: go depth 7
+15:33:39	Parse go: go depth 7
+15:33:39	Parse go finished, start serach now
+15:33:39	Entered search
+15:33:40	Left search and cout bestmove found
+16:31:06	
+Startup
+16:31:44	
+Startup
+16:34:37	
+Startup
+16:37:57	
+Startup
+16:38:25	
+Startup
+16:39:13	
+Startup
+16:39:33	
+Startup
+16:40:23	
+Startup
+16:41:26	
+Startup
+16:42:26	
+Startup
+16:43:23	
+Startup
+16:43:59	
+Startup
+16:44:45	
+Startup
+16:45:09	
+Startup
+16:45:31	
+Startup
+16:45:40	
+Startup
+16:46:34	
+Startup
+16:46:55	
+Startup
+16:49:35	
+Startup
+16:50:50	
+Startup
+16:51:24	
+Startup
+16:52:20	
+Startup
+16:53:09	
+Startup
+16:53:25	
+Startup
+16:53:38	
+Startup
+16:56:17	
+Startup
+16:57:15	
+Startup
+16:57:38	
+Startup
+16:58:30	
+Startup
+16:58:52	
+Startup
+16:59:28	
+Startup
+17:01:47	
+Startup
+17:02:45	
+Startup
+17:13:13	
+Startup
+17:14:10	
+Startup
+17:25:06	
+Startup
+17:25:26	
+Startup
+17:25:56	
+Startup
+17:28:06	
+Startup
+17:28:46	
+Startup
+17:29:07	
+Startup
+17:29:32	
+Startup
+17:33:47	
+Startup
+17:34:01	
+Startup
+17:34:16	
+Startup
+17:34:34	
+Startup
+17:36:00	
+Startup
+17:41:43	
+Startup
+17:42:07	
+Startup
+17:43:48	
+Startup
+17:45:32	
+Startup
+17:51:18	
+Startup
+17:52:18	
+Startup
+17:52:47	
+Startup
+17:53:19	
+Startup
+17:53:40	
+Startup
+17:53:58	
+Startup
+17:55:18	
+Startup
+17:55:45	
+Startup
+17:56:05	
+Startup
+17:58:08	
+Startup
+17:58:51	
+Startup
+17:59:36	
+Startup
+17:59:54	
+Startup
+18:04:29	
+Startup
+18:05:08	
+Startup
+18:11:29	
+Startup
+18:20:20	
+Startup
+18:20:40	
+Startup
+18:21:07	
+Startup
+18:21:45	
+Startup
+18:22:00	
+Startup
+18:41:43	
+Startup
+18:45:41	
+Startup
+18:47:11	
+18:47:58	
+Startup
+18:49:28	
+Startup
+19:00:54	
+Startup
+19:01:24	
+Startup
+19:03:07	
+Startup
+19:04:30	
+Startup
+19:06:32	
+Startup
+19:07:30	
+Startup
+19:09:56	
+Startup
+19:10:24	
+Startup
+19:12:27	
+Startup
+19:16:15	
+Startup
+19:17:27	
+Startup
+19:28:46	
+Startup
+19:29:24	
+Startup
+19:33:59	
+Startup
+19:34:13	
+Startup
+19:39:01	
+Startup
+19:39:44	
+Startup
+19:42:53	
+Startup
+19:45:49	
+Startup
+19:46:45	
+Startup
+19:54:22	
+Startup
+19:54:50	
+Startup
+19:58:22	
+Startup
+19:59:45	
+Startup
+20:00:50	
+Startup
+20:01:54	
+Startup
+20:04:31	
+Startup
+20:04:38	
+Startup
+20:05:46	
+Startup
+20:15:33	
+Startup
+20:16:39	
+Startup
+20:17:56	
+Startup
+20:18:29	
+Startup
+20:18:49	
+Startup
+20:20:18	
+Startup
+20:21:13	
+Startup
+20:22:21	s
+20:22:21	Entered search
+20:22:23	Left search and cout bestmove found
+20:27:07	
+Startup
+20:28:06	
+Startup
+20:31:40	
+Startup
+20:33:09	
+Startup
+20:33:46	
+Startup
+20:34:19	
+Startup
+20:35:39	
+Startup
+20:42:15	
+Startup
+20:43:02	
+Startup
+20:44:00	
+Startup
+20:44:14	
+Startup
+20:44:42	
+Startup
+20:45:08	
+Startup
+20:45:40	
+Startup
+20:46:11	
+Startup
+20:47:06	
+Startup
+20:47:39	
+Startup
+20:48:03	
+Startup
+20:49:09	
+Startup
+20:49:27	
+Startup
+20:50:26	
+Startup
+20:50:46	
+Startup
+20:51:17	
+Startup
+21:31:55	
+Startup
+21:32:20	
+Startup
+21:32:25	
+Startup
+21:32:55	
+Startup
+21:33:15	
+Startup
+21:36:07	
+Startup
+21:36:19	
+Startup
+21:37:41	
+Startup
+21:38:38	
+Startup
+21:39:18	
+Startup
+21:39:43	
+Startup
+21:39:52	
+Startup
+21:42:04	
+Startup
+21:43:35	
+Startup
+21:44:01	
+Startup
+21:44:20	
+Startup
+21:44:53	
+Startup
+21:45:45	
+Startup
+21:46:38	
+Startup
+21:47:00	
+Startup
+21:47:38	
+Startup
+21:48:01	
+Startup
+21:49:41	
+Startup
+21:52:11	
+Startup
+21:53:03	
+Startup
+21:54:32	
+Startup
+21:59:13	
+Startup
+22:00:49	
+Startup
+22:01:57	
+Startup
+22:02:44	
+Startup
+22:03:11	
+Startup
+22:04:15	
+Startup
+22:05:24	
+Startup
+22:19:09	
+Startup
+22:19:37	
+Startup
+22:19:54	
+Startup
+22:20:07	
+Startup
+22:22:29	
+Startup
+22:24:04	
+Startup
+22:27:23	
+Startup
+22:35:53	
+Startup
+22:35:54	s
+22:35:54	Entered search
+22:37:26	
+Startup
+22:37:31	s
+22:37:31	Entered search
+22:37:38	Left search and cout bestmove found
+22:38:10	
+Startup
+22:38:13	s
+22:38:13	Entered search
+22:39:06	
+Startup
+22:39:07	s
+22:39:07	Entered search
+22:39:12	
+Startup
+22:39:14	s
+22:39:14	Entered search
+22:39:30	
+Startup
+22:39:31	s
+22:39:31	Entered search
+22:40:26	
+Startup
+22:40:26	s
+22:40:26	Entered search
+22:41:11	
+Startup
+22:41:13	autoplay
+22:41:13	Entered search
+22:42:17	
+Startup
+22:42:17	s
+22:42:17	Entered search
+22:42:51	
+Startup
+22:42:53	s
+22:42:53	Entered search
+22:43:22	
+Startup
+22:43:22	s
+22:43:22	Entered search
+22:43:34	
+Startup
+22:43:34	s
+22:43:34	Entered search
+22:43:57	
+Startup
+22:43:58	s
+22:43:58	Entered search
+22:44:12	
+Startup
+22:44:12	s
+22:44:12	Entered search
+22:44:35	
+Startup
+22:44:36	s
+22:44:36	Entered search
+22:44:52	
+Startup
+22:44:54	s
+22:44:54	Entered search
+22:51:50	
+Startup
+22:51:57	s
+22:51:57	Entered search
+23:43:03	
+Startup
+23:43:04	s
+23:43:04	Entered search
+23:43:17	
+Startup
+23:43:53	s
+23:43:53	Entered search
+23:44:16	
+Startup
+23:44:21	s
+23:44:21	Entered search
+23:45:12	
+Startup
+23:45:13	s
+23:45:13	Entered search
+23:47:34	
+Startup
+23:48:10	
+Startup
+23:48:20	
+Startup
+23:48:24	s
+23:48:24	Entered search
+23:49:42	
+Startup
+23:49:42	s
+23:49:42	Entered search
+23:50:32	
+Startup
+23:50:33	s
+23:50:33	Entered search
+23:51:47	
+Startup
+23:51:53	s
+23:51:53	Entered search
+23:52:14	
+Startup
+23:52:26	
+Startup
+23:54:01	
+Startup
+23:54:11	
+Startup
+23:54:14	s
+23:54:14	Entered search
+23:55:25	
+Startup
+23:55:25	s
+23:55:25	Entered search
+23:56:27	
+Startup
+23:56:45	
+Startup
+23:56:45	s
+23:56:45	Entered search
+23:57:04	
+Startup
+23:57:14	s
+23:57:14	Entered search
+23:58:53	
+Startup
+00:02:08	
+Startup
+00:02:09	s
+00:02:09	Entered search
+00:06:28	
+Startup
+00:07:12	
+Startup
+00:07:14	s
+00:07:14	Entered search
+00:07:37	
+Startup
+00:07:37	s
+00:07:37	Entered search
+00:08:14	
+Startup
+00:08:16	s
+00:08:16	Entered search
+00:11:33	
+Startup
+00:11:54	
+Startup
+00:17:02	
+Startup
+00:20:36	
+Startup
+00:21:28	
+Startup
+00:24:43	
+Startup
+00:25:13	
+Startup
+00:25:49	
+Startup
+00:26:47	
+Startup
+00:26:58	
+Startup
+00:29:21	
+Startup
+00:35:01	
+Startup
+00:35:36	
+Startup
+00:35:59	
+Startup
+00:36:19	
+Startup
+00:36:41	
+Startup
+00:36:47	
+Startup
+00:37:12	
+Startup
+00:37:58	
+Startup
+00:39:07	
+Startup
+00:43:23	
+Startup
+00:44:02	
+Startup
+00:52:07	
+Startup
+00:53:57	
+Startup
+00:54:09	
+Startup
+00:54:10	s
+00:54:10	Entered search
+00:54:10	Left search and cout bestmove found
+00:54:29	
+Startup
+00:54:46	s
+00:54:46	Entered search
+00:55:06	Left search and cout bestmove found
+00:55:47	
+Startup
+00:55:48	s
+00:55:48	Entered search
+00:56:15	Left search and cout bestmove found
+00:57:34	
+Startup
+00:58:12	
+Startup
+00:58:16	s
+00:58:16	Entered search
+00:58:17	Left search and cout bestmove found
+00:58:47	
+Startup
+00:58:49	s
+00:58:49	Entered search
+00:58:49	Left search and cout bestmove found
+01:05:49	
+Startup
+01:05:50	s
+01:05:50	Entered search
+01:05:51	Left search and cout bestmove found
+01:09:08	
+Startup
+01:16:01	
+Startup
+01:16:02	s
+01:16:02	Entered search
+01:16:02	Left search and cout bestmove found
+01:18:50	
+Startup
+01:18:51	s
+01:18:51	Entered search
+01:18:52	Left search and cout bestmove found
+01:19:25	
+Startup
+01:19:26	s
+01:19:26	Entered search
+01:19:27	Left search and cout bestmove found
+01:25:17	
+Startup
+01:25:17	s
+01:25:17	Entered search
+01:25:18	Left search and cout bestmove found
+01:25:46	
+Startup
+01:25:47	s
+01:25:47	Entered search
+01:25:49	Left search and cout bestmove found
+01:26:09	
+Startup
+01:26:10	s
+01:26:10	Entered search
+01:26:12	Left search and cout bestmove found
+01:34:52	
+Startup
+01:34:59	s
+01:34:59	Entered search
+01:34:59	Left search and cout bestmove found
+01:35:26	
+Startup
+01:35:29	s
+01:35:29	Entered search
+01:35:30	Left search and cout bestmove found
+12:55:10	
+Startup
+12:55:11	s
+12:55:11	Entered search
+13:01:17	
+Startup
+13:01:18	s
+13:01:18	Entered search
+13:01:19	Left search and cout bestmove found
+13:01:52	
+Startup
+13:01:52	s
+13:01:52	Entered search
+13:01:56	Left search and cout bestmove found
+13:01:58	s
+13:01:58	Entered search
+13:01:58	Left search and cout bestmove found
+13:02:23	e2e4
+13:02:23	s
+13:02:23	Entered search
+13:02:27	Left search and cout bestmove found
+13:35:53	
+Startup
+13:35:54	s
+13:35:54	Entered search
+13:36:04	Left search and cout bestmove found
+13:36:26	
+Startup
+13:36:30	s
+13:36:30	Entered search
+13:36:30	Left search and cout bestmove found
+13:38:29	
+Startup
+13:38:30	s
+13:38:30	Entered search
+13:38:30	Left search and cout bestmove found
+13:39:50	
+Startup
+13:39:50	s
+13:39:50	Entered search
+13:39:51	Left search and cout bestmove found
+13:40:01	
+Startup
+13:40:02	s
+13:40:02	Entered search
+13:40:02	Left search and cout bestmove found
+13:44:00	
+Startup
+13:44:01	s
+13:44:01	Entered search
+13:44:01	Left search and cout bestmove found
+13:44:20	
+Startup
+13:44:22	s
+13:44:22	Entered search
+13:44:22	Left search and cout bestmove found
+13:44:34	
+Startup
+13:44:34	s
+13:44:34	Entered search
+13:44:45	Left search and cout bestmove found
+13:47:22	
+Startup
+13:47:22	s
+13:47:22	Entered search
+13:47:23	Left search and cout bestmove found
+13:47:56	
+Startup
+13:47:57	s
+13:47:57	Entered search
+13:47:57	Left search and cout bestmove found
+13:56:06	
+Startup
+13:56:07	s
+13:56:07	Entered search
+13:56:07	Left search and cout bestmove found
+13:56:54	
+Startup
+13:56:55	s
+13:56:55	Entered search
+13:56:55	Left search and cout bestmove found
+13:57:45	
+Startup
+13:57:46	s
+13:57:46	Entered search
+13:57:46	Left search and cout bestmove found
+13:59:57	
+Startup
+13:59:57	s
+13:59:57	Entered search
+14:00:08	Left search and cout bestmove found
+14:03:12	
+Startup
+14:03:13	s
+14:03:13	Entered search
+14:03:13	Left search and cout bestmove found
+14:06:22	
+Startup
+14:06:23	s
+14:06:23	Entered search
+14:06:23	Left search and cout bestmove found
+14:22:25	
+Startup
+14:22:29	s
+14:22:29	Entered search
+14:22:29	Left search and cout bestmove found
+14:30:40	
+Startup
+14:30:40	s
+14:30:40	Entered search
+14:30:41	Left search and cout bestmove found
+14:37:26	
+Startup
+14:37:28	
+Startup
+14:37:33	
+Startup
+14:37:35	s
+14:37:35	Entered search
+14:37:35	Left search and cout bestmove found
+14:39:43	
+Startup
+14:39:44	s
+14:39:44	Entered search
+14:39:50	Left search and cout bestmove found
+14:41:18	
+Startup
+14:41:19	s
+14:41:19	Entered search
+14:41:29	Left search and cout bestmove found
+14:42:14	
+Startup
+14:42:15	s
+14:42:15	Entered search
+14:42:22	Left search and cout bestmove found
+14:42:57	
+Startup
+14:42:58	s
+14:42:58	Entered search
+14:43:05	Left search and cout bestmove found
+14:44:59	
+Startup
+14:45:06	
+Startup
+14:45:07	s
+14:45:07	Entered search
+14:45:11	Left search and cout bestmove found
+17:47:07	
+Startup
+17:48:25	
+Startup
+17:52:05	
+Startup
+17:52:24	
+Startup
+17:52:55	
+Startup
+17:53:33	
+Startup
+21:32:34	
+Startup
+21:32:36	s
+21:32:36	Entered search
+21:32:43	Left search and cout bestmove found
+21:33:16	
+Startup
+21:33:20	s
+21:33:20	Entered search
+21:33:29	Left search and cout bestmove found
+21:45:01	
+Startup
+21:45:42	
+Startup
+21:47:27	
+Startup
+21:47:39	
+Startup
+21:49:45	
+Startup
+22:09:29	
+Startup
+22:16:21	
+Startup
+22:16:52	
+Startup
+22:16:53	s
+22:16:53	Entered search
+22:17:03	Left search and cout bestmove found
+22:26:09	
+Startup
+22:26:10	s
+22:26:10	Entered search
+22:26:32	Left search and cout bestmove found
+22:27:13	
+Startup
+22:27:15	s
+22:27:15	Entered search
+22:27:32	Left search and cout bestmove found
+22:33:24	
+Startup
+22:33:28	s
+22:33:28	Entered search
+22:33:37	Left search and cout bestmove found
+22:34:16	
+Startup
+22:34:17	s
+22:34:17	Entered search
+22:34:28	Left search and cout bestmove found
+22:34:57	
+Startup
+22:34:58	s
+22:34:58	Entered search
+22:35:09	Left search and cout bestmove found
+22:36:34	
+Startup
+22:36:36	s
+22:36:36	Entered search
+22:36:47	Left search and cout bestmove found
+22:37:03	
+Startup
+22:37:15	s
+22:37:15	Entered search
+22:37:26	Left search and cout bestmove found
+22:38:41	
+Startup
+22:38:42	s
+22:38:42	Entered search
+22:38:53	Left search and cout bestmove found
+22:39:12	
+Startup
+22:39:24	s
+22:39:24	Entered search
+22:39:35	Left search and cout bestmove found
+23:42:17	
+Startup
+00:05:36	
+Startup
+00:06:16	
+Startup
+00:06:58	
+Startup
+00:07:29	
+Startup
+00:08:24	
+Startup
+00:09:42	
+Startup
+00:10:01	
+Startup
+00:10:27	
+Startup
+00:10:44	
+Startup
+00:11:06	
+Startup
+00:12:44	
+Startup
+00:12:57	
+Startup
+00:15:15	
+Startup
+00:15:24	
+Startup
+00:21:21	
+Startup
+00:21:48	
+Startup
+00:21:57	
+Startup
+00:22:26	
+Startup
+00:23:37	
+Startup
+00:23:38	s
+00:23:38	Entered search
+00:23:48	Left search and cout bestmove found
+00:24:18	
+Startup
+00:24:20	s
+00:24:20	Entered search
+00:24:25	Left search and cout bestmove found
+00:57:40	
+Startup
+00:58:36	
+Startup
+00:59:01	uci
+00:59:01	UCI MODE
+00:59:02	cmd received: isready
+00:59:42	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+00:59:42	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+00:59:42	Parsing complete
+01:00:04	cmd received: go wtime 33318 btime 6387 winc 1000 binc 1000
+01:00:04	Parse go: go wtime 33318 btime 6387 winc 1000 binc 1000
+01:00:04	Parse go finished, start serach now
+01:00:04	Entered search
+01:00:04	Left search and cout bestmove found
+01:00:49	cmd received: go depth 4
+01:00:49	Parse go: go depth 4
+01:00:49	Parse go finished, start serach now
+01:00:49	Entered search
+01:00:49	Left search and cout bestmove found
+01:01:13	cmd received: go movetime 100
+01:01:13	Parse go: go movetime 100
+01:01:13	Set time to 1000ms due to low move time.
+01:01:13	Parse go finished, start serach now
+01:01:13	Entered search
+01:01:13	Left search and cout bestmove found
+01:01:18	cmd received: go movetime 1000
+01:01:18	Parse go: go movetime 1000
+01:01:18	Set time to 1000ms due to low move time.
+01:01:18	Parse go finished, start serach now
+01:01:18	Entered search
+01:01:18	Left search and cout bestmove found
+01:01:26	cmd received: go movetime 1800
+01:01:26	Parse go: go movetime 1800
+01:01:26	Set time to 1000ms due to low move time.
+01:01:26	Parse go finished, start serach now
+01:01:26	Entered search
+01:01:26	Left search and cout bestmove found
+01:03:14	cmd received: 
+01:03:39	
+Startup
+01:03:39	uci
+01:03:39	UCI MODE
+01:03:41	cmd received: isready
+01:03:44	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:03:44	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:03:44	Parsing complete
+01:03:51	cmd received: go movetime 1000
+01:03:51	Parse go: go movetime 1000
+01:03:51	Set time to 1000ms due to low move time.
+01:03:51	Parse go finished, start serach now
+01:03:51	Entered search
+01:03:51	Left search and cout bestmove found
+01:04:58	cmd received: go movetime 1001
+01:04:58	Parse go: go movetime 1001
+01:04:58	Set time to 1000ms due to low move time.
+01:04:58	Parse go finished, start serach now
+01:04:58	Entered search
+01:04:58	Left search and cout bestmove found
+01:06:12	
+Startup
+01:06:13	uci
+01:06:13	UCI MODE
+01:06:14	cmd received: isredy
+01:06:16	cmd received: isready
+01:06:18	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:06:18	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:06:18	Parsing complete
+01:08:31	
+Startup
+01:08:32	s
+01:08:32	Entered search
+01:08:33	Left search and cout bestmove found
+01:08:55	uci
+01:08:55	UCI MODE
+01:08:56	cmd received: isready
+01:08:59	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:08:59	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:08:59	Parsing complete
+01:09:01	cmd received: go depth 3
+01:09:01	Parse go: go depth 3
+01:09:01	Parse go finished, start serach now
+01:09:01	Entered search
+01:09:01	Left search and cout bestmove found
+01:09:13	cmd received: go movetime 10000
+01:09:13	Parse go: go movetime 10000
+01:09:13	Parse go finished, start serach now
+01:09:13	Entered search
+01:09:13	Left search and cout bestmove found
+01:10:51	cmd received: go depth 10
+01:10:51	Parse go: go depth 10
+01:10:51	Parse go finished, start serach now
+01:10:51	Entered search
+01:10:51	Left search and cout bestmove found
+01:11:40	
+Startup
+01:11:41	uci
+01:11:41	UCI MODE
+01:11:43	cmd received: isready
+01:11:45	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:11:45	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:11:45	Parsing complete
+01:11:53	cmd received: go depth 10
+01:11:53	Parse go: go depth 10
+01:11:53	Parse go finished, start serach now
+01:11:53	Entered search
+01:11:53	Left search and cout bestmove found
+01:12:06	cmd received: go depth 15
+01:12:06	Parse go: go depth 15
+01:12:06	Parse go finished, start serach now
+01:12:06	Entered search
+01:12:06	Left search and cout bestmove found
+01:12:36	
+Startup
+01:12:38	uci
+01:12:38	UCI MODE
+01:12:39	cmd received: isready
+01:12:39	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:12:39	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:12:39	Parsing complete
+01:12:46	cmd received: go movetime 10000
+01:12:47	Parse go: go movetime 10000
+01:12:47	Parse go finished, start serach now
+01:12:47	Entered search
+01:12:47	Left search and cout bestmove found
+01:13:39	
+Startup
+01:13:39	uci
+01:13:39	UCI MODE
+01:13:41	cmd received: isready
+01:13:42	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:13:42	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:13:42	Parsing complete
+01:13:46	cmd received: go movetime 10000
+01:13:46	Parse go: go movetime 10000
+01:13:46	Parse go finished, start serach now
+01:13:46	Entered search
+01:13:47	Left search and cout bestmove found
+01:14:55	
+Startup
+01:15:06	
+Startup
+01:15:09	uci
+01:15:09	UCI MODE
+01:15:11	cmd received: isready
+01:15:12	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:15:12	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:15:12	Parsing complete
+01:15:21	cmd received: go movetime 10000
+01:15:21	Parse go: go movetime 10000
+01:15:21	Parse go finished, start serach now
+01:15:21	Entered search
+01:15:21	Left search and cout bestmove found
+01:17:56	
+Startup
+01:17:57	uci
+01:17:57	UCI MODE
+01:17:58	cmd received: isready
+01:17:59	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:17:59	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:17:59	Parsing complete
+01:18:03	cmd received: go movetime 10000
+01:18:03	Parse go: go movetime 10000
+01:18:03	Parse go finished, start serach now
+01:18:03	Entered search
+01:18:04	Left search and cout bestmove found
+01:19:52	
+Startup
+01:19:59	uci
+01:19:59	UCI MODE
+01:20:01	cmd received: isready
+01:20:02	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:20:02	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:20:02	Parsing complete
+01:20:08	cmd received: go movetime 10000
+01:20:08	Parse go: go movetime 10000
+01:20:08	Parse go finished, start serach now
+01:20:08	Entered search
+01:20:08	Left search and cout bestmove found
+01:46:25	
+Startup
+01:46:30	uci
+01:46:30	UCI MODE
+01:46:31	cmd received: isready
+01:46:33	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:46:33	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+01:46:33	Parsing complete
+01:46:39	cmd received: go movetime 1000
+01:46:39	Parse go: go movetime 1000
+01:46:39	Set time to 1000ms due to low move time.
+01:46:39	Parse go finished, start serach now
+01:46:39	Entered search
+01:51:32	
+Startup
+01:51:33	s
+01:51:33	Entered search
+01:52:05	
+Startup
+01:52:06	s
+01:52:06	Entered search
+01:52:56	
+Startup
+01:52:57	s
+01:52:57	Entered search
+01:52:58	Left search and cout bestmove found
+01:54:52	
+Startup
+01:54:52	s
+01:54:52	Entered search
+01:54:53	Left search and cout bestmove found
+01:55:14	
+Startup
+01:55:15	s
+01:55:15	Entered search
+01:55:16	Left search and cout bestmove found
+02:01:01	
+Startup
+02:01:02	s
+02:01:02	Entered search
+02:01:03	Left search and cout bestmove found
+02:01:07	s
+02:01:07	Entered search
+02:01:07	Left search and cout bestmove found
+02:01:29	
+Startup
+02:01:30	s
+02:01:30	Entered search
+02:01:31	Left search and cout bestmove found
+12:43:25	
+Startup
+12:43:26	s
+12:43:26	Entered search
+12:43:27	Left search and cout bestmove found
+12:43:36	s
+12:43:36	Entered search
+12:43:36	Left search and cout bestmove found
+12:43:54	
+Startup
+12:43:55	s
+12:43:55	Entered search
+12:45:04	
+Startup
+12:45:11	uci
+12:45:11	UCI MODE
+12:45:13	cmd received: isready
+12:45:15	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+12:45:15	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 b8a6 b2f6 g7f6 a2a3 h5g6 h3h4 h7h5 e2e4 a6c5 e4d5 c6d5 d3d4 c5e4 c2c4 a8c8 c4d5 e6d5 e1g1 a7a5 f1c1 c8c1 a1c1 g6f5 d2e4 d5e4 f3d2 f8a3 c1c7 e4e3 f2e3 a3d6 c7b7 d6g3 d2f1 g3d6 b7a7 e8g8 a7a5 f5g4 a5a6 d6e7 a6a7 e7b4 g1f2 f8c8 g2e4 c8c1 e4d5 b4e1 f2g2 c1c2 g2h1 g4e6 d5e4 c2b2 d4d5 e6h3 d5d6 e1h4 a7a1 b2b3 e4g2 h3g4 a1a7 b3d3 a7a6 g8g7 h1g1 d3d1 g1h2 h4g5 a6a7 h5h4 a7a4 g4f5 a4a5 f5e6 a5a4 d1d6 g2f3 f6f5 h2g2 d6b6 f3e2 g7f6 a4a5 b6b3 g2f2 h4h3 a5a4 b3c3 e2d1 f6e5 a4a5 e5d6 a5a6 d6c5 a6a5 c5b6 a5a4 b6b5 a4a7 e6c4 a7b7 b5c5 b7c7 c5d6 c7c8 g5h4 f2g1 h4e1 f1h2 f7f6 c8h8 c3c1 h8d8 d6c7 d8h8 c1d1 h8h3 e1h4 g1g2 d1d2 g2h1 c4d5 h1g1 h4f2 g1f1 d5c4 f1g2 f2e3 g2g3 f5f4 g3h4 c4e6 h2g4 d2d8 g4f6 d8h8 f6h5 e3d4 h4g5 e6h3 h5f4
+12:45:15	Parsing complete
+12:45:21	cmd received: go depth 15
+12:45:21	Parse go: go depth 15
+12:45:21	Parse go finished, start serach now
+12:45:21	Entered search
+12:45:21	Left search and cout bestmove found
+12:45:50	cmd received: go movetime 3214
+12:45:50	Parse go: go movetime 3214
+12:45:50	Parse go finished, start serach now
+12:45:50	Entered search
+12:45:50	Left search and cout bestmove found
+12:53:55	
+Startup
+12:54:00	uci
+12:54:00	UCI MODE
+12:54:02	cmd received: isready
+12:54:04	cmd received: ucinewgame
+12:54:04	Parse position: position startpos
+
+12:54:04	Parsing complete
+12:54:09	cmd received: go depth 1
+12:54:09	Parse go: go depth 1
+12:54:09	
+12:54:09	wbinc:
+12:54:09	
+12:54:09	Parse go finished, start serach now
+12:54:09	Entered search
+12:55:39	
+Startup
+12:55:41	uci
+12:55:41	UCI MODE
+12:55:42	cmd received: isready
+12:55:44	cmd received: ucinewgame
+12:55:44	Parse position: position startpos
+
+12:55:44	Parsing complete
+12:57:46	
+Startup
+12:57:49	uci
+12:57:49	UCI MODE
+12:57:51	cmd received: isready
+12:57:53	cmd received: ucinewgame
+12:57:53	Parse position: position startpos
+
+12:57:53	Parsing complete
+12:58:22	
+Startup
+12:58:24	uci
+12:58:24	UCI MODE
+12:58:26	cmd received: isready
+12:58:28	cmd received: ucinewgame
+12:58:28	Parse position: position startpos
+12:58:28	Parsing complete
+13:16:59	
+Startup
+13:17:01	uci
+13:17:01	UCI MODE
+13:17:02	cmd received: isready
+13:17:04	cmd received: ucinewgame
+13:17:04	Parse position: position startpos
+13:17:04	Parsing complete
+13:17:08	cmd received: isready
+13:17:34	cmd received: position startpos moves d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 f1e2 e7e5 c1e3 e5d4 f3d4 f8e8 f2f3 a7a6 e1g1 c7c5 d4b3 b8c6 d1d2 a6a5 c3b5 a5a4 b5d6 e8e6 d6f7 d8d2 b3d2 g8f7 e3c5 f6d7 c5a3 g7d4 g1h1 d7c5 a3c5 d4c5 f3f4 c5e3 d2f3 f7g8 f3g5 e6e8 c4c5 h7h6 e2c4 g8g7 a1e1 e3d2 e1e2 h6g5 e2d2 e8e4 c4d5 e4f4 h1g1 f4f1 g1f1 a8a5 d5c6 b7c6 d2c2 c8e6 a2a3 g7f6 f1f2 f6e5 c2e2 e5d5 e2d2 d5c5 f2e3 a5b5 e3e4 c5c4 h2h3 e6f5 e4e3 b5b3 e3e2 g5g4 h3h4 g4g3 e2d1 f5d3 d1c1 b3b5 d2d1 b5e5 d1d2 c4d4 c1d1 e5c5 b2b3 a4b3 d2b2 d4c3 b2b3 c3b3 d1d2 d3f5 d2e3 c5c4 e3f3 c4g4 a3a4 b3a4 f3e2 g4e4 e2f3 e4g4 f3e2
+13:17:34	Parse position: position startpos moves d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 f1e2 e7e5 c1e3 e5d4 f3d4 f8e8 f2f3 a7a6 e1g1 c7c5 d4b3 b8c6 d1d2 a6a5 c3b5 a5a4 b5d6 e8e6 d6f7 d8d2 b3d2 g8f7 e3c5 f6d7 c5a3 g7d4 g1h1 d7c5 a3c5 d4c5 f3f4 c5e3 d2f3 f7g8 f3g5 e6e8 c4c5 h7h6 e2c4 g8g7 a1e1 e3d2 e1e2 h6g5 e2d2 e8e4 c4d5 e4f4 h1g1 f4f1 g1f1 a8a5 d5c6 b7c6 d2c2 c8e6 a2a3 g7f6 f1f2 f6e5 c2e2 e5d5 e2d2 d5c5 f2e3 a5b5 e3e4 c5c4 h2h3 e6f5 e4e3 b5b3 e3e2 g5g4 h3h4 g4g3 e2d1 f5d3 d1c1 b3b5 d2d1 b5e5 d1d2 c4d4 c1d1 e5c5 b2b3 a4b3 d2b2 d4c3 b2b3 c3b3 d1d2 d3f5 d2e3 c5c4 e3f3 c4g4 a3a4 b3a4 f3e2 g4e4 e2f3 e4g4 f3e2
+13:17:34	Parsing complete
+13:17:48	cmd received: position startpos moves d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 f1e2 e7e5 c1e3 e5d4 f3d4 f8e8 f2f3 a7a6 e1g1 c7c5 d4b3 b8c6 d1d2 a6a5 c3b5 a5a4 b5d6 e8e6 d6f7 d8d2 b3d2 g8f7 e3c5 f6d7 c5a3 g7d4 g1h1 d7c5 a3c5 d4c5 f3f4 c5e3 d2f3 f7g8 f3g5 e6e8 c4c5 h7h6 e2c4 g8g7 a1e1 e3d2 e1e2 h6g5 e2d2 e8e4 c4d5 e4f4 h1g1 f4f1 g1f1 a8a5 d5c6 b7c6 d2c2 c8e6 a2a3 g7f6 f1f2 f6e5 c2e2 e5d5 e2d2 d5c5 f2e3 a5b5 e3e4 c5c4 h2h3 e6f5 e4e3 b5b3 e3e2 g5g4 h3h4 g4g3 e2d1 f5d3 d1c1 b3b5 d2d1 b5e5 d1d2 c4d4 c1d1 e5c5 b2b3 a4b3 d2b2 d4c3 b2b3 c3b3 d1d2 d3f5 d2e3 c5c4 e3f3 c4g4 a3a4 b3a4 f3e2 g4e4 e2f3 e4g4 f3e2
+13:17:48	Parse position: position startpos moves d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 f1e2 e7e5 c1e3 e5d4 f3d4 f8e8 f2f3 a7a6 e1g1 c7c5 d4b3 b8c6 d1d2 a6a5 c3b5 a5a4 b5d6 e8e6 d6f7 d8d2 b3d2 g8f7 e3c5 f6d7 c5a3 g7d4 g1h1 d7c5 a3c5 d4c5 f3f4 c5e3 d2f3 f7g8 f3g5 e6e8 c4c5 h7h6 e2c4 g8g7 a1e1 e3d2 e1e2 h6g5 e2d2 e8e4 c4d5 e4f4 h1g1 f4f1 g1f1 a8a5 d5c6 b7c6 d2c2 c8e6 a2a3 g7f6 f1f2 f6e5 c2e2 e5d5 e2d2 d5c5 f2e3 a5b5 e3e4 c5c4 h2h3 e6f5 e4e3 b5b3 e3e2 g5g4 h3h4 g4g3 e2d1 f5d3 d1c1 b3b5 d2d1 b5e5 d1d2 c4d4 c1d1 e5c5 b2b3 a4b3 d2b2 d4c3 b2b3 c3b3 d1d2 d3f5 d2e3 c5c4 e3f3 c4g4 a3a4 b3a4 f3e2 g4e4 e2f3 e4g4 f3e2
+13:17:48	Parsing complete
+13:19:04	
+Startup
+13:19:05	uci
+13:19:05	UCI MODE
+13:19:11	cmd received: isready
+13:19:11	cmd received: 
+13:19:12	cmd received: position startpos moves d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 f1e2 e7e5 c1e3 e5d4 f3d4 f8e8 f2f3 a7a6 e1g1 c7c5 d4b3 b8c6 d1d2 a6a5 c3b5 a5a4 b5d6 e8e6 d6f7 d8d2 b3d2 g8f7 e3c5 f6d7 c5a3 g7d4 g1h1 d7c5 a3c5 d4c5 f3f4 c5e3 d2f3 f7g8 f3g5 e6e8 c4c5 h7h6 e2c4 g8g7 a1e1 e3d2 e1e2 h6g5 e2d2 e8e4 c4d5 e4f4 h1g1 f4f1 g1f1 a8a5 d5c6 b7c6 d2c2 c8e6 a2a3 g7f6 f1f2 f6e5 c2e2 e5d5 e2d2 d5c5 f2e3 a5b5 e3e4 c5c4 h2h3 e6f5 e4e3 b5b3 e3e2 g5g4 h3h4 g4g3 e2d1 f5d3 d1c1 b3b5 d2d1 b5e5 d1d2 c4d4 c1d1 e5c5 b2b3 a4b3 d2b2 d4c3 b2b3 c3b3 d1d2 d3f5 d2e3 c5c4 e3f3 c4g4 a3a4 b3a4 f3e2 g4e4 e2f3 e4g4 f3e2
+13:19:12	Parse position: position startpos moves d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 f1e2 e7e5 c1e3 e5d4 f3d4 f8e8 f2f3 a7a6 e1g1 c7c5 d4b3 b8c6 d1d2 a6a5 c3b5 a5a4 b5d6 e8e6 d6f7 d8d2 b3d2 g8f7 e3c5 f6d7 c5a3 g7d4 g1h1 d7c5 a3c5 d4c5 f3f4 c5e3 d2f3 f7g8 f3g5 e6e8 c4c5 h7h6 e2c4 g8g7 a1e1 e3d2 e1e2 h6g5 e2d2 e8e4 c4d5 e4f4 h1g1 f4f1 g1f1 a8a5 d5c6 b7c6 d2c2 c8e6 a2a3 g7f6 f1f2 f6e5 c2e2 e5d5 e2d2 d5c5 f2e3 a5b5 e3e4 c5c4 h2h3 e6f5 e4e3 b5b3 e3e2 g5g4 h3h4 g4g3 e2d1 f5d3 d1c1 b3b5 d2d1 b5e5 d1d2 c4d4 c1d1 e5c5 b2b3 a4b3 d2b2 d4c3 b2b3 c3b3 d1d2 d3f5 d2e3 c5c4 e3f3 c4g4 a3a4 b3a4 f3e2 g4e4 e2f3 e4g4 f3e2
+13:19:12	Parsing complete
+13:19:27	cmd received: position startpos moves d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 f1e2 e7e5 c1e3 e5d4 f3d4 f8e8 f2f3 a7a6 e1g1 c7c5 d4b3 b8c6 d1d2 a6a5 c3b5 a5a4 b5d6 e8e6 d6f7 d8d2 b3d2 g8f7 e3c5 f6d7 c5a3 g7d4 g1h1 d7c5 a3c5 d4c5 f3f4 c5e3 d2f3 f7g8 f3g5 e6e8 c4c5 h7h6 e2c4 g8g7 a1e1 e3d2 e1e2 h6g5 e2d2 e8e4 c4d5 e4f4 h1g1 f4f1 g1f1 a8a5 d5c6 b7c6 d2c2 c8e6 a2a3 g7f6 f1f2 f6e5 c2e2 e5d5 e2d2 d5c5 f2e3 a5b5 e3e4 c5c4 h2h3 e6f5 e4e3 b5b3 e3e2 g5g4 h3h4 g4g3 e2d1 f5d3 d1c1 b3b5 d2d1 b5e5 d1d2 c4d4 c1d1 e5c5 b2b3 a4b3 d2b2 d4c3 b2b3 c3b3 d1d2 d3f5 d2e3 c5c4 e3f3 c4g4 a3a4 b3a4 f3e2 g4e4 e2f3 e4g4 f3e2
+13:19:27	Parse position: position startpos moves d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 f1e2 e7e5 c1e3 e5d4 f3d4 f8e8 f2f3 a7a6 e1g1 c7c5 d4b3 b8c6 d1d2 a6a5 c3b5 a5a4 b5d6 e8e6 d6f7 d8d2 b3d2 g8f7 e3c5 f6d7 c5a3 g7d4 g1h1 d7c5 a3c5 d4c5 f3f4 c5e3 d2f3 f7g8 f3g5 e6e8 c4c5 h7h6 e2c4 g8g7 a1e1 e3d2 e1e2 h6g5 e2d2 e8e4 c4d5 e4f4 h1g1 f4f1 g1f1 a8a5 d5c6 b7c6 d2c2 c8e6 a2a3 g7f6 f1f2 f6e5 c2e2 e5d5 e2d2 d5c5 f2e3 a5b5 e3e4 c5c4 h2h3 e6f5 e4e3 b5b3 e3e2 g5g4 h3h4 g4g3 e2d1 f5d3 d1c1 b3b5 d2d1 b5e5 d1d2 c4d4 c1d1 e5c5 b2b3 a4b3 d2b2 d4c3 b2b3 c3b3 d1d2 d3f5 d2e3 c5c4 e3f3 c4g4 a3a4 b3a4 f3e2 g4e4 e2f3 e4g4 f3e2
+13:19:27	Parsing complete
+13:37:50	
+Startup
+13:37:52	uci
+13:37:52	UCI MODE
+13:37:53	cmd received: isready
+13:37:54	cmd received: position startpos moves d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 c1g5 c7c5 d4d5 e6d5 c4d5 d7d6 e2e3 b8d7 f1b5 h7h6 g5f6 d8f6 g1e2 b4c3 e2c3 e8g8 e1g1 d7e5 f2f4 e5g4 d1e2 f6h4 h2h3 g4f6 a2a4 c8d7 a4a5 d7b5 e2b5 a8b8 a1e1 f6h5 f4f5 f8e8 b5d7 h4b4 d7d6 b8d8 d6c7 d8c8 c7d7 h5f6 d7b5 f6d5 b5b4 d5b4 e3e4 b4c2 e1b1 c2e3 f1f2 c8d8 b2b3 d8d3 b1c1 c5c4 b3b4 e8d8 g2g4 e3d1 c3d1 d3d1 f2f1 d1d4 e4e5 d4e4 f1e1 e4e1 c1e1 d8d2 e5e6 g8f8 e1c1 d2d4 e6f7 f8f7 b4b5 b7b6 a5a6 h6h5 g4h5 f7f6 g1h2 f6f5 c1g1 d4d2 h2g3 c4c3 g3f3 c3c2 g1c1 d2h2 f3g3 h2e2 g3f3 e2d2 f3e3 d2h2 e3d4 f5g5 d4c3 g5h5 c1c2 h2c2 c3c2 h5h4
+13:37:54	Parse position: position startpos moves d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 c1g5 c7c5 d4d5 e6d5 c4d5 d7d6 e2e3 b8d7 f1b5 h7h6 g5f6 d8f6 g1e2 b4c3 e2c3 e8g8 e1g1 d7e5 f2f4 e5g4 d1e2 f6h4 h2h3 g4f6 a2a4 c8d7 a4a5 d7b5 e2b5 a8b8 a1e1 f6h5 f4f5 f8e8 b5d7 h4b4 d7d6 b8d8 d6c7 d8c8 c7d7 h5f6 d7b5 f6d5 b5b4 d5b4 e3e4 b4c2 e1b1 c2e3 f1f2 c8d8 b2b3 d8d3 b1c1 c5c4 b3b4 e8d8 g2g4 e3d1 c3d1 d3d1 f2f1 d1d4 e4e5 d4e4 f1e1 e4e1 c1e1 d8d2 e5e6 g8f8 e1c1 d2d4 e6f7 f8f7 b4b5 b7b6 a5a6 h6h5 g4h5 f7f6 g1h2 f6f5 c1g1 d4d2 h2g3 c4c3 g3f3 c3c2 g1c1 d2h2 f3g3 h2e2 g3f3 e2d2 f3e3 d2h2 e3d4 f5g5 d4c3 g5h5 c1c2 h2c2 c3c2 h5h4
+13:37:54	Parsing complete
+13:37:55	cmd received: s
+13:37:59	cmd received: go depth 15
+13:37:59	Parse go: go depth 15
+13:37:59	
+13:37:59	wbinc:
+13:37:59	
+13:37:59	Parse go finished, start serach now
+13:37:59	Entered search
+13:37:59	Left search and cout bestmove found
+13:41:16	
+Startup
+13:41:17	s
+13:41:17	Entered search
+13:41:17	Left search and cout bestmove found
+13:41:51	
+Startup
+13:41:52	s
+13:41:52	Entered search
+13:41:52	Left search and cout bestmove found
+13:42:23	
+Startup
+13:42:30	uci
+13:42:30	UCI MODE
+13:42:31	cmd received: isready
+13:42:33	cmd received: position startpos moves d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 c1g5 c7c5 d4d5 e6d5 c4d5 d7d6 e2e3 b8d7 f1b5 h7h6 g5f6 d8f6 g1e2 b4c3 e2c3 e8g8 e1g1 d7e5 f2f4 e5g4 d1e2 f6h4 h2h3 g4f6 a2a4 c8d7 a4a5 d7b5 e2b5 a8b8 a1e1 f6h5 f4f5 f8e8 b5d7 h4b4 d7d6 b8d8 d6c7 d8c8 c7d7 h5f6 d7b5 f6d5 b5b4 d5b4 e3e4 b4c2 e1b1 c2e3 f1f2 c8d8 b2b3 d8d3 b1c1 c5c4 b3b4 e8d8 g2g4 e3d1 c3d1 d3d1 f2f1 d1d4 e4e5 d4e4 f1e1 e4e1 c1e1 d8d2 e5e6 g8f8 e1c1 d2d4 e6f7 f8f7 b4b5 b7b6 a5a6 h6h5 g4h5 f7f6 g1h2 f6f5 c1g1 d4d2 h2g3 c4c3 g3f3 c3c2 g1c1 d2h2 f3g3 h2e2 g3f3 e2d2 f3e3 d2h2 e3d4 f5g5 d4c3 g5h5 c1c2 h2c2 c3c2 h5h4
+13:42:33	Parse position: position startpos moves d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 c1g5 c7c5 d4d5 e6d5 c4d5 d7d6 e2e3 b8d7 f1b5 h7h6 g5f6 d8f6 g1e2 b4c3 e2c3 e8g8 e1g1 d7e5 f2f4 e5g4 d1e2 f6h4 h2h3 g4f6 a2a4 c8d7 a4a5 d7b5 e2b5 a8b8 a1e1 f6h5 f4f5 f8e8 b5d7 h4b4 d7d6 b8d8 d6c7 d8c8 c7d7 h5f6 d7b5 f6d5 b5b4 d5b4 e3e4 b4c2 e1b1 c2e3 f1f2 c8d8 b2b3 d8d3 b1c1 c5c4 b3b4 e8d8 g2g4 e3d1 c3d1 d3d1 f2f1 d1d4 e4e5 d4e4 f1e1 e4e1 c1e1 d8d2 e5e6 g8f8 e1c1 d2d4 e6f7 f8f7 b4b5 b7b6 a5a6 h6h5 g4h5 f7f6 g1h2 f6f5 c1g1 d4d2 h2g3 c4c3 g3f3 c3c2 g1c1 d2h2 f3g3 h2e2 g3f3 e2d2 f3e3 d2h2 e3d4 f5g5 d4c3 g5h5 c1c2 h2c2 c3c2 h5h4
+13:42:33	Parsing complete
+13:42:35	cmd received: go depth 15
+13:42:35	Parse go: go depth 15
+13:42:35	
+13:42:35	wbinc:
+13:42:35	
+13:42:35	Parse go finished, start serach now
+13:42:35	Entered search
+13:42:35	Left search and cout bestmove found
+13:43:11	
+Startup
+13:43:14	uci
+13:43:14	UCI MODE
+13:43:15	cmd received: isready
+13:43:17	cmd received: position startpos moves d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 c1g5 c7c5 d4d5 e6d5 c4d5 d7d6 e2e3 b8d7 f1b5 h7h6 g5f6 d8f6 g1e2 b4c3 e2c3 e8g8 e1g1 d7e5 f2f4 e5g4 d1e2 f6h4 h2h3 g4f6 a2a4 c8d7 a4a5 d7b5 e2b5 a8b8 a1e1 f6h5 f4f5 f8e8 b5d7 h4b4 d7d6 b8d8 d6c7 d8c8 c7d7 h5f6 d7b5 f6d5 b5b4 d5b4 e3e4 b4c2 e1b1 c2e3 f1f2 c8d8 b2b3 d8d3 b1c1 c5c4 b3b4 e8d8 g2g4 e3d1 c3d1 d3d1 f2f1 d1d4 e4e5 d4e4 f1e1 e4e1 c1e1 d8d2 e5e6 g8f8 e1c1 d2d4 e6f7 f8f7 b4b5 b7b6 a5a6 h6h5 g4h5 f7f6 g1h2 f6f5 c1g1 d4d2 h2g3 c4c3 g3f3 c3c2 g1c1 d2h2 f3g3 h2e2 g3f3 e2d2 f3e3 d2h2 e3d4 f5g5 d4c3 g5h5 c1c2 h2c2 c3c2 h5h4
+13:43:17	Parse position: position startpos moves d2d4 g8f6 c2c4 e7e6 b1c3 f8b4 c1g5 c7c5 d4d5 e6d5 c4d5 d7d6 e2e3 b8d7 f1b5 h7h6 g5f6 d8f6 g1e2 b4c3 e2c3 e8g8 e1g1 d7e5 f2f4 e5g4 d1e2 f6h4 h2h3 g4f6 a2a4 c8d7 a4a5 d7b5 e2b5 a8b8 a1e1 f6h5 f4f5 f8e8 b5d7 h4b4 d7d6 b8d8 d6c7 d8c8 c7d7 h5f6 d7b5 f6d5 b5b4 d5b4 e3e4 b4c2 e1b1 c2e3 f1f2 c8d8 b2b3 d8d3 b1c1 c5c4 b3b4 e8d8 g2g4 e3d1 c3d1 d3d1 f2f1 d1d4 e4e5 d4e4 f1e1 e4e1 c1e1 d8d2 e5e6 g8f8 e1c1 d2d4 e6f7 f8f7 b4b5 b7b6 a5a6 h6h5 g4h5 f7f6 g1h2 f6f5 c1g1 d4d2 h2g3 c4c3 g3f3 c3c2 g1c1 d2h2 f3g3 h2e2 g3f3 e2d2 f3e3 d2h2 e3d4 f5g5 d4c3 g5h5 c1c2 h2c2 c3c2 h5h4
+13:43:17	Parsing complete
+13:43:20	cmd received: go depth 10
+13:43:20	Parse go: go depth 10
+13:43:20	
+13:43:20	wbinc:
+13:43:20	
+13:43:20	Parse go finished, start serach now
+13:43:20	Entered search
+13:43:21	Left search and cout bestmove found
+14:08:04	
+Startup
+14:08:06	perft
+14:09:14	
+Startup
+14:09:19	b2b1q
+14:10:28	
+Startup
+14:10:29	perft
+14:10:39	
+Startup
+14:10:46	g7g8q
+14:10:50	a2a1q
+14:12:47	
+Startup
+14:13:14	
+Startup
+14:13:19	g7g8q
+14:13:23	a2a1q
+14:13:25	a2a1n
+14:15:03	
+Startup
+14:15:10	g7g8q
+14:15:16	a2a1q
+14:16:29	
+Startup
+14:16:33	g7g8q
+14:16:37	a2a1q
+14:18:11	
+Startup
+14:18:15	g7g8q
+14:18:18	a2a1q
+14:21:12	
+Startup
+14:21:16	g7g8q
+14:21:19	a2a1q
+16:27:11	
+Startup
+16:27:13	uci
+16:27:13	UCI MODE
+16:27:15	cmd received: isready
+16:27:18	cmd received: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4 b8a6 a1c1 f8e8
+16:27:18	Parse position: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4 b8a6 a1c1 f8e8
+16:27:18	Parsing complete
+16:27:29	cmd received: go depth 6
+16:27:29	Parse go: go depth 6
+16:27:29	
+16:27:29	wbinc:
+16:27:29	
+16:27:29	Parse go finished, start serach now
+16:27:29	Entered search
+16:27:31	Left search and cout bestmove found
+16:28:36	cmd received: go wtime 63541 btime 65495 winc 1000 winc 1000
+16:28:36	Parse go: go wtime 63541 btime 65495 winc 1000 winc 1000
+16:28:36	
+16:28:36	
+16:28:36	
+16:28:36	Parse go finished, start serach now
+16:28:36	Entered search
+16:28:39	Left search and cout bestmove found
+16:30:02	
+Startup
+16:30:06	uci
+16:30:06	UCI MODE
+16:30:07	cmd received: isready
+16:30:08	cmd received: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4 b8a6 a1c1 f8e8
+16:30:08	Parse position: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4 b8a6 a1c1 f8e8
+16:30:08	Parsing complete
+16:30:15	cmd received: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4
+16:30:15	Parse position: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4
+16:30:16	Parsing complete
+16:30:34	cmd received: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4
+16:30:34	Parse position: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4
+16:30:34	Parsing complete
+16:30:35	cmd received: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4 b8a6 a1c1 f8e8
+16:30:35	Parse position: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4 b8a6 a1c1 f8e8
+16:30:35	Parsing complete
+16:31:47	
+Startup
+16:31:55	
+Startup
+16:32:12	
+Startup
+16:32:17	s
+16:32:17	Entered search
+16:32:19	Left search and cout bestmove found
+16:32:27	c2c4
+16:32:40	g7g6
+16:32:51	uci
+16:32:51	UCI MODE
+16:32:52	cmd received: isready
+16:32:52	cmd received: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4 b8a6 a1c1 f8e8
+16:32:52	Parse position: position startpos moves c2c4 g7g6 b1c3 f8g7 g2g3 e7e5 f1g2 d7d6 d2d3 g8f6 f2f4 e8g8 g1f3 e5f4 c1f4 c7c6 e2e4 b8a6 a1c1 f8e8
+16:32:52	Parsing complete
+16:34:32	
+Startup
+16:34:34	s
+16:34:34	Entered search
+16:35:13	Left search and cout bestmove found
+16:35:55	
+Startup
+16:35:55	s
+16:35:55	Entered search
+16:39:48	
+Startup
+16:40:34	
+Startup
+16:41:04	
+Startup
+16:42:31	
+Startup
+16:42:45	
+Startup
+16:43:27	
+Startup
+16:44:02	
+Startup
+16:44:35	
+Startup
+16:44:46	
+Startup
+16:44:57	
+Startup
+16:45:50	
+Startup
+16:46:04	
+Startup
+20:08:10	parseFen() finished.
+20:08:10	
+Startup
+20:08:15	uci
+20:08:15	UCI MODE
+20:08:17	cmd received: isready
+20:08:20	cmd received: ucinewgame
+20:08:20	Parse position: position startpos
+20:08:20	parseFen() finished.
+20:08:20	Parsing complete
+20:08:23	cmd received: position startpos moves g1f3 e7e6 c2c4 g8f6 b1c3 f8b4 d1c2 d7d5 c4d5 e6d5 c2a4 b8c6 f3d4 a7a5 d4c6 b7c6 a2a3 b4e7 a4c6
+20:08:23	Parse position: position startpos moves g1f3 e7e6 c2c4 g8f6 b1c3 f8b4 d1c2 d7d5 c4d5 e6d5 c2a4 b8c6 f3d4 a7a5 d4c6 b7c6 a2a3 b4e7 a4c6
+20:08:23	parseFen() finished.
+20:08:23	Parsing complete
+20:14:20	parseFen() finished.
+20:14:20	
+Startup
+20:14:24	uci
+20:14:24	UCI MODE
+20:14:25	cmd received: isready
+20:14:27	cmd received: position startpos moves b2b4
+20:14:27	Parse position: position startpos moves b2b4
+20:14:27	parseFen() finished.
+20:14:27	Parsing complete
+20:14:46	parseFen() finished.
+20:14:46	
+Startup
+20:14:48	uci
+20:14:48	UCI MODE
+20:14:49	cmd received: isready
+20:14:59	cmd received: position startpos moves b2b4 a7a5 b4a5 b7b6 a5b6 h7h6 b6c7 g7g6 c7b8q d8c7
+20:14:59	Parse position: position startpos moves b2b4 a7a5 b4a5 b7b6 a5b6 h7h6 b6c7 g7g6 c7b8q d8c7
+20:14:59	parseFen() finished.
+20:14:59	Parsing complete
+18:29:45	parseFen() finished.
+18:29:45	
+Startup
+18:29:46	s
+18:29:46	Entered search
+18:29:46	Left search and cout bestmove found
+18:30:02	parseFen() finished.
+18:30:02	
+Startup
+18:30:03	s
+18:30:03	Entered search
+18:30:03	Left search and cout bestmove found
+18:30:50	parseFen() finished.
+18:30:50	
+Startup
+18:30:51	s
+18:30:51	Entered search
+18:30:51	Left search and cout bestmove found
+18:31:04	parseFen() finished.
+18:31:04	
+Startup
+18:31:05	s
+18:31:05	Entered search
+18:33:38	parseFen() finished.
+18:33:38	
+Startup
+18:33:40	s
+18:33:40	Entered search
+18:34:00	parseFen() finished.
+18:34:00	
+Startup
+18:34:02	s
+18:34:02	Entered search
+18:36:52	parseFen() finished.
+18:36:52	
+Startup
+18:36:54	s
+18:36:54	Entered search
+18:37:19	parseFen() finished.
+18:37:19	
+Startup
+18:37:20	s
+18:37:20	Entered search
+18:39:26	parseFen() finished.
+18:39:26	
+Startup
+18:39:27	s
+18:39:27	Entered search
+18:40:35	parseFen() finished.
+18:40:35	
+Startup
+18:40:35	s
+18:40:35	Entered search
+18:40:36	Left search and cout bestmove found
+18:43:40	parseFen() finished.
+18:43:40	
+Startup
+18:43:41	uci
+18:43:41	UCI MODE
+18:43:43	cmd received: isready
+18:43:44	cmd received: position startpos moves e2e4 c7c5 c2c3 e7e6 g1f3 d7d5 e4d5 e6d5 d2d4 b8c6 f1b5 f8d6 e1g1 g8f6 c1g5 c8e6 b5c6 b7c6 d1a4 d8b6 g5f6 g7f6 b1d2 e8g8 a4a3 e6g4 h2h3 g4f3 d2f3 a8b8 a1b1 f8e8 d4c5 d6c5 b2b4 c5d6 b1b3 b8a8 a3a4 d6e5 b4b5 c6c5 a4g4 g8h8 c3c4 d5d4 f3d2 b6e6 g4e6 f7e6 f2f4 e5d6 d2e4 d6e7 f4f5 e6e5 a2a4 a8b8 g2g4 e8g8 g1f2 g8g7 f2e2 h7h6 a4a5 b8b7 b3b1 g7g8 e2d3 g8b8 a5a6 b7b6 d3c2 b8d8 h3h4 d8g8 g4g5 g8c8 g5g6 h8g8 h4h5 c8b8 f1f3 g8g7 b1a1 b8g8 c2b3 g7f8 a1g1 g8g7 f3f1 f8e8 f1a1 b6b8 g1e1 b8d8 a1b1 d8b8 e1f1 g7g8 f1f3 b8b6 f3g3 g8g7 b3a2 e8d8 g3f3 d8d7 b1d1 d7e8 a2b3 g7g8 e4f2 e7d6 d1g1 d6f8 f2e4 f8e7 g6g7 e8f7 f3g3 b6b8 e4f2 e7d6 g3g6 e5e4 f2g4 d6f4 g4f6 g8g7 f6e4 g7h7 e4c5 f4e3 g1d1 b8d8 b3b4 e3f2 c5d3 f2e3 d3e5 f7f8 e5c6 d8d7 f5f6 h7h8 b5b6 a7b6 a6a7 d7a7 c6a7 f8f7 b4b5 h8g8 d1f1 d4d3 a7c6 f7f8 g6g8 f8g8 f6f7 g8f8 c6e5 e3c5
+18:43:44	Parse position: position startpos moves e2e4 c7c5 c2c3 e7e6 g1f3 d7d5 e4d5 e6d5 d2d4 b8c6 f1b5 f8d6 e1g1 g8f6 c1g5 c8e6 b5c6 b7c6 d1a4 d8b6 g5f6 g7f6 b1d2 e8g8 a4a3 e6g4 h2h3 g4f3 d2f3 a8b8 a1b1 f8e8 d4c5 d6c5 b2b4 c5d6 b1b3 b8a8 a3a4 d6e5 b4b5 c6c5 a4g4 g8h8 c3c4 d5d4 f3d2 b6e6 g4e6 f7e6 f2f4 e5d6 d2e4 d6e7 f4f5 e6e5 a2a4 a8b8 g2g4 e8g8 g1f2 g8g7 f2e2 h7h6 a4a5 b8b7 b3b1 g7g8 e2d3 g8b8 a5a6 b7b6 d3c2 b8d8 h3h4 d8g8 g4g5 g8c8 g5g6 h8g8 h4h5 c8b8 f1f3 g8g7 b1a1 b8g8 c2b3 g7f8 a1g1 g8g7 f3f1 f8e8 f1a1 b6b8 g1e1 b8d8 a1b1 d8b8 e1f1 g7g8 f1f3 b8b6 f3g3 g8g7 b3a2 e8d8 g3f3 d8d7 b1d1 d7e8 a2b3 g7g8 e4f2 e7d6 d1g1 d6f8 f2e4 f8e7 g6g7 e8f7 f3g3 b6b8 e4f2 e7d6 g3g6 e5e4 f2g4 d6f4 g4f6 g8g7 f6e4 g7h7 e4c5 f4e3 g1d1 b8d8 b3b4 e3f2 c5d3 f2e3 d3e5 f7f8 e5c6 d8d7 f5f6 h7h8 b5b6 a7b6 a6a7 d7a7 c6a7 f8f7 b4b5 h8g8 d1f1 d4d3 a7c6 f7f8 g6g8 f8g8 f6f7 g8f8 c6e5 e3c5
+18:43:44	parseFen() finished.
+18:43:44	Pushed all moves from cmd
+18:43:44	Parsing complete
+18:45:12	cmd received: go depth 12
+18:45:12	Parse go: go depth 12
+18:45:12	
+18:45:12	wbinc:
+18:45:12	
+18:45:12	Parse go finished, start search now
+18:45:12	Entered search
+18:45:45	parseFen() finished.
+18:45:45	
+Startup
+18:45:45	uci
+18:45:45	UCI MODE
+18:45:47	cmd received: isready
+18:45:49	cmd received: position startpos moves e2e4 c7c5 c2c3 e7e6 g1f3 d7d5 e4d5 e6d5 d2d4 b8c6 f1b5 f8d6 e1g1 g8f6 c1g5 c8e6 b5c6 b7c6 d1a4 d8b6 g5f6 g7f6 b1d2 e8g8 a4a3 e6g4 h2h3 g4f3 d2f3 a8b8 a1b1 f8e8 d4c5 d6c5 b2b4 c5d6 b1b3 b8a8 a3a4 d6e5 b4b5 c6c5 a4g4 g8h8 c3c4 d5d4 f3d2 b6e6 g4e6 f7e6 f2f4 e5d6 d2e4 d6e7 f4f5 e6e5 a2a4 a8b8 g2g4 e8g8 g1f2 g8g7 f2e2 h7h6 a4a5 b8b7 b3b1 g7g8 e2d3 g8b8 a5a6 b7b6 d3c2 b8d8 h3h4 d8g8 g4g5 g8c8 g5g6 h8g8 h4h5 c8b8 f1f3 g8g7 b1a1 b8g8 c2b3 g7f8 a1g1 g8g7 f3f1 f8e8 f1a1 b6b8 g1e1 b8d8 a1b1 d8b8 e1f1 g7g8 f1f3 b8b6 f3g3 g8g7 b3a2 e8d8 g3f3 d8d7 b1d1 d7e8 a2b3 g7g8 e4f2 e7d6 d1g1 d6f8 f2e4 f8e7 g6g7 e8f7 f3g3 b6b8 e4f2 e7d6 g3g6 e5e4 f2g4 d6f4 g4f6 g8g7 f6e4 g7h7 e4c5 f4e3 g1d1 b8d8 b3b4 e3f2 c5d3 f2e3 d3e5 f7f8 e5c6 d8d7 f5f6 h7h8 b5b6 a7b6 a6a7 d7a7 c6a7 f8f7 b4b5 h8g8 d1f1 d4d3 a7c6 f7f8 g6g8 f8g8 f6f7 g8f8 c6e5 e3c5
+18:45:49	Parse position: position startpos moves e2e4 c7c5 c2c3 e7e6 g1f3 d7d5 e4d5 e6d5 d2d4 b8c6 f1b5 f8d6 e1g1 g8f6 c1g5 c8e6 b5c6 b7c6 d1a4 d8b6 g5f6 g7f6 b1d2 e8g8 a4a3 e6g4 h2h3 g4f3 d2f3 a8b8 a1b1 f8e8 d4c5 d6c5 b2b4 c5d6 b1b3 b8a8 a3a4 d6e5 b4b5 c6c5 a4g4 g8h8 c3c4 d5d4 f3d2 b6e6 g4e6 f7e6 f2f4 e5d6 d2e4 d6e7 f4f5 e6e5 a2a4 a8b8 g2g4 e8g8 g1f2 g8g7 f2e2 h7h6 a4a5 b8b7 b3b1 g7g8 e2d3 g8b8 a5a6 b7b6 d3c2 b8d8 h3h4 d8g8 g4g5 g8c8 g5g6 h8g8 h4h5 c8b8 f1f3 g8g7 b1a1 b8g8 c2b3 g7f8 a1g1 g8g7 f3f1 f8e8 f1a1 b6b8 g1e1 b8d8 a1b1 d8b8 e1f1 g7g8 f1f3 b8b6 f3g3 g8g7 b3a2 e8d8 g3f3 d8d7 b1d1 d7e8 a2b3 g7g8 e4f2 e7d6 d1g1 d6f8 f2e4 f8e7 g6g7 e8f7 f3g3 b6b8 e4f2 e7d6 g3g6 e5e4 f2g4 d6f4 g4f6 g8g7 f6e4 g7h7 e4c5 f4e3 g1d1 b8d8 b3b4 e3f2 c5d3 f2e3 d3e5 f7f8 e5c6 d8d7 f5f6 h7h8 b5b6 a7b6 a6a7 d7a7 c6a7 f8f7 b4b5 h8g8 d1f1 d4d3 a7c6 f7f8 g6g8 f8g8 f6f7 g8f8 c6e5 e3c5
+18:45:49	parseFen() finished.
+18:45:49	Pushed all moves from cmd
+18:45:49	Parsing complete
+18:45:52	cmd received: go depth 12
+18:45:52	Parse go: go depth 12
+18:45:52	
+18:45:52	wbinc:
+18:45:52	
+18:45:52	Parse go finished, start search now
+18:45:52	Entered search
+18:46:08	Left search and cout bestmove found
+18:48:10	parseFen() finished.
+18:48:10	
+Startup
+18:48:10	uci
+18:48:10	UCI MODE
+18:48:12	cmd received: isready
+18:48:13	cmd received: position startpos moves e2e4 c7c5 c2c3 e7e6 g1f3 d7d5 e4d5 e6d5 d2d4 b8c6 f1b5 f8d6 e1g1 g8f6 c1g5 c8e6 b5c6 b7c6 d1a4 d8b6 g5f6 g7f6 b1d2 e8g8 a4a3 e6g4 h2h3 g4f3 d2f3 a8b8 a1b1 f8e8 d4c5 d6c5 b2b4 c5d6 b1b3 b8a8 a3a4 d6e5 b4b5 c6c5 a4g4 g8h8 c3c4 d5d4 f3d2 b6e6 g4e6 f7e6 f2f4 e5d6 d2e4 d6e7 f4f5 e6e5 a2a4 a8b8 g2g4 e8g8 g1f2 g8g7 f2e2 h7h6 a4a5 b8b7 b3b1 g7g8 e2d3 g8b8 a5a6 b7b6 d3c2 b8d8 h3h4 d8g8 g4g5 g8c8 g5g6 h8g8 h4h5 c8b8 f1f3 g8g7 b1a1 b8g8 c2b3 g7f8 a1g1 g8g7 f3f1 f8e8 f1a1 b6b8 g1e1 b8d8 a1b1 d8b8 e1f1 g7g8 f1f3 b8b6 f3g3 g8g7 b3a2 e8d8 g3f3 d8d7 b1d1 d7e8 a2b3 g7g8 e4f2 e7d6 d1g1 d6f8 f2e4 f8e7 g6g7 e8f7 f3g3 b6b8 e4f2 e7d6 g3g6 e5e4 f2g4 d6f4 g4f6 g8g7 f6e4 g7h7 e4c5 f4e3 g1d1 b8d8 b3b4 e3f2 c5d3 f2e3 d3e5 f7f8 e5c6 d8d7 f5f6 h7h8 b5b6 a7b6 a6a7 d7a7 c6a7 f8f7 b4b5 h8g8 d1f1 d4d3 a7c6 f7f8 g6g8 f8g8 f6f7 g8f8 c6e5 e3c5
+18:48:13	Parse position: position startpos moves e2e4 c7c5 c2c3 e7e6 g1f3 d7d5 e4d5 e6d5 d2d4 b8c6 f1b5 f8d6 e1g1 g8f6 c1g5 c8e6 b5c6 b7c6 d1a4 d8b6 g5f6 g7f6 b1d2 e8g8 a4a3 e6g4 h2h3 g4f3 d2f3 a8b8 a1b1 f8e8 d4c5 d6c5 b2b4 c5d6 b1b3 b8a8 a3a4 d6e5 b4b5 c6c5 a4g4 g8h8 c3c4 d5d4 f3d2 b6e6 g4e6 f7e6 f2f4 e5d6 d2e4 d6e7 f4f5 e6e5 a2a4 a8b8 g2g4 e8g8 g1f2 g8g7 f2e2 h7h6 a4a5 b8b7 b3b1 g7g8 e2d3 g8b8 a5a6 b7b6 d3c2 b8d8 h3h4 d8g8 g4g5 g8c8 g5g6 h8g8 h4h5 c8b8 f1f3 g8g7 b1a1 b8g8 c2b3 g7f8 a1g1 g8g7 f3f1 f8e8 f1a1 b6b8 g1e1 b8d8 a1b1 d8b8 e1f1 g7g8 f1f3 b8b6 f3g3 g8g7 b3a2 e8d8 g3f3 d8d7 b1d1 d7e8 a2b3 g7g8 e4f2 e7d6 d1g1 d6f8 f2e4 f8e7 g6g7 e8f7 f3g3 b6b8 e4f2 e7d6 g3g6 e5e4 f2g4 d6f4 g4f6 g8g7 f6e4 g7h7 e4c5 f4e3 g1d1 b8d8 b3b4 e3f2 c5d3 f2e3 d3e5 f7f8 e5c6 d8d7 f5f6 h7h8 b5b6 a7b6 a6a7 d7a7 c6a7 f8f7 b4b5 h8g8 d1f1 d4d3 a7c6 f7f8 g6g8 f8g8 f6f7 g8f8 c6e5 e3c5
+18:48:13	parseFen() finished.
+18:48:13	Pushed all moves from cmd
+18:48:13	Parsing complete
+18:48:16	cmd received: go depth 6
+18:48:16	Parse go: go depth 6
+18:48:16	
+18:48:16	wbinc:
+18:48:16	
+18:48:16	Parse go finished, start search now
+18:48:16	Entered search
+18:48:47	parseFen() finished.
+18:48:47	
+Startup
+18:48:50	uci
+18:48:50	UCI MODE
+18:48:51	cmd received: isready
+18:48:51	cmd received: position startpos moves e2e4 c7c5 c2c3 e7e6 g1f3 d7d5 e4d5 e6d5 d2d4 b8c6 f1b5 f8d6 e1g1 g8f6 c1g5 c8e6 b5c6 b7c6 d1a4 d8b6 g5f6 g7f6 b1d2 e8g8 a4a3 e6g4 h2h3 g4f3 d2f3 a8b8 a1b1 f8e8 d4c5 d6c5 b2b4 c5d6 b1b3 b8a8 a3a4 d6e5 b4b5 c6c5 a4g4 g8h8 c3c4 d5d4 f3d2 b6e6 g4e6 f7e6 f2f4 e5d6 d2e4 d6e7 f4f5 e6e5 a2a4 a8b8 g2g4 e8g8 g1f2 g8g7 f2e2 h7h6 a4a5 b8b7 b3b1 g7g8 e2d3 g8b8 a5a6 b7b6 d3c2 b8d8 h3h4 d8g8 g4g5 g8c8 g5g6 h8g8 h4h5 c8b8 f1f3 g8g7 b1a1 b8g8 c2b3 g7f8 a1g1 g8g7 f3f1 f8e8 f1a1 b6b8 g1e1 b8d8 a1b1 d8b8 e1f1 g7g8 f1f3 b8b6 f3g3 g8g7 b3a2 e8d8 g3f3 d8d7 b1d1 d7e8 a2b3 g7g8 e4f2 e7d6 d1g1 d6f8 f2e4 f8e7 g6g7 e8f7 f3g3 b6b8 e4f2 e7d6 g3g6 e5e4 f2g4 d6f4 g4f6 g8g7 f6e4 g7h7 e4c5 f4e3 g1d1 b8d8 b3b4 e3f2 c5d3 f2e3 d3e5 f7f8 e5c6 d8d7 f5f6 h7h8 b5b6 a7b6 a6a7 d7a7 c6a7 f8f7 b4b5 h8g8 d1f1 d4d3 a7c6 f7f8 g6g8 f8g8 f6f7 g8f8 c6e5 e3c5
+18:48:51	Parse position: position startpos moves e2e4 c7c5 c2c3 e7e6 g1f3 d7d5 e4d5 e6d5 d2d4 b8c6 f1b5 f8d6 e1g1 g8f6 c1g5 c8e6 b5c6 b7c6 d1a4 d8b6 g5f6 g7f6 b1d2 e8g8 a4a3 e6g4 h2h3 g4f3 d2f3 a8b8 a1b1 f8e8 d4c5 d6c5 b2b4 c5d6 b1b3 b8a8 a3a4 d6e5 b4b5 c6c5 a4g4 g8h8 c3c4 d5d4 f3d2 b6e6 g4e6 f7e6 f2f4 e5d6 d2e4 d6e7 f4f5 e6e5 a2a4 a8b8 g2g4 e8g8 g1f2 g8g7 f2e2 h7h6 a4a5 b8b7 b3b1 g7g8 e2d3 g8b8 a5a6 b7b6 d3c2 b8d8 h3h4 d8g8 g4g5 g8c8 g5g6 h8g8 h4h5 c8b8 f1f3 g8g7 b1a1 b8g8 c2b3 g7f8 a1g1 g8g7 f3f1 f8e8 f1a1 b6b8 g1e1 b8d8 a1b1 d8b8 e1f1 g7g8 f1f3 b8b6 f3g3 g8g7 b3a2 e8d8 g3f3 d8d7 b1d1 d7e8 a2b3 g7g8 e4f2 e7d6 d1g1 d6f8 f2e4 f8e7 g6g7 e8f7 f3g3 b6b8 e4f2 e7d6 g3g6 e5e4 f2g4 d6f4 g4f6 g8g7 f6e4 g7h7 e4c5 f4e3 g1d1 b8d8 b3b4 e3f2 c5d3 f2e3 d3e5 f7f8 e5c6 d8d7 f5f6 h7h8 b5b6 a7b6 a6a7 d7a7 c6a7 f8f7 b4b5 h8g8 d1f1 d4d3 a7c6 f7f8 g6g8 f8g8 f6f7 g8f8 c6e5 e3c5
+18:48:51	parseFen() finished.
+18:48:51	Pushed all moves from cmd
+18:48:51	Parsing complete
+18:48:56	cmd received: go depth 5
+18:48:56	Parse go: go depth 5
+18:48:56	
+18:48:56	wbinc:
+18:48:56	
+18:48:56	Parse go finished, start search now
+18:48:56	Entered search
+18:48:59	Left search and cout bestmove found
+18:49:13	cmd received: ucinewgame
+18:49:13	Parse position: position startpos
+18:49:13	parseFen() finished.
+18:49:13	Parsing complete
+18:49:17	cmd received: do depth 4
+18:49:21	cmd received: go depth 4
+18:49:21	Parse go: go depth 4
+18:49:21	
+18:49:21	wbinc:
+18:49:21	
+18:49:21	Parse go finished, start search now
+18:49:21	Entered search
+18:49:29	Left search and cout bestmove found
+18:50:23	cmd received: go depth 4
+18:50:23	Parse go: go depth 4
+18:50:23	
+18:50:23	wbinc:
+18:50:23	
+18:50:23	Parse go finished, start search now
+18:50:23	Entered search
+18:50:24	Left search and cout bestmove found
+18:51:11	parseFen() finished.
+18:51:11	
+Startup
+18:51:12	s
+18:51:12	Entered search
+18:51:12	Left search and cout bestmove found
+18:51:35	parseFen() finished.
+18:51:35	
+Startup
+18:51:37	s
+18:51:37	Entered search
+18:51:47	Left search and cout bestmove found
+18:53:24	parseFen() finished.
+18:53:24	
+Startup
+18:53:27	s
+18:53:27	Entered search
+18:53:27	Left search and cout bestmove found
+18:53:32	s
+18:53:32	Entered search
+18:53:35	Left search and cout bestmove found
+18:55:03	parseFen() finished.
+18:55:03	
+Startup
+18:55:05	s
+18:55:05	Entered search
+18:55:06	Left search and cout bestmove found
+18:55:21	parseFen() finished.
+18:55:21	
+Startup
+18:55:22	s
+18:55:22	Entered search
+18:55:23	Left search and cout bestmove found
+18:55:40	parseFen() finished.
+18:55:40	
+Startup
+18:55:42	autplay
+18:55:46	autoplay
+18:55:46	Entered search
+18:55:48	Left search and cout bestmove found
+18:55:48	Entered search
+18:55:51	Left search and cout bestmove found
+18:55:51	Entered search
+18:55:51	Left search and cout bestmove found
+18:55:51	Entered search
+18:55:52	Left search and cout bestmove found
+18:55:52	Entered search
+18:55:53	Left search and cout bestmove found
+18:55:53	Entered search
+18:55:54	Left search and cout bestmove found
+18:55:54	Entered search
+18:55:57	Left search and cout bestmove found
+18:55:57	Entered search
+18:56:43	parseFen() finished.
+18:56:43	
+Startup
+18:58:05	parseFen() finished.
+18:58:05	
+Startup
+18:58:06	s
+18:58:06	Entered search
+18:58:07	Left search and cout bestmove found
+18:59:11	parseFen() finished.
+18:59:11	
+Startup
+18:59:12	s
+18:59:12	Entered search
+18:59:33	parseFen() finished.
+18:59:33	
+Startup
+18:59:35	s
+18:59:35	Entered search
+19:00:11	parseFen() finished.
+19:00:11	
+Startup
+19:00:13	e5d7
+19:12:26	parseFen() finished.
+19:12:26	
+Startup
+19:12:30	s
+19:12:30	Entered search
+19:12:30	Left search and cout bestmove found
+19:13:48	a1b1
+19:13:49	s
+19:13:49	Entered search
+19:13:49	Left search and cout bestmove found
+19:14:31	parseFen() finished.
+19:14:31	
+Startup
+19:14:32	s
+19:14:32	Entered search
+19:14:32	Left search and cout bestmove found
+19:14:35	a1b1
+19:14:35	s
+19:14:35	Entered search
+19:14:35	Left search and cout bestmove found
+19:14:58	f7f6
+19:14:59	s
+19:14:59	Entered search
+19:14:59	Left search and cout bestmove found
+19:15:03	b1a1
+19:15:04	s
+19:15:04	Entered search
+19:15:04	Left search and cout bestmove found
+19:15:07	f6f5
+19:15:09	s
+19:15:09	Entered search
+19:15:09	Left search and cout bestmove found
+19:15:41	parseFen() finished.
+19:15:41	
+Startup
+19:15:45	s
+19:15:45	Entered search
+19:15:45	Left search and cout bestmove found
+19:15:48	a1b1
+19:15:49	s
+19:15:49	Entered search
+19:15:49	Left search and cout bestmove found
+19:16:17	s
+19:16:17	Entered search
+19:16:17	Left search and cout bestmove found
+19:16:18	s
+19:16:18	Entered search
+19:16:18	Left search and cout bestmove found
+19:16:21	quit
+19:16:24	parseFen() finished.
+19:16:24	
+Startup
+19:16:32	s
+19:16:32	Entered search
+19:16:32	Left search and cout bestmove found
+19:16:52	a1b1
+19:16:54	s
+19:16:54	Entered search
+19:16:54	Left search and cout bestmove found
+19:18:10	parseFen() finished.
+19:18:10	
+Startup
+19:20:48	parseFen() finished.
+19:20:48	
+Startup
+19:20:51	s
+19:20:51	Entered search
+19:20:51	Left search and cout bestmove found
+19:21:16	parseFen() finished.
+19:21:16	
+Startup
+19:21:17	s
+19:21:17	Entered search
+19:21:17	Left search and cout bestmove found
+19:21:51	parseFen() finished.
+19:21:51	
+Startup
+19:21:58	s
+19:21:58	Entered search
+19:21:58	Left search and cout bestmove found
+19:22:05	f7f6
+19:22:06	s
+19:22:06	Entered search
+19:22:06	Left search and cout bestmove found
+19:22:09	a1b1
+19:22:10	s
+19:22:10	Entered search
+19:22:10	Left search and cout bestmove found
+19:22:15	g7g5
+19:22:16	s
+19:22:16	Entered search
+19:22:16	Left search and cout bestmove found
+19:22:18	b1a1
+19:22:20	s
+19:22:20	Entered search
+19:22:20	Left search and cout bestmove found
+19:22:23	g5g4
+19:22:24	s
+19:22:24	Entered search
+19:22:24	Left search and cout bestmove found
+19:22:27	a1b1
+19:22:29	s
+19:22:29	Entered search
+19:22:29	Left search and cout bestmove found
+19:42:50	parseFen() finished.
+19:42:50	
+Startup
+19:43:11	parseFen() finished.
+19:43:11	
+Startup
+19:43:16	a1b1
+19:43:24	g8h8
+19:43:28	b1a1
+19:43:33	h8g8
+19:43:40	a1b1
+19:43:45	g7h8
+19:43:54	g8h8
+19:43:59	b1a1
+19:44:04	h8g8
+19:44:08	a1b1
+19:45:22	parseFen() finished.
+19:45:22	
+Startup
+19:45:27	a1b1
+19:45:36	g8h8
+23:21:54	parseFen() finished.
+23:21:54	
+Startup
+23:21:56	s
+23:21:56	Entered search
+23:21:56	Left search and cout bestmove found
+23:22:10	parseFen() finished.
+23:22:10	
+Startup
+23:22:11	s
+23:22:11	Entered search
+23:23:02	parseFen() finished.
+23:23:02	
+Startup
+23:23:05	s
+23:23:05	Entered search
+23:23:22	parseFen() finished.
+23:23:22	
+Startup
+23:23:23	s
+23:23:23	Entered search
+23:23:47	parseFen() finished.
+23:23:47	
+Startup
+23:23:48	s
+23:23:48	Entered search
+23:23:49	Left search and cout bestmove found
+23:23:54	e5d6
+23:24:06	c6e8
+23:24:09	s
+23:24:09	Entered search
+23:24:10	Left search and cout bestmove found
+23:24:16	d6e5
+23:24:26	e8c6
+23:24:29	s
+23:24:29	Entered search
+23:24:29	Left search and cout bestmove found
+23:25:26	parseFen() finished.
+23:25:26	
+Startup
+23:25:27	s
+23:25:27	Entered search
+23:25:28	Left search and cout bestmove found
+23:25:32	e5d6
+23:25:37	c6e8
+23:25:37	s
+23:25:37	Entered search
+23:25:38	Left search and cout bestmove found
+23:25:42	d6e5
+23:25:59	e8c6
+23:26:00	s
+23:26:00	Entered search
+23:26:00	Left search and cout bestmove found
+23:26:20	parseFen() finished.
+23:26:20	
+Startup
+23:26:34	e5d6
+23:26:37	pop
+23:26:37	s
+23:26:37	Entered search
+23:26:38	Left search and cout bestmove found
+23:26:41	e5d6
+23:26:48	c6e8
+23:26:48	s
+23:26:48	Entered search
+23:26:50	Left search and cout bestmove found
+23:26:53	d6e5
+23:27:01	e8c6
+23:27:02	s
+23:27:02	Entered search
+23:27:02	Left search and cout bestmove found
+23:27:07	e5d6
+23:27:14	c6e8
+23:27:16	s
+23:27:16	Entered search
+23:27:16	Left search and cout bestmove found
+23:27:25	d6e5
+23:27:42	c8e6
+23:27:49	e8c6
+23:27:50	s
+23:27:50	Entered search
+23:27:50	Left search and cout bestmove found
+23:28:03	parseFen() finished.
+23:28:03	
+Startup
+23:28:10	s
+23:28:10	Entered search
+23:28:11	Left search and cout bestmove found
+23:28:14	e5d6
+23:28:19	c6e8
+23:28:20	s
+23:28:20	Entered search
+23:28:22	Left search and cout bestmove found
+23:28:24	d6e5
+23:28:29	e8c6
+23:28:31	s
+23:28:31	Entered search
+23:28:31	Left search and cout bestmove found
+23:28:34	e5d6
+23:28:38	c6e8
+23:28:39	s
+23:28:39	Entered search
+23:28:39	Left search and cout bestmove found
+23:28:45	d6e5
+23:28:51	e8c6
+23:28:52	s
+23:28:52	Entered search
+23:28:52	Left search and cout bestmove found
+23:29:32	parseFen() finished.
+23:29:32	
+Startup
+23:29:35	s
+23:29:35	Entered search
+23:29:36	Left search and cout bestmove found
+23:29:38	e5d6
+23:29:41	c6e8
+23:29:42	s
+23:29:42	Entered search
+23:29:43	Left search and cout bestmove found
+23:29:46	d6e5
+23:29:50	e8c6
+23:29:51	s
+23:29:51	Entered search
+23:29:51	Left search and cout bestmove found
+23:29:54	e5d6
+23:29:59	c6e8
+23:30:01	s
+23:30:01	Entered search
+23:30:01	Left search and cout bestmove found
+23:30:15	parseFen() finished.
+23:30:15	
+Startup
+23:30:17	s
+23:30:17	Entered search
+23:30:18	Left search and cout bestmove found
+23:30:20	e5d6
+23:30:26	c6e8
+23:30:27	s
+23:30:27	Entered search
+23:30:28	Left search and cout bestmove found
+23:30:31	d6e5
+23:30:35	e8c6
+23:30:35	s
+23:30:35	Entered search
+23:30:35	Left search and cout bestmove found
+23:30:39	e5d6
+23:30:43	c6e8
+23:30:44	s
+23:30:44	Entered search
+23:30:44	Left search and cout bestmove found
+23:30:47	d6e5
+23:31:00	e8c6
+23:31:02	s
+23:31:02	Entered search
+23:31:02	Left search and cout bestmove found
+23:31:56	parseFen() finished.
+23:31:56	
+Startup
+23:32:12	s
+23:32:12	Entered search
+23:32:13	Left search and cout bestmove found
+23:32:15	e5d6
+23:32:23	c6e8
+23:32:24	s
+23:32:24	Entered search
+23:32:25	Left search and cout bestmove found
+23:32:28	d6e5
+23:32:43	e8c6
+23:32:43	s
+23:32:43	Entered search
+23:32:43	Left search and cout bestmove found
+23:33:14	e5d6
+23:33:18	c6e8
+23:33:18	s
+23:33:18	Entered search
+23:33:18	Left search and cout bestmove found
+23:34:54	parseFen() finished.
+23:34:54	
+Startup
+23:34:57	s
+23:34:57	Entered search
+23:34:58	Left search and cout bestmove found
+23:35:00	e5d6
+23:35:04	c6e8
+23:35:06	s
+23:35:06	Entered search
+23:35:07	Left search and cout bestmove found
+23:35:10	d6e5
+23:35:13	e8c6
+23:35:13	s
+23:35:13	Entered search
+23:35:13	Left search and cout bestmove found
+23:35:16	e5d6
+23:35:22	3fold
+23:36:36	parseFen() finished.
+23:36:36	
+Startup
+23:43:35	parseFen() finished.
+23:43:35	
+Startup
+23:43:59	parseFen() finished.
+23:43:59	
+Startup
+23:44:28	parseFen() finished.
+23:44:28	
+Startup
+23:44:45	parseFen() finished.
+23:44:45	
+Startup
+23:45:08	3fold
+23:46:01	parseFen() finished.
+23:46:02	
+Startup
+23:46:06	3fold
+23:46:26	parseFen() finished.
+23:46:26	
+Startup
+23:46:32	3fold
+23:47:32	parseFen() finished.
+23:47:32	
+Startup
+23:47:35	3fold
+23:47:52	parseFen() finished.
+23:47:52	
+Startup
+23:47:54	3fold
+23:48:29	parseFen() finished.
+23:48:29	
+Startup
+23:48:30	3fold
+23:52:02	parseFen() finished.
+23:52:02	
+Startup
+23:52:04	3fold
+23:52:27	parseFen() finished.
+23:52:27	
+Startup
+23:52:29	3fold
+23:54:29	parseFen() finished.
+23:54:29	
+Startup
+23:54:34	3fold
+23:55:14	parseFen() finished.
+23:55:14	
+Startup
+23:55:16	3fold
+23:56:06	parseFen() finished.
+23:56:06	
+Startup
+23:56:30	3fold
+23:57:27	parseFen() finished.
+23:57:27	
+Startup
+23:57:34	3fold
+23:57:55	parseFen() finished.
+23:57:56	
+Startup
+23:57:58	3fold
+23:58:20	parseFen() finished.
+23:58:20	
+Startup
+23:58:22	3fold
+23:58:50	parseFen() finished.
+23:58:50	
+Startup
+23:58:52	3fold
+23:59:29	parseFen() finished.
+23:59:29	
+Startup
+23:59:31	3fold
+23:59:44	parseFen() finished.
+23:59:44	
+Startup
+23:59:47	3fold
+00:00:03	parseFen() finished.
+00:00:03	
+Startup
+00:00:05	3fold
+00:00:57	parseFen() finished.
+00:00:57	
+Startup
+00:01:00	s
+00:01:00	Entered search
+00:01:01	Left search and cout bestmove found
+00:01:25	parseFen() finished.
+00:01:25	
+Startup
+00:01:27	s
+00:01:27	Entered search
+00:01:27	Left search and cout bestmove found
+00:02:37	parseFen() finished.
+00:02:37	
+Startup
+00:02:38	s
+00:02:38	Entered search
+00:02:38	Left search and cout bestmove found
+00:02:43	3fold
+00:02:54	parseFen() finished.
+00:02:54	
+Startup
+00:02:56	3fold
+00:02:58	s
+00:02:58	Entered search
+00:02:58	Left search and cout bestmove found
+00:03:00	3fold
+00:04:05	parseFen() finished.
+00:04:05	
+Startup
+00:04:06	p
+00:04:14	3fold
+00:04:16	p
+00:04:17	s
+00:04:17	Entered search
+00:04:17	Left search and cout bestmove found
+00:04:19	p
+00:04:24	3fold
+00:05:16	parseFen() finished.
+00:05:16	
+Startup
+00:05:19	3fold
+00:05:20	s
+00:05:20	Entered search
+00:05:20	Left search and cout bestmove found
+00:08:31	parseFen() finished.
+00:08:31	
+Startup
+00:08:33	3fold
+00:09:10	parseFen() finished.
+00:09:10	
+Startup
+00:09:12	3fold
+00:10:00	parseFen() finished.
+00:10:00	
+Startup
+00:10:02	3fold
+00:10:21	parseFen() finished.
+00:10:21	
+Startup
+00:10:21	s
+00:10:21	Entered search
+00:10:21	Left search and cout bestmove found
+00:11:16	parseFen() finished.
+00:11:16	
+Startup
+00:11:19	3fold
+00:11:21	reps
+00:12:47	parseFen() finished.
+00:12:47	
+Startup
+00:12:48	s
+00:12:48	Entered search
+00:12:48	Left search and cout bestmove found
+00:13:17	parseFen() finished.
+00:13:17	
+Startup
+00:13:18	s
+00:13:18	Entered search
+00:13:18	Left search and cout bestmove found
+00:13:58	parseFen() finished.
+00:13:58	
+Startup
+00:14:00	s
+00:14:00	Entered search
+00:14:00	Left search and cout bestmove found
+00:14:50	parseFen() finished.
+00:14:50	
+Startup
+00:14:51	s
+00:14:51	Entered search
+00:14:51	Left search and cout bestmove found
+00:15:31	parseFen() finished.
+00:15:31	
+Startup
+00:15:32	s
+00:15:32	Entered search
+00:15:32	Left search and cout bestmove found
+00:15:46	parseFen() finished.
+00:15:46	
+Startup
+00:15:48	s
+00:15:48	Entered search
+00:15:48	Left search and cout bestmove found
+00:15:59	parseFen() finished.
+00:15:59	
+Startup
+00:16:01	s
+00:16:01	Entered search
+00:16:01	Left search and cout bestmove found
+00:17:36	parseFen() finished.
+00:17:36	
+Startup
+00:17:38	s
+00:17:38	Entered search
+00:17:38	Left search and cout bestmove found
+00:18:11	parseFen() finished.
+00:18:11	
+Startup
+00:18:13	s
+00:18:13	Entered search
+00:18:14	Left search and cout bestmove found
+00:18:33	parseFen() finished.
+00:18:33	
+Startup
+00:18:34	s
+00:18:34	Entered search
+00:18:34	Left search and cout bestmove found
+00:19:09	parseFen() finished.
+00:19:09	
+Startup
+00:19:12	s
+00:19:12	Entered search
+00:19:12	Left search and cout bestmove found
+00:19:38	parseFen() finished.
+00:19:38	
+Startup
+00:19:39	s
+00:19:39	Entered search
+00:19:39	Left search and cout bestmove found
+00:20:20	parseFen() finished.
+00:20:20	
+Startup
+00:20:20	s
+00:20:20	Entered search
+00:20:21	Left search and cout bestmove found
+00:20:54	parseFen() finished.
+00:20:54	
+Startup
+00:20:55	s
+00:20:55	Entered search
+00:20:56	Left search and cout bestmove found
+00:21:49	parseFen() finished.
+00:21:49	
+Startup
+00:21:49	s
+00:21:49	Entered search
+00:21:50	Left search and cout bestmove found
+00:23:00	parseFen() finished.
+00:23:00	
+Startup
+00:23:01	reps
+00:23:07	s
+00:23:07	Entered search
+00:23:07	Left search and cout bestmove found
+00:23:44	parseFen() finished.
+00:23:44	
+Startup
+00:23:55	e6d5
+00:24:12	e8c6
+00:25:10	parseFen() finished.
+00:25:10	
+Startup
+00:25:11	s
+00:25:11	Entered search
+00:25:11	Left search and cout bestmove found
+00:25:54	parseFen() finished.
+00:25:54	
+Startup
+00:25:55	s
+00:25:55	Entered search
+00:25:55	Left search and cout bestmove found
+00:26:38	parseFen() finished.
+00:26:38	
+Startup
+00:26:38	s
+00:26:38	Entered search
+00:26:39	Left search and cout bestmove found
+00:28:36	parseFen() finished.
+00:28:36	
+Startup
+00:28:53	s
+00:28:53	Entered search
+00:28:54	Left search and cout bestmove found
+00:31:45	parseFen() finished.
+00:31:45	
+Startup
+00:31:46	s
+00:31:46	Entered search
+00:31:46	Left search and cout bestmove found
+00:32:01	parseFen() finished.
+00:32:01	
+Startup
+00:32:03	s
+00:32:03	Entered search
+00:32:04	Left search and cout bestmove found
+00:35:33	parseFen() finished.
+00:35:33	
+Startup
+00:36:23	parseFen() finished.
+00:36:23	
+Startup
+00:36:43	parseFen() finished.
+00:36:43	
+Startup
+00:36:47	s
+00:36:47	Entered search
+00:36:47	Left search and cout bestmove found
+00:39:11	parseFen() finished.
+00:39:11	
+Startup
+00:39:12	s
+00:39:12	Entered search
+00:39:12	Left search and cout bestmove found
+00:39:57	parseFen() finished.
+00:39:57	
+Startup
+00:39:59	s
+00:39:59	Entered search
+00:39:59	Left search and cout bestmove found
+00:40:33	parseFen() finished.
+00:40:33	
+Startup
+00:40:35	s
+00:40:35	Entered search
+00:40:35	Left search and cout bestmove found
+00:41:35	parseFen() finished.
+00:41:35	
+Startup
+00:42:14	parseFen() finished.
+00:42:14	
+Startup
+00:42:18	s
+00:42:18	Entered search
+00:42:18	Left search and cout bestmove found
+00:43:44	parseFen() finished.
+00:43:44	
+Startup
+00:44:02	s
+00:44:02	Entered search
+00:44:02	Left search and cout bestmove found
+00:44:52	parseFen() finished.
+00:44:52	
+Startup
+00:44:54	s
+00:44:54	Entered search
+00:44:55	Left search and cout bestmove found
+00:49:24	parseFen() finished.
+00:49:24	
+Startup
+00:49:34	e8c6
+00:59:46	parseFen() finished.
+00:59:46	
+Startup
+00:59:51	s
+00:59:51	Entered search
+00:59:51	Left search and cout bestmove found
+01:02:30	parseFen() finished.
+01:02:30	
+Startup
+01:02:36	s
+01:02:36	Entered search
+01:02:36	Left search and cout bestmove found
+01:04:05	parseFen() finished.
+01:04:05	
+Startup
+01:04:18	s
+01:04:18	Entered search
+01:04:19	Left search and cout bestmove found
+01:08:02	parseFen() finished.
+01:08:02	
+Startup
+01:08:06	s
+01:08:06	Entered search
+01:08:06	Left search and cout bestmove found
+01:11:51	parseFen() finished.
+01:11:51	
+Startup
+01:11:52	s
+01:11:52	Entered search
+01:11:52	Left search and cout bestmove found
+01:14:34	parseFen() finished.
+01:14:34	
+Startup
+01:14:35	s
+01:14:35	Entered search
+01:14:35	Left search and cout bestmove found
+01:14:54	parseFen() finished.
+01:14:54	
+Startup
+01:14:56	s
+01:14:56	Entered search
+01:14:56	Left search and cout bestmove found
+01:15:46	parseFen() finished.
+01:15:46	
+Startup
+01:16:43	parseFen() finished.
+01:16:43	
+Startup
+01:16:44	s
+01:16:44	Entered search
+01:16:44	Left search and cout bestmove found
+01:17:42	parseFen() finished.
+01:17:42	
+Startup
+01:17:43	s
+01:17:43	Entered search
+01:17:43	Left search and cout bestmove found
+01:03:42	parseFen() finished.
+01:03:42	
+Startup
+01:03:45	s
+01:03:45	Entered search
+01:03:45	Left search and cout bestmove found
+01:17:49	parseFen() finished.
+01:17:49	
+Startup
+01:18:30	parseFen() finished.
+01:18:30	
+Startup
+01:18:50	e8c6
+01:19:18	reps
+01:21:19	parseFen() finished.
+01:21:19	
+Startup
+01:21:24	s
+01:21:24	Entered search
+01:21:24	Left search and cout bestmove found
+01:22:09	parseFen() finished.
+01:22:09	
+Startup
+01:22:24	s
+01:22:24	Entered search
+01:22:24	Left search and cout bestmove found
+01:23:19	parseFen() finished.
+01:23:19	
+Startup
+01:23:19	s
+01:23:19	Entered search
+01:23:20	Left search and cout bestmove found
+01:33:22	parseFen() finished.
+01:33:22	
+Startup
+01:33:24	s
+01:33:24	Entered search
+01:33:24	Left search and cout bestmove found
+01:33:40	parseFen() finished.
+01:33:40	
+Startup
+01:33:41	s
+01:33:41	Entered search
+01:33:41	Left search and cout bestmove found
+01:33:56	parseFen() finished.
+01:33:56	
+Startup
+01:33:57	s
+01:33:57	Entered search
+01:33:57	Left search and cout bestmove found
+16:00:02	parseFen() finished.
+16:00:03	
+Startup
+16:37:06	parseFen() finished.
+16:37:07	
+Startup
+16:37:09	uci
+16:37:09	UCI MODE
+16:37:27	cmd received: isready
+16:37:30	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 h5g6 b2f6 g7f6 e2e4 b8d7 a2a3 f8d6 h3h4 h7h5 a1a2 e8g8 e4d5 c6d5 d3d4 e6e5 c2c4 e5e4 f3h2 d5c4 d2c4 d6c7 d4d5 b7b5 c4e3 d7c5 g3g4 c5b3 a2b2 b3d4 g4h5 g6h5 g2e4 a8e8 e4g2 c7d6 b2d2 d4f5 g2f3 h5f3 h2f3 f5e3 f2e3 e8e3 e1f2 e3a3 h4h5 f8d8 h5h6 d6c5 f2g2 g8h7 h1h3 a7a5 g2f1 a3a1 f1e2 d8e8 e2d3 e8e3 d3c2 a1a3 d5d6 a3c3 c2d1 e3f3 h3f3 c3f3 d6d7 c5b6 d2d5 b6d8 d1e2 f3f4 d5b5 f4d4 b5b7 d4d6 e2f3 h7h6 f3f4 h6g7 f4f5 g7f8 b7b2 f8e7 b2c2 e7d7 c2h2 d6d5 f5e4 d7e6 e4f3 d5e5 h2h8 d8e7 h8a8 f6f5 a8a7 f7f6 a7a8 e6d6 a8a6 d6c7 a6a8 c7b6 a8b8 b6c5 b8a8 c5b5 a8b8 b5c4 b8a8 c4b4 a8b8 b4c5 b8a8 c5b5 a8b8 b5a6 b8a8 a6b7 a8g8 a5a4 g8g7 a4a3 g7g2 b7c6 g2c2 c6b5 c2h2 b5c4 h2d2 e7b4 d2g2 c4b3 g2g1 a3a2 g1a1 b4c3 a1a2 b3a2 f3g3 c3e1 g3f4 a2b3 f4f3 e5e4 f3g2 e4e3 g2g1 f5f4 g1h1 f4f3 h1h2
+16:37:30	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 h5g6 b2f6 g7f6 e2e4 b8d7 a2a3 f8d6 h3h4 h7h5 a1a2 e8g8 e4d5 c6d5 d3d4 e6e5 c2c4 e5e4 f3h2 d5c4 d2c4 d6c7 d4d5 b7b5 c4e3 d7c5 g3g4 c5b3 a2b2 b3d4 g4h5 g6h5 g2e4 a8e8 e4g2 c7d6 b2d2 d4f5 g2f3 h5f3 h2f3 f5e3 f2e3 e8e3 e1f2 e3a3 h4h5 f8d8 h5h6 d6c5 f2g2 g8h7 h1h3 a7a5 g2f1 a3a1 f1e2 d8e8 e2d3 e8e3 d3c2 a1a3 d5d6 a3c3 c2d1 e3f3 h3f3 c3f3 d6d7 c5b6 d2d5 b6d8 d1e2 f3f4 d5b5 f4d4 b5b7 d4d6 e2f3 h7h6 f3f4 h6g7 f4f5 g7f8 b7b2 f8e7 b2c2 e7d7 c2h2 d6d5 f5e4 d7e6 e4f3 d5e5 h2h8 d8e7 h8a8 f6f5 a8a7 f7f6 a7a8 e6d6 a8a6 d6c7 a6a8 c7b6 a8b8 b6c5 b8a8 c5b5 a8b8 b5c4 b8a8 c4b4 a8b8 b4c5 b8a8 c5b5 a8b8 b5a6 b8a8 a6b7 a8g8 a5a4 g8g7 a4a3 g7g2 b7c6 g2c2 c6b5 c2h2 b5c4 h2d2 e7b4 d2g2 c4b3 g2g1 a3a2 g1a1 b4c3 a1a2 b3a2 f3g3 c3e1 g3f4 a2b3 f4f3 e5e4 f3g2 e4e3 g2g1 f5f4 g1h1 f4f3 h1h2
+16:37:30	parseFen() finished.
+16:37:30	Pushed all moves from cmd
+16:37:30	Parsing complete
+16:37:32	cmd received: s
+16:37:38	cmd received: go movetime 750
+16:37:38	Parse go: go movetime 750
+16:37:38	
+16:37:38	wbinc:
+16:37:38	
+16:37:38	Set time to 1000ms due to low move time.
+16:37:38	Parse go finished, start search now
+16:37:38	Entered search
+16:37:46	Left search and cout bestmove found
+16:38:39	parseFen() finished.
+16:38:39	
+Startup
+16:38:44	uci
+16:38:44	UCI MODE
+16:38:47	cmd received: isready
+16:38:48	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 h5g6 b2f6 g7f6 e2e4 b8d7 a2a3 f8d6 h3h4 h7h5 a1a2 e8g8 e4d5 c6d5 d3d4 e6e5 c2c4 e5e4 f3h2 d5c4 d2c4 d6c7 d4d5 b7b5 c4e3 d7c5 g3g4 c5b3 a2b2 b3d4 g4h5 g6h5 g2e4 a8e8 e4g2 c7d6 b2d2 d4f5 g2f3 h5f3 h2f3 f5e3 f2e3 e8e3 e1f2 e3a3 h4h5 f8d8 h5h6 d6c5 f2g2 g8h7 h1h3 a7a5 g2f1 a3a1 f1e2 d8e8 e2d3 e8e3 d3c2 a1a3 d5d6 a3c3 c2d1 e3f3 h3f3 c3f3 d6d7 c5b6 d2d5 b6d8 d1e2 f3f4 d5b5 f4d4 b5b7 d4d6 e2f3 h7h6 f3f4 h6g7 f4f5 g7f8 b7b2 f8e7 b2c2 e7d7 c2h2 d6d5 f5e4 d7e6 e4f3 d5e5 h2h8 d8e7 h8a8 f6f5 a8a7 f7f6 a7a8 e6d6 a8a6 d6c7 a6a8 c7b6 a8b8 b6c5 b8a8 c5b5 a8b8 b5c4 b8a8 c4b4 a8b8 b4c5 b8a8 c5b5 a8b8 b5a6 b8a8 a6b7 a8g8 a5a4 g8g7 a4a3 g7g2 b7c6 g2c2 c6b5 c2h2 b5c4 h2d2 e7b4 d2g2 c4b3 g2g1 a3a2 g1a1 b4c3 a1a2 b3a2 f3g3 c3e1 g3f4 a2b3 f4f3 e5e4 f3g2 e4e3 g2g1 f5f4 g1h1 f4f3 h1h2
+16:38:48	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 h5g6 b2f6 g7f6 e2e4 b8d7 a2a3 f8d6 h3h4 h7h5 a1a2 e8g8 e4d5 c6d5 d3d4 e6e5 c2c4 e5e4 f3h2 d5c4 d2c4 d6c7 d4d5 b7b5 c4e3 d7c5 g3g4 c5b3 a2b2 b3d4 g4h5 g6h5 g2e4 a8e8 e4g2 c7d6 b2d2 d4f5 g2f3 h5f3 h2f3 f5e3 f2e3 e8e3 e1f2 e3a3 h4h5 f8d8 h5h6 d6c5 f2g2 g8h7 h1h3 a7a5 g2f1 a3a1 f1e2 d8e8 e2d3 e8e3 d3c2 a1a3 d5d6 a3c3 c2d1 e3f3 h3f3 c3f3 d6d7 c5b6 d2d5 b6d8 d1e2 f3f4 d5b5 f4d4 b5b7 d4d6 e2f3 h7h6 f3f4 h6g7 f4f5 g7f8 b7b2 f8e7 b2c2 e7d7 c2h2 d6d5 f5e4 d7e6 e4f3 d5e5 h2h8 d8e7 h8a8 f6f5 a8a7 f7f6 a7a8 e6d6 a8a6 d6c7 a6a8 c7b6 a8b8 b6c5 b8a8 c5b5 a8b8 b5c4 b8a8 c4b4 a8b8 b4c5 b8a8 c5b5 a8b8 b5a6 b8a8 a6b7 a8g8 a5a4 g8g7 a4a3 g7g2 b7c6 g2c2 c6b5 c2h2 b5c4 h2d2 e7b4 d2g2 c4b3 g2g1 a3a2 g1a1 b4c3 a1a2 b3a2 f3g3 c3e1 g3f4 a2b3 f4f3 e5e4 f3g2 e4e3 g2g1 f5f4 g1h1 f4f3 h1h2
+16:38:48	parseFen() finished.
+16:38:48	Pushed all moves from cmd
+16:38:48	Parsing complete
+16:38:52	cmd received: go movetime 750
+16:38:52	Parse go: go movetime 750
+16:38:52	
+16:38:52	wbinc:
+16:38:52	
+16:38:52	Set time to 1000ms due to low move time.
+16:38:52	Parse go finished, start search now
+16:38:52	Entered search
+16:38:53	Left search and cout bestmove found
+14:09:01	parseFen() finished.
+14:09:01	
+Startup
+14:09:04	s
+14:09:04	Entered search
+14:09:04	Left search and cout bestmove found
+14:09:24	parseFen() finished.
+14:09:24	
+Startup
+14:09:24	s
+14:09:24	Entered search
+14:09:41	Left search and cout bestmove found
+14:10:35	parseFen() finished.
+14:10:35	
+Startup
+14:10:36	s
+14:10:36	Entered search
+14:10:59	Left search and cout bestmove found
+14:12:21	parseFen() finished.
+14:12:21	
+Startup
+14:14:20	parseFen() finished.
+14:14:20	
+Startup
+14:14:23	s
+14:14:23	Entered search
+14:15:58	parseFen() finished.
+14:15:58	
+Startup
+14:15:59	s
+14:15:59	Entered search
+14:16:02	Left search and cout bestmove found
+14:16:48	parseFen() finished.
+14:16:48	
+Startup
+14:17:11	s
+14:17:11	Entered search
+14:17:14	Left search and cout bestmove found
+14:17:57	parseFen() finished.
+14:17:57	
+Startup
+14:17:58	s
+14:17:58	Entered search
+14:18:01	Left search and cout bestmove found
+14:18:20	parseFen() finished.
+14:18:20	
+Startup
+14:18:21	s
+14:18:21	Entered search
+14:21:01	parseFen() finished.
+14:21:01	
+Startup
+14:21:02	s
+14:21:02	Entered search
+14:21:27	Left search and cout bestmove found
+14:21:44	parseFen() finished.
+14:21:44	
+Startup
+14:21:45	s
+14:21:45	Entered search
+14:22:10	Left search and cout bestmove found
+14:22:44	parseFen() finished.
+14:22:44	
+Startup
+14:22:45	s
+14:22:45	Entered search
+14:23:03	Left search and cout bestmove found
+14:24:40	parseFen() finished.
+14:24:40	
+Startup
+14:24:42	s
+14:24:42	Entered search
+14:25:12	parseFen() finished.
+14:25:12	
+Startup
+14:25:13	s
+14:25:13	Entered search
+14:25:36	Left search and cout bestmove found
+14:26:21	parseFen() finished.
+14:26:21	
+Startup
+14:26:22	s
+14:26:22	Entered search
+14:26:46	Left search and cout bestmove found
+14:26:58	parseFen() finished.
+14:26:58	
+Startup
+14:27:01	s
+14:27:01	Entered search
+14:27:17	Left search and cout bestmove found
+14:28:03	parseFen() finished.
+14:28:03	
+Startup
+14:28:04	s
+14:28:04	Entered search
+14:28:08	Left search and cout bestmove found
+14:35:34	parseFen() finished.
+14:35:34	
+Startup
+14:35:36	s
+14:35:36	Entered search
+14:35:43	Left search and cout bestmove found
+14:36:10	parseFen() finished.
+14:36:10	
+Startup
+14:36:13	s
+14:36:13	Entered search
+14:36:17	Left search and cout bestmove found
+14:39:25	parseFen() finished.
+14:39:25	
+Startup
+14:39:27	s
+14:39:27	Entered search
+14:39:29	Left search and cout bestmove found
+14:39:48	parseFen() finished.
+14:39:48	
+Startup
+14:39:54	s
+14:39:54	Entered search
+14:39:55	Left search and cout bestmove found
+14:40:30	parseFen() finished.
+14:40:30	
+Startup
+14:40:32	s
+14:40:32	Entered search
+14:40:34	Left search and cout bestmove found
+14:44:56	parseFen() finished.
+14:44:56	
+Startup
+14:44:58	s
+14:44:58	Entered search
+14:45:00	Left search and cout bestmove found
+14:47:11	parseFen() finished.
+14:47:11	
+Startup
+14:47:12	s
+14:47:12	Entered search
+14:47:14	Left search and cout bestmove found
+14:47:40	parseFen() finished.
+14:47:40	
+Startup
+14:47:40	s
+14:47:40	Entered search
+14:47:42	Left search and cout bestmove found
+14:48:04	parseFen() finished.
+14:48:04	
+Startup
+14:48:12	s
+14:48:12	Entered search
+14:48:14	Left search and cout bestmove found
+14:58:34	parseFen() finished.
+14:58:34	
+Startup
+14:58:35	s
+14:58:35	Entered search
+14:58:36	Left search and cout bestmove found
+14:59:00	parseFen() finished.
+14:59:00	
+Startup
+14:59:04	s
+14:59:04	Entered search
+14:59:19	Left search and cout bestmove found
+15:55:22	parseFen() finished.
+15:55:22	
+Startup
+15:55:34	s
+15:55:34	Entered search
+15:56:08	parseFen() finished.
+15:56:08	
+Startup
+15:56:28	s
+15:56:28	Entered search
+15:57:03	Left search and cout bestmove found
+16:00:13	parseFen() finished.
+16:00:13	
+Startup
+16:00:16	s
+16:00:16	Entered search
+16:00:22	Left search and cout bestmove found
+16:02:39	parseFen() finished.
+16:02:39	
+Startup
+16:02:40	s
+16:02:40	Entered search
+16:03:04	Left search and cout bestmove found
+16:03:39	parseFen() finished.
+16:03:39	
+Startup
+16:03:42	s
+16:03:42	Entered search
+16:03:48	Left search and cout bestmove found
+16:37:07	parseFen() finished.
+16:37:07	
+Startup
+16:37:09	s
+16:37:09	Entered search
+16:40:53	parseFen() finished.
+16:40:53	
+Startup
+16:40:55	s
+16:40:55	Entered search
+16:40:55	Left search and cout bestmove found
+16:42:39	parseFen() finished.
+16:42:39	
+Startup
+16:42:54	parseFen() finished.
+16:42:54	
+Startup
+16:42:55	s
+16:42:55	Entered search
+16:42:55	Left search and cout bestmove found
+16:43:33	parseFen() finished.
+16:43:33	
+Startup
+16:43:34	s
+16:43:34	Entered search
+16:44:29	parseFen() finished.
+16:44:29	
+Startup
+16:44:31	s
+16:44:31	Entered search
+16:44:48	Left search and cout bestmove found
+16:59:49	parseFen() finished.
+16:59:49	
+Startup
+17:00:02	parseFen() finished.
+17:00:02	
+Startup
+17:00:04	s
+17:00:04	Entered search
+17:01:03	parseFen() finished.
+17:01:03	
+Startup
+17:01:04	s
+17:01:04	Entered search
+17:01:24	Left search and cout bestmove found
+17:03:01	parseFen() finished.
+17:03:01	
+Startup
+17:03:02	s
+17:03:02	Entered search
+17:03:20	Left search and cout bestmove found
+17:11:35	parseFen() finished.
+17:11:35	
+Startup
+17:11:37	s
+17:11:37	Entered search
+17:12:33	parseFen() finished.
+17:12:33	
+Startup
+17:12:34	s
+17:12:34	Entered search
+17:12:42	Left search and cout bestmove found
+17:48:34	parseFen() finished.
+17:48:34	
+Startup
+17:48:35	s
+17:48:35	Entered search
+17:50:05	parseFen() finished.
+17:50:05	
+Startup
+17:50:43	parseFen() finished.
+17:50:43	
+Startup
+17:50:56	s
+17:50:56	Entered search
+17:50:56	Left search and cout bestmove found
+17:51:17	parseFen() finished.
+17:51:17	
+Startup
+17:51:19	s
+17:51:19	Entered search
+17:51:23	Left search and cout bestmove found
+00:09:58	parseFen() finished.
+00:09:58	
+Startup
+00:10:03	parseFen() finished.
+00:10:03	
+Startup
+00:10:07	s
+00:10:07	Entered search
+00:10:13	Left search and cout bestmove found
+00:10:31	parseFen() finished.
+00:10:31	
+Startup
+00:10:35	s
+00:10:35	Entered search
+00:10:40	Left search and cout bestmove found
+00:10:49	parseFen() finished.
+00:10:49	
+Startup
+00:10:51	s
+00:10:51	Entered search
+00:10:56	Left search and cout bestmove found
+00:11:00	parseFen() finished.
+00:11:00	
+Startup
+00:11:01	s
+00:11:01	Entered search
+00:11:07	Left search and cout bestmove found
+00:11:26	parseFen() finished.
+00:11:26	
+Startup
+00:11:28	s
+00:11:28	Entered search
+00:11:33	Left search and cout bestmove found
+00:12:14	parseFen() finished.
+00:12:14	
+Startup
+00:12:15	s
+00:12:15	Entered search
+00:12:22	Left search and cout bestmove found
+00:12:43	parseFen() finished.
+00:12:43	
+Startup
+00:12:44	s
+00:12:44	Entered search
+00:12:50	Left search and cout bestmove found
+00:13:14	parseFen() finished.
+00:13:14	
+Startup
+00:13:16	s
+00:13:16	Entered search
+00:13:24	Left search and cout bestmove found
+00:13:39	parseFen() finished.
+00:13:39	
+Startup
+00:13:41	s
+00:13:41	Entered search
+00:13:46	Left search and cout bestmove found
+00:15:19	parseFen() finished.
+00:15:19	
+Startup
+00:15:21	s
+00:15:21	Entered search
+00:17:17	parseFen() finished.
+00:17:17	
+Startup
+00:17:20	s
+00:17:20	Entered search
+00:17:53	parseFen() finished.
+00:17:53	
+Startup
+00:17:54	s
+00:17:54	Entered search
+00:19:23	parseFen() finished.
+00:19:23	
+Startup
+00:19:24	s
+00:19:24	Entered search
+00:19:36	parseFen() finished.
+00:19:36	
+Startup
+00:19:37	s
+00:19:37	Entered search
+00:20:25	parseFen() finished.
+00:20:25	
+Startup
+00:20:26	s
+00:20:26	Entered search
+00:21:29	parseFen() finished.
+00:21:29	
+Startup
+00:21:31	s
+00:21:31	Entered search
+00:55:32	parseFen() finished.
+00:55:32	
+Startup
+00:55:33	s
+00:55:33	Entered search
+00:55:44	parseFen() finished.
+00:55:44	
+Startup
+00:55:45	s
+00:55:45	Entered search
+00:56:26	parseFen() finished.
+00:56:26	
+Startup
+00:56:26	s
+00:56:26	Entered search
+00:56:27	Left search and cout bestmove found
+13:30:23	parseFen() finished.
+13:30:23	
+Startup
+13:30:27	s
+13:30:27	Entered search
+13:30:27	Left search and cout bestmove found
+13:30:41	parseFen() finished.
+13:30:41	
+Startup
+13:30:44	s
+13:30:44	Entered search
+13:30:45	Left search and cout bestmove found
+13:31:16	parseFen() finished.
+13:31:16	
+Startup
+13:31:16	s
+13:31:16	Entered search
+13:31:17	Left search and cout bestmove found
+13:54:42	parseFen() finished.
+13:54:42	
+Startup
+13:54:44	s
+13:54:44	Entered search
+13:54:44	Left search and cout bestmove found
+13:55:04	parseFen() finished.
+13:55:04	
+Startup
+13:55:05	s
+13:55:05	Entered search
+13:55:06	Left search and cout bestmove found
+13:55:44	parseFen() finished.
+13:55:44	
+Startup
+13:55:45	s
+13:55:45	Entered search
+13:55:46	Left search and cout bestmove found
+13:55:59	parseFen() finished.
+13:55:59	
+Startup
+13:56:03	s
+13:56:03	Entered search
+13:56:04	Left search and cout bestmove found
+13:56:07	parseFen() finished.
+13:56:07	
+Startup
+13:56:08	s
+13:56:08	Entered search
+13:56:09	Left search and cout bestmove found
+13:56:43	parseFen() finished.
+13:56:43	
+Startup
+13:56:44	s
+13:56:44	Entered search
+13:56:45	Left search and cout bestmove found
+13:59:36	parseFen() finished.
+13:59:36	
+Startup
+13:59:37	s
+13:59:37	Entered search
+13:59:46	parseFen() finished.
+13:59:46	
+Startup
+13:59:48	s
+13:59:48	Entered search
+13:59:49	Left search and cout bestmove found
+14:27:52	parseFen() finished.
+14:27:52	
+Startup
+14:27:52	s
+14:27:52	Entered search
+14:27:53	Left search and cout bestmove found
+14:28:42	parseFen() finished.
+14:28:42	
+Startup
+14:28:43	s
+14:28:43	Entered search
+14:28:44	Left search and cout bestmove found
+14:31:38	parseFen() finished.
+14:31:38	
+Startup
+14:31:38	s
+14:31:38	Entered search
+14:31:39	Left search and cout bestmove found
+14:38:29	parseFen() finished.
+14:38:29	
+Startup
+14:38:29	s
+14:38:29	Entered search
+14:38:30	Left search and cout bestmove found
+14:39:37	parseFen() finished.
+14:39:37	
+Startup
+14:39:38	s
+14:39:38	Entered search
+14:39:38	Left search and cout bestmove found
+14:43:20	parseFen() finished.
+14:43:20	
+Startup
+14:43:21	s
+14:43:21	Entered search
+14:43:21	Left search and cout bestmove found
+14:43:42	parseFen() finished.
+14:43:42	
+Startup
+14:43:43	s
+14:43:43	Entered search
+14:43:43	Left search and cout bestmove found
+14:44:59	parseFen() finished.
+14:44:59	
+Startup
+14:44:59	s
+14:44:59	Entered search
+14:44:59	Left search and cout bestmove found
+14:45:18	parseFen() finished.
+14:45:18	
+Startup
+14:45:19	s
+14:45:19	Entered search
+14:45:19	Left search and cout bestmove found
+14:45:46	parseFen() finished.
+14:45:46	
+Startup
+14:45:47	s
+14:45:47	Entered search
+14:45:47	Left search and cout bestmove found
+14:48:53	parseFen() finished.
+14:48:53	
+Startup
+14:48:53	s
+14:48:54	Entered search
+14:48:54	Left search and cout bestmove found
+14:49:50	parseFen() finished.
+14:49:50	
+Startup
+14:49:51	s
+14:49:51	Entered search
+14:49:51	Left search and cout bestmove found
+14:50:09	parseFen() finished.
+14:50:09	
+Startup
+14:50:10	s
+14:50:10	Entered search
+14:50:10	Left search and cout bestmove found
+14:50:50	parseFen() finished.
+14:50:50	
+Startup
+14:50:51	s
+14:50:51	Entered search
+14:50:51	Left search and cout bestmove found
+14:52:00	parseFen() finished.
+14:52:00	
+Startup
+14:52:00	s
+14:52:00	Entered search
+14:52:01	Left search and cout bestmove found
+14:52:50	parseFen() finished.
+14:52:50	
+Startup
+14:52:51	s
+14:52:51	Entered search
+14:53:19	parseFen() finished.
+14:53:19	
+Startup
+14:53:20	s
+14:53:20	Entered search
+14:54:06	parseFen() finished.
+14:54:06	
+Startup
+14:54:07	s
+14:54:07	Entered search
+14:54:07	Left search and cout bestmove found
+14:56:41	parseFen() finished.
+14:56:41	
+Startup
+14:56:42	s
+14:56:42	Entered search
+14:56:42	Left search and cout bestmove found
+14:57:09	parseFen() finished.
+14:57:09	
+Startup
+14:57:09	s
+14:57:09	Entered search
+14:57:09	Left search and cout bestmove found
+14:59:07	parseFen() finished.
+14:59:07	
+Startup
+14:59:08	s
+14:59:08	Entered search
+14:59:08	Left search and cout bestmove found
+14:59:31	parseFen() finished.
+14:59:31	
+Startup
+14:59:32	s
+14:59:32	Entered search
+14:59:32	Left search and cout bestmove found
+15:00:39	parseFen() finished.
+15:00:39	
+Startup
+15:00:40	s
+15:00:40	Entered search
+15:00:40	Left search and cout bestmove found
+15:02:11	parseFen() finished.
+15:02:11	
+Startup
+15:02:11	s
+15:02:11	Entered search
+15:03:09	parseFen() finished.
+15:03:09	
+Startup
+15:03:10	s
+15:03:10	Entered search
+15:03:13	Left search and cout bestmove found
+15:03:41	parseFen() finished.
+15:03:41	
+Startup
+15:03:42	s
+15:03:42	Entered search
+15:03:44	Left search and cout bestmove found
+15:04:18	parseFen() finished.
+15:04:18	
+Startup
+15:04:18	s
+15:04:18	Entered search
+15:04:20	Left search and cout bestmove found
+15:05:51	parseFen() finished.
+15:05:51	
+Startup
+15:05:51	s
+15:05:51	Entered search
+15:05:52	Left search and cout bestmove found
+15:06:16	parseFen() finished.
+15:06:16	
+Startup
+15:06:16	s
+15:06:16	Entered search
+15:06:17	Left search and cout bestmove found
+15:07:12	parseFen() finished.
+15:07:12	
+Startup
+15:07:13	s
+15:07:13	Entered search
+15:07:13	Left search and cout bestmove found
+15:07:57	parseFen() finished.
+15:07:57	
+Startup
+15:07:58	s
+15:07:58	Entered search
+15:07:58	Left search and cout bestmove found
+15:08:45	parseFen() finished.
+15:08:45	
+Startup
+15:08:46	
+15:08:46	s
+15:08:46	Entered search
+15:08:46	Left search and cout bestmove found
+15:09:13	parseFen() finished.
+15:09:13	
+Startup
+15:09:14	s
+15:09:14	Entered search
+15:09:14	Left search and cout bestmove found
+15:10:16	parseFen() finished.
+15:10:16	
+Startup
+15:10:17	s
+15:10:17	Entered search
+15:10:17	Left search and cout bestmove found
+15:10:31	parseFen() finished.
+15:10:31	
+Startup
+15:10:32	s
+15:10:32	Entered search
+15:10:32	Left search and cout bestmove found
+15:10:51	parseFen() finished.
+15:10:51	
+Startup
+15:10:51	s
+15:10:51	Entered search
+15:10:51	Left search and cout bestmove found
+15:11:02	parseFen() finished.
+15:11:02	
+Startup
+15:11:02	s
+15:11:02	Entered search
+15:11:02	Left search and cout bestmove found
+15:12:55	parseFen() finished.
+15:12:55	
+Startup
+15:13:08	h7g6
+15:13:30	parseFen() finished.
+15:13:30	
+Startup
+15:13:35	e2e4
+15:13:39	e7e5
+15:13:42	pop
+15:13:49	a7a6
+15:14:52	parseFen() finished.
+15:14:52	
+Startup
+15:14:53	s
+15:14:53	Entered search
+15:15:10	parseFen() finished.
+15:15:10	
+Startup
+15:15:11	s
+15:15:11	Entered search
+15:15:11	Left search and cout bestmove found
+15:18:36	parseFen() finished.
+15:18:36	
+Startup
+15:18:37	s
+15:18:37	Entered search
+15:19:42	parseFen() finished.
+15:19:42	
+Startup
+15:19:42	s
+15:19:42	Entered search
+15:23:01	parseFen() finished.
+15:23:01	
+Startup
+15:23:02	s
+15:23:02	Entered search
+15:23:19	parseFen() finished.
+15:23:20	
+Startup
+15:23:20	s
+15:23:20	Entered search
+15:23:32	parseFen() finished.
+15:23:32	
+Startup
+15:23:32	s
+15:23:32	Entered search
+15:24:27	parseFen() finished.
+15:24:27	
+Startup
+15:24:28	s
+15:24:28	Entered search
+15:24:28	Left search and cout bestmove found
+15:25:56	parseFen() finished.
+15:25:56	
+Startup
+15:25:56	s
+15:25:56	Entered search
+15:25:56	Left search and cout bestmove found
+15:26:34	parseFen() finished.
+15:26:34	
+Startup
+15:26:34	s
+15:26:34	Entered search
+15:26:34	Left search and cout bestmove found
+15:26:58	parseFen() finished.
+15:26:58	
+Startup
+15:26:59	s
+15:26:59	Entered search
+15:26:59	Left search and cout bestmove found
+15:27:12	parseFen() finished.
+15:27:12	
+Startup
+15:27:12	s
+15:27:12	Entered search
+15:28:31	parseFen() finished.
+15:28:31	
+Startup
+15:28:32	s
+15:28:32	Entered search
+15:29:18	parseFen() finished.
+15:29:18	
+Startup
+15:29:19	s
+15:29:19	Entered search
+15:29:48	parseFen() finished.
+15:29:48	
+Startup
+15:29:50	s
+15:29:50	Entered search
+15:29:50	Left search and cout bestmove found
+15:30:15	parseFen() finished.
+15:30:15	
+Startup
+15:30:17	s
+15:30:17	Entered search
+15:31:53	parseFen() finished.
+15:31:53	
+Startup
+15:31:53	s
+15:31:53	Entered search
+15:33:02	parseFen() finished.
+15:33:02	
+Startup
+15:33:03	s
+15:33:03	Entered search
+15:33:06	Left search and cout bestmove found
+15:33:15	parseFen() finished.
+15:33:15	
+Startup
+15:33:15	s
+15:33:15	Entered search
+15:33:15	Left search and cout bestmove found
+15:33:33	parseFen() finished.
+15:33:33	
+Startup
+15:33:34	s
+15:33:34	Entered search
+15:33:34	Left search and cout bestmove found
+15:37:44	parseFen() finished.
+15:37:44	
+Startup
+15:37:46	s
+15:37:46	Entered search
+15:38:59	parseFen() finished.
+15:38:59	
+Startup
+15:39:00	s
+15:39:00	Entered search
+15:47:56	parseFen() finished.
+15:47:56	
+Startup
+15:47:57	s
+15:47:57	Entered search
+15:48:23	parseFen() finished.
+15:48:23	
+Startup
+15:48:24	s
+15:48:24	Entered search
+15:52:18	parseFen() finished.
+15:52:18	
+Startup
+15:52:18	s
+15:52:18	Entered search
+15:52:50	parseFen() finished.
+15:52:50	
+Startup
+15:52:51	s
+15:52:51	Entered search
+15:55:13	parseFen() finished.
+15:55:13	
+Startup
+15:55:14	s
+15:55:14	Entered search
+15:55:52	parseFen() finished.
+15:55:52	
+Startup
+15:55:52	s
+15:55:52	Entered search
+15:55:54	Left search and cout bestmove found
+15:56:16	parseFen() finished.
+15:56:16	
+Startup
+15:56:25	parseFen() finished.
+15:56:25	
+Startup
+15:56:25	s
+15:56:25	Entered search
+15:56:27	Left search and cout bestmove found
+15:57:27	parseFen() finished.
+15:57:27	
+Startup
+15:57:28	s
+15:57:28	Entered search
+15:58:37	parseFen() finished.
+15:58:37	
+Startup
+15:58:37	s
+15:58:37	Entered search
+15:59:18	parseFen() finished.
+15:59:19	
+Startup
+15:59:19	s
+15:59:19	Entered search
+16:02:45	parseFen() finished.
+16:02:45	
+Startup
+16:02:45	s
+16:02:45	Entered search
+16:03:55	parseFen() finished.
+16:03:55	
+Startup
+16:03:56	s
+16:03:56	Entered search
+16:03:58	Left search and cout bestmove found
+16:04:18	parseFen() finished.
+16:04:18	
+Startup
+16:04:18	s
+16:04:18	Entered search
+16:04:20	Left search and cout bestmove found
+16:05:31	parseFen() finished.
+16:05:31	
+Startup
+16:05:32	s
+16:05:32	Entered search
+16:05:33	Left search and cout bestmove found
+16:06:09	parseFen() finished.
+16:06:09	
+Startup
+16:06:11	s
+16:06:11	Entered search
+16:06:13	Left search and cout bestmove found
+16:06:46	parseFen() finished.
+16:06:46	
+Startup
+16:06:47	s
+16:06:47	Entered search
+16:06:48	Left search and cout bestmove found
+16:10:39	parseFen() finished.
+16:10:39	
+Startup
+16:10:39	s
+16:10:39	Entered search
+16:11:31	parseFen() finished.
+16:11:31	
+Startup
+16:11:32	s
+16:11:32	Entered search
+16:11:51	parseFen() finished.
+16:11:51	
+Startup
+16:11:52	s
+16:11:52	Entered search
+16:11:52	Left search and cout bestmove found
+16:12:11	parseFen() finished.
+16:12:11	
+Startup
+16:12:11	s
+16:12:11	Entered search
+16:12:12	Left search and cout bestmove found
+16:12:26	parseFen() finished.
+16:12:26	
+Startup
+16:12:26	s
+16:12:26	Entered search
+16:12:27	Left search and cout bestmove found
+16:13:22	parseFen() finished.
+16:13:22	
+Startup
+16:13:22	s
+16:13:22	Entered search
+16:13:23	Left search and cout bestmove found
+16:13:45	parseFen() finished.
+16:13:45	
+Startup
+16:13:46	s
+16:13:46	Entered search
+16:13:46	Left search and cout bestmove found
+16:14:18	parseFen() finished.
+16:14:18	
+Startup
+16:14:19	s
+16:14:19	Entered search
+16:14:20	Left search and cout bestmove found
+16:15:10	parseFen() finished.
+16:15:10	
+Startup
+16:15:11	s
+16:15:11	Entered search
+16:15:12	Left search and cout bestmove found
+16:16:43	parseFen() finished.
+16:16:43	
+Startup
+16:16:44	s
+16:16:44	Entered search
+16:16:45	Left search and cout bestmove found
+16:17:08	parseFen() finished.
+16:17:08	
+Startup
+16:17:10	s
+16:17:10	Entered search
+16:17:10	Left search and cout bestmove found
+16:31:19	parseFen() finished.
+16:31:19	
+Startup
+16:32:06	s
+16:32:06	Entered search
+16:32:06	Left search and cout bestmove found
+16:35:49	parseFen() finished.
+16:35:50	
+Startup
+16:35:50	s
+16:35:50	Entered search
+16:35:51	Left search and cout bestmove found
+16:36:07	parseFen() finished.
+16:36:07	
+Startup
+16:36:08	s
+16:36:08	Entered search
+16:39:28	parseFen() finished.
+16:39:28	
+Startup
+16:39:31	s
+16:39:31	Entered search
+16:40:00	parseFen() finished.
+16:40:00	
+Startup
+16:40:01	s
+16:40:01	Entered search
+16:40:01	Left search and cout bestmove found
+16:41:15	parseFen() finished.
+16:41:16	
+Startup
+16:41:17	s
+16:41:17	Entered search
+16:41:17	Left search and cout bestmove found
+16:41:58	parseFen() finished.
+16:41:58	
+Startup
+16:41:58	s
+16:41:58	Entered search
+16:42:34	parseFen() finished.
+16:42:34	
+Startup
+16:42:35	s
+16:42:35	Entered search
+16:43:25	parseFen() finished.
+16:43:25	
+Startup
+16:43:26	s
+16:43:26	Entered search
+19:48:44	parseFen() finished.
+19:48:44	
+Startup
+19:48:46	s
+19:48:46	Entered search
+19:51:56	parseFen() finished.
+19:51:56	
+Startup
+19:51:59	uci
+19:51:59	UCI MODE
+19:52:00	cmd received: isready
+19:52:02	cmd received: position startpos moves d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5 c4d5 f6d5 e2e4 d5b6 g1e2 e8g8 e1g1 e7e6 b1c3 b8c6 e4e5 c8d7 b2b4 b6d5 b4b5 c6e7 c1a3 c7c6 d1b3 d5c3 e2c3 c6b5 g2b7 a8b8 b7a6 b8b6 a6b5 a7a6 a3c5 b6b7 a2a4 f8e8 c3e4 e7f5 b3f3 d7b5 a4b5 b7b5 a1a6 d8d5 g3g4 b5b3 f3f4 f5h4 f2f3 e8d8 a6a7 d8d7 a7d7 d5d7 e4f6 g7f6 e5f6 d7b5 f4h6 h4f3 f1f3 b3b1 g1f2 b1b2 f2g3 b5b8 h6f4 b8b5 f4d6 b5e8 g4g5 e8a8 h2h4 b2a2 d6e5 a2c2 g3f4 c2a2 c5b4 a2b2 b4c3 b2h2 c3e1 h2b2 f3d3 a8h1
+19:52:02	Parse position: position startpos moves d2d4 g8f6 c2c4 g7g6 g2g3 f8g7 f1g2 d7d5 c4d5 f6d5 e2e4 d5b6 g1e2 e8g8 e1g1 e7e6 b1c3 b8c6 e4e5 c8d7 b2b4 b6d5 b4b5 c6e7 c1a3 c7c6 d1b3 d5c3 e2c3 c6b5 g2b7 a8b8 b7a6 b8b6 a6b5 a7a6 a3c5 b6b7 a2a4 f8e8 c3e4 e7f5 b3f3 d7b5 a4b5 b7b5 a1a6 d8d5 g3g4 b5b3 f3f4 f5h4 f2f3 e8d8 a6a7 d8d7 a7d7 d5d7 e4f6 g7f6 e5f6 d7b5 f4h6 h4f3 f1f3 b3b1 g1f2 b1b2 f2g3 b5b8 h6f4 b8b5 f4d6 b5e8 g4g5 e8a8 h2h4 b2a2 d6e5 a2c2 g3f4 c2a2 c5b4 a2b2 b4c3 b2h2 c3e1 h2b2 f3d3 a8h1
+19:52:02	parseFen() finished.
+19:52:02	Pushed all moves from cmd
+19:52:02	Parsing complete
+19:52:05	cmd received: go depth 10
+19:52:05	Parse go: go depth 10
+19:52:05	Parse go finished, start search now
+19:52:05	Entered search
+19:52:06	Left search and cout bestmove found
+19:55:39	parseFen() finished.
+19:55:39	
+Startup
+19:55:39	s
+19:55:39	Entered search
+19:56:14	parseFen() finished.
+19:56:14	
+Startup
+19:56:16	s
+19:56:16	Entered search
+20:12:02	parseFen() finished.
+20:12:02	
+Startup
+20:12:04	s
+20:12:04	Entered search
+20:12:04	Left search and cout bestmove found
+20:12:32	parseFen() finished.
+20:12:32	
+Startup
+20:12:32	s
+20:12:32	Entered search
+20:12:33	Left search and cout bestmove found
+01:34:45	parseFen() finished.
+01:34:45	
+Startup
+01:34:47	s
+01:34:47	Entered search
+01:35:37	parseFen() finished.
+01:35:37	
+Startup
+01:35:37	s
+01:35:37	Entered search
+01:38:27	parseFen() finished.
+01:38:27	
+Startup
+01:38:28	s
+01:38:28	Entered search
+01:39:19	parseFen() finished.
+01:39:20	
+Startup
+01:39:20	s
+01:39:20	Entered search
+01:40:29	parseFen() finished.
+01:40:29	
+Startup
+01:40:30	s
+01:40:30	Entered search
+01:46:30	parseFen() finished.
+01:46:30	
+Startup
+01:46:32	s
+01:46:32	Entered search
+01:48:56	parseFen() finished.
+01:48:56	
+Startup
+01:48:56	s
+01:48:56	Entered search
+01:49:57	parseFen() finished.
+01:49:57	
+Startup
+01:49:58	s
+01:49:58	Entered search
+01:55:10	parseFen() finished.
+01:55:10	
+Startup
+01:55:13	s
+01:55:13	Entered search
+01:57:08	parseFen() finished.
+01:57:08	
+Startup
+01:57:08	s
+01:57:08	Entered search
+01:59:40	parseFen() finished.
+01:59:40	
+Startup
+02:00:03	s
+02:00:04	Entered search
+02:00:46	parseFen() finished.
+02:00:46	
+Startup
+02:00:47	s
+02:00:47	Entered search
+02:01:24	parseFen() finished.
+02:01:24	
+Startup
+02:01:29	s
+02:01:29	Entered search
+02:01:30	Left search and cout bestmove found
+02:05:55	parseFen() finished.
+02:05:55	
+Startup
+02:05:55	uci
+02:05:55	UCI MODE
+02:05:57	cmd received: isready
+02:05:59	cmd received: isready
+02:06:04	cmd received: ucinewgame
+02:06:04	Parse position: position startpos
+02:06:04	parseFen() finished.
+02:06:04	Parsing complete
+02:09:25	parseFen() finished.
+02:09:25	
+Startup
+02:09:27	uc
+02:09:28	uci
+02:09:28	UCI MODE
+02:09:32	cmd received: isready
+02:09:34	cmd received: ucinewgame
+02:09:34	Parse position: position startpos
+02:09:34	parseFen() finished.
+02:09:34	Parsing complete
+02:09:36	cmd received: isready
+02:09:37	cmd received: 2020-10-27 02:06:56,279-->1:position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+02:09:37	cmd received: 
+02:09:43	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+02:09:43	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+02:09:43	parseFen() finished.
+02:09:43	Pushed all moves from cmd
+02:09:43	Parsing complete
+02:09:47	cmd received: isready
+02:18:15	parseFen() finished.
+02:18:15	
+Startup
+02:18:17	uc
+02:18:18	uci
+02:18:18	UCI MODE
+02:18:21	cmd received: isready
+02:18:23	cmd received: 2020-10-27 02:06:56,279-->1:position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+02:18:28	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+02:18:28	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+02:18:28	parseFen() finished.
+02:18:28	Pushed all moves from cmd
+02:18:28	Parsing complete
+02:18:31	cmd received: go depth 4
+02:18:31	Parse go: go depth 4
+02:18:31	Parse go finished, start search now
+02:18:31	Entered search
+02:19:24	parseFen() finished.
+02:19:24	
+Startup
+02:19:28	uci
+02:19:28	UCI MODE
+02:19:31	cmd received: isready
+02:19:33	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+02:19:33	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+02:19:33	parseFen() finished.
+02:19:33	Pushed all moves from cmd
+02:19:33	Parsing complete
+02:19:35	cmd received: go depth 4
+02:19:35	Parse go: go depth 4
+02:19:35	Parse go finished, start search now
+02:19:35	Entered search
+02:20:05	parseFen() finished.
+02:20:05	
+Startup
+02:20:06	s
+02:20:06	Entered search
+02:21:34	parseFen() finished.
+02:21:34	
+Startup
+02:21:36	uci
+02:21:36	UCI MODE
+02:21:38	cmd received: isready
+02:21:41	cmd received: position startpos
+02:21:41	Parse position: position startpos
+02:21:41	parseFen() finished.
+02:21:41	Parsing complete
+02:21:44	cmd received: go depth 4
+02:21:44	Parse go: go depth 4
+02:21:44	Parse go finished, start search now
+02:21:44	Entered search
+02:21:44	Left search and cout bestmove found
+13:00:50	parseFen() finished.
+13:00:50	
+Startup
+13:00:51	uci
+13:00:51	UCI MODE
+13:00:53	cmd received: isready
+13:00:54	cmd received: 2020-10-27 12:58:56,935-->1:position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:00:59	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:00:59	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:00:59	parseFen() finished.
+13:00:59	Pushed all moves from cmd
+13:00:59	Parsing complete
+13:01:06	cmd received: 2020-10-27 12:58:56,935-->1:go wtime 68000 btime 68000 winc 1000 binc 1000
+13:01:13	cmd received: go wtime 68000 btime 68000 winc 1000 binc 1000
+13:01:13	Parse go: go wtime 68000 btime 68000 winc 1000 binc 1000
+13:01:13	Parse go finished, start search now
+13:01:13	Entered search
+13:01:36	parseFen() finished.
+13:01:36	
+Startup
+13:01:47	uci
+13:01:47	UCI MODE
+13:01:48	cmd received: isready
+13:01:49	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:01:49	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:01:49	parseFen() finished.
+13:01:49	Pushed all moves from cmd
+13:01:49	Parsing complete
+13:01:50	cmd received: go depth 4
+13:01:50	Parse go: go depth 4
+13:01:50	Parse go finished, start search now
+13:01:51	Entered search
+13:07:33	parseFen() finished.
+13:07:33	
+Startup
+13:07:35	uci
+13:07:35	UCI MODE
+13:07:37	cmd received: isready
+13:07:39	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:07:39	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:07:39	parseFen() finished.
+13:07:39	Pushed all moves from cmd
+13:07:39	Parsing complete
+13:07:44	cmd received: go depth 3
+13:07:44	Parse go: go depth 3
+13:07:44	Parse go finished, start search now
+13:07:44	Entered search
+13:09:01	parseFen() finished.
+13:09:01	
+Startup
+13:09:02	uci
+13:09:02	UCI MODE
+13:09:03	cmd received: isready
+13:09:03	cmd received: 
+13:09:04	cmd received: 
+13:09:08	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:09:08	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:09:08	parseFen() finished.
+13:09:08	Pushed all moves from cmd
+13:09:08	Parsing complete
+13:09:12	cmd received: go depth 1
+13:09:12	Parse go: go depth 1
+13:09:12	Parse go finished, start search now
+13:09:12	Entered search
+13:12:38	parseFen() finished.
+13:12:38	
+Startup
+13:12:40	e2e4
+13:12:45	e7e5
+13:13:00	b1c3
+13:13:08	g8f6
+13:13:20	e1e2
+13:13:30	f6e4
+13:13:40	c3e4
+13:14:57	parseFen() finished.
+13:14:57	
+Startup
+13:15:01	e2e4
+13:15:02	e7e5
+13:15:04	pop
+13:15:06	pop
+13:15:54	parseFen() finished.
+13:15:54	
+Startup
+13:16:03	s
+13:16:03	Entered search
+13:16:21	parseFen() finished.
+13:16:21	
+Startup
+13:16:22	uci
+13:16:22	UCI MODE
+13:16:28	cmd received: isready
+13:16:32	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:16:32	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:16:32	parseFen() finished.
+13:16:32	Pushed all moves from cmd
+13:16:32	Parsing complete
+13:16:36	cmd received: go depth 1
+13:16:36	Parse go: go depth 1
+13:16:36	Parse go finished, start search now
+13:16:36	Entered search
+13:21:00	parseFen() finished.
+13:21:00	
+Startup
+13:21:01	uci
+13:21:01	UCI MODE
+13:21:03	cmd received: isready
+13:21:04	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:21:04	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:21:04	parseFen() finished.
+13:21:04	Pushed all moves from cmd
+13:21:04	Parsing complete
+13:21:07	cmd received: go depth 1
+13:21:07	Parse go: go depth 1
+13:21:07	Parse go finished, start search now
+13:21:07	Entered search
+13:21:45	parseFen() finished.
+13:21:45	
+Startup
+13:21:47	e2e4
+13:21:48	e7e5
+13:21:50	0000
+13:21:53	pop
+13:21:59	q2q4
+13:22:01	a2a4
+13:22:05	0000
+13:22:07	pop
+13:22:14	pop
+13:22:16	a2a4
+13:22:20	0000
+13:22:22	pop
+13:22:25	pop
+13:29:33	uci
+13:29:33	UCI MODE
+13:29:34	cmd received: isready
+13:29:36	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:29:36	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:29:36	parseFen() finished.
+13:29:36	Pushed all moves from cmd
+13:29:36	Parsing complete
+13:29:40	cmd received: go depth 1
+13:29:40	Parse go: go depth 1
+13:29:40	Parse go finished, start search now
+13:29:40	Entered search
+13:37:56	parseFen() finished.
+13:37:56	
+Startup
+13:37:58	uci
+13:37:58	UCI MODE
+13:37:59	cmd received: isready
+13:38:00	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:38:00	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:38:00	parseFen() finished.
+13:38:00	Pushed all moves from cmd
+13:38:00	Parsing complete
+13:38:02	cmd received: go depth 1
+13:38:02	Parse go: go depth 1
+13:38:02	Parse go finished, start search now
+13:38:02	Entered search
+13:38:30	parseFen() finished.
+13:38:30	
+Startup
+13:38:31	uci
+13:38:31	UCI MODE
+13:38:32	cmd received: isready
+13:38:32	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:38:32	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:38:32	parseFen() finished.
+13:38:32	Pushed all moves from cmd
+13:38:32	Parsing complete
+13:38:36	cmd received: go depth 1
+13:38:36	Parse go: go depth 1
+13:38:36	Parse go finished, start search now
+13:38:36	Entered search
+13:40:54	parseFen() finished.
+13:40:54	
+Startup
+13:40:55	uci
+13:40:55	UCI MODE
+13:40:57	cmd received: isready
+13:40:58	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:40:58	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:40:58	parseFen() finished.
+13:40:58	Pushed all moves from cmd
+13:40:58	Parsing complete
+13:41:00	cmd received: go depth 1
+13:41:00	Parse go: go depth 1
+13:41:00	Parse go finished, start search now
+13:41:00	Entered search
+13:41:26	parseFen() finished.
+13:41:26	
+Startup
+13:41:26	uci
+13:41:26	UCI MODE
+13:41:29	cmd received: isready
+13:41:30	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:41:30	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:41:30	parseFen() finished.
+13:41:30	Pushed all moves from cmd
+13:41:30	Parsing complete
+13:41:33	cmd received: go depth 1
+13:41:33	Parse go: go depth 1
+13:41:33	Parse go finished, start search now
+13:41:33	Entered search
+13:46:50	parseFen() finished.
+13:46:50	
+Startup
+13:46:54	s
+13:46:54	Entered search
+13:47:31	parseFen() finished.
+13:47:31	
+Startup
+13:47:32	e2e4
+13:47:42	e7e5
+13:47:46	pop
+13:47:48	pop
+13:47:54	pop
+13:48:41	parseFen() finished.
+13:48:41	
+Startup
+13:48:45	uci
+13:48:45	UCI MODE
+13:48:46	cmd received: isready
+13:48:49	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:48:49	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:48:49	parseFen() finished.
+13:48:49	Pushed all moves from cmd
+13:48:49	Parsing complete
+13:48:51	cmd received: go depth 1
+13:48:51	Parse go: go depth 1
+13:48:51	Parse go finished, start search now
+13:48:51	Entered search
+13:52:29	parseFen() finished.
+13:52:29	
+Startup
+13:52:30	uci
+13:52:30	UCI MODE
+13:52:31	cmd received: isready
+13:52:32	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:52:32	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:52:32	parseFen() finished.
+13:52:32	Pushed all moves from cmd
+13:52:32	Parsing complete
+13:52:33	cmd received: fo depth 1
+13:52:36	cmd received: go depth 1
+13:52:36	Parse go: go depth 1
+13:52:36	Parse go finished, start search now
+13:52:36	Entered search
+13:52:36	Left search and cout bestmove found
+13:54:25	parseFen() finished.
+13:54:25	
+Startup
+13:54:27	uci
+13:54:27	UCI MODE
+13:54:28	cmd received: isready
+13:54:29	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:54:29	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+13:54:29	parseFen() finished.
+13:54:29	Pushed all moves from cmd
+13:54:29	Parsing complete
+13:54:39	cmd received: go depth 6
+13:54:39	Parse go: go depth 6
+13:54:39	Parse go finished, start search now
+13:54:39	Entered search
+13:54:39	Left search and cout bestmove found
+14:04:20	parseFen() finished.
+14:04:20	
+Startup
+14:04:22	uci
+14:04:23	UCI MODE
+14:04:24	cmd received: isready
+14:04:25	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+14:04:25	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2
+14:04:25	parseFen() finished.
+14:04:25	Pushed all moves from cmd
+14:04:25	Parsing complete
+14:04:28	cmd received: go depth 8
+14:04:28	Parse go: go depth 8
+14:04:28	Parse go finished, start search now
+14:04:28	Entered search
+14:04:28	Left search and cout bestmove found
+14:05:16	parseFen() finished.
+14:05:16	
+Startup
+14:05:17	s
+14:05:17	Entered search
+14:05:18	Left search and cout bestmove found
+14:06:14	parseFen() finished.
+14:06:14	
+Startup
+14:06:15	s
+14:06:15	Entered search
+14:06:15	Left search and cout bestmove found
+14:07:41	parseFen() finished.
+14:07:41	
+Startup
+14:07:44	s
+14:07:44	Entered search
+14:07:45	Left search and cout bestmove found
+14:18:57	parseFen() finished.
+14:18:57	
+Startup
+14:19:01	uci
+14:19:01	UCI MODE
+14:19:03	cmd received: isready
+14:19:03	cmd received: 2020-10-27 14:16:51,594-->1:position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 h5g6 b2f6 g7f6 e2e4 b8d7 e4d5 c6d5 f3d4 f8c5 d4b5 a8c8 d3d4 a7a6 d4c5 a6b5 e1d1 d7c5 h1e1 e8g8 a2a3 b5b4 a3b4 c5a6 c2c4 a6b4 a1a7 g6c2 d1e2 c2d3 e2d1 c8a8 a7a4 a8a4 b3a4 f8a8 c4d5 a8a4 d2e4 a4a1 d1d2 a1e1 e4f6 g8g7 f6h5 g7h6 d2e1 h6h5 e1d2 d3b5 d5e6 f7e6 g2e4 b5f1 h3h4 h5g4 e4h7 g4f3 h4h5 f3f2 h5h6 b4d5 h7g6 d5f6 g3g4 f1g2 d2c1 g2f3 g4g5 f6h7 g6h7 f3g2 h7c2 e6e5 h6h7
+14:19:04	cmd received: 2020-10-27 14:16:51,594-->1:position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 h5g6 b2f6 g7f6 e2e4 b8d7 e4d5 c6d5 f3d4 f8c5 d4b5 a8c8 d3d4 a7a6 d4c5 a6b5 e1d1 d7c5 h1e1 e8g8 a2a3 b5b4 a3b4 c5a6 c2c4 a6b4 a1a7 g6c2 d1e2 c2d3 e2d1 c8a8 a7a4 a8a4 b3a4 f8a8 c4d5 a8a4 d2e4 a4a1 d1d2 a1e1 e4f6 g8g7 f6h5 g7h6 d2e1 h6h5 e1d2 d3b5 d5e6 f7e6 g2e4 b5f1 h3h4 h5g4 e4h7 g4f3 h4h5 f3f2 h5h6 b4d5 h7g6 d5f6 g3g4 f1g2 d2c1 g2f3 g4g5 f6h7 g6h7 f3g2 h7c2 e6e5 h6h7
+14:19:10	cmd received: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 h5g6 b2f6 g7f6 e2e4 b8d7 e4d5 c6d5 f3d4 f8c5 d4b5 a8c8 d3d4 a7a6 d4c5 a6b5 e1d1 d7c5 h1e1 e8g8 a2a3 b5b4 a3b4 c5a6 c2c4 a6b4 a1a7 g6c2 d1e2 c2d3 e2d1 c8a8 a7a4 a8a4 b3a4 f8a8 c4d5 a8a4 d2e4 a4a1 d1d2 a1e1 e4f6 g8g7 f6h5 g7h6 d2e1 h6h5 e1d2 d3b5 d5e6 f7e6 g2e4 b5f1 h3h4 h5g4 e4h7 g4f3 h4h5 f3f2 h5h6 b4d5 h7g6 d5f6 g3g4 f1g2 d2c1 g2f3 g4g5 f6h7 g6h7 f3g2 h7c2 e6e5 h6h7
+14:19:10	Parse position: position startpos moves g1f3 d7d5 g2g3 c7c6 f1g2 g8f6 d2d3 c8g4 h2h3 g4h5 b2b3 e7e6 c1b2 d8a5 d1d2 a5d2 b1d2 h5g6 b2f6 g7f6 e2e4 b8d7 e4d5 c6d5 f3d4 f8c5 d4b5 a8c8 d3d4 a7a6 d4c5 a6b5 e1d1 d7c5 h1e1 e8g8 a2a3 b5b4 a3b4 c5a6 c2c4 a6b4 a1a7 g6c2 d1e2 c2d3 e2d1 c8a8 a7a4 a8a4 b3a4 f8a8 c4d5 a8a4 d2e4 a4a1 d1d2 a1e1 e4f6 g8g7 f6h5 g7h6 d2e1 h6h5 e1d2 d3b5 d5e6 f7e6 g2e4 b5f1 h3h4 h5g4 e4h7 g4f3 h4h5 f3f2 h5h6 b4d5 h7g6 d5f6 g3g4 f1g2 d2c1 g2f3 g4g5 f6h7 g6h7 f3g2 h7c2 e6e5 h6h7
+14:19:10	parseFen() finished.
+14:19:10	Pushed all moves from cmd
+14:19:10	Parsing complete
+14:19:20	cmd received: go depth 3
+14:19:20	Parse go: go depth 3
+14:19:20	Parse go finished, start search now
+14:19:20	Entered search
+14:19:20	Left search and cout bestmove found
+14:19:50	cmd received: go depth 8
+14:19:50	Parse go: go depth 8
+14:19:50	Parse go finished, start search now
+14:19:50	Entered search
+14:19:50	Left search and cout bestmove found
+14:20:01	cmd received: f2f3
+14:22:30	parseFen() finished.
+14:22:30	
+Startup
+14:22:34	s
+14:22:34	Entered search
+14:22:35	Left search and cout bestmove found
+14:27:29	parseFen() finished.
+14:27:29	
+Startup
+14:27:30	s
+14:27:30	Entered search
+14:33:56	parseFen() finished.
+14:33:56	
+Startup
+14:34:14	parseFen() finished.
+14:34:14	
+Startup
+14:34:16	s
+14:34:16	Entered search
+14:34:20	Left search and cout bestmove found
+14:34:23	e2e4
+14:35:57	parseFen() finished.
+14:35:57	
+Startup
+14:35:58	s
+14:35:58	Entered search
+14:36:00	Left search and cout bestmove found
+14:36:02	e2e4
+14:36:07	s
+14:36:07	Entered search
+14:36:11	Left search and cout bestmove found
+14:36:14	b8c6
+22:41:50	parseFen() finished.
+22:41:50	
+Startup
+22:41:50	s
+22:41:50	Entered search
+22:42:00	Left search and cout bestmove found
+22:42:22	parseFen() finished.
+22:42:22	
+Startup
+22:42:24	s
+22:42:24	Entered search
+22:42:56	parseFen() finished.
+22:42:56	
+Startup
+22:42:57	s
+22:42:57	Entered search
+22:42:59	Left search and cout bestmove found
+22:43:30	parseFen() finished.
+22:43:30	
+Startup
+22:43:31	s
+22:43:31	Entered search
+22:43:33	Left search and cout bestmove found
+22:46:08	parseFen() finished.
+22:46:08	
+Startup
+22:46:08	s
+22:46:08	Entered search
+22:46:11	Left search and cout bestmove found
+22:46:27	parseFen() finished.
+22:46:27	
+Startup
+22:46:27	s
+22:46:27	Entered search
+22:46:30	Left search and cout bestmove found
+22:49:24	parseFen() finished.
+22:49:24	
+Startup
+22:49:26	s
+22:49:26	Entered search
+22:49:29	Left search and cout bestmove found
+22:52:22	parseFen() finished.
+22:52:22	
+Startup
+22:52:22	s
+22:52:23	Entered search
+22:52:24	Left search and cout bestmove found
+22:52:57	parseFen() finished.
+22:52:57	
+Startup
+22:52:59	s
+22:52:59	Entered search
+22:53:01	Left search and cout bestmove found
+22:54:40	parseFen() finished.
+22:54:40	
+Startup
+22:54:43	perft
+22:55:23	parseFen() finished.
+22:55:23	
+Startup
+22:55:24	s
+22:55:24	Entered search
+22:55:28	Left search and cout bestmove found
+22:55:32	int revFutilMargin[4] = { pieceScores[KING], pieceScores[QUEEN], pieceScores[ROOK], pieceScores[BISHOP] };
+22:55:32	int revFutilMargin[4] = { pieceScores[KING], pieceScores[QUEEN], pieceScores[ROOK], pieceScores[BISHOP] };
+23:31:33	parseFen() finished.
+23:31:34	
+Startup
+23:31:34	s
+23:31:34	Entered search
+23:32:32	parseFen() finished.
+23:32:32	
+Startup
+23:32:33	s
+23:32:33	Entered search
+23:33:26	parseFen() finished.
+23:33:26	
+Startup
+23:33:26	s
+23:33:26	Entered search
+23:33:49	parseFen() finished.
+23:33:49	
+Startup
+23:33:49	s
+23:33:49	Entered search
+23:34:35	parseFen() finished.
+23:34:35	
+Startup
+23:34:36	s
+23:34:36	Entered search
+23:35:10	parseFen() finished.
+23:35:10	
+Startup
+23:35:11	s
+23:35:11	Entered search
+23:36:00	parseFen() finished.
+23:36:00	
+Startup
+23:36:01	s
+23:36:01	Entered search
+23:37:02	parseFen() finished.
+23:37:02	
+Startup
+23:37:03	s
+23:37:03	Entered search
+23:39:13	parseFen() finished.
+23:39:13	
+Startup
+23:39:13	s
+23:39:13	Entered search
+23:39:17	Left search and cout bestmove found
+23:41:11	parseFen() finished.
+23:41:11	
+Startup
+23:41:13	s
+23:41:13	Entered search
+23:41:31	parseFen() finished.
+23:41:31	
+Startup
+23:41:33	s
+23:41:33	Entered search
+23:41:37	Left search and cout bestmove found
+23:42:01	parseFen() finished.
+23:42:01	
+Startup
+23:42:02	s
+23:42:02	Entered search
+23:42:06	Left search and cout bestmove found
+23:42:45	parseFen() finished.
+23:42:45	
+Startup
+23:42:49	s
+23:42:49	Entered search
+23:42:52	Left search and cout bestmove found
+23:43:09	parseFen() finished.
+23:43:09	
+Startup
+23:43:09	s
+23:43:09	Entered search
+23:43:13	Left search and cout bestmove found
+23:43:54	parseFen() finished.
+23:43:54	
+Startup
+23:44:04	parseFen() finished.
+23:44:04	
+Startup
+23:44:04	s
+23:44:04	Entered search
+23:44:08	Left search and cout bestmove found
+23:44:25	parseFen() finished.
+23:44:25	
+Startup
+23:44:26	s
+23:44:26	Entered search
+23:44:29	Left search and cout bestmove found
+19:39:36	parseFen() finished.
+19:39:36	
+Startup
+19:39:37	s
+19:39:37	Entered search
+19:39:38	Left search and cout bestmove found
+19:39:58	parseFen() finished.
+19:39:58	
+Startup
+19:40:00	s
+19:40:00	Entered search
+19:40:36	parseFen() finished.
+19:40:36	
+Startup
+19:40:36	s
+19:40:36	Entered search
+19:42:25	parseFen() finished.
+19:42:25	
+Startup
+19:42:25	s
+19:42:25	Entered search
+19:42:45	parseFen() finished.
+19:42:45	
+Startup
+19:42:46	s
+19:42:46	Entered search
+22:15:44	parseFen() finished.
+22:15:45	
+Startup
+22:15:45	s
+22:15:45	Entered search
+22:16:01	Left search and cout bestmove found
+22:16:22	parseFen() finished.
+22:16:22	
+Startup
+22:16:23	s
+22:16:23	Entered search
+22:16:36	Left search and cout bestmove found
+22:22:02	parseFen() finished.
+22:22:02	
+Startup
+22:22:03	s
+22:22:03	Entered search
+22:22:22	parseFen() finished.
+22:22:22	
+Startup
+22:22:23	s
+22:22:23	Entered search
+22:22:34	Left search and cout bestmove found
+22:42:08	parseFen() finished.
+22:42:08	
+Startup
+22:42:08	s
+22:42:08	Entered search
+22:42:20	Left search and cout bestmove found
+22:42:36	parseFen() finished.
+22:42:36	
+Startup
+22:42:37	s
+22:42:37	Entered search
+22:42:40	Left search and cout bestmove found
+22:43:11	parseFen() finished.
+22:43:11	
+Startup
+22:48:18	parseFen() finished.
+22:48:18	
+Startup
+22:48:19	s
+22:48:19	Entered search
+22:49:05	parseFen() finished.
+22:49:05	
+Startup
+22:49:08	s
+22:49:08	Entered search
+22:49:19	Left search and cout bestmove found
+22:54:19	parseFen() finished.
+22:54:19	
+Startup
+22:54:20	s
+22:54:20	Entered search
+22:54:29	Left search and cout bestmove found
+22:54:40	parseFen() finished.
+22:54:40	
+Startup
+22:54:40	s
+22:54:40	Entered search
+22:54:52	Left search and cout bestmove found
+23:08:07	parseFen() finished.
+23:08:07	
+Startup
+23:08:07	parseFen() finished.
+23:10:32	parseFen() finished.
+23:10:32	
+Startup
+23:10:32	parseFen() finished.
+23:15:13	parseFen() finished.
+23:15:13	
+Startup
+23:15:15	s
+23:15:15	Entered search
+23:15:25	Left search and cout bestmove found
+23:33:57	parseFen() finished.
+23:33:57	
+Startup
+23:33:57	s
+23:33:57	Entered search
+23:34:08	Left search and cout bestmove found
+23:34:18	parseFen() finished.
+23:34:19	
+Startup
+23:34:20	s
+23:34:20	Entered search
+23:34:30	Left search and cout bestmove found
+23:35:26	parseFen() finished.
+23:35:26	
+Startup
+23:35:27	s
+23:35:27	Entered search
+23:35:36	Left search and cout bestmove found
+23:39:38	parseFen() finished.
+23:39:38	
+Startup
+23:39:39	s
+23:39:39	Entered search
+23:39:49	Left search and cout bestmove found

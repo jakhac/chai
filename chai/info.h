@@ -69,16 +69,16 @@ inline string getStringMove(const int move) {
 
 
 	int promoted = PROMOTED(move);
-	char promChar = ' ';
+	string promChar = " ";
 
 	if (promoted) {
-		promChar = 'q';
+		promChar = "q ";
 		if (isN(promoted)) {
-			promChar = 'n';
+			promChar = "n ";
 		} else if (isRQ(promoted) && !isBQ(promoted)) {
-			promChar = 'r';
+			promChar = "r ";
 		} else if (!isRQ(promoted) && isBQ(promoted)) {
-			promChar = 'b';
+			promChar = "b ";
 		}
 	}
 

@@ -25,11 +25,18 @@ exit(1);}
 const int NUM_SQUARES = 64;
 const int MAX_GAME_MOVES = 2048;
 const int MAX_POSITION_MOVES = 256;
-const int MAX_DEPTH = 64;
+const int MAX_DEPTH = 32;
+const int NO_SCORE = 10000000;
 
 const int INF = 30000;
 const int MATE = 29000;
+const int ISMATE = MATE - MAX_DEPTH;
 const int R_NULL = 2;
+
+const bool IS_PV = true;
+const bool NO_PV = false;
+const bool DO_NULL = true;
+const bool NO_NULL = false;
 
 const U64 RANK_1_HEX = 0xFF;
 const U64 RANK_2_HEX = 0xFF00;
@@ -49,10 +56,15 @@ const U64 FILE_F_HEX = 0x2020202020202020;
 const U64 FILE_G_HEX = 0x4040404040404040;
 const U64 FILE_H_HEX = 0x8080808080808080;
 
-const U64 FILE_LIST[8] = { 
-    FILE_A_HEX, FILE_B_HEX , FILE_C_HEX , 
-    FILE_D_HEX , FILE_E_HEX , FILE_F_HEX, 
-    FILE_G_HEX, FILE_H_HEX };
+const U64 FILE_LIST[8] = {
+    FILE_A_HEX, FILE_B_HEX, FILE_C_HEX, FILE_D_HEX,
+    FILE_E_HEX, FILE_F_HEX, FILE_G_HEX, FILE_H_HEX 
+};
+
+const U64 RANK_LIST[8] = {
+    RANK_1_HEX, RANK_2_HEX, RANK_3_HEX, RANK_4_HEX,
+    RANK_5_HEX, RANK_6_HEX, RANK_7_HEX, RANK_8_HEX
+};
 
 const U64 BLACK_SQUARES = 0xAA55AA55AA55AA55;
 const U64 WHITE_SQUARES = 0x55AA55AA55AA55AA;
@@ -105,6 +117,7 @@ const string pieceChar = ".PNBRQKpnbrqk";
 const string sideChar = "wb-";
 const string rankChar = "12345678";
 const string fileChar = "abcdefgh";
+const string gameStateStr[3] = { "OPENING", "MIDDLE GAME" , "ENDGAME" };
 
 const U64 rand64();
 const U64 randomFewBits();

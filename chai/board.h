@@ -10,12 +10,6 @@
 #include "info.h"
 #include "attacks.h"
 
-
-/*
-* - Pawn Shield Pattern for king safety
-* - Distance to king for safety
-*/
-
 /// <summary>
 /// Board uses 8 bitboards to store each piece and squares occupied by each color. A chess game should only uses 
 /// one board instance since various push/pop moves in recursive search trees do not require new boards.
@@ -32,14 +26,23 @@ public:
 	/// <summary>Ply Counter</summary>
 	int ply = 0;
 
+	/// <summary>Ply Counter for undoHistory array</summary>
+	int undoPly = 0;
+
 	/// <summary>Fifty-move rule counter. Resets after captures.</summary>
 	int fiftyMove = 0;
+
+	/// <summary>Count half moves. Increment when push or pushNull, decrement when pop.</summary>
+	int halfMoves = 0;
 
 	/// <summary>CastlePermission stored as number between 0 and 15 (4 bits for each side and color)</summary>
 	int castlePermission = 0;
 
 	/// <summary>Unique zobrist key</summary>
 	U64 zobristKey = 0x0;
+
+	/// <summary>Unique zobrist pawn key</summary>
+	U64 zobristPawnKey = 0x0;
 
 	/// <summary>Store pieces for given color</summary>
 	U64 color[2] = { 0ULL, 0ULL };
@@ -50,7 +53,7 @@ public:
 	/// <summary>Store occupied squares</summary>
 	U64 occupied = 0ULL;
 
-	/// <summary>Stores the currently attacked squares both side</summary>
+	/// <summary>Stores the currently attacked squares by side</summary>
 	U64 attackedSquares[2] = { 0ULL, 0ULL };
 
 	/// <summary>Unique 64bit number for each piece on each square. En pas key is stored as piece 0.</summary>
@@ -66,7 +69,9 @@ public:
 	UNDO_S undoHistory[MAX_GAME_MOVES];
 
 	/// <summary>PV Table -> TODO transposition table</summary>
-	PV_TABLE_S pvTable_s[1];
+	TT_S tt[1];
+
+	PAWN_TABLE_S pawnTable[1];
 
 	int pvArray[MAX_DEPTH];
 
@@ -77,9 +82,9 @@ public:
 
 	void updateGameState();
 
-	void pushNull();
+	int countMajorPieces(int side);
 
-	void popNull();
+	void pushNull();
 
 	/// <summary>
 	/// Set bit at given index to 0 in side, occupied and piece bitboard.
@@ -112,6 +117,8 @@ public:
 	/// </summary>
 	/// <returns>Unique 64-bit number</returns>
 	U64 generateZobristKey();
+
+	U64 generatePawnHashKey();
 
 	/// <summary>
 	/// Get pieces of given index and color.
@@ -224,7 +231,9 @@ public:
 	/// <param name="square">Square to check attacks on</param>
 	/// <param name="side">Side that might attack the square</param>
 	/// <returns></returns>
-	U64 squareAttacked(int square, int side);
+	U64 squareAttackedBy(int square, int side);
+
+	U64 squareAttacked(int square);
 
 	/// <summary>
 	/// Check if given side is currently in check.

@@ -17,26 +17,60 @@ struct UNDO_S {
     int fiftyMove;
     int gameState;
     U64 zobKey;
+    U64 pawnKey;
 };
 
-struct PV_ENTRY_S {
+struct TT_ENTRY_S {
     U64 zobKey;
     int move;
+    int score;
+    uint8_t flag;
+    uint8_t depth;
 };
 
-struct PV_TABLE_S {
-    PV_ENTRY_S* pvTable = NULL;
+struct TT_S {
+    TT_ENTRY_S* table = NULL;
     int entries = 0;
+
+    // measure successful probes
+    int probed;
+    int hit;
+    int valueHit;
+
+    // measure collided keys
+    int collided;
+    int overwrite;
+    int stored;
+
 };
 
-struct SEARCH_INFO_S {
+struct PAWN_ENTRY_S {
+    U64 zobristPawnKey;
+    int eval;
+};
+
+struct PAWN_TABLE_S {
+    PAWN_ENTRY_S* table = NULL;
+    int entries;
+
+    // measure collided keys
+    int collided;
+    int stored;
+
+    // measure successful probes
+    int probed;
+    int hit;
+};
+
+struct SEARCH_S {
     int startTime;
     int stopTime;
     int depth;
-    int depthset;
     int movesLeft;
+
     bool infinite;
-    int timeSet;
+    bool depthSet;
+    bool timeSet;
 
     long nodes;
 
@@ -46,6 +80,9 @@ struct SEARCH_INFO_S {
     // fail high heuristics
     float fh;
     float fhf;
+
+    // pv hits
+    int pvHits = 0;
 };
 
 enum PIECE_VALUES { EMPTY, P, N, B, R, Q, K, p, n, b, r, q, k };
@@ -56,6 +93,8 @@ enum COLORS { BLACK, WHITE, BOTH };
 
 enum CASTLING_RIGHTS { K_CASTLE = 1, Q_CASTLE = 2, k_CASTLE = 4, q_CASTLE = 8 };
 enum GAME_STATE { START, MID, END };
+
+enum { NONE, TT_ALPHA, TT_BETA, TT_SCORE };
 
 enum SQUARES {
     A8 = 56, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD,

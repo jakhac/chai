@@ -146,7 +146,6 @@
     <ClInclude Include="eval.h" />
     <ClInclude Include="info.h" />
     <ClInclude Include="legalMoveGenerator.h" />
-    <ClInclude Include="magics.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="mask.h" />
     <ClInclude Include="move.h" />

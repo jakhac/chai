@@ -13,3 +13,5 @@ int squareOnBoard(int sq);
 /// <param name="piece">Piece</param>
 /// <returns>True if piece is valid</returns>
 int pieceValid(int piece);
+
+bool fileValid(int file);

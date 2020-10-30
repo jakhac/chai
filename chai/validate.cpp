@@ -7,3 +7,7 @@ int squareOnBoard(int sq) {
 int pieceValid(int piece) {
 	return ((piece >= 1) && (piece <= 13));
 }
+
+bool fileValid(int file) {
+	return (file >= 0) && (file <= 7);
+}

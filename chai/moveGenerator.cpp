@@ -38,7 +38,10 @@ void generateMoves(Board* b, MOVE_S* move_s) {
 
 void generateCaptures(Board* b, MOVE_S* move_s) {
 	for (int i = 0; i < MAX_POSITION_MOVES; i++) move_s->moveScore[i] = 0;
-	move_s->attackedSquares = b->attackerSet(b->side ^ 1);
+	//move_s->attackedSquares = b->attackerSet(b->side ^ 1);
+
+	//b->attackedSquares[WHITE] = b->attackerSet(WHITE);
+	//b->attackedSquares[BLACK] = b->attackerSet(BLACK);
 
 	if (b->side == WHITE) {
 		whitePawnCaptures(b, move_s);
@@ -74,15 +77,13 @@ bool moveLegal(Board* b, const int move) {
 }
 
 void addQuietMove(Board* b, MOVE_S* move_s, int move) {
-	//ASSERT(moveLegal(b, move));
-
 	// score according to killers or zero else
 	if (b->killer[0][b->ply] == move) {
 		move_s->moveScore[move_s->moveCounter] = 900000;
 	} else if (b->killer[1][b->ply] == move) {
 		move_s->moveScore[move_s->moveCounter] = 800000;
 	} else {
-		move_s->moveScore[move_s->moveCounter] = 0;
+		move_s->moveScore[move_s->moveCounter] = 50000;
 	}
 	move_s->moveList[move_s->moveCounter] = move;
 	move_s->moveCounter++;
@@ -90,7 +91,18 @@ void addQuietMove(Board* b, MOVE_S* move_s, int move) {
 
 void addCaptureMove(Board* b, MOVE_S* move_s, int move, int movingPiece) {
 	ASSERT(pieceValid(CAPTURED(move)));
-	move_s->moveScore[move_s->moveCounter] = MVV_LVA[CAPTURED(move)][movingPiece] + 1000000;
+
+	int moveScore;
+	int seeScore = see(b, move);
+	if (seeScore > 0) {
+		moveScore = MVV_LVA[CAPTURED(move)][movingPiece] + 1100000;
+	} else if (seeScore == 0) {
+		moveScore = MVV_LVA[CAPTURED(move)][movingPiece] + 1000000;
+	} else {
+		moveScore = MVV_LVA[CAPTURED(move)][movingPiece];
+	}
+
+	move_s->moveScore[move_s->moveCounter] = moveScore;
 	move_s->moveList[move_s->moveCounter] = move;
 	move_s->moveCounter++;
 }
@@ -111,6 +123,69 @@ void initMVV_LVA() {
 	}
 }
 
+// 20percent see function
+U64 getLeastValuablePiece(Board* b, U64 attadef, int side, int attackerPiece) {
+	attadef &= b->color[side];
+ 	if (!attadef) {
+		return 0ULL;
+	}
+
+	U64 lva;
+	for (int i = PAWN; i <= KING; i++) {
+		lva = attadef & b->pieces[i];
+		if (lva) {
+			return setMask[bitscanForward(lva)];
+		}
+	}
+
+	ASSERT(false);
+}
+
+int see(Board* b, const int move) {
+	int toSq = TOSQ(move);
+	int attackerPiece = b->pieceAt(FROMSQ(move));
+	int gain[32], d = 0, side = b->side;
+
+	U64 occ = b->occupied;
+	U64 mayXray = b->pieces[PAWN] | b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
+	U64 attadef = b->squareAttacked(toSq);
+	U64 from = setMask[FROMSQ(move)];
+	U64 used = 0ULL, discovered = 0ULL;
+	
+	gain[d] = pieceScores[CAPTURED(move)];
+	do {
+		ASSERT(pieceValid(attackerPiece));
+		d++; // next depth and side
+		gain[d] = -gain[d - 1] + pieceScores[attackerPiece]; // speculative store, if defended
+
+		if (max(-gain[d - 1], gain[d]) < 0) break; // pruning does not influence the result
+
+		attadef ^= from; // reset bit in set to traverse
+		occ ^= from; // reset bit in temporary occupancy (for magic move generation)
+		used |= from;
+
+		if (from & mayXray) {
+			discovered = 0ULL;
+			discovered |= lookUpBishopMoves(toSq, occ) & (b->getPieces(QUEEN, side) | b->getPieces(BISHOP, side));
+			discovered |= lookUpRookMoves(toSq, occ) & (b->getPieces(QUEEN, side) | b->getPieces(ROOK, side));
+			attadef |= discovered & ~used;
+		}
+
+		side ^= 1;
+		from = getLeastValuablePiece(b, attadef, side, attackerPiece);
+		attackerPiece = b->pieceAt(bitscanForward(from));
+
+	} while (from && attackerPiece);
+	while (--d) {
+		gain[d - 1] = -max(-gain[d - 1], gain[d]);
+	}
+
+	if (MFLAGEP & move) gain[0] += 100;
+
+	return gain[0];
+
+}
+
 /// <summary>
 /// Calculate possible single push pawn moves for white.
 /// </summary>
@@ -127,7 +202,6 @@ void whiteSinglePawnPush(Board* b, MOVE_S* move_s) {
 	while (pushedPawns) {
 		sq = popBit(&pushedPawns);
 		addQuietMove(b, move_s, MOVE(sq - 8, sq, EMPTY, EMPTY, EMPTY));
-		//move_s->moveList[move_s->moveCounter++] = MOVE(sq - 8, sq, EMPTY, EMPTY, EMPTY);
 	}
 
 	// prom pawn pushes
@@ -180,7 +254,6 @@ void whiteDoublePawnPush(Board* board, MOVE_S* move_s) {
 	while (pushedPawns) {
 		sq = popBit(&pushedPawns);
 		addQuietMove(board, move_s, MOVE(sq - 16, sq, EMPTY, EMPTY, MFLAGPS));
-		//move_s->moveList[move_s->moveCounter++] = MOVE(sq - 16, sq, EMPTY, EMPTY, MFLAGPS);
 	}
 }
 
@@ -196,7 +269,6 @@ void blackDoublePawnPush(Board* board, MOVE_S* move_s) {
 	while (pushedPawns) {
 		sq = popBit(&pushedPawns);
 		addQuietMove(board, move_s, MOVE(sq + 16, sq, EMPTY, EMPTY, MFLAGPS));
-		//move_s->moveList[move_s->moveCounter++] = MOVE(sq + 16, sq, EMPTY, EMPTY, MFLAGPS);
 	}
 }
 
@@ -216,13 +288,9 @@ void whitePawnCaptures(Board* board, MOVE_S* move_s) {
 	// en passant square
 	if ((whitePawns << 7 & ~FILE_H_HEX) & setMask[board->enPas]) {
 		addEnPassantMove(board, move_s, MOVE(board->enPas - 7, board->enPas, EMPTY, EMPTY, MFLAGEP));
-		//move_s->moveList[move_s->moveCounter] = MOVE(board->enPas - 7, board->enPas, EMPTY, EMPTY, MFLAGEP);
-		//move_s->moveScore[move_s->moveCounter++] = MVV_LVA[p][P];
 	}
 	if ((whitePawns << 9 & ~FILE_A_HEX) & setMask[board->enPas]) {
 		addEnPassantMove(board, move_s, MOVE(board->enPas - 9, board->enPas, EMPTY, EMPTY, MFLAGEP));
-		//move_s->moveList[move_s->moveCounter] = MOVE(board->enPas - 9, board->enPas, EMPTY, EMPTY, MFLAGEP);
-		//move_s->moveScore[move_s->moveCounter++] = MVV_LVA[p][P];
 	}
 
 	while (whitePawns) {
@@ -231,8 +299,6 @@ void whitePawnCaptures(Board* board, MOVE_S* move_s) {
 		while (atks) {
 			atk_sq = popBit(&atks);
 			addCaptureMove(board, move_s, MOVE(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY), P);
-			//move_s->moveList[move_s->moveCounter] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY);
-			//move_s->moveScore[move_s->moveCounter++] = MVV_LVA[board->pieceAt(atk_sq)][P];
 		}
 	}
 
@@ -246,15 +312,6 @@ void whitePawnCaptures(Board* board, MOVE_S* move_s) {
 			addCaptureMove(board, move_s, MOVE(sq, atk_sq, board->pieceAt(atk_sq), R, EMPTY), P);
 			addCaptureMove(board, move_s, MOVE(sq, atk_sq, board->pieceAt(atk_sq), B, EMPTY), P);
 			addCaptureMove(board, move_s, MOVE(sq, atk_sq, board->pieceAt(atk_sq), N, EMPTY), P);
-
-			//move_s->moveList[move_s->moveCounter] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), Q, EMPTY);
-			//move_s->moveScore[move_s->moveCounter++] = MVV_LVA[board->pieceAt(atk_sq)][P];
-			//move_s->moveList[move_s->moveCounter] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), R, EMPTY);
-			//move_s->moveScore[move_s->moveCounter++] = MVV_LVA[board->pieceAt(atk_sq)][P];
-			//move_s->moveList[move_s->moveCounter] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), B, EMPTY);
-			//move_s->moveScore[move_s->moveCounter++] = MVV_LVA[board->pieceAt(atk_sq)][P];
-			//move_s->moveList[move_s->moveCounter] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), N, EMPTY);
-			//move_s->moveScore[move_s->moveCounter++] = MVV_LVA[board->pieceAt(atk_sq)][P];
 		}
 	}
 }
@@ -275,13 +332,9 @@ void blackPawnCaptures(Board* board, MOVE_S* move_s) {
 	// en passant square
 	if ((blackPawns >> 7 & ~FILE_A_HEX) & setMask[board->enPas]) {
 		addEnPassantMove(board, move_s, MOVE(board->enPas + 7, board->enPas, EMPTY, EMPTY, MFLAGEP));
-		//move_s->moveScore[move_s->moveCounter] = MVV_LVA[P][p];
-		//move_s->moveList[move_s->moveCounter++] = MOVE(board->enPas + 7, board->enPas, EMPTY, EMPTY, MFLAGEP);
 	}
 	if ((blackPawns >> 9 & ~FILE_H_HEX) & setMask[board->enPas]) {
 		addEnPassantMove(board, move_s, MOVE(board->enPas + 9, board->enPas, EMPTY, EMPTY, MFLAGEP));
-		//move_s->moveScore[move_s->moveCounter] = MVV_LVA[P][p];
-		//move_s->moveList[move_s->moveCounter++] = MOVE(board->enPas + 9, board->enPas, EMPTY, EMPTY, MFLAGEP);
 	}
 
 	while (blackPawns) {
@@ -290,8 +343,6 @@ void blackPawnCaptures(Board* board, MOVE_S* move_s) {
 		while (atks) {
 			atk_sq = popBit(&atks);
 			addCaptureMove(board, move_s, MOVE(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY), p);
-			//move_s->moveScore[move_s->moveCounter] = MVV_LVA[board->pieceAt(atk_sq)][p];
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 
@@ -305,15 +356,6 @@ void blackPawnCaptures(Board* board, MOVE_S* move_s) {
 			addCaptureMove(board, move_s, MOVE(sq, atk_sq, board->pieceAt(atk_sq), r, EMPTY), p);
 			addCaptureMove(board, move_s, MOVE(sq, atk_sq, board->pieceAt(atk_sq), b, EMPTY), p);
 			addCaptureMove(board, move_s, MOVE(sq, atk_sq, board->pieceAt(atk_sq), n, EMPTY), p);
-
-			//move_s->moveScore[move_s->moveCounter] = MVV_LVA[board->pieceAt(atk_sq)][p];
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), q, EMPTY);
-			//move_s->moveScore[move_s->moveCounter] = MVV_LVA[board->pieceAt(atk_sq)][p];
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), r, EMPTY);
-			//move_s->moveScore[move_s->moveCounter] = MVV_LVA[board->pieceAt(atk_sq)][p];
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), b, EMPTY);
-			//move_s->moveScore[move_s->moveCounter] = MVV_LVA[board->pieceAt(atk_sq)][p];
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), n, EMPTY);
 		}
 	}
 }
@@ -329,7 +371,6 @@ void addKnightMoves(Board* b, MOVE_S* move_s) {
 		while (atks) {
 			atk_sq = popBit(&atks);
 			addQuietMove(b, move_s, MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY));
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 }
@@ -346,8 +387,6 @@ void addKnightCaptures(Board* b, MOVE_S* move_s) {
 		while (atks) {
 			atk_sq = popBit(&atks);
 			addCaptureMove(b, move_s, MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY), piece);
-			//move_s->moveScore[move_s->moveCounter] = MVV_LVA[b->pieceAt(atk_sq)][piece];
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 }
@@ -359,7 +398,6 @@ void addKingMoves(Board* b, MOVE_S* move_s) {
 	while (kingMoves) {
 		sq = popBit(&kingMoves);
 		addQuietMove(b, move_s, MOVE(kSq, sq, EMPTY, EMPTY, EMPTY));
-		//move_s->moveList[move_s->moveCounter++] = MOVE(kSq, sq, EMPTY, EMPTY, EMPTY);
 	}
 
 	switch (b->side) {
@@ -367,25 +405,21 @@ void addKingMoves(Board* b, MOVE_S* move_s) {
 			if (b->castleValid(K_CASTLE, &move_s->attackedSquares)) {
 				ASSERT(kSq == E1);
 				addQuietMove(b, move_s, MOVE(kSq, G1, EMPTY, EMPTY, MFLAGCA));
-				//move_s->moveList[move_s->moveCounter++] = MOVE(kSq, G1, EMPTY, EMPTY, MFLAGCA);
 			}
 			if (b->castleValid(Q_CASTLE, &move_s->attackedSquares)) {
 				ASSERT(kSq == E1);
 				addQuietMove(b, move_s, MOVE(kSq, C1, EMPTY, EMPTY, MFLAGCA));
-				//move_s->moveList[move_s->moveCounter++] = MOVE(kSq, C1, EMPTY, EMPTY, MFLAGCA);
 			}
 			break;
 		case BLACK:
 			if (b->castleValid(k_CASTLE, &move_s->attackedSquares)) {
 				ASSERT(kSq == E8);
 				addQuietMove(b, move_s, MOVE(kSq, G8, EMPTY, EMPTY, MFLAGCA));
-				//move_s->moveList[move_s->moveCounter++] = MOVE(kSq, G8, EMPTY, EMPTY, MFLAGCA);
 			}
 
 			if (b->castleValid(q_CASTLE, &move_s->attackedSquares)) {
 				ASSERT(kSq == E8);
 				addQuietMove(b, move_s, MOVE(kSq, C8, EMPTY, EMPTY, MFLAGCA));
-				//move_s->moveList[move_s->moveCounter++] = MOVE(kSq, C8, EMPTY, EMPTY, MFLAGCA);
 			}
 			break;
 		default: break;
@@ -400,8 +434,6 @@ void addKingCaptures(Board* b, MOVE_S* move_s) {
 	while (whiteKingAttacks) {
 		atk_sq = popBit(&whiteKingAttacks);
 		addCaptureMove(b, move_s, MOVE(kSq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY), piece);
-		//move_s->moveScore[move_s->moveCounter] = MVV_LVA[b->pieceAt(atk_sq)][piece];
-		//move_s->moveList[move_s->moveCounter++] = MOVE(kSq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 	}
 }
 
@@ -417,7 +449,6 @@ void addRookMoves(Board* b, MOVE_S* move_s) {
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
 			addQuietMove(b, move_s, MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY));
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 }
@@ -434,7 +465,6 @@ void addBishopMoves(Board* b, MOVE_S* move_s) {
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
 			addQuietMove(b, move_s, MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY));
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 }
@@ -452,8 +482,6 @@ void addRookCaptures(Board* b, MOVE_S* move_s) {
 		while (captureSet) {
 			atk_sq = popBit(&captureSet);
 			addCaptureMove(b, move_s, MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY), piece);
-			//move_s->moveScore[move_s->moveCounter] = MVV_LVA[b->pieceAt(atk_sq)][piece];
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 }
@@ -471,8 +499,6 @@ void addBishopCaptures(Board* board, MOVE_S* move_s) {
 		while (captureSet) {
 			atk_sq = popBit(&captureSet);
 			addCaptureMove(board, move_s, MOVE(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY), piece);
-			//move_s->moveScore[move_s->moveCounter] = MVV_LVA[board->pieceAt(atk_sq)][piece];
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 
@@ -490,7 +516,6 @@ void addQueenMoves(Board* b, MOVE_S* move_s) {
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
 			addQuietMove(b, move_s, MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY));
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, EMPTY, EMPTY, EMPTY);
 		}
 	}
 }
@@ -508,8 +533,6 @@ void addQueenCaptures(Board* b, MOVE_S* move_s) {
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
 			addCaptureMove(b, move_s, MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY), piece);
-			//move_s->moveScore[move_s->moveCounter] = MVV_LVA[b->pieceAt(atk_sq)][piece];
-			//move_s->moveList[move_s->moveCounter++] = MOVE(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
 		}
 	}
 }

@@ -3,47 +3,45 @@
 /*
 * - Evaluation improvements: 
 *		King Safety
-*		Pawn Shield
 *		Pawn Structure
-*		Bishop Pair
-*		Pins
 *		Center Control
 *		Mobility
-*		
-* - Game States
-* - Opening Book
-* - Null move pruning
-* - Transposition table
+* 
+* - Move Ordering, extra bonnus for promotions
+* - Delta cutoff in quiescence loop, no caps / proms
+* - code documentation
 */
 
 int main() {
 
 	Board b;
-	Perft p;
+	Perft perft;
 	MOVE_S move_s[1];
-	SEARCH_INFO_S s[1];
+	SEARCH_S s[1];
 
 	init(&b);
-	b.parseFen(STARTING_FEN);
-	//b.parseFen(WAC1);
-	//b.parseFen("rnbqkbnr/pp2pppp/2p5/3p4/3PQ3/8/PPP1PPPP/RNB1KBNR w KQkq - 0 1");
+	b.parseFen(MID_FEN);
+	//b.parseFen("8/7K/8/8/8/8/R7/7k w - - 0 1 ");
 	b.printBoard();
+	log("\nStartup");
 
-	//generateMoves(&b, move_s);
 	//dividePerft(&b, BUG_FEN, 5); // 8312, 8031
-	
-	play(&b, &p, s);
 
-	if (b.pvTable_s->pvTable != NULL) free(b.pvTable_s->pvTable);
+	play(&b, &perft, s);
+
+	if (b.tt->table != NULL) free(b.tt->table);
+	if (b.pawnTable->table != NULL) free(b.pawnTable->table);
 	return 0;
 }
 
-void play(Board* b, Perft* p, SEARCH_INFO_S* s) {
+void play(Board* b, Perft* p, SEARCH_S* s) {
 	string m;
 
 	while (true) {
 		cout << "\n##################\n\n";
 		getline(cin, m);
+
+		log(m);
 
 		// POP MOVE FROM BOARD
 		if (m == "pop") {
@@ -53,12 +51,35 @@ void play(Board* b, Perft* p, SEARCH_INFO_S* s) {
 			continue;
 		}
 
+		if (m == "autoplay") {
+			while (true) {
+				s->depth = 7;
+				s->startTime = getTimeMs();
+				s->stopTime = getTimeMs() + 10000;
+
+				s->timeSet = false;
+				s->depthSet = true;
+				search(b, s);
+
+				getPVLine(b, s->depth);
+
+				MOVE_S move_s[1];
+				generateMoves(b, move_s);
+				b->push(move_s->moveList[move_s->moveCounter/3]);
+				cout << "Push move " << b->halfMoves << ". " << getStringMove(move_s->moveList[move_s->moveCounter / 2]) << endl;
+				b->printBoard();
+				cout << "###############" << endl;
+			}
+		}
+
 		// SEARCH POSITION
 		if (m == "s") {
-			s->depth = 12;
+			s->depth = 10;
 			s->startTime = getTimeMs();
-			s->stopTime = getTimeMs() + 20000;
-			s->timeSet = true;
+			s->stopTime = getTimeMs() + 10000;
+
+			s->timeSet = false;
+			s->depthSet = true;
 			search(b, s);
 			continue;
 		}
@@ -88,6 +109,11 @@ void play(Board* b, Perft* p, SEARCH_INFO_S* s) {
 			continue;
 		}
 
+		if (m == "reps") {
+			cout << "Board is three fold repetition " << isThreeFoldRepetition(b) << endl;
+			cout << "Board is repetition " << isRepetition(b) << endl;
+		}
+
 		if (m == "0000") {
 			b->pushNull();
 
@@ -97,23 +123,39 @@ void play(Board* b, Perft* p, SEARCH_INFO_S* s) {
 			continue;
 		}
 
+		if (m == "p") {
+			b->printBoard();
+			continue;
+		}
+
 		// PUSH MOVE IN ALGEBRAIC NOTATION
 		MOVE_S _move_s[1];
 		generateMoves(b, _move_s);
+
 		int parsedMove = b->parseMove(m);
 		bool flag_found = false;
 		for (int i = 0; i < _move_s->moveCounter; i++) {
 			if (parsedMove == _move_s->moveList[i]) {
 				flag_found = true;
-				storePV(b, parsedMove);
+				//storeTT(b, parsedMove);
 
 				if (!b->push(parsedMove)) {
 					cout << "Move " << getStringMove(parsedMove) << " remains check or is no valid move. Try again." << endl;
 					continue;
 				}
 
+				if (isThreeFoldRepetition(b)) {
+					cout << "Position was repeated the third time. Both players can claim draw." << endl;
+				}
+
 				cout << "Pushed " << getStringMove(parsedMove) << " on board." << endl;
 				b->printBoard();
+
+				cout << "Undo history is" << endl;
+				for (int i = 0; i < b->undoPly; i++) {
+					cout << getStringMove(b->undoHistory[i].move) << endl;
+				}
+
 				break;
 			}
 		}

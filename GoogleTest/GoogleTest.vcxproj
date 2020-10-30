@@ -89,7 +89,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>attacks.obj;board.obj;defs.obj;magics.obj;move.obj;moveGenerator.obj;perft.obj;rays.obj;validate.obj;legalMoveGenerator.obj;search.obj;eval.obj;tt.obj;uci.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>attacks.obj;board.obj;defs.obj;move.obj;moveGenerator.obj;perft.obj;validate.obj;legalMoveGenerator.obj;search.obj;eval.obj;tt.obj;uci.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>F:\SmartGit-Repositories\chai\chai\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
