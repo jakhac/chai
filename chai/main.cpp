@@ -4,11 +4,10 @@
 * - Evaluation improvements: 
 *		King Safety
 *		Pawn Structure
-*		Center Control
 *		Mobility
 * 
-* - Move Ordering, extra bonnus for promotions
-* - Delta cutoff in quiescence loop, no caps / proms
+* - Refactor eval.cpp
+* - Move Ordering, extra bonus for promotions
 * - code documentation
 */
 
@@ -20,7 +19,7 @@ int main() {
 	SEARCH_S s[1];
 
 	init(&b);
-	b.parseFen(MID_FEN);
+	b.parseFen(BUG_FEN);
 	//b.parseFen("8/7K/8/8/8/8/R7/7k w - - 0 1 ");
 	b.printBoard();
 	log("\nStartup");

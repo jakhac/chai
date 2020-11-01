@@ -131,7 +131,8 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 	}
 
 	// adaptive null move pruning
-	if (depth > 2 && nullOk && b->gameState != END && !inCheck && !pvNode && eval(b) >= beta) {
+	bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
+	if (depth > 2 && nullOk && !endGame && !inCheck && !pvNode && eval(b) >= beta) {
 		b->pushNull();
 
 		int r = (depth > 6) ? 3 : 2;
@@ -323,8 +324,9 @@ int quiesence(int alpha, int beta, Board* b, SEARCH_S* s) {
 		ASSERT(currentMove & MCHECKCAP || currentMove & MFLAGEP);
 
 		// Delta cutoff: prune moves that cannot improve over alpha
+		bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
 		if (standPat + pieceScores[CAPTURED(currentMove)] + 200 < alpha && 
-			b->gameState != END &&
+			!endGame &&
 			!(MCHECKPROM & currentMove)) {
 			continue;
 		}

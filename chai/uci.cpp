@@ -114,11 +114,11 @@ void uciParseGo(Board* b, SEARCH_S* s, string cmd) {
 		s->timeSet = true;
 
 		// catch low time
-		if (time <= 3000) {
-			cout << "Set time to 750ms due to low move time. (was " << time << ")" << endl;
-			s->stopTime = s->startTime + 750;
-		//if (time <= 1500) {
-			//s->stopTime = s->startTime + 450;
+		//if (time <= 3000) {
+			//cout << "Set time to 750ms due to low move time. (was " << time << ")" << endl;
+			//s->stopTime = s->startTime + 750;
+		if (time <= 1500) {
+			s->stopTime = s->startTime + 300;
 		} else {
 			time /= movesLeft;
 			time -= 50;
@@ -149,7 +149,8 @@ void init(Board* b) {
 	b->initHashKeys();
 	initAttackerMasks();
 	initMVV_LVA();
-	initEval();
+	initEvalMasks();
+	initManhattenMask();
 	
 	initTT(b->tt);
 	initPawnTable(b->pawnTable);

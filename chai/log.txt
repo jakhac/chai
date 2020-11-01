@@ -4331,3 +4331,116 @@ Startup
 23:39:39	s
 23:39:39	Entered search
 23:39:49	Left search and cout bestmove found
+14:56:15	parseFen() finished.
+14:56:15	
+Startup
+14:56:32	parseFen() finished.
+14:56:32	
+Startup
+15:02:01	parseFen() finished.
+15:02:01	
+Startup
+15:02:03	perft
+15:02:53	parseFen() finished.
+15:02:53	
+Startup
+15:02:55	perft
+15:21:28	parseFen() finished.
+15:21:28	
+Startup
+15:29:54	parseFen() finished.
+15:29:54	
+Startup
+15:30:37	parseFen() finished.
+15:30:37	
+Startup
+15:33:02	parseFen() finished.
+15:33:02	
+Startup
+15:33:14	
+15:33:15	
+16:06:23	parseFen() finished.
+16:06:23	
+Startup
+16:06:27	perft
+16:16:49	parseFen() finished.
+16:16:49	
+Startup
+16:16:50	s
+16:16:50	Entered search
+16:17:16	parseFen() finished.
+16:17:16	
+Startup
+16:17:21	s
+16:17:21	Entered search
+16:17:51	parseFen() finished.
+16:17:52	
+Startup
+16:17:53	uci
+16:17:53	UCI MODE
+16:17:54	cmd received: isready
+16:17:56	cmd received: position startpos moves e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 c1e3 a7a6 a2a3 b7b5 d4c6 c7c6 d1d4 c8b7 e1c1 g8e7 f1d3 d7d5 h2h3 a8d8 h1f1 c6c8
+16:17:56	Parse position: position startpos moves e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 c1e3 a7a6 a2a3 b7b5 d4c6 c7c6 d1d4 c8b7 e1c1 g8e7 f1d3 d7d5 h2h3 a8d8 h1f1 c6c8
+16:17:56	parseFen() finished.
+16:17:56	Pushed all moves from cmd
+16:17:56	Parsing complete
+16:18:02	cmd received: go depth 8
+16:18:02	Parse go: go depth 8
+16:18:02	Parse go finished, start search now
+16:18:02	Entered search
+16:18:48	parseFen() finished.
+16:18:48	
+Startup
+16:18:49	uci
+16:18:49	UCI MODE
+16:18:51	cmd received: isready
+16:18:52	cmd received: position startpos moves e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 c1e3 a7a6 a2a3 b7b5 d4c6 c7c6 d1d4 c8b7 e1c1 g8e7 f1d3 d7d5 h2h3 a8d8 h1f1 c6c8
+16:18:52	Parse position: position startpos moves e2e4 c7c5 g1f3 e7e6 d2d4 c5d4 f3d4 b8c6 b1c3 d8c7 c1e3 a7a6 a2a3 b7b5 d4c6 c7c6 d1d4 c8b7 e1c1 g8e7 f1d3 d7d5 h2h3 a8d8 h1f1 c6c8
+16:18:52	parseFen() finished.
+16:18:52	Pushed all moves from cmd
+16:18:52	Parsing complete
+16:18:54	cmd received: go depth 8
+16:18:54	Parse go: go depth 8
+16:18:54	Parse go finished, start search now
+16:18:54	Entered search
+16:18:58	Left search and cout bestmove found
+01:05:53	parseFen() finished.
+01:05:53	
+Startup
+01:06:43	parseFen() finished.
+01:06:43	
+Startup
+01:07:16	parseFen() finished.
+01:07:16	
+Startup
+01:07:46	parseFen() finished.
+01:07:47	
+Startup
+01:08:13	parseFen() finished.
+01:08:13	
+Startup
+01:08:15	
+01:08:39	parseFen() finished.
+01:08:39	
+Startup
+01:08:51	parseFen() finished.
+01:08:51	
+Startup
+01:09:17	parseFen() finished.
+01:09:17	
+Startup
+01:09:40	parseFen() finished.
+01:09:40	
+Startup
+01:09:57	parseFen() finished.
+01:09:57	
+Startup
+01:11:49	parseFen() finished.
+01:11:49	
+Startup
+01:29:39	parseFen() finished.
+01:29:39	
+Startup
+01:29:40	s
+01:29:40	Entered search
+01:29:46	Left search and cout bestmove found

@@ -15,7 +15,6 @@ struct UNDO_S {
     int castle;
     int enPas;
     int fiftyMove;
-    int gameState;
     U64 zobKey;
     U64 pawnKey;
 };

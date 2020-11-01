@@ -7,7 +7,7 @@
 
 using namespace std;
 
-//#define DEBUG
+#define DEBUG
 
 #ifndef DEBUG
 #define ASSERT(n)
@@ -56,6 +56,8 @@ const U64 FILE_F_HEX = 0x2020202020202020;
 const U64 FILE_G_HEX = 0x4040404040404040;
 const U64 FILE_H_HEX = 0x8080808080808080;
 
+const U64 CENTER_SQUARES = (1ULL << D4) | (1ULL << D5) | (1ULL << E4) | (1ULL << E5);
+
 const U64 FILE_LIST[8] = {
     FILE_A_HEX, FILE_B_HEX, FILE_C_HEX, FILE_D_HEX,
     FILE_E_HEX, FILE_F_HEX, FILE_G_HEX, FILE_H_HEX 
@@ -89,12 +91,13 @@ const int pieceRookQueen[13] = { 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0 };
 const int pieceRook[13] = { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0 };
 const int pieceBishopQueen[13] = { 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0 };
 
+// 
 const int victimScore[13] = { 0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 };
 
-const int isBQ(int p);
-const int isRQ(int p);
-const int isN(int p);
-const int isK(int p);
+//const int isBQ(int p);
+//const int isRQ(int p);
+//const int isN(int p);
+//const int isK(int p);
 
 /* index true if piece is big / maj / min /wb and value */
 const int pieceScores[13] = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };

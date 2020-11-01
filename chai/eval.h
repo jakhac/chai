@@ -5,7 +5,7 @@
 
 int eval(Board* b);
 
-int evalBonusMaps(Board* b, int side);
+int evalPST(Board* b, int side, float* t);
 
 int materialScore(Board* b, int side);
 
@@ -15,15 +15,15 @@ int passedPawns(Board* b, int side);
 
 int stackedPawn(Board* b, int side);
 
-int evaluatePawns(Board* b);
+int evaluatePawns(Board* b, float* t);
 
 int openFilesRQ(Board* b, int side);
 
 int bishopPair(Board* b, int side);
 
-int kingSafety(Board* b, int side);
+int kingSafety(Board* b, int side, float* t);
 
-int mobility(Board* b, int side);
+int mobility(Board* b, int side, float* t);
 
 float interpolate(int a, int b, float t);
 
@@ -35,8 +35,6 @@ int scale(int scaler, int pressure);
 /// <param name="b">Board</param>
 /// <returns>Superiority/inferiority score viewed as player to move (signed)</returns>
 int contemptFactor(Board* b);
-
-void initEval();
 
 const int PAWN_OPEN[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0,
@@ -193,6 +191,8 @@ const int passedBonus[2][8] = {
 	{ 200, 100, 60, 35, 20, 10, 5, 0 }, 
 	{ 0, 5, 10, 20, 35, 60, 100, 200 }
 };
+
+const int kingZoneTropism[7] = { 0, 40, 60, 77, 87, 92, 95 };
 
 const int openFileBonusR = 10;
 const int openFileBonusQ = 5;

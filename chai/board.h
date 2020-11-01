@@ -78,9 +78,6 @@ public:
 	int killer[2][MAX_DEPTH];
 
 	/// <summary>Stores the current game state, either START, MIDDLE or END</summary>
-	int gameState;
-
-	void updateGameState();
 
 	int countMajorPieces(int side);
 

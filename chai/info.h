@@ -44,11 +44,11 @@ inline void printMove(const int move) {
 
 	if (promoted) {
 		promChar = 'q';
-		if (isN(promoted)) {
+		if (promoted == n || promoted == N) {
 			promChar = 'n';
-		} else if (isRQ(promoted) && !isBQ(promoted)) {
+		} else if (promoted == r || promoted == R) {
 			promChar = 'r';
-		} else if (!isRQ(promoted) && isBQ(promoted)) {
+		} else if (promoted == b || promoted == B) {
 			promChar = 'b';
 		}
 	}

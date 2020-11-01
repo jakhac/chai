@@ -26,6 +26,15 @@ extern U64 inBetween[64][64];
 extern int dirFromTo[64][64];
 extern U64 lineBB[64][64];
 
+// eval masks
+extern U64 pawnIsolatedMask[64];
+extern U64 pawnPassedMask[2][64];
+extern U64 upperMask[64];
+extern U64 lowerMask[64];
+extern U64 pawnShield[2][64];
+extern U64 xMask[64];
+extern int manhattenDistance[64][64];
+
 /// <summary>
 /// Initialize clear and set mask arrays for usage.
 /// </summary>
@@ -92,6 +101,69 @@ inline void initAttackerMasks() {
 		kingSet |= attacks;
 		attacks |= kingSet << 8 | kingSet >> 8;
 		kingAtkMask[i] = attacks;
+	}
+}
+
+inline void initEvalMasks() {
+	int file;
+	U64 left, right;
+	for (int i = 0; i < 64; i++) {
+		file = squareToFile[i] - 1;
+		left = (file >= 0) ? FILE_LIST[file] : 0ULL;
+
+		file = squareToFile[i] + 1;
+		right = (file <= 7) ? FILE_LIST[file] : 0ULL;
+
+		pawnIsolatedMask[i] = left | right;
+	}
+
+	for (int i = 0; i < 64; i++) {
+		int rank = squareToRank[i] + 1;
+		while (rank <= 7) {
+			upperMask[i] |= RANK_LIST[rank];
+			rank++;
+		}
+
+		rank = squareToRank[i] - 1;
+		while (rank >= 0) {
+			lowerMask[i] |= RANK_LIST[rank];
+			rank--;
+		}
+	}
+
+	for (int i = 0; i < 64; i++) {
+		pawnPassedMask[WHITE][i] = upperMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
+		pawnPassedMask[BLACK][i] = lowerMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
+	}
+
+	U64 shield;
+	for (int i = 0; i < 64; i++) {
+		shield = 0ULL;
+		shield = (setMask[i] >> 1 & ~FILE_H_HEX) | (setMask[i] << 1 & ~FILE_A_HEX) | setMask[i];
+		pawnShield[WHITE][i] = (shield << 8) | (shield << 16);
+		pawnShield[BLACK][i] = (shield >> 8) | (shield >> 16);
+	}
+
+	for (int i = 0; i < 64; i++) {
+		xMask[i] = pawnAtkMask[WHITE][i] | pawnAtkMask[BLACK][i];
+	}
+}
+
+inline void initManhattenMask() {
+	int file1, file2, rank1, rank2;
+	int rankDistance, fileDistance;
+
+	for (int i = 0; i < 64; i++) {
+		for (int j = 0; j < 64; j++) {
+			file1 = i & 7;
+			file2 = j & 7;
+			rank1 = i >> 3;
+			rank2 = j >> 3;
+			rankDistance = abs(rank2 - rank1);
+			fileDistance = abs(file2 - file1);
+
+			manhattenDistance[i][j] = rankDistance + fileDistance;
+		}
 	}
 }
 
@@ -165,15 +237,12 @@ inline vector<U64> initLine() {
 }
 
 inline U64 line_bb(int s1, int s2) {
-	return U64();
-	//return LineBB[s1][s2];
+	return lineBB[s1][s2];
 }
 
 inline bool aligned(int s1, int s2, int s3) {
 	return line_bb(s1, s2) & s3;
 }
-
-
 
 /// <summary>
 /// Returns bitboard with all bits sets between sq1 and sq2

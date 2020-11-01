@@ -38,10 +38,6 @@ void generateMoves(Board* b, MOVE_S* move_s) {
 
 void generateCaptures(Board* b, MOVE_S* move_s) {
 	for (int i = 0; i < MAX_POSITION_MOVES; i++) move_s->moveScore[i] = 0;
-	//move_s->attackedSquares = b->attackerSet(b->side ^ 1);
-
-	//b->attackedSquares[WHITE] = b->attackerSet(WHITE);
-	//b->attackedSquares[BLACK] = b->attackerSet(BLACK);
 
 	if (b->side == WHITE) {
 		whitePawnCaptures(b, move_s);
@@ -79,11 +75,11 @@ bool moveLegal(Board* b, const int move) {
 void addQuietMove(Board* b, MOVE_S* move_s, int move) {
 	// score according to killers or zero else
 	if (b->killer[0][b->ply] == move) {
-		move_s->moveScore[move_s->moveCounter] = 900000;
+		move_s->moveScore[move_s->moveCounter] += 900000;
 	} else if (b->killer[1][b->ply] == move) {
-		move_s->moveScore[move_s->moveCounter] = 800000;
+		move_s->moveScore[move_s->moveCounter] += 800000;
 	} else {
-		move_s->moveScore[move_s->moveCounter] = 50000;
+		move_s->moveScore[move_s->moveCounter] += 50000;
 	}
 	move_s->moveList[move_s->moveCounter] = move;
 	move_s->moveCounter++;
@@ -92,14 +88,14 @@ void addQuietMove(Board* b, MOVE_S* move_s, int move) {
 void addCaptureMove(Board* b, MOVE_S* move_s, int move, int movingPiece) {
 	ASSERT(pieceValid(CAPTURED(move)));
 
-	int moveScore;
+	int moveScore = 0;
 	int seeScore = see(b, move);
 	if (seeScore > 0) {
-		moveScore = MVV_LVA[CAPTURED(move)][movingPiece] + 1100000;
+		moveScore += MVV_LVA[CAPTURED(move)][movingPiece] + 1100000;
 	} else if (seeScore == 0) {
-		moveScore = MVV_LVA[CAPTURED(move)][movingPiece] + 1000000;
+		moveScore += MVV_LVA[CAPTURED(move)][movingPiece] + 1000000;
 	} else {
-		moveScore = MVV_LVA[CAPTURED(move)][movingPiece];
+		moveScore += MVV_LVA[CAPTURED(move)][movingPiece];
 	}
 
 	move_s->moveScore[move_s->moveCounter] = moveScore;
@@ -108,7 +104,7 @@ void addCaptureMove(Board* b, MOVE_S* move_s, int move, int movingPiece) {
 }
 
 void addEnPassantMove(Board* b, MOVE_S* move_s, int move) {
-	move_s->moveScore[move_s->moveCounter] = 105 + 1000000;
+	move_s->moveScore[move_s->moveCounter] += 105 + 1000000;
 	move_s->moveList[move_s->moveCounter] = move;
 	move_s->moveCounter++;
 }

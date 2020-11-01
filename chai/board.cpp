@@ -44,18 +44,6 @@ void Board::setPiece(int piece, int square, int side) {
 	occupied |= setMask[square];
 }
 
-void Board::updateGameState() {
-	if (halfMoves < 12) {
-		gameState = START;
-	} 
-	if (halfMoves >= 12) {
-		gameState = MID;
-	}
-	if (countBits(occupied) <= 7 || countMajorPieces(side) <= 6) {
-		gameState = END;
-	}
-}
-
 void Board::clearPiece(int piece, int square, int side) {
 	pieces[pieceType[piece]] &= clearMask[square];
 	color[side] &= clearMask[square];
@@ -193,7 +181,6 @@ void Board::printBoard() {
 	printf("Pawn key: %llX\n", zobristPawnKey);
 	cout << "En passant square: " << enPas << endl;
 	cout << "Halfmoves " << halfMoves << ", undoPly " << undoPly << ", ply " << ply << endl;
-	cout << "Game State " << gameStateStr[gameState] << endl;
 	printf("Castle permission: %c%c%c%c\n",
 		castlePermission & K_CASTLE ? 'K' : ' ',
 		castlePermission & Q_CASTLE ? 'Q' : ' ',
@@ -308,7 +295,6 @@ void Board::parseFen(string fen) {
 
 	halfMoves += stoi(fullMoveStr) * 2;
 
-	updateGameState();
 	zobristPawnKey = generatePawnHashKey();
 	zobristKey = generateZobristKey();
 
@@ -467,8 +453,6 @@ bool Board::push(int move) {
 	// update game state variables
 	side ^= 1;
 	zobristKey ^= sideKey;
-	updateGameState();
-	undo_s->gameState = gameState;
 	undoHistory[undoPly] = *undo_s;
 
 	halfMoves++;
@@ -523,8 +507,6 @@ void Board::pushNull() {
 	// update gameState variable and store in undo struct
 
 	undo_s->fiftyMove = fiftyMove;
-	updateGameState();
-	undo_s->gameState = gameState;
 	undoHistory[undoPly] = *undo_s;
 
 	fiftyMove++; // might cause negative ply in isRepetition() check
@@ -561,7 +543,6 @@ UNDO_S Board::pop() {
 	zobristKey = undo.zobKey;
 	zobristPawnKey = undo.pawnKey;
 	enPas = undo.enPas;
-	gameState = undo.gameState;
 
 	// trivial case for null moves
 	if (undo.move == -1) {

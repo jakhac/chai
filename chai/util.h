@@ -11,6 +11,7 @@
 
 #include "defs.h"
 #include "mask.h"
+#include "windows.h"
 
 #ifndef UTIL_H
 #define UTIL_H
@@ -30,7 +31,6 @@ inline U64 westN(U64 board, int n) {
 	return newBoard;
 }
 
-#include "windows.h"
 inline int getTimeMs() {
 	return (int) GetTickCount64();
 }
