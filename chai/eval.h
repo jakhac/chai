@@ -3,8 +3,21 @@
 #include "board.h"
 #include "tt.h"
 
+/// <summary>
+/// Main evaluation function calculates static board evaulation.
+/// </summary>
+/// <param name="b">Current board to evaluate</param>
+/// <returns>Score in centipawns</returns>
 int eval(Board* b);
 
+/// <summary>
+/// Evaulate all pieces of given side regarding piece square tables. 
+/// Opening and endgame tables are interpolated based on halfMoves and material.
+/// </summary>
+/// <param name="b"></param>
+/// <param name="side"></param>
+/// <param name="t"></param>
+/// <returns></returns>
 int evalPST(Board* b, int side, float* t);
 
 int materialScore(Board* b, int side);

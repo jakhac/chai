@@ -27,7 +27,6 @@ void clearTT(TT_S* tt) {
 	}
 }
 
-// store a move into pvtable of board
 void storeTT(Board* b, int move, int score, int flag, int depth) {
 	int index = b->zobristKey % b->tt->entries;
 
@@ -54,7 +53,7 @@ void storeTT(Board* b, int move, int score, int flag, int depth) {
 	b->tt->table[index].depth = depth;
 }
 
-int probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
+bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
 	int index = b->zobristKey % b->tt->entries;
 
 	ASSERT(index >= 0 && index <= b->tt->entries - 1);
@@ -78,7 +77,7 @@ int probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
 			if (*score > ISMATE) *score -= b->ply;
 			else if (*score < -ISMATE) *score += b->ply;
 
-			// try to overwrite score reference, if possible return true
+			// if current alpha is lower than stored alpha, no move will increase alpha -> return stored alpha
 			switch (b->tt->table[index].flag) {
 				case TT_ALPHA:
 					if (*score <= alpha) {
@@ -130,7 +129,6 @@ int getPVLine(Board* b, const int maxDepth) {
 
 	return count;
 }
-
 
 void initPawnTable(PAWN_TABLE_S* pawnTable) {
 	pawnTable->entries = pawnTableSize / sizeof(PAWN_ENTRY_S);

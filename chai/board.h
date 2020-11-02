@@ -73,12 +73,17 @@ public:
 
 	PAWN_TABLE_S pawnTable[1];
 
+	/// <summary>Stores the pv line</summary>
 	int pvArray[MAX_DEPTH];
 
+	/// <summary>Stores up to 2 killer moves for each depth</summary>
 	int killer[2][MAX_DEPTH];
 
-	/// <summary>Stores the current game state, either START, MIDDLE or END</summary>
-
+	/// <summary>
+	/// Count major pieces (n, b, r, q, k) on current board
+	/// </summary>
+	/// <param name="side">Side of pieces</param>
+	/// <returns>Amount of major pieces</returns>
 	int countMajorPieces(int side);
 
 	void pushNull();
@@ -110,11 +115,15 @@ public:
 	void initHashKeys();
 
 	/// <summary>
-	/// Generate a unique zobristKey for this board.
+	/// Generate a unique zobristKey for current board.
 	/// </summary>
 	/// <returns>Unique 64-bit number</returns>
 	U64 generateZobristKey();
 
+	/// <summary>
+	/// Generate a unique pawn key for current board.
+	/// </summary>
+	/// <returns>Unique 64-bit number</returns>
 	U64 generatePawnHashKey();
 
 	/// <summary>
@@ -132,7 +141,12 @@ public:
 	/// <returns>Piece index or zero if empty</returns>
 	int pieceAt(int square);
 
-	//TODO doc
+	/// <summary>
+	/// Calculates all pinners towards given king square.
+	/// </summary>
+	/// <param name="kSq">Square (of attacked king)</param>
+	/// <param name="kSide">Side of attacked king</param>
+	/// <returns>Bitboard revealing all pinners</returns>
 	U64 pinner(int kSq, int kSide);
 
 	/// <summary>

@@ -4444,3 +4444,21 @@ Startup
 01:29:40	s
 01:29:40	Entered search
 01:29:46	Left search and cout bestmove found
+18:08:00	parseFen() finished.
+18:08:00	
+Startup
+18:08:34	parseFen() finished.
+18:08:34	
+Startup
+18:09:22	parseFen() finished.
+18:09:22	
+Startup
+18:09:31	parseFen() finished.
+18:09:31	
+Startup
+18:09:42	parseFen() finished.
+18:09:42	
+Startup
+18:10:45	parseFen() finished.
+18:10:45	
+Startup

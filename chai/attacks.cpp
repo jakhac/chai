@@ -65,15 +65,12 @@ void initBishopMasks() {
 
 void initRookMagicTable() {
     U64 tableIndex;
-    //magic();
-
     U64 blockers, rookMoves;
     for (int sq = 0; sq < 64; sq++) {
         for (int block = 0; block < (1 << rookIndexBits[sq]); block++) {
             blockers = getBlockers(rookMasks[sq], block);
 
             tableIndex = (blockers * rookMagic[sq]) >> (64 - rookIndexBits[sq]);
-            //tableIndex = (blockers * rook_magic_gen[sq]) >> (64 - rookIndexBits[sq]);
             rookMoves = calculateRookMoves(sq, blockers);
 
             // check for desired hash collision

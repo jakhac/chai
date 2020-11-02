@@ -2,12 +2,13 @@
 
 #include "stdlib.h"
 #include <string>
+#include <cassert>
 
 #include "types.h"
 
 using namespace std;
 
-#define DEBUG
+//#define DEBUG
 
 #ifndef DEBUG
 #define ASSERT(n)
@@ -27,6 +28,7 @@ const int MAX_GAME_MOVES = 2048;
 const int MAX_POSITION_MOVES = 256;
 const int MAX_DEPTH = 32;
 const int NO_SCORE = 10000000;
+const int NO_MOVE = 0;
 
 const int INF = 30000;
 const int MATE = 29000;
@@ -91,31 +93,26 @@ const int pieceRookQueen[13] = { 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0 };
 const int pieceRook[13] = { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0 };
 const int pieceBishopQueen[13] = { 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0 };
 
-// 
+// victim scores used to calculate mvv lva score
 const int victimScore[13] = { 0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 };
 
-//const int isBQ(int p);
-//const int isRQ(int p);
-//const int isN(int p);
-//const int isK(int p);
-
-/* index true if piece is big / maj / min /wb and value */
+// index true if piece is big / maj / min /wb and value
 const int pieceScores[13] = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
 const int piecePawn[13] = { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
 
-/* color for given index */
+// color for given index
 const int pieceCol[13] = { BOTH, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK };
 
-/* Converts piece 1..12 to 1..6 */
+// Converts piece 1..12 to 1..6
 const int pieceType[13] = { 0, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6 };
 
-/* contains piece slides for indexed piece */
+// contains piece slides for indexed piece
 const int pieceSlides[13] = { 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0 };
 
-/* color to string */
+// color to string
 const string colorString[2] = { "BLACK", "WHITE" };
 
-/* variables to parse fen into board variables and print in console */
+// variables to parse fen into board variables and print in console
 const string pieceChar = ".PNBRQKpnbrqk";
 const string sideChar = "wb-";
 const string rankChar = "12345678";
@@ -126,21 +123,21 @@ const U64 rand64();
 const U64 randomFewBits();
 const int file_rank_2_sq(int f, int r);
 
-/* Macros for int move bits */
+// move macros
+#define MOVE(f,t,ca,pro,fl) ( (f) | ((t) << 7) | ( (ca) << 14 ) | ( (pro) << 20 ) | fl )
 #define FROMSQ(m) ((m) & 0x7F)
 #define TOSQ(m) (((m)>>7) & 0x7F)
 #define CAPTURED(m) (((m)>>14) & 0xF)
 #define PROMOTED(m) (((m)>>20) & 0xF)
 
 // set bits (flags) in move
-#define MFLAGEP 0x40000
-#define MFLAGPS 0x80000
-#define MFLAGCA 0x1000000
+constexpr auto MFLAGEP = 0x40000;
+constexpr auto MFLAGPS = 0x80000;
+constexpr auto MFLAGCA = 0x1000000;
 
 // check only, do not set bits
-#define MCHECKCAP 0x3C000
-#define MCHECKPROM 0xF00000
+constexpr auto MCHECKCAP = 0x3C000;
+constexpr auto MCHECKPROM = 0xF00000;
 
-#define NULLMOVE 0
+constexpr auto NULLMOVE = 0;
 
-#define MOVE(f,t,ca,pro,fl) ( (f) | ((t) << 7) | ( (ca) << 14 ) | ( (pro) << 20 ) | fl )

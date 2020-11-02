@@ -32,7 +32,7 @@ int evalPST(Board* b, int side, float* t) {
 		score += (int) interpolate(PAWN_OPEN[sq], PAWN_ENDGAME[sq], *t);
 	}
 	kingPawnDistance /= max(1, pawnSum);
-	score += interpolate(kingPawnDistance, kingPawnDistance*2, *t);
+	score += (int) interpolate(kingPawnDistance, kingPawnDistance*2, *t);
 
 	// KNIGHTS
 	pieces = b->getPieces(KNIGHT, side);
@@ -107,7 +107,7 @@ int passedPawns(Board* b, int side) {
 	}
 
 	//return passedScore;
-	return interpolate(passedScore, scale(4, passedScore), b->halfMoves);
+	return (int) interpolate(passedScore, scale(4, passedScore), (float) b->halfMoves);
 }
 
 int stackedPawn(Board* b, int side) {
@@ -209,7 +209,7 @@ int kingSafety(Board* b, int side, float* t) {
 	result -= countBits(b->pinned(kSq, side) & ~pawns);
 
 	 //scale depending on gamestate
-	result = interpolate(result*2, result, *t);
+	result = (int) interpolate(result*2, result, *t);
 
 	int attackedKingSquares = countBits(kingAtkMask[kSq] & b->attackedSquares[side^1]);
 	result -= kingZoneTropism[attackedKingSquares];
@@ -240,7 +240,7 @@ int mobility(Board* b, int side, float* t) {
 		blackDoublePawnPush(b, move_s);
 		blackPawnCaptures(b, move_s);
 	}
-	mobility += interpolate(move_s->moveCounter/6, move_s->moveCounter, *t);
+	mobility += (int) interpolate(move_s->moveCounter/6, move_s->moveCounter, *t);
 	move_s->moveCounter = 0;
 
 	int pieceMoves = 0;
@@ -289,7 +289,7 @@ int evaluatePawns(Board* b, float* t) {
 
 	// passed
 	int passed = 5 * passedPawns(b, WHITE) - passedPawns(b, BLACK);
-	passed = interpolate(passed, passed + 20, *t);
+	passed = (int) interpolate(passed, passed + 20, *t);
 	// blocked pawns
 
 	// stacked pawns
@@ -304,6 +304,7 @@ int evaluatePawns(Board* b, float* t) {
 
 	return score;
 }
+
 
 int eval(Board* b) {
 	int eval = 0;

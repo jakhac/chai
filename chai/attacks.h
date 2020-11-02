@@ -6,7 +6,7 @@
 #ifndef ATTACKS_H
 #define ATTACKS_H
 
-// store number of bits required for that square in rook magic table index
+/// <summary>Store number of bits required for that square in rook magic table index</summary>
 const int rookIndexBits[64] = {
     12, 11, 11, 11, 11, 11, 11, 12,
     11, 10, 10, 10, 10, 10, 10, 11,
@@ -18,7 +18,7 @@ const int rookIndexBits[64] = {
     12, 11, 11, 11, 11, 11, 11, 12
 };
 
-// store number of bits required for that square in bishop magic table index
+/// <summary>Store number of bits required for that square in bishop magic table index</summary>
 const int bishopIndexBits[64] = {
     6, 5, 5, 5, 5, 5, 5, 6,
     5, 5, 5, 5, 5, 5, 5, 5,

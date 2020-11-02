@@ -5,7 +5,7 @@ typedef unsigned long long U64;
 struct MOVE_S {
     int moveCounter = 0;
     int moveList[256];
-    int moveScore[256]; // store score of each move?
+    int moveScore[256];
 
     U64 attackedSquares = 0ULL;
 };

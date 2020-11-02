@@ -2,7 +2,6 @@
 
 int selDepth = 0;
 int deltaPruning = 0;
-int rootDepth = 0;
 
 void checkSearchInfo(SEARCH_S* s) {
 	if (s->timeSet && getTimeMs() > s->stopTime) {
@@ -86,21 +85,23 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 
 	// variables relevant for mulitple pruning techniques
 	bool inCheck = b->isCheck(b->side);
-	//int static_eval = eval(b);
+	int static_eval = eval(b);
 
 	// no evaluation if side is in check, no performance loss due to lower branching factor
 	if (inCheck) {
 		depth = min(depth + 1, MAX_DEPTH);
 	}
 
-	// Probe hash table: score is referenced and overwritten with either an alpha, beta or exact score.
-	// If score was overwritten, return immediately
+	// probe hash table for pv move and early cutoff
 	int score = -INF;
-	int pvMove = 0;
+	int pvMove = NO_MOVE;
 	b->tt->probed++;
 	if (probeTT(b, &pvMove, &score, alpha, beta, depth)) {
 		b->tt->hit++;
-		return score;
+		// in pvNodes return exact scores only
+		if (!pvNode || (score > alpha && score < beta)) {
+			return score;
+		}
 	}
 
 	// mate distance pruning
@@ -111,9 +112,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 	}*/
 
 	// static null move pruning (reverse futility pruning)
-	if (!pvNode && depth <= 3 && !inCheck && abs(beta - 1) > -ISMATE) {
-		int static_eval = eval(b);
-
+	/*if (!pvNode && depth <= 3 && !inCheck && abs(beta - 1) > -ISMATE) {
 		switch (depth) {
 			case 1: 
 				if (static_eval - pieceScores[BISHOP] > beta) return beta;
@@ -128,11 +127,11 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 				ASSERT(false); 
 				break;
 		}
-	}
+	}*/
 
 	// adaptive null move pruning
 	bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
-	if (depth > 2 && nullOk && !endGame && !inCheck && !pvNode && eval(b) >= beta) {
+	if (depth > 2 && nullOk && !endGame && !inCheck && !pvNode && static_eval >= beta) {
 		b->pushNull();
 
 		int r = (depth > 6) ? 3 : 2;
@@ -155,7 +154,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 	int bestScore = -INF;
 	score = -INF;
 
-	if (pvMove != 0) {
+	if (pvMove != NO_MOVE) {
 		for (int i = 0; i < move_s->moveCounter; i++) {
 			if (pvMove == move_s->moveList[i]) {
 				s->pvHits++;
@@ -167,13 +166,12 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 
 	// set futility pruning flag
 	bool fPrune = false;
-	//int fmargin[4] = { 0, 200, 300, 500 };
-	int fmargin[4] = { 0, 200, 325, 550 };
+	/*int fmargin[4] = { 0, 200, 325, 550 };
 	if (depth <= 3 && !inCheck && !pvNode && abs(alpha) < 9000) {
-		if (eval(b) + fmargin[depth] <= alpha) {
+		if (static_eval + fmargin[depth] <= alpha) {
 			fPrune = true;
 		}
-	}
+	}*/
 
 	// main move loop
 	for (int i = 0; i < move_s->moveCounter; i++) {
@@ -183,7 +181,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 		if (!b->push(currentMove)) continue;
 
 		// Futility pruning: skip moves that are futile and have no chance of raising alpha
-		// if at least one legal move was made
+		// if at least one legal move was made before
 		if (legalMoves && fPrune && !(CAPTURED(currentMove) && !(MCHECKPROM & currentMove) &&
 			!b->squareAttackedBy(b->getKingSquare(b->side^1), b->side))) {
 			b->pop();
@@ -193,14 +191,15 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 		legalMoves++;
 		int reduction = 0;
 
-		if (legalMoves == 1) {
+		score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, NO_PV);
+
+		/*if (legalMoves == 1) {
 			// always do full search on first move
 			score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, IS_PV);
 		} else {
 			// late move reduction
 			if (i > 3 && !CAPTURED(currentMove) && !inCheck && depth >= 3 && !pvNode) {
 				reduction = (i > 6) ? 2 : 3;
-				//score = -alphaBeta(-alpha - 1, -alpha, depth - 1 - reduction, b, s, DO_NULL, NO_PV);
 			}
 
 			// pvs
@@ -213,7 +212,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 					alpha = score;
 				}
 			}
-		}
+		}*/
 
 		b->pop();
 
@@ -320,14 +319,12 @@ int quiesence(int alpha, int beta, Board* b, SEARCH_S* s) {
 	for (int i = 0; i < move_s->moveCounter; i++) {
 		moveSwapper(b, move_s, i);
 		int currentMove = move_s->moveList[i];
-
 		ASSERT(currentMove & MCHECKCAP || currentMove & MFLAGEP);
 
 		// Delta cutoff: prune moves that cannot improve over alpha
 		bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
 		if (standPat + pieceScores[CAPTURED(currentMove)] + 200 < alpha && 
-			!endGame &&
-			!(MCHECKPROM & currentMove)) {
+			!endGame && !(MCHECKPROM & currentMove)) {
 			continue;
 		}
 

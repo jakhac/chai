@@ -72,13 +72,13 @@ inline string getStringMove(const int move) {
 	string promChar = " ";
 
 	if (promoted) {
-		promChar = "q ";
-		if (isN(promoted)) {
-			promChar = "n ";
-		} else if (isRQ(promoted) && !isBQ(promoted)) {
-			promChar = "r ";
-		} else if (!isRQ(promoted) && isBQ(promoted)) {
-			promChar = "b ";
+		promChar = 'q';
+		if (promoted == n || promoted == N) {
+			promChar = 'n';
+		} else if (promoted == r || promoted == R) {
+			promChar = 'r';
+		} else if (promoted == b || promoted == B) {
+			promChar = 'b';
 		}
 	}
 

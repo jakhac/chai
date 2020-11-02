@@ -11,6 +11,7 @@
 * - code documentation
 */
 
+
 int main() {
 
 	Board b;
@@ -149,12 +150,6 @@ void play(Board* b, Perft* p, SEARCH_S* s) {
 
 				cout << "Pushed " << getStringMove(parsedMove) << " on board." << endl;
 				b->printBoard();
-
-				cout << "Undo history is" << endl;
-				for (int i = 0; i < b->undoPly; i++) {
-					cout << getStringMove(b->undoHistory[i].move) << endl;
-				}
-
 				break;
 			}
 		}
