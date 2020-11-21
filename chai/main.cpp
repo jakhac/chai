@@ -6,9 +6,44 @@
 *		Pawn Structure
 *		Mobility
 * 
+* - Check evasion in quiesence?
+* - Late move _pruning_
+* - Try pv move before move generation
 * - Refactor eval.cpp
 * - Move Ordering, extra bonus for promotions
 * - code documentation
+*/
+
+/* 
+* 500 Games vs TSCP181 with 40/0.4
+* 
+* 275-162-63 (61%) +78
+*	- pvs
+*	- lmr
+*	- futility pruning
+*	- static null move pruning
+*	- pv move in quiesence
+* 
+* 285-133-82 (65%) +108
+*	- pvs
+*	- lmr
+*	- futility pruning
+*	- static null move pruning
+*	+ pv move in quiesence
+*
+* 312-108-80 (70%) +147
+*	- pvs
+*	- lmr
+*	+ futility pruning
+*	- static null move pruning
+*	+ pv move in quiesence
+* 
+* 353-112-70 (71%) +156 [310-119-71 (70%) +147]
+*	- pvs
+*	- lmr
+*	+ futility pruning
+*	+ static null move pruning
+*	+ pv move in quiesence
 */
 
 

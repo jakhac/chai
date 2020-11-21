@@ -130,7 +130,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 	}*/
 
 	// adaptive null move pruning
-	bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
+	/*bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
 	if (depth > 2 && nullOk && !endGame && !inCheck && !pvNode && static_eval >= beta) {
 		b->pushNull();
 
@@ -141,7 +141,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 
 		if (s->stopped) return 0;
 		if (score >= beta) return beta;
-	}
+	}*/
 
 	MOVE_S move_s[1];
 	generateMoves(b, move_s);
@@ -297,11 +297,11 @@ int quiesence(int alpha, int beta, Board* b, SEARCH_S* s) {
 		return beta;
 	}
 
-	//delta pruning, check for alpha raise with biggest material swing
-   //int delta = pieceScores[QUEEN];
-   //if (standPat < alpha - delta) {
-	  // return alpha;
-   //}
+	int pvMove = NO_MOVE;
+	int score = -INF;
+	//b->tt->probed++;
+	// try pvMove found from hash table
+	probeTT(b, &pvMove, &score, alpha, beta, MAX_DEPTH + 1);
 
    // rise alpha to stand pat
 	if (standPat > alpha) {
@@ -311,10 +311,20 @@ int quiesence(int alpha, int beta, Board* b, SEARCH_S* s) {
 	int legalMoves = 0;
 	int oldAlpha = alpha;
 	int bestMove = 0;
-	int score = -INF;
+	score = -INF;
 
 	MOVE_S move_s[1];
 	generateCaptures(b, move_s);
+
+	if (pvMove != NO_MOVE && CAPTURED(pvMove)) {
+		for (int i = 0; i < move_s->moveCounter; i++) {
+			if (pvMove == move_s->moveList[i]) {
+				s->pvHits++;
+				move_s->moveScore[i] = 2000000;
+				break;
+			}
+		}
+	}
 
 	for (int i = 0; i < move_s->moveCounter; i++) {
 		moveSwapper(b, move_s, i);
@@ -329,7 +339,7 @@ int quiesence(int alpha, int beta, Board* b, SEARCH_S* s) {
 		}
 
 		// SEE pruning, skip nodes with negative see score
-		if (legalMoves && move_s->moveScore[i] < 0 && !(MCHECKPROM & currentMove)) continue;
+		if (move_s->moveScore[i] < 0 && !(MCHECKPROM & currentMove)) continue;
 
 		if (!b->push(currentMove)) continue;
 
