@@ -13,9 +13,6 @@
 #include "mask.h"
 #include "windows.h"
 
-#ifndef UTIL_H
-#define UTIL_H
-
 /// <summary>
 /// Moves all set bits in the given bitboard n squares west and returns the new
 /// bitboard, discarding those that fall off the edge.
@@ -23,8 +20,8 @@
 /// <param name="board">Board to move bits west on</param>
 /// <param name="n">Number of squares to move west</param>
 /// <returns>New bitboard with shifted bits to west</returns>
-inline U64 westN(U64 board, int n) {
-	U64 newBoard = board;
+inline bitboard_t westN(bitboard_t board, int n) {
+	bitboard_t newBoard = board;
 	for (int i = 0; i < n; i++) {
 		newBoard = ((newBoard >> 1) & (~FILE_H));
 	}
@@ -59,7 +56,7 @@ inline bool inputWaiting() {
 	}
 }
 
-inline void readInput(SEARCH_S* s) {
+inline void readInput(search_t* s) {
 	int bytes;
 	char input[256] = "", * endc;
 
@@ -104,8 +101,8 @@ inline void log(string logMsg) {
 /// <param name="board">Board to move bits east on</param>
 /// <param name="n">Number of squares to move east</param>
 /// <returns>New bitboard with shifted bits to east</returns>
-inline U64 eastN(U64 board, int n) {
-	U64 newBoard = board;
+inline bitboard_t eastN(bitboard_t board, int n) {
+	bitboard_t newBoard = board;
 	for (int i = 0; i < n; i++) {
 		newBoard = ((newBoard << 1) & (~FILE_A));
 	}
@@ -135,7 +132,7 @@ inline int col(int square) {
 /// </summary>
 /// <param name="board">Board</param>
 /// <returns>INdex of first found bit</returns>
-inline int bitscanForward(U64 board) {
+inline int bitscanForward(bitboard_t board) {
 	if (board == 0ULL) return -1;
 
 	unsigned long ret;
@@ -148,7 +145,7 @@ inline int bitscanForward(U64 board) {
 /// </summary>
 /// <param name="board">Board</param>
 /// <returns>Index of first found bit</returns>
-inline int bitscanReverse(U64 board) {
+inline int bitscanReverse(bitboard_t board) {
 	if (board == 0ULL) return -1;
 
 	unsigned long ret;
@@ -161,7 +158,7 @@ inline int bitscanReverse(U64 board) {
 /// </summary>
 /// <param name="bb">Bitboard to count bits on</param>
 /// <returns>Amount of bits set to 1 in bb</returns>
-inline int countBits(U64 bb) {
+inline int countBits(bitboard_t bb) {
 	return (int)__popcnt64(bb);
 }
 
@@ -171,7 +168,7 @@ inline int countBits(U64 bb) {
 /// </summary>
 /// <param name="bb">Bitboard to pop lsb on</param>
 /// <returns>Index of popped bit</returns>
-inline int popBit(U64* bb) {
+inline int popBit(bitboard_t* bb) {
 	unsigned long ret;
 	_BitScanForward64(&ret, *bb);
 	*bb &= (*bb - 1);
@@ -183,7 +180,7 @@ inline int popBit(U64* bb) {
 /// </summary>
 /// <param name="bb">Bitboard to set bit on</param>
 /// <param name="i">Index of bit that is set to 1</param>
-inline void setBit(U64* bb, int i) {
+inline void setBit(bitboard_t* bb, int i) {
 	*bb |= setMask[i];
 }
 
@@ -192,8 +189,7 @@ inline void setBit(U64* bb, int i) {
 /// </summary>
 /// <param name="bb">Bitboard to clear bit on</param>
 /// <param name="i">Index of bit that is set to 0</param>
-inline void clearBit(U64* bb, int i) {
+inline void clearBit(bitboard_t* bb, int i) {
 	*bb &= clearMask[i];
 }
 
-#endif // !UTIL_H

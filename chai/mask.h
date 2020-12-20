@@ -8,31 +8,31 @@
 #define MASK_H
 
 // clear set bit masks
-extern U64 setMask[64];
-extern U64 clearMask[64];
+extern bitboard_t setMask[64];
+extern bitboard_t clearMask[64];
 
 // convert sq to rank or file
 extern int squareToRank[64];
 extern int squareToFile[64];
 
 // attacker mask for pieces
-extern U64 pawnAtkMask[2][64];
-extern U64 knightAtkMask[64];
-extern U64 kingAtkMask[64];
+extern bitboard_t pawnAtkMask[2][64];
+extern bitboard_t knightAtkMask[64];
+extern bitboard_t kingAtkMask[64];
 
 // helper arrays to generate obstructed method
-extern U64 dirBitmap[64][8];
-extern U64 inBetween[64][64];
+extern bitboard_t dirBitmap[64][8];
+extern bitboard_t inBetween[64][64];
 extern int dirFromTo[64][64];
-extern U64 lineBB[64][64];
+extern bitboard_t lineBB[64][64];
 
 // eval masks
-extern U64 pawnIsolatedMask[64];
-extern U64 pawnPassedMask[2][64];
-extern U64 upperMask[64];
-extern U64 lowerMask[64];
-extern U64 pawnShield[2][64];
-extern U64 xMask[64];
+extern bitboard_t pawnIsolatedMask[64];
+extern bitboard_t pawnPassedMask[2][64];
+extern bitboard_t upperMask[64];
+extern bitboard_t lowerMask[64];
+extern bitboard_t pawnShield[2][64];
+extern bitboard_t xMask[64];
 extern int manhattenDistance[64][64];
 
 /// <summary>
@@ -96,8 +96,8 @@ inline void initAttackerMasks() {
 
 	// kings
 	for (int i = 0; i < 64; i++) {
-		U64 kingSet = setMask[i];
-		U64 attacks = (kingSet << 1 & ~FILE_A_HEX) | (kingSet >> 1 & ~FILE_H_HEX);
+		bitboard_t kingSet = setMask[i];
+		bitboard_t attacks = (kingSet << 1 & ~FILE_A_HEX) | (kingSet >> 1 & ~FILE_H_HEX);
 		kingSet |= attacks;
 		attacks |= kingSet << 8 | kingSet >> 8;
 		kingAtkMask[i] = attacks;
@@ -106,7 +106,7 @@ inline void initAttackerMasks() {
 
 inline void initEvalMasks() {
 	int file;
-	U64 left, right;
+	bitboard_t left, right;
 	for (int i = 0; i < 64; i++) {
 		file = squareToFile[i] - 1;
 		left = (file >= 0) ? FILE_LIST[file] : 0ULL;
@@ -136,7 +136,7 @@ inline void initEvalMasks() {
 		pawnPassedMask[BLACK][i] = lowerMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
 	}
 
-	U64 shield;
+	bitboard_t shield;
 	for (int i = 0; i < 64; i++) {
 		shield = 0ULL;
 		shield = (setMask[i] >> 1 & ~FILE_H_HEX) | (setMask[i] << 1 & ~FILE_A_HEX) | setMask[i];
@@ -185,7 +185,7 @@ inline void initObstructed() {
 	}
 	for (int sq = 0; sq < 64; ++sq) {
 		for (int sq2 = 0; sq2 < 64; ++sq2) {
-			inBetween[sq][sq2] = U64(0);
+			inBetween[sq][sq2] = bitboard_t(0);
 			int k = dirFromTo[sq][sq2];
 			if (k != 8) {
 				int k2 = dirFromTo[sq2][sq];
@@ -195,13 +195,13 @@ inline void initObstructed() {
 	}
 }
 
-inline vector<U64> initLine() {
+inline vector<bitboard_t> initLine() {
 
-	U64 midDiagonalUp = 0x8040201008040201;
-	U64 midDiagonalDown = 0x0102040810204080;
-	U64 vertical = FILE_A_HEX;
-	U64 horizontal = RANK_1_HEX;
-	vector<U64> axis = { midDiagonalDown, midDiagonalUp, vertical, horizontal, 
+	bitboard_t midDiagonalUp = 0x8040201008040201;
+	bitboard_t midDiagonalDown = 0x0102040810204080;
+	bitboard_t vertical = FILE_A_HEX;
+	bitboard_t horizontal = RANK_1_HEX;
+	vector<bitboard_t> axis = { midDiagonalDown, midDiagonalUp, vertical, horizontal, 
 		FILE_B_HEX, FILE_C_HEX, FILE_D_HEX, FILE_E_HEX, 
 		FILE_F_HEX, FILE_G_HEX, FILE_H_HEX };
 
@@ -236,7 +236,7 @@ inline vector<U64> initLine() {
 	return axis;
 }
 
-inline U64 line_bb(int s1, int s2) {
+inline bitboard_t line_bb(int s1, int s2) {
 	return lineBB[s1][s2];
 }
 
@@ -250,7 +250,7 @@ inline bool aligned(int s1, int s2, int s3) {
 /// <param name="sq1">Square 1</param>
 /// <param name="sq2">Square 2</param>
 /// <returns></returns>
-inline U64 obstructed(int sq1, int sq2) {
+inline bitboard_t obstructed(int sq1, int sq2) {
 	return inBetween[sq1][sq2];
 }
 

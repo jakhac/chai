@@ -3,12 +3,17 @@
 int selDepth = 0;
 int deltaPruning = 0;
 
-void checkSearchInfo(SEARCH_S* s) {
+void checkSearchInfo(search_t* s) {
 	if (s->timeSet && getTimeMs() > s->stopTime) {
 		cout << "Forced search quit (set time is up)" << endl;
 		s->stopped = true;
 	}
+
+// read input causes tests to wait for cin and does not terminate
+#ifndef TESTING
 	readInput(s);
+#endif // TESTING
+
 }
 
 bool isRepetition(Board* b) {
@@ -36,7 +41,7 @@ bool isThreeFoldRepetition(Board* b) {
 	return false;
 }
 
-void moveSwapper(Board* b, MOVE_S* move_s, int curIdx) {
+void moveSwapper(Board* b, moveList_t* move_s, int curIdx) {
 	int bestScore = 0;
 	int bestIdx = curIdx;
 	
@@ -49,7 +54,7 @@ void moveSwapper(Board* b, MOVE_S* move_s, int curIdx) {
 	swapMove(move_s, curIdx, bestIdx);
 }
 
-void swapMove(MOVE_S* move_s, int id1, int id2) {
+void swapMove(moveList_t* move_s, int id1, int id2) {
 	if (id1 == id2) return; 
 
 	// swap score and move in BOTH lists
@@ -62,7 +67,7 @@ void swapMove(MOVE_S* move_s, int id1, int id2) {
 	move_s->moveScore[id2] = tempScore;
 }
 
-int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk, bool pvNode) {
+int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode) {
 	ASSERT(b->checkBoard());
 	ASSERT(beta > alpha);
 
@@ -72,7 +77,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 	}
 
 	// check for time and depth
-	if ((s->nodes & 4095) == 0) {
+	if ((s->nodes & 2048) == 0) {
 		checkSearchInfo(s);
 	}
 
@@ -112,7 +117,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 	}*/
 
 	// static null move pruning (reverse futility pruning)
-	/*if (!pvNode && depth <= 3 && !inCheck && abs(beta - 1) > -ISMATE) {
+	if (!pvNode && depth <= 3 && !inCheck && abs(beta - 1) > -ISMATE) {
 		switch (depth) {
 			case 1: 
 				if (static_eval - pieceScores[BISHOP] > beta) return beta;
@@ -127,10 +132,10 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 				ASSERT(false); 
 				break;
 		}
-	}*/
+	}
 
 	// adaptive null move pruning
-	/*bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
+	bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
 	if (depth > 2 && nullOk && !endGame && !inCheck && !pvNode && static_eval >= beta) {
 		b->pushNull();
 
@@ -141,9 +146,9 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 
 		if (s->stopped) return 0;
 		if (score >= beta) return beta;
-	}*/
+	}
 
-	MOVE_S move_s[1];
+	moveList_t move_s[1];
 	generateMoves(b, move_s);
 
 	int currentMove;
@@ -166,12 +171,12 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 
 	// set futility pruning flag
 	bool fPrune = false;
-	/*int fmargin[4] = { 0, 200, 325, 550 };
+	int fmargin[4] = { 0, 200, 325, 550 };
 	if (depth <= 3 && !inCheck && !pvNode && abs(alpha) < 9000) {
 		if (static_eval + fmargin[depth] <= alpha) {
 			fPrune = true;
 		}
-	}*/
+	}
 
 	// main move loop
 	for (int i = 0; i < move_s->moveCounter; i++) {
@@ -191,9 +196,9 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 		legalMoves++;
 		int reduction = 0;
 
-		score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, NO_PV);
+		//score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, NO_PV);
 
-		/*if (legalMoves == 1) {
+		if (legalMoves == 1) {
 			// always do full search on first move
 			score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, IS_PV);
 		} else {
@@ -212,7 +217,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 					alpha = score;
 				}
 			}
-		}*/
+		}
 
 		b->pop();
 
@@ -273,14 +278,15 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 	return alpha;
 }
 
-int quiesence(int alpha, int beta, Board* b, SEARCH_S* s) {
+int quiesence(int alpha, int beta, Board* b, search_t* s) {
 	ASSERT(b->checkBoard());
 	selDepth = max(selDepth, b->ply);
 
 	// check for time and depth
-	if ((s->nodes & 2047) == 0) {
+	if ((s->nodes & 2048) == 0) {
 		checkSearchInfo(s);
 	}
+
 
 	s->nodes++;
 
@@ -297,11 +303,11 @@ int quiesence(int alpha, int beta, Board* b, SEARCH_S* s) {
 		return beta;
 	}
 
-	int pvMove = NO_MOVE;
 	int score = -INF;
+	//int pvMove = NO_MOVE;
 	//b->tt->probed++;
-	// try pvMove found from hash table
-	probeTT(b, &pvMove, &score, alpha, beta, MAX_DEPTH + 1);
+	// //try pvMove found from hash table
+	//probeTT(b, &pvMove, &score, alpha, beta, MAX_DEPTH + 1);
 
    // rise alpha to stand pat
 	if (standPat > alpha) {
@@ -313,18 +319,18 @@ int quiesence(int alpha, int beta, Board* b, SEARCH_S* s) {
 	int bestMove = 0;
 	score = -INF;
 
-	MOVE_S move_s[1];
+	moveList_t move_s[1];
 	generateCaptures(b, move_s);
 
-	if (pvMove != NO_MOVE && CAPTURED(pvMove)) {
-		for (int i = 0; i < move_s->moveCounter; i++) {
-			if (pvMove == move_s->moveList[i]) {
-				s->pvHits++;
-				move_s->moveScore[i] = 2000000;
-				break;
-			}
-		}
-	}
+	//if (pvMove != NO_MOVE && CAPTURED(pvMove)) {
+	//	for (int i = 0; i < move_s->moveCounter; i++) {
+	//		if (pvMove == move_s->moveList[i]) {
+	//			s->pvHits++;
+	//			move_s->moveScore[i] = 2000000;
+	//			break;
+	//		}
+	//	}
+	//}
 
 	for (int i = 0; i < move_s->moveCounter; i++) {
 		moveSwapper(b, move_s, i);
@@ -367,7 +373,7 @@ int quiesence(int alpha, int beta, Board* b, SEARCH_S* s) {
 	return alpha;
 }
 
-void clearForSearch(Board* b, SEARCH_S* s) {
+void clearForSearch(Board* b, search_t* s) {
 	// reset history of killer heuristic
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < MAX_DEPTH; j++) {
@@ -393,7 +399,7 @@ void clearForSearch(Board* b, SEARCH_S* s) {
 	s->fh = 0;
 }
 
-int search_aspiration(Board* b, SEARCH_S* s, int depth, int bestScore) {
+int search_aspiration(Board* b, search_t* s, int depth, int bestScore) {
 	int temp = bestScore;
 	int alpha = bestScore - 75;
 	int beta = bestScore + 75;
@@ -408,7 +414,7 @@ int search_aspiration(Board* b, SEARCH_S* s, int depth, int bestScore) {
 	return temp;
 }
 
-void search(Board* b, SEARCH_S* s) {
+int search(Board* b, search_t* s) {
 	int bestMove = 0;
 	int bestScore = -INF;
 	int pvMoves = 0;
@@ -434,7 +440,7 @@ void search(Board* b, SEARCH_S* s) {
 		selDepth = 0;
 		b->ply = 0;
 
-		int bestScore = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV);
+		bestScore = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV);
 		//bestScore = search_aspiration(b, s, currentDepth, bestScore);
 
 		// forced stop, break and use pv line of previous iteration
@@ -475,6 +481,8 @@ void search(Board* b, SEARCH_S* s) {
 	cout << "\n";
 	cout << "bestmove " << getStringMove(bestMove) << "\n";
 	fflush(stdout);
+
+	return bestScore;
 }
 
 

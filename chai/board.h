@@ -39,39 +39,39 @@ public:
 	int castlePermission = 0;
 
 	/// <summary>Unique zobrist key</summary>
-	U64 zobristKey = 0x0;
+	bitboard_t zobristKey = 0x0;
 
 	/// <summary>Unique zobrist pawn key</summary>
-	U64 zobristPawnKey = 0x0;
+	bitboard_t zobristPawnKey = 0x0;
 
 	/// <summary>Store pieces for given color</summary>
-	U64 color[2] = { 0ULL, 0ULL };
+	bitboard_t color[2] = { 0ULL, 0ULL };
 
 	/// <summary>Store pieces for given type</summary>
-	U64 pieces[7] = { EMPTY, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL };
+	bitboard_t pieces[7] = { EMPTY, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL, 0ULL };
 
 	/// <summary>Store occupied squares</summary>
-	U64 occupied = 0ULL;
+	bitboard_t occupied = 0ULL;
 
 	/// <summary>Stores the currently attacked squares by side</summary>
-	U64 attackedSquares[2] = { 0ULL, 0ULL };
+	bitboard_t attackedSquares[2] = { 0ULL, 0ULL };
 
 	/// <summary>Unique 64bit number for each piece on each square. En pas key is stored as piece 0.</summary>
-	U64 pieceKeys[13][64];
+	bitboard_t pieceKeys[13][64];
 
 	/// <summary>Castle keys</summary>
-	U64 castleKeys[16];
+	bitboard_t castleKeys[16];
 
 	/// <summary>Side key for color change. Hash into zobristKey if white.</summary>
-	U64 sideKey;
+	bitboard_t sideKey;
 
 	/// <summary>Stack stores pushed moves as Undo objects.</summary>
-	UNDO_S undoHistory[MAX_GAME_MOVES];
+	undo_t undoHistory[MAX_GAME_MOVES];
 
 	/// <summary>PV Table -> TODO transposition table</summary>
-	TT_S tt[1];
+	ttable_t tt[1];
 
-	PAWN_TABLE_S pawnTable[1];
+	pawntable_t pawnTable[1];
 
 	/// <summary>Stores the pv line</summary>
 	int pvArray[MAX_DEPTH];
@@ -118,13 +118,13 @@ public:
 	/// Generate a unique zobristKey for current board.
 	/// </summary>
 	/// <returns>Unique 64-bit number</returns>
-	U64 generateZobristKey();
+	bitboard_t generateZobristKey();
 
 	/// <summary>
 	/// Generate a unique pawn key for current board.
 	/// </summary>
 	/// <returns>Unique 64-bit number</returns>
-	U64 generatePawnHashKey();
+	bitboard_t generatePawnHashKey();
 
 	/// <summary>
 	/// Get pieces of given index and color.
@@ -132,7 +132,7 @@ public:
 	/// <param name="piece">Piece index</param>
 	/// <param name="side">Color of piece</param>
 	/// <returns>Bitboard of piece and color</returns>
-	U64 getPieces(int piece, int side);
+	bitboard_t getPieces(int piece, int side);
 
 	/// <summary>
 	/// Determines the piece index at given square.
@@ -147,7 +147,7 @@ public:
 	/// <param name="kSq">Square (of attacked king)</param>
 	/// <param name="kSide">Side of attacked king</param>
 	/// <returns>Bitboard revealing all pinners</returns>
-	U64 pinner(int kSq, int kSide);
+	bitboard_t pinner(int kSq, int kSide);
 
 	/// <summary>
 	/// Generate bitboard with pinned pieces according to king square and king side. Includes rook
@@ -156,7 +156,7 @@ public:
 	/// <param name="kSq">Square of king</param>
 	/// <param name="side">Side of pinned pieces (king side)</param>
 	/// <returns></returns>
-	U64 pinned(int kSq, int side);
+	bitboard_t pinned(int kSq, int side);
 
 	/// <summary>
 	/// Get king of given side as square index.
@@ -218,7 +218,7 @@ public:
 	/// captures and promotions. Assert for correct zobristKey.
 	/// </summary>
 	/// <returns>undo struct</returns>
-	UNDO_S pop();
+	undo_t pop();
 
 	/// <summary>
 	/// Reverse pushed castle move from board. Resets rook on init square.
@@ -234,7 +234,7 @@ public:
 	/// </summary>
 	/// <param name="side">Attacker side</param>
 	/// <returns>Bitboard with attacked squares and pieces set</returns>
-	U64 attackerSet(int side);
+	bitboard_t attackerSet(int side);
 
 	/// <summary>
 	/// Check if given side attacks given square.
@@ -242,16 +242,16 @@ public:
 	/// <param name="square">Square to check attacks on</param>
 	/// <param name="side">Side that might attack the square</param>
 	/// <returns></returns>
-	U64 squareAttackedBy(int square, int side);
+	bitboard_t squareAttackedBy(int square, int side);
 
-	U64 squareAttacked(int square);
+	bitboard_t squareAttacked(int square);
 
 	/// <summary>
 	/// Check if given side is currently in check.
 	/// </summary>
 	/// <param name="side">Side to check state</param>
 	/// <returns>Returns the mask of pieces giving check</returns>
-	U64 isCheck(int side);
+	bitboard_t isCheck(int side);
 
 	/// <summary>
 	/// Check if castle move is valid: castle permission, current check, empty squares
@@ -259,8 +259,6 @@ public:
 	/// </summary>
 	/// <param name="castle">Castle bit from board variable</param>
 	/// <returns>True if castling move is valid, else false</returns>
-	bool castleValid(int castle, U64* attackerSet);
+	bool castleValid(int castle, bitboard_t* attackerSet);
 
 };
-
-;

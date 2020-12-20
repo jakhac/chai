@@ -20,7 +20,7 @@ extern int selDepth;
 /// <param name="nullOk">Enables null move pruning in node</param>
 /// <param name="pvNode">Determines the current node type</param>
 /// <returns>Best score found in search</returns>
-int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk, bool pvNode);
+int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode);
 
 /// <summary>
 /// Quiesence search pushes all captures to evaluate a stable and quiet position.
@@ -30,14 +30,14 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, SEARCH_S* s, bool nullOk
 /// <param name="b">Current board</param>
 /// <param name="s">Search info containing search parameters</param>
 /// <returns>Best score found in quiesences search</returns>
-int quiesence(int alpha, int beta, Board* b, SEARCH_S* s);
+int quiesence(int alpha, int beta, Board* b, search_t* s);
 
 /// <summary>
 /// Root function that starts alphaBeta search in iterative deepening framework.
 /// </summary>
 /// <param name="b">Reference to current board</param>
 /// <param name="s">Search info containing search parameters</param>
-void search(Board* b, SEARCH_S* s);
+int search(Board* b, search_t* s);
 
 /// <summary>
 /// Apply offset of aspiration windows in alphaBeta call and try to score inside alpha and beta.
@@ -48,7 +48,7 @@ void search(Board* b, SEARCH_S* s);
 /// <param name="depth">Current depth for alphaBeta call</param>
 /// <param name="bestScore">Best score from previous search to determine aspiration windows</param>
 /// <returns>Best score found in alphaBeta search</returns>
-int search_aspiration(Board* b, SEARCH_S* s, int depth, int bestScore);
+int search_aspiration(Board* b, search_t* s, int depth, int bestScore);
 
 /// <summary>
 /// Tries to find a single(!) repetition in undoPly array. Used in search to find upcoming draws.
@@ -71,7 +71,7 @@ bool isThreeFoldRepetition(Board* b);
 /// <param name="b">Current board</param>
 /// <param name="move_s">Move struct with all moves and scores</param>
 /// <param name="curIdx">Current index in moveList</param>
-void moveSwapper(Board* b, MOVE_S* move_s, int curIdx);
+void moveSwapper(Board* b, moveList_t* move_s, int curIdx);
 
 /// <summary>
 /// Swap to moves and their score in given MOVE_S struct. Returns if id1 is equal to id2.
@@ -79,5 +79,5 @@ void moveSwapper(Board* b, MOVE_S* move_s, int curIdx);
 /// <param name="move_s">Move struct with all moves and scores</param>
 /// <param name="id1">First index</param>
 /// <param name="id2">Second index</param>
-void swapMove(MOVE_S* move_s, int id1, int id2);
+void swapMove(moveList_t* move_s, int id1, int id2);
 

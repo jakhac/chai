@@ -10,6 +10,6 @@ public:
 	int enPas;
 	int fiftyMove;
 	//U64 attackedSquares[2];
-	U64 zobKey;
+	bitboard_t zobKey;
 
 };

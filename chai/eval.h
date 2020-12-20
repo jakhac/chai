@@ -193,12 +193,12 @@ const int mirror64[64] = {
 };
 
 extern const int* maps[7];
-extern U64 pawnIsolatedMask[64];
-extern U64 pawnPassedMask[2][64];
-extern U64 upperMask[64];
-extern U64 lowerMask[64];
-extern U64 pawnShield[2][64];
-extern U64 xMask[64];
+extern bitboard_t pawnIsolatedMask[64];
+extern bitboard_t pawnPassedMask[2][64];
+extern bitboard_t upperMask[64];
+extern bitboard_t lowerMask[64];
+extern bitboard_t pawnShield[2][64];
+extern bitboard_t xMask[64];
 
 const int passedBonus[2][8] = {
 	{ 200, 100, 60, 35, 20, 10, 5, 0 }, 

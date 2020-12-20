@@ -1,6 +1,6 @@
 #include "uci.h"
 
-void uciMode(Board* b, SEARCH_S* s) {
+void uciMode(Board* b, search_t* s) {
 	string cmd;
 
 	log("UCI MODE");
@@ -77,7 +77,7 @@ void uciParsePosition(Board* b, string cmd) {
 	fflush(stdout);
 }
 
-void uciParseGo(Board* b, SEARCH_S* s, string cmd) {
+void uciParseGo(Board* b, search_t* s, string cmd) {
 	int depth = -1,  movesLeft = 30, moveTime = -1;
 	int time = -1, inc = 0;
 	s->timeSet = false;

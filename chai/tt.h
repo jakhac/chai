@@ -13,13 +13,13 @@ const int pawnTableSize = 0x100000 * 8;
 /// Initialize transposition table: Clear used or allocated memory and re-allocate.
 /// </summary>
 /// <param name="tt">Transposition table</param>
-void initTT(TT_S* pvTable_s);
+void initTT(ttable_t* pvTable_s);
 
 /// <summary>
 /// Reset all variables in transposition table. Only used in initialization or new game.
 /// </summary>
 /// <param name="tt">Transposition table</param>
-void clearTT(TT_S* pvTable_s);
+void clearTT(ttable_t* pvTable_s);
 
 /// <summary>
 /// Store a transposition entry containing score, score flag, move and depth in 
@@ -60,13 +60,13 @@ int getPVLine(Board* b, const int maxDepth);
 /// Initialize pawn table. Re-allocate memory.
 /// </summary>
 /// <param name="pawnTable">Pawn table declared in board</param>
-void initPawnTable(PAWN_TABLE_S* pawnTable);
+void initPawnTable(pawntable_t* pawnTable);
 
 /// <summary>
 /// Reset all variables used in pawn table. Only used before new game.
 /// </summary>
 /// <param name="pawnTable">Pawn table to clear</param>
-void clearPawnTable(PAWN_TABLE_S* pawnTable);
+void clearPawnTable(pawntable_t* pawnTable);
 
 /// <summary>
 /// Store a pawn table entry with pawn evaluation score.

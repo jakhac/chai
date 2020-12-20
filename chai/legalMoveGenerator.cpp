@@ -1,6 +1,6 @@
 #include "legalMoveGenerator.h"
 
-void _generateMoves(Board* b, MOVE_S* move_s) {
+void _generateMoves(Board* b, moveList_t* move_s) {
 	move_s->attackedSquares = b->attackerSet(b->side^1);
 
 	//pawns
@@ -89,13 +89,13 @@ void _generateMoves(Board* b, MOVE_S* move_s) {
 /// Calculate possible single push pawn moves for white.
 /// </summary>
 /// <param name="board">Board</param>
-void _whiteSinglePawnPush(Board* board, MOVE_S* move_s) {
+void _whiteSinglePawnPush(Board* board, moveList_t* move_s) {
 	int sq, kSq = board->getKingSquare(WHITE);
-	U64 pinners = board->pinner(kSq, WHITE);
-	U64 pinned = board->pinned(kSq, WHITE);
+	bitboard_t pinners = board->pinner(kSq, WHITE);
+	bitboard_t pinned = board->pinned(kSq, WHITE);
 
-	U64 whitePawns = board->getPieces(PAWN, WHITE);
-	U64 potPinned = whitePawns & pinned;
+	bitboard_t whitePawns = board->getPieces(PAWN, WHITE);
+	bitboard_t potPinned = whitePawns & pinned;
 	whitePawns = whitePawns & ~pinned;
 
 	// iterate pinned pawns
@@ -107,13 +107,13 @@ void _whiteSinglePawnPush(Board* board, MOVE_S* move_s) {
 	//}
 
 	while (potPinned) {
-		U64 _pinners = pinners;
+		bitboard_t _pinners = pinners;
 		sq = popBit(&potPinned);
 
 		// for each pawn try to find pinner
 		while (_pinners) {
 			int pinnerSq = popBit(&_pinners);
-			U64 attackLine = obstructed(kSq, pinnerSq) | setMask[kSq] | setMask[pinnerSq];
+			bitboard_t attackLine = obstructed(kSq, pinnerSq) | setMask[kSq] | setMask[pinnerSq];
 
 			// pinned piece found, check for same file (diagonal pins do not allow pushes)
 			if ((setMask[sq] & attackLine) && squareToFile[pinnerSq] == squareToFile[sq]) {
@@ -122,10 +122,10 @@ void _whiteSinglePawnPush(Board* board, MOVE_S* move_s) {
 		}
 	}
 
-	U64 pushedPawns = (whitePawns << 8) & ~board->occupied;
+	bitboard_t pushedPawns = (whitePawns << 8) & ~board->occupied;
 
 	// divide proms and normal pushes
-	U64 promPawns = pushedPawns & RANK_8_HEX;
+	bitboard_t promPawns = pushedPawns & RANK_8_HEX;
 	pushedPawns = pushedPawns & ~RANK_8_HEX;
 
 	// normal pawn pushes
@@ -148,13 +148,13 @@ void _whiteSinglePawnPush(Board* board, MOVE_S* move_s) {
 /// Calculate possible single push pawn moves for black.
 /// </summary>
 /// <param name="board">Board</param> 
-void _blackSinglePawnPush(Board* board, MOVE_S* move_s) {
+void _blackSinglePawnPush(Board* board, moveList_t* move_s) {
 	int sq, kSq = board->getKingSquare(BLACK);
 
-	U64 pinners = board->pinner(kSq, BLACK);
-	U64 pinned = board->pinned(kSq, BLACK);
-	U64 blackPawns = board->getPieces(PAWN, BLACK);
-	U64 potPinned = blackPawns & pinned;
+	bitboard_t pinners = board->pinner(kSq, BLACK);
+	bitboard_t pinned = board->pinned(kSq, BLACK);
+	bitboard_t blackPawns = board->getPieces(PAWN, BLACK);
+	bitboard_t potPinned = blackPawns & pinned;
 	blackPawns &= ~pinned;
 
 	 //if there is a pinner on same file as pinned pawn, push is allowed
@@ -166,13 +166,13 @@ void _blackSinglePawnPush(Board* board, MOVE_S* move_s) {
 	//}
 
 	while (potPinned) {
-		U64 _pinners = pinners;
+		bitboard_t _pinners = pinners;
 		sq = popBit(&potPinned);
 
 		// for each pawn try to find pinner
 		while (_pinners) {
 			int pinnerSq = popBit(&_pinners);
-			U64 attackLine = obstructed(kSq, pinnerSq) | setMask[kSq] | setMask[pinnerSq];
+			bitboard_t attackLine = obstructed(kSq, pinnerSq) | setMask[kSq] | setMask[pinnerSq];
 
 			// pinned piece found, check for same file (diagonal pins do not allow pushes)
 			if ((setMask[sq] & attackLine) && squareToFile[pinnerSq]  == squareToFile[sq]) {
@@ -181,10 +181,10 @@ void _blackSinglePawnPush(Board* board, MOVE_S* move_s) {
 		}
 	}
 
-	U64 pushedPawns = (blackPawns >> 8) & ~board->occupied;
+	bitboard_t pushedPawns = (blackPawns >> 8) & ~board->occupied;
 
 	// divide proms and normal pushes
-	U64 promPawns = pushedPawns & RANK_1_HEX;
+	bitboard_t promPawns = pushedPawns & RANK_1_HEX;
 	pushedPawns = pushedPawns & ~RANK_1_HEX;
 
 	// normal pawn pushes
@@ -207,13 +207,13 @@ void _blackSinglePawnPush(Board* board, MOVE_S* move_s) {
 /// Calculate all possible moves with pawnstart for white.
 /// </summary>
 /// <param name="board">Board</param>
-void _whiteDoublePawnPush(Board* board, MOVE_S* move_s) {
+void _whiteDoublePawnPush(Board* board, moveList_t* move_s) {
 	int potPinnedSq, sq, kSq = board->getKingSquare(WHITE);
-	U64 pinners = board->pinner(kSq, WHITE);
-	U64 pinned = board->pinned(kSq, WHITE);
+	bitboard_t pinners = board->pinner(kSq, WHITE);
+	bitboard_t pinned = board->pinned(kSq, WHITE);
 
-	U64 whitePawns = board->getPieces(PAWN, WHITE);
-	U64 potPinned = whitePawns & pinned;
+	bitboard_t whitePawns = board->getPieces(PAWN, WHITE);
+	bitboard_t potPinned = whitePawns & pinned;
 	whitePawns &= ~pinned;
 
 	// iterate pinned pawns
@@ -226,7 +226,7 @@ void _whiteDoublePawnPush(Board* board, MOVE_S* move_s) {
 		}
 	}
 
-	U64 pushedPawns = (whitePawns << 8) & ~board->occupied;
+	bitboard_t pushedPawns = (whitePawns << 8) & ~board->occupied;
 	pushedPawns = (pushedPawns << 8) & ~board->occupied & RANK_4_HEX;
 
 	while (pushedPawns) {
@@ -239,13 +239,13 @@ void _whiteDoublePawnPush(Board* board, MOVE_S* move_s) {
 /// Calculate all possible moves with pawnstart for black.
 /// </summary>
 /// <param name="board">Board</param>
-void _blackDoublePawnPush(Board* board, MOVE_S* move_s) {
+void _blackDoublePawnPush(Board* board, moveList_t* move_s) {
 	int sq, kSq = board->getKingSquare(BLACK);
 
-	U64 pinners = board->pinner(kSq, BLACK);
-	U64 pinned = board->pinned(kSq, BLACK);
-	U64 blackPawns = board->getPieces(PAWN, BLACK);
-	U64 potPinned = blackPawns & pinned;
+	bitboard_t pinners = board->pinner(kSq, BLACK);
+	bitboard_t pinned = board->pinned(kSq, BLACK);
+	bitboard_t blackPawns = board->getPieces(PAWN, BLACK);
+	bitboard_t potPinned = blackPawns & pinned;
 	blackPawns &= ~pinned;
 
 	// if there is a pinner on same file as pinned pawn, push is allowed
@@ -256,7 +256,7 @@ void _blackDoublePawnPush(Board* board, MOVE_S* move_s) {
 		}
 	}
 
-	U64 pushedPawns = (blackPawns >> 8) & ~board->occupied;
+	bitboard_t pushedPawns = (blackPawns >> 8) & ~board->occupied;
 	pushedPawns = (pushedPawns >> 8) & ~board->occupied & RANK_5_HEX;
 
 	while (pushedPawns) {
@@ -269,25 +269,25 @@ void _blackDoublePawnPush(Board* board, MOVE_S* move_s) {
 /// Generate all possible east attacks for white pawns
 /// </summary>
 /// <param name="board">Board</param>
-void _whitePawnCaptures(Board* board, MOVE_S* move_s) {
+void _whitePawnCaptures(Board* board, moveList_t* move_s) {
 	int sq, atk_sq, kSq = board->getKingSquare(WHITE);
 
-	U64 atks;
-	U64 pinners = board->pinner(kSq, WHITE);
-	U64 pinned = board->pinned(kSq, WHITE);
-	U64 whitePawns = board->getPieces(PAWN, WHITE);
-	U64 potPinned = whitePawns & pinned;
+	bitboard_t atks;
+	bitboard_t pinners = board->pinner(kSq, WHITE);
+	bitboard_t pinned = board->pinned(kSq, WHITE);
+	bitboard_t whitePawns = board->getPieces(PAWN, WHITE);
+	bitboard_t potPinned = whitePawns & pinned;
 	whitePawns &= ~pinned;
 
 	//iterate pinned pawns
 	while (potPinned) {
-		U64 _pinners = pinners;
+		bitboard_t _pinners = pinners;
 		sq = popBit(&potPinned);
 
 		// for each pawn try to find pinner
 		while (_pinners) {
 			int pinnerSq = popBit(&_pinners);
-			U64 attackLine = obstructed(kSq, pinnerSq) | setMask[kSq] | setMask[pinnerSq];
+			bitboard_t attackLine = obstructed(kSq, pinnerSq) | setMask[kSq] | setMask[pinnerSq];
 
 			// pinned piece found
 			if (setMask[sq] & attackLine) {
@@ -301,7 +301,7 @@ void _whitePawnCaptures(Board* board, MOVE_S* move_s) {
 	}
 
 	//divide in prom and non prom attacks
-	U64 whitePawnProm = whitePawns & RANK_7_HEX;
+	bitboard_t whitePawnProm = whitePawns & RANK_7_HEX;
 	whitePawns &= ~RANK_7_HEX;
 
 	// en passant square
@@ -357,25 +357,25 @@ void _whitePawnCaptures(Board* board, MOVE_S* move_s) {
 /// Generate all possible east attacks for white pawns.
 /// </summary>
 /// <param name="board">Board</param>
-void _blackPawnCaptures(Board* board, MOVE_S* move_s) {
+void _blackPawnCaptures(Board* board, moveList_t* move_s) {
 	int sq, atk_sq, kSq = board->getKingSquare(BLACK);
 
-	U64 atks;
-	U64 pinners = board->pinner(kSq, BLACK);
-	U64 pinned = board->pinned(kSq, BLACK);
-	U64 blackPawns = board->getPieces(PAWN, BLACK);
-	U64 potPinned = blackPawns & pinned;
+	bitboard_t atks;
+	bitboard_t pinners = board->pinner(kSq, BLACK);
+	bitboard_t pinned = board->pinned(kSq, BLACK);
+	bitboard_t blackPawns = board->getPieces(PAWN, BLACK);
+	bitboard_t potPinned = blackPawns & pinned;
 	blackPawns &= ~pinned;
 
 	//iterate pinned pawns
 	while (potPinned) {
-		U64 _pinners = pinners;
+		bitboard_t _pinners = pinners;
 		sq = popBit(&potPinned);
 
 		// for each pawn try to find pinner
 		while (_pinners) {
 			int pinnerSq = popBit(&_pinners);
-			U64 attackLine = obstructed(kSq, pinnerSq) | setMask[kSq] | setMask[pinnerSq];
+			bitboard_t attackLine = obstructed(kSq, pinnerSq) | setMask[kSq] | setMask[pinnerSq];
 
 			// pinned piece found
 			if (setMask[sq] & attackLine) {
@@ -389,7 +389,7 @@ void _blackPawnCaptures(Board* board, MOVE_S* move_s) {
 	}
 
 	//divide in prom and non prom attacks
-	U64 blackPawnProm = blackPawns & RANK_2_HEX;
+	bitboard_t blackPawnProm = blackPawns & RANK_2_HEX;
 	blackPawns &= ~RANK_2_HEX;
 
 	// en passant square
@@ -439,12 +439,12 @@ void _blackPawnCaptures(Board* board, MOVE_S* move_s) {
 	}
 }
 
-void _addKnightMoves(Board* b, MOVE_S* move_s) {
+void _addKnightMoves(Board* b, moveList_t* move_s) {
 	int sq, atk_sq;
 
 	// LEGAL ADD leave pinned knights out of move gen, since the cant block / capture
-	U64 knights = b->getPieces(KNIGHT, b->side) & ~b->pinned(b->getKingSquare(b->side), b->side);
-	U64 atks;
+	bitboard_t knights = b->getPieces(KNIGHT, b->side) & ~b->pinned(b->getKingSquare(b->side), b->side);
+	bitboard_t atks;
 
 	while (knights) {
 		sq = popBit(&knights);
@@ -456,12 +456,12 @@ void _addKnightMoves(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void _addKnightCaptures(Board* b, MOVE_S* move_s) {
+void _addKnightCaptures(Board* b, moveList_t* move_s) {
 	int sq, atk_sq;
 
 	// LEGAL ADD leave pinned knights out of move gen, since the cant block / capture
-	U64 knights = b->getPieces(KNIGHT, b->side) & ~b->pinned(b->getKingSquare(b->side), b->side);
-	U64 atks;
+	bitboard_t knights = b->getPieces(KNIGHT, b->side) & ~b->pinned(b->getKingSquare(b->side), b->side);
+	bitboard_t atks;
 
 	while (knights) {
 		sq = popBit(&knights);
@@ -473,9 +473,9 @@ void _addKnightCaptures(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void _addKingMoves(Board* b, MOVE_S* move_s) {
+void _addKingMoves(Board* b, moveList_t* move_s) {
 	int sq, kSq = b->getKingSquare(b->side);
-	U64 kingMoves = kingAtkMask[kSq] & ~move_s->attackedSquares & ~b->occupied;
+	bitboard_t kingMoves = kingAtkMask[kSq] & ~move_s->attackedSquares & ~b->occupied;
 
 	while (kingMoves) {
 		sq = popBit(&kingMoves);
@@ -508,9 +508,9 @@ void _addKingMoves(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void _addKingCaptures(Board* b, MOVE_S* move_s) {
+void _addKingCaptures(Board* b, moveList_t* move_s) {
 	int atk_sq, kSq = b->getKingSquare(b->side);
-	U64 whiteKingAttacks = kingAtkMask[kSq] & ~move_s->attackedSquares & b->color[b->side ^ 1];
+	bitboard_t whiteKingAttacks = kingAtkMask[kSq] & ~move_s->attackedSquares & b->color[b->side ^ 1];
 
 	while (whiteKingAttacks) {
 		atk_sq = popBit(&whiteKingAttacks);
@@ -556,13 +556,13 @@ void _addKingCaptures(Board* b, MOVE_S* move_s) {
 //	}
 //}
 
-void _addRookMoves(Board* b, MOVE_S* move_s) {
+void _addRookMoves(Board* b, moveList_t* move_s) {
 	int sq, atk_sq, kSq = b->getKingSquare(b->side);
-	U64 attackSet;
-	U64 pinned = b->pinned(kSq, b->side);
+	bitboard_t attackSet;
+	bitboard_t pinned = b->pinned(kSq, b->side);
 
 	// LEGAL ADD, only use non pinned rooks in std gen
-	U64 rooks = b->getPieces(ROOK, b->side) & ~pinned;
+	bitboard_t rooks = b->getPieces(ROOK, b->side) & ~pinned;
 	while (rooks) {
 		sq = popBit(&rooks);
 		attackSet = lookUpRookMoves(sq, b->occupied);
@@ -587,12 +587,12 @@ void _addRookMoves(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void _addBishopMoves(Board* b, MOVE_S* move_s) {
+void _addBishopMoves(Board* b, moveList_t* move_s) {
 	int sq, atk_sq, kSq = b->getKingSquare(b->side);
-	U64 pinned = b->pinned(kSq, b->side);
+	bitboard_t pinned = b->pinned(kSq, b->side);
 
-	U64 bishops = b->getPieces(BISHOP, b->side) & ~pinned;
-	U64 attackSet;
+	bitboard_t bishops = b->getPieces(BISHOP, b->side) & ~pinned;
+	bitboard_t attackSet;
 	while (bishops) {
 		sq = popBit(&bishops);
 		attackSet = lookUpBishopMoves(sq, b->occupied);
@@ -617,13 +617,13 @@ void _addBishopMoves(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void _addRookCaptures(Board* b, MOVE_S* move_s) {
+void _addRookCaptures(Board* b, moveList_t* move_s) {
 	int sq, atk_sq, kSq = b->getKingSquare(b->side);
-	U64 attackSet;
-	U64 pinned = b->pinned(kSq, b->side);
+	bitboard_t attackSet;
+	bitboard_t pinned = b->pinned(kSq, b->side);
 
 	// LEGAL ADD, only use non pinned rooks in std gen
-	U64 rooks = b->getPieces(ROOK, b->side) & ~pinned;
+	bitboard_t rooks = b->getPieces(ROOK, b->side) & ~pinned;
 	while (rooks) {
 		sq = popBit(&rooks);
 		attackSet = lookUpRookMoves(sq, b->occupied);
@@ -648,12 +648,12 @@ void _addRookCaptures(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void _addBishopCaptures(Board* b, MOVE_S* move_s) {
+void _addBishopCaptures(Board* b, moveList_t* move_s) {
 	int sq, atk_sq, kSq = b->getKingSquare(b->side);
-	U64 attackSet;
-	U64 pinned = b->pinned(kSq, b->side);
+	bitboard_t attackSet;
+	bitboard_t pinned = b->pinned(kSq, b->side);
 
-	U64 bishops = b->getPieces(BISHOP, b->side) & ~pinned;
+	bitboard_t bishops = b->getPieces(BISHOP, b->side) & ~pinned;
 	while (bishops) {
 		sq = popBit(&bishops);
 		attackSet = lookUpBishopMoves(sq, b->occupied);
@@ -678,12 +678,12 @@ void _addBishopCaptures(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void _addQueenMoves(Board* b, MOVE_S* move_s) {
+void _addQueenMoves(Board* b, moveList_t* move_s) {
 	int sq, atk_sq, kSq = b->getKingSquare(b->side);
-	U64 attackSet;
-	U64 pinned = b->pinned(kSq, b->side);
+	bitboard_t attackSet;
+	bitboard_t pinned = b->pinned(kSq, b->side);
 
-	U64 queens = b->getPieces(QUEEN, b->side) & ~pinned;
+	bitboard_t queens = b->getPieces(QUEEN, b->side) & ~pinned;
 	while (queens) {
 		sq = popBit(&queens);
 		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
@@ -708,12 +708,12 @@ void _addQueenMoves(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void _addQueenCaptures(Board* b, MOVE_S* move_s) {
+void _addQueenCaptures(Board* b, moveList_t* move_s) {
 	int sq, atk_sq, kSq = b->getKingSquare(b->side);
-	U64 attackSet;
-	U64 pinned = b->pinned(kSq, b->side);
+	bitboard_t attackSet;
+	bitboard_t pinned = b->pinned(kSq, b->side);
 
-	U64 queens = b->getPieces(QUEEN, b->side) & ~pinned;
+	bitboard_t queens = b->getPieces(QUEEN, b->side) & ~pinned;
 	while (queens) {
 		sq = popBit(&queens);
 		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
@@ -738,7 +738,7 @@ void _addQueenCaptures(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void _printGeneratedMoves(MOVE_S* move_s) {
+void _printGeneratedMoves(moveList_t* move_s) {
 
 	cout << "\nGenerated " << move_s->moveCounter << " moves: " << endl;
 

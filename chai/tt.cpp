@@ -1,7 +1,7 @@
 #include "tt.h"
 
-void initTT(TT_S* tt) {
-	tt->entries = ttSize / sizeof(TT_ENTRY_S);
+void initTT(ttable_t* tt) {
+	tt->entries = ttSize / sizeof(ttable_entry_t);
 	tt->entries -= 2;
 	tt->stored = 0;
 
@@ -10,14 +10,14 @@ void initTT(TT_S* tt) {
 	}
 
 	// dynamically allocate memory hash table
-	tt->table = (TT_ENTRY_S*)malloc(tt->entries * sizeof(TT_ENTRY_S));
+	tt->table = (ttable_entry_t*)malloc(tt->entries * sizeof(ttable_entry_t));
 	clearTT(tt);
 
 	cout << "Transposition table initialized with " << tt->entries << " entries." << endl;
 }
 
-void clearTT(TT_S* tt) {
-	TT_ENTRY_S* ttEntry;
+void clearTT(ttable_t* tt) {
+	ttable_entry_t* ttEntry;
 	for (ttEntry = tt->table; ttEntry < tt->table + tt->entries; ttEntry++) {
 		ttEntry->zobKey = 0ULL;
 		ttEntry->move = 0;
@@ -130,8 +130,8 @@ int getPVLine(Board* b, const int maxDepth) {
 	return count;
 }
 
-void initPawnTable(PAWN_TABLE_S* pawnTable) {
-	pawnTable->entries = pawnTableSize / sizeof(PAWN_ENTRY_S);
+void initPawnTable(pawntable_t* pawnTable) {
+	pawnTable->entries = pawnTableSize / sizeof(pawntable_entry_t);
 	pawnTable->entries -= 2;
 	pawnTable->stored = 0;
 
@@ -140,14 +140,14 @@ void initPawnTable(PAWN_TABLE_S* pawnTable) {
 	}
 
 	// dynamically allocate memory hash table
-	pawnTable->table = (PAWN_ENTRY_S*)malloc(pawnTable->entries * sizeof(PAWN_ENTRY_S));
+	pawnTable->table = (pawntable_entry_t*)malloc(pawnTable->entries * sizeof(pawntable_entry_t));
 	clearPawnTable(pawnTable);
 
 	cout << "Pawn table initialized with " << pawnTable->entries << " entries." << endl;
 }
 
-void clearPawnTable(PAWN_TABLE_S* pawnTable) {
-	PAWN_ENTRY_S* pawnEntry_s;
+void clearPawnTable(pawntable_t* pawnTable) {
+	pawntable_entry_t* pawnEntry_s;
 	for (pawnEntry_s = pawnTable->table; pawnEntry_s < pawnTable->table + pawnTable->entries; pawnEntry_s++) {
 		pawnEntry_s->zobristPawnKey = 0x0;
 		pawnEntry_s->eval = 0;

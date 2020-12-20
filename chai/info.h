@@ -9,8 +9,8 @@
 /// Print referenced bitboard.
 /// </summary>
 /// <param name="bb">Bitboard</param>
-inline void printBitBoard(U64* bb) {
-	U64 shiftBit = 1ULL;
+inline void printBitBoard(bitboard_t* bb) {
+	bitboard_t shiftBit = 1ULL;
 	int sq;
 
 	std::cout << std::endl;
@@ -112,7 +112,7 @@ inline void printMoveStatus(int move) {
 /// Print binary format of given integer.
 /// </summary>
 /// /// <param name="x">unsigned long long number</param>
-inline void printBinary(U64 x) {
+inline void printBinary(bitboard_t x) {
 	std::bitset<64> b(x);
 	cout << b << endl;
 }

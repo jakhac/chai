@@ -51,11 +51,11 @@ int main() {
 
 	Board b;
 	Perft perft;
-	MOVE_S move_s[1];
-	SEARCH_S s[1];
+	moveList_t move_s[1];
+	search_t s[1];
 
 	init(&b);
-	b.parseFen(BUG_FEN);
+	b.parseFen(PIN_FEN);
 	//b.parseFen("8/7K/8/8/8/8/R7/7k w - - 0 1 ");
 	b.printBoard();
 	log("\nStartup");
@@ -69,7 +69,7 @@ int main() {
 	return 0;
 }
 
-void play(Board* b, Perft* p, SEARCH_S* s) {
+void play(Board* b, Perft* p, search_t* s) {
 	string m;
 
 	while (true) {
@@ -80,7 +80,7 @@ void play(Board* b, Perft* p, SEARCH_S* s) {
 
 		// POP MOVE FROM BOARD
 		if (m == "pop") {
-			UNDO_S pop = b->pop();
+			undo_t pop = b->pop();
 			cout << "Popped " << getStringMove(pop.move) << " from stack." << endl;
 			b->printBoard();
 			continue;
@@ -98,7 +98,7 @@ void play(Board* b, Perft* p, SEARCH_S* s) {
 
 				getPVLine(b, s->depth);
 
-				MOVE_S move_s[1];
+				moveList_t move_s[1];
 				generateMoves(b, move_s);
 				b->push(move_s->moveList[move_s->moveCounter/3]);
 				cout << "Push move " << b->halfMoves << ". " << getStringMove(move_s->moveList[move_s->moveCounter / 2]) << endl;
@@ -109,7 +109,7 @@ void play(Board* b, Perft* p, SEARCH_S* s) {
 
 		// SEARCH POSITION
 		if (m == "s") {
-			s->depth = 10;
+			s->depth = 12;
 			s->startTime = getTimeMs();
 			s->stopTime = getTimeMs() + 10000;
 
@@ -164,7 +164,7 @@ void play(Board* b, Perft* p, SEARCH_S* s) {
 		}
 
 		// PUSH MOVE IN ALGEBRAIC NOTATION
-		MOVE_S _move_s[1];
+		moveList_t _move_s[1];
 		generateMoves(b, _move_s);
 
 		int parsedMove = b->parseMove(m);

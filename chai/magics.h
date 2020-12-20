@@ -14,12 +14,12 @@ const int RBits[64] = {
   12, 11, 11, 11, 11, 11, 11, 12
 };
 
-extern U64 rook_magic_gen[64];
+extern bitboard_t rook_magic_gen[64];
 
-U64 index_to_U64(int index, int bits, U64 m);
-U64 rmask(int sq);
-U64 ratt(int sq, U64 block);
-int transform(U64 b, U64 magic, int bits);
-U64 find_magic(int sq, int m);
+bitboard_t index_to_U64(int index, int bits, bitboard_t m);
+bitboard_t rmask(int sq);
+bitboard_t ratt(int sq, bitboard_t block);
+int transform(bitboard_t b, bitboard_t magic, int bits);
+bitboard_t find_magic(int sq, int m);
 void magic();
 

@@ -6,7 +6,7 @@ long long Perft::perftRoot(Board* b, int depth) {
     auto start = std::chrono::high_resolution_clock::now();
 
     leafNodes = 0;
-    MOVE_S _moveList[1];
+    moveList_t _moveList[1];
     generateMoves(b, _moveList);
 
     int move;
@@ -41,7 +41,7 @@ void Perft::perft(Board* b, int depth) {
         return;
     }
 
-    MOVE_S _moveList[1];
+    moveList_t _moveList[1];
     generateMoves(b, _moveList);
 
     int move;
@@ -64,7 +64,7 @@ long long Perft::perftBulkRoot(Board* b, int depth) {
     auto start = std::chrono::high_resolution_clock::now();
 
     leafNodes = 0;
-    MOVE_S _moveList[1];
+    moveList_t _moveList[1];
     _generateMoves(b, _moveList);
 
     int move;
@@ -94,7 +94,7 @@ long long Perft::perftBulk(Board* b, int depth) {
 
     long long nodes = 0;
 
-    MOVE_S move_s[1];
+    moveList_t move_s[1];
     _generateMoves(b, move_s);
 
     if (depth == 1)

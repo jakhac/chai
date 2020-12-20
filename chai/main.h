@@ -25,9 +25,7 @@ int main();
 /// </summary>
 /// <param name="b">Board instance</param>
 /// <param name="moveGenerator">MoveGenrator instance</param>
-void play(Board* b, Perft* p, SEARCH_S* s);
+void play(Board* b, Perft* p, search_t* s);
 
 void dividePerft(Board* b, string fen, int depth);
-
-void uciParsePosition(Board* b, string cmd);
 

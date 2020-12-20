@@ -1,20 +1,20 @@
 #include "board.h"
 
 // include extern vars
-U64 setMask[64];
-U64 clearMask[64];
+bitboard_t setMask[64];
+bitboard_t clearMask[64];
 
 int squareToRank[64];
 int squareToFile[64];
 
-U64 pawnAtkMask[2][64];
-U64 knightAtkMask[64];
-U64 kingAtkMask[64];
+bitboard_t pawnAtkMask[2][64];
+bitboard_t knightAtkMask[64];
+bitboard_t kingAtkMask[64];
 
-U64 dirBitmap[64][8];
-U64 inBetween[64][64];
+bitboard_t dirBitmap[64][8];
+bitboard_t inBetween[64][64];
 int dirFromTo[64][64];
-U64 lineBB[64][64];
+bitboard_t lineBB[64][64];
 
 
 int Board::checkBoard() {
@@ -85,9 +85,9 @@ void Board::initHashKeys() {
 	}
 }
 
-U64 Board::generateZobristKey() {
-	U64 finalZobristKey = 0;
-	U64 occ = occupied;
+bitboard_t Board::generateZobristKey() {
+	bitboard_t finalZobristKey = 0;
+	bitboard_t occ = occupied;
 	int square = 0;
 	int piece = 0;
 
@@ -112,11 +112,11 @@ U64 Board::generateZobristKey() {
 	return finalZobristKey;
 }
 
-U64 Board::generatePawnHashKey() {
+bitboard_t Board::generatePawnHashKey() {
 	int sq;
-	U64 finalPawnKey = 0x0;
-	U64 whitePawns = getPieces(PAWN, WHITE);
-	U64 blackPawns = getPieces(PAWN, BLACK);
+	bitboard_t finalPawnKey = 0x0;
+	bitboard_t whitePawns = getPieces(PAWN, WHITE);
+	bitboard_t blackPawns = getPieces(PAWN, BLACK);
 
 	while (whitePawns) {
 		sq = popBit(&whitePawns);
@@ -131,7 +131,7 @@ U64 Board::generatePawnHashKey() {
 	return finalPawnKey;
 }
 
-U64 Board::getPieces(int piece, int side) {
+bitboard_t Board::getPieces(int piece, int side) {
 	return pieces[pieceType[piece]] & color[side];
 }
 
@@ -354,7 +354,7 @@ bool Board::push(int move) {
 		return false;
 	}
 
-	UNDO_S undo_s[1];
+	undo_t undo_s[1];
 	undo_s->enPas = enPas;
 	undo_s->castle = castlePermission;
 	undo_s->zobKey = zobristKey;
@@ -486,7 +486,7 @@ void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 void Board::pushNull() {
 	ASSERT(!isCheck(side));
 
-	UNDO_S undo_s[1];
+	undo_t undo_s[1];
 	undo_s->enPas = enPas;
 	undo_s->castle = castlePermission;
 	undo_s->zobKey = zobristKey;
@@ -525,14 +525,14 @@ void Board::clearCastlePermission(int side) {
 	}
 }
 
-UNDO_S Board::pop() {
+undo_t Board::pop() {
 	halfMoves--;
 	undoPly--;
 	ply--;
 
 	ASSERT(undoPly >= 0);
 
-	UNDO_S undo = undoHistory[undoPly];
+	undo_t undo = undoHistory[undoPly];
 
 	// change side before clear and set pieces
 	side ^= 1;
@@ -596,12 +596,12 @@ void Board::popCastle(int clearRookSq, int setRookSq, int side) {
 	setPiece(ROOK, setRookSq, side);
 }
 
-U64 Board::pinner(int kSq, int kSide) {
-	U64 kingSlider = lookUpRookMoves(kSq, occupied);
-	U64 potPinned = kingSlider & color[kSide];
-	U64 xrays = kingSlider ^ lookUpRookMoves(kSq, occupied ^ potPinned);
+bitboard_t Board::pinner(int kSq, int kSide) {
+	bitboard_t kingSlider = lookUpRookMoves(kSq, occupied);
+	bitboard_t potPinned = kingSlider & color[kSide];
+	bitboard_t xrays = kingSlider ^ lookUpRookMoves(kSq, occupied ^ potPinned);
 
-	U64 pinner = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(ROOK, kSide ^ 1)));
+	bitboard_t pinner = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(ROOK, kSide ^ 1)));
 
 	kingSlider = lookUpBishopMoves(kSq, occupied);
 	potPinned = kingSlider & color[kSide];
@@ -611,13 +611,13 @@ U64 Board::pinner(int kSq, int kSide) {
 	return pinner;
 }
 
-U64 Board::pinned(int kSq, int kSide) {
-	U64 pinned = 0;
+bitboard_t Board::pinned(int kSq, int kSide) {
+	bitboard_t pinned = 0;
 
-	U64 kingSlider = lookUpRookMoves(kSq, occupied);
-	U64 potPinned = kingSlider & color[kSide];
-	U64 xrays = kingSlider ^ lookUpRookMoves(kSq, occupied ^ potPinned);
-	U64 pinner = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(ROOK, kSide ^ 1)));
+	bitboard_t kingSlider = lookUpRookMoves(kSq, occupied);
+	bitboard_t potPinned = kingSlider & color[kSide];
+	bitboard_t xrays = kingSlider ^ lookUpRookMoves(kSq, occupied ^ potPinned);
+	bitboard_t pinner = xrays & (getPieces(QUEEN, kSide ^ 1) | (getPieces(ROOK, kSide ^ 1)));
 
 	while (pinner) {
 		int sq = popBit(&pinner);
@@ -641,9 +641,9 @@ int Board::getKingSquare(int side) {
 	return bitscanForward(getPieces(KING, side));
 }
 
-U64 Board::attackerSet(int side) {
+bitboard_t Board::attackerSet(int side) {
 	int sq;
-	U64 attackerSet = 0ULL, piece;
+	bitboard_t attackerSet = 0ULL, piece;
 
 	// pawn attacks
 	piece = getPieces(PAWN, side);
@@ -680,8 +680,8 @@ U64 Board::attackerSet(int side) {
 	return attackerSet;
 }
 
-U64 Board::squareAttackedBy(int square, int side) {
-	U64 attacker = 0ULL;
+bitboard_t Board::squareAttackedBy(int square, int side) {
+	bitboard_t attacker = 0ULL;
 	attacker |= pawnAtkMask[side^1][square] & getPieces(PAWN, side);
 	attacker |= knightAtkMask[square] & getPieces(KNIGHT, side);
 	attacker |= lookUpBishopMoves(square, occupied) & (getPieces(BISHOP, side) | getPieces(QUEEN, side));
@@ -689,8 +689,8 @@ U64 Board::squareAttackedBy(int square, int side) {
 	return attacker;
 }
 
-U64 Board::squareAttacked(int square) {
-	U64 attacker = 0ULL;
+bitboard_t Board::squareAttacked(int square) {
+	bitboard_t attacker = 0ULL;
 	attacker |= (pawnAtkMask[side ^ 1][square] | pawnAtkMask[side][square]) & pieces[PAWN];
 	attacker |= knightAtkMask[square] & pieces[KNIGHT];
 	attacker |= lookUpBishopMoves(square, occupied) & (pieces[BISHOP] | pieces[QUEEN]);
@@ -698,11 +698,11 @@ U64 Board::squareAttacked(int square) {
 	return attacker;
 }
 
-U64 Board::isCheck(int side) {
+bitboard_t Board::isCheck(int side) {
 	return squareAttackedBy(getKingSquare(side), side ^ 1);
 }
 
-bool Board::castleValid(int castle, U64* attackerSet) {
+bool Board::castleValid(int castle, bitboard_t* attackerSet) {
 	if (isCheck(side)) return false;
 
 	if (!(castlePermission & castle)) return false;

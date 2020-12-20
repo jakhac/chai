@@ -2,12 +2,12 @@
 
 // include extern vars
 const int* maps[7];
-U64 pawnIsolatedMask[64];
-U64 pawnPassedMask[2][64];
-U64 upperMask[64];
-U64 lowerMask[64];
-U64 pawnShield[2][64];
-U64 xMask[64];
+bitboard_t pawnIsolatedMask[64];
+bitboard_t pawnPassedMask[2][64];
+bitboard_t upperMask[64];
+bitboard_t lowerMask[64];
+bitboard_t pawnShield[2][64];
+bitboard_t xMask[64];
 int manhattenDistance[64][64];
 
 // 0 == a / 1 == b
@@ -16,7 +16,7 @@ float interpolate(int a, int b, float t) {
 }
 
 int evalPST(Board* b, int side, float* t) {
-	U64 pieces;
+	bitboard_t pieces;
 	int score = 0, kSq = b->getKingSquare(side), sq;
 
 	// PAWNS
@@ -81,8 +81,8 @@ int materialScore(Board* b, int side) {
 // number of isolated pawns
 int isolatedPawns(Board* b, int side) {
 	int isolated = 0, sq;
-	U64 pawns = b->getPieces(PAWN, side);
-	U64 refPawns = pawns;
+	bitboard_t pawns = b->getPieces(PAWN, side);
+	bitboard_t refPawns = pawns;
 
 	while (pawns) {
 		sq = popBit(&pawns);
@@ -97,8 +97,8 @@ int isolatedPawns(Board* b, int side) {
 // number of passed pawns
 int passedPawns(Board* b, int side) {
 	int passedScore = 0, sq;
-	U64 pawns = b->getPieces(PAWN, side);
-	U64 oppPawns = b->getPieces(PAWN, side ^ 1);
+	bitboard_t pawns = b->getPieces(PAWN, side);
+	bitboard_t oppPawns = b->getPieces(PAWN, side ^ 1);
 	while (pawns) {
 		sq = popBit(&pawns);
 		if (!(pawnPassedMask[side][sq] & oppPawns)) {
@@ -113,7 +113,7 @@ int passedPawns(Board* b, int side) {
 int stackedPawn(Board* b, int side) {
 	int stackedPenalty = 0;
 
-	U64 pawns = b->getPieces(PAWN, side);
+	bitboard_t pawns = b->getPieces(PAWN, side);
 	for (int i = 0; i < 8; i++) {
 		if (countBits(FILE_LIST[i] & pawns) > 1) {
 			stackedPenalty -= 4;
@@ -125,8 +125,8 @@ int stackedPawn(Board* b, int side) {
 
 int pawnChain(Board* b, int side) {
 	int result = 0;
-	U64 pawns = b->getPieces(PAWN, side);
-	U64 tPawns = pawns;
+	bitboard_t pawns = b->getPieces(PAWN, side);
+	bitboard_t tPawns = pawns;
 
 	// use xMask to reward protected pawns
 	int sq;
@@ -140,11 +140,11 @@ int pawnChain(Board* b, int side) {
 
 int openFilesRQ(Board* b, int side) {
 	int sq, score = 0;
-	U64 pawns = b->pieces[PAWN];
+	bitboard_t pawns = b->pieces[PAWN];
 
 	// openFileBonus for rooks
-	U64 rooks = b->getPieces(ROOK, side);
-	U64 oppKing = b->getKingSquare(side^1);
+	bitboard_t rooks = b->getPieces(ROOK, side);
+	bitboard_t oppKing = b->getKingSquare(side^1);
 	while (rooks) {
 		sq = popBit(&rooks);
 		if (!(setMask[squareToFile[sq]] & pawns)) {
@@ -158,7 +158,7 @@ int openFilesRQ(Board* b, int side) {
 	}
 
 	// openFileBonus for queens
-	U64 queens = b->getPieces(QUEEN, side);
+	bitboard_t queens = b->getPieces(QUEEN, side);
 	while (queens) {
 		sq = popBit(&queens);
 		if (!(setMask[squareToFile[sq]] & pawns)) {
@@ -177,7 +177,7 @@ int bishopPair(Board* b, int side) {
 int kingSafety(Board* b, int side, float* t) {
 	int result = 0;
 	int kSq = b->getKingSquare(side);
-	U64 pawns = b->getPieces(PAWN, side);
+	bitboard_t pawns = b->getPieces(PAWN, side);
 
 	// count pawn shielder
 	result += countBits(pawnShield[side][kSq] & pawns) * 3;
@@ -226,7 +226,7 @@ int mobility(Board* b, int side, float* t) {
 	 mobility += countBits(b->attackedSquares[side] & b->color[side^1]) / 4;
 
 	// weighted sum of possible moves, reward knight, bishop and rook moves
-	MOVE_S move_s[1];
+	moveList_t move_s[1];
 
 	// change side for move generation
 	if (b->side != side) b->side = side;

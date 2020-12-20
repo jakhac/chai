@@ -26,15 +26,15 @@ const int file_rank_2_sq(int f, int r) {
 /*
 Generate a random 64bit integer for zobrist hashing
 */
-const U64 rand64() {
-	return (U64)rand() |
-		((U64)rand() << 15) |
-		((U64)rand() << 30) |
-		((U64)rand() << 45) |
-		(((U64)rand() & 0xf) << 60);
+const bitboard_t rand64() {
+	return (bitboard_t)rand() |
+		((bitboard_t)rand() << 15) |
+		((bitboard_t)rand() << 30) |
+		((bitboard_t)rand() << 45) |
+		(((bitboard_t)rand() & 0xf) << 60);
 }
 
-const U64 randomFewBits() {
+const bitboard_t randomFewBits() {
 	return rand64() & rand64() & rand64();
 }
 

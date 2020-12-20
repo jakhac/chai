@@ -1,34 +1,34 @@
 #pragma once
 
-typedef unsigned long long U64;
+typedef unsigned long long bitboard_t;
 
-struct MOVE_S {
+struct moveList_t {
     int moveCounter = 0;
     int moveList[256];
     int moveScore[256];
 
-    U64 attackedSquares = 0ULL;
+    bitboard_t attackedSquares = 0ULL;
 };
 
-struct UNDO_S {
+struct undo_t {
     int move;
     int castle;
     int enPas;
     int fiftyMove;
-    U64 zobKey;
-    U64 pawnKey;
+    bitboard_t zobKey;
+    bitboard_t pawnKey;
 };
 
-struct TT_ENTRY_S {
-    U64 zobKey;
+struct ttable_entry_t {
+    bitboard_t zobKey;
     int move;
     int score;
     uint8_t flag;
     uint8_t depth;
 };
 
-struct TT_S {
-    TT_ENTRY_S* table = NULL;
+struct ttable_t {
+    ttable_entry_t* table = NULL;
     int entries = 0;
 
     // measure successful probes
@@ -43,13 +43,13 @@ struct TT_S {
 
 };
 
-struct PAWN_ENTRY_S {
-    U64 zobristPawnKey;
+struct pawntable_entry_t {
+    bitboard_t zobristPawnKey;
     int eval;
 };
 
-struct PAWN_TABLE_S {
-    PAWN_ENTRY_S* table = NULL;
+struct pawntable_t {
+    pawntable_entry_t* table = NULL;
     int entries;
 
     // measure collided keys
@@ -61,7 +61,7 @@ struct PAWN_TABLE_S {
     int hit;
 };
 
-struct SEARCH_S {
+struct search_t {
     int startTime;
     int stopTime;
     int depth;

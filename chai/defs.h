@@ -8,7 +8,11 @@
 
 using namespace std;
 
-//#define DEBUG
+
+// if defined, readInput is disabled
+#define TESTING
+
+#define DEBUG
 
 #ifndef DEBUG
 #define ASSERT(n)
@@ -40,38 +44,38 @@ const bool NO_PV = false;
 const bool DO_NULL = true;
 const bool NO_NULL = false;
 
-const U64 RANK_1_HEX = 0xFF;
-const U64 RANK_2_HEX = 0xFF00;
-const U64 RANK_3_HEX = 0xFF0000;
-const U64 RANK_4_HEX = 0xFF000000;
-const U64 RANK_5_HEX = 0xFF00000000;
-const U64 RANK_6_HEX = 0xFF0000000000;
-const U64 RANK_7_HEX = 0xFF000000000000;
-const U64 RANK_8_HEX = 0xFF00000000000000;
+const bitboard_t RANK_1_HEX = 0xFF;
+const bitboard_t RANK_2_HEX = 0xFF00;
+const bitboard_t RANK_3_HEX = 0xFF0000;
+const bitboard_t RANK_4_HEX = 0xFF000000;
+const bitboard_t RANK_5_HEX = 0xFF00000000;
+const bitboard_t RANK_6_HEX = 0xFF0000000000;
+const bitboard_t RANK_7_HEX = 0xFF000000000000;
+const bitboard_t RANK_8_HEX = 0xFF00000000000000;
 
-const U64 FILE_A_HEX = 0x0101010101010101;
-const U64 FILE_B_HEX = 0x0202020202020202;
-const U64 FILE_C_HEX = 0x0404040404040404;
-const U64 FILE_D_HEX = 0x0808080808080808;
-const U64 FILE_E_HEX = 0x1010101010101010;
-const U64 FILE_F_HEX = 0x2020202020202020;
-const U64 FILE_G_HEX = 0x4040404040404040;
-const U64 FILE_H_HEX = 0x8080808080808080;
+const bitboard_t FILE_A_HEX = 0x0101010101010101;
+const bitboard_t FILE_B_HEX = 0x0202020202020202;
+const bitboard_t FILE_C_HEX = 0x0404040404040404;
+const bitboard_t FILE_D_HEX = 0x0808080808080808;
+const bitboard_t FILE_E_HEX = 0x1010101010101010;
+const bitboard_t FILE_F_HEX = 0x2020202020202020;
+const bitboard_t FILE_G_HEX = 0x4040404040404040;
+const bitboard_t FILE_H_HEX = 0x8080808080808080;
 
-const U64 CENTER_SQUARES = (1ULL << D4) | (1ULL << D5) | (1ULL << E4) | (1ULL << E5);
+const bitboard_t CENTER_SQUARES = (1ULL << D4) | (1ULL << D5) | (1ULL << E4) | (1ULL << E5);
 
-const U64 FILE_LIST[8] = {
+const bitboard_t FILE_LIST[8] = {
     FILE_A_HEX, FILE_B_HEX, FILE_C_HEX, FILE_D_HEX,
     FILE_E_HEX, FILE_F_HEX, FILE_G_HEX, FILE_H_HEX 
 };
 
-const U64 RANK_LIST[8] = {
+const bitboard_t RANK_LIST[8] = {
     RANK_1_HEX, RANK_2_HEX, RANK_3_HEX, RANK_4_HEX,
     RANK_5_HEX, RANK_6_HEX, RANK_7_HEX, RANK_8_HEX
 };
 
-const U64 BLACK_SQUARES = 0xAA55AA55AA55AA55;
-const U64 WHITE_SQUARES = 0x55AA55AA55AA55AA;
+const bitboard_t BLACK_SQUARES = 0xAA55AA55AA55AA55;
+const bitboard_t WHITE_SQUARES = 0x55AA55AA55AA55AA;
 
 /* test fens to check parse function */
 const string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -119,8 +123,8 @@ const string rankChar = "12345678";
 const string fileChar = "abcdefgh";
 const string gameStateStr[3] = { "OPENING", "MIDDLE GAME" , "ENDGAME" };
 
-const U64 rand64();
-const U64 randomFewBits();
+const bitboard_t rand64();
+const bitboard_t randomFewBits();
 const int file_rank_2_sq(int f, int r);
 
 // move macros

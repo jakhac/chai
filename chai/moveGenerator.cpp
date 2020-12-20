@@ -3,7 +3,7 @@
 // cap piece ][ moving piece
 int MVV_LVA[13][13];
 
-void generateMoves(Board* b, MOVE_S* move_s) {
+void generateMoves(Board* b, moveList_t* move_s) {
 	for (int i = 0; i < MAX_POSITION_MOVES; i++) move_s->moveScore[i] = 0;
 
 	move_s->attackedSquares = b->attackerSet(b->side^1);
@@ -36,7 +36,7 @@ void generateMoves(Board* b, MOVE_S* move_s) {
 
 }
 
-void generateCaptures(Board* b, MOVE_S* move_s) {
+void generateCaptures(Board* b, moveList_t* move_s) {
 	for (int i = 0; i < MAX_POSITION_MOVES; i++) move_s->moveScore[i] = 0;
 
 	if (b->side == WHITE) {
@@ -54,7 +54,7 @@ void generateCaptures(Board* b, MOVE_S* move_s) {
 
 bool moveLegal(Board* b, const int move) {
 
-	MOVE_S move_s[1];
+	moveList_t move_s[1];
 	generateMoves(b, move_s);
 
 	for (int i = 0; i < move_s->moveCounter; i++) {
@@ -72,7 +72,7 @@ bool moveLegal(Board* b, const int move) {
 	return false;
 }
 
-void addQuietMove(Board* b, MOVE_S* move_s, int move) {
+void addQuietMove(Board* b, moveList_t* move_s, int move) {
 	// score according to killers or zero else
 	if (b->killer[0][b->ply] == move) {
 		move_s->moveScore[move_s->moveCounter] += 900000;
@@ -85,7 +85,7 @@ void addQuietMove(Board* b, MOVE_S* move_s, int move) {
 	move_s->moveCounter++;
 }
 
-void addCaptureMove(Board* b, MOVE_S* move_s, int move, int movingPiece) {
+void addCaptureMove(Board* b, moveList_t* move_s, int move, int movingPiece) {
 	ASSERT(pieceValid(CAPTURED(move)));
 
 	int moveScore = 0;
@@ -103,7 +103,7 @@ void addCaptureMove(Board* b, MOVE_S* move_s, int move, int movingPiece) {
 	move_s->moveCounter++;
 }
 
-void addEnPassantMove(Board* b, MOVE_S* move_s, int move) {
+void addEnPassantMove(Board* b, moveList_t* move_s, int move) {
 	move_s->moveScore[move_s->moveCounter] += 105 + 1000000;
 	move_s->moveList[move_s->moveCounter] = move;
 	move_s->moveCounter++;
@@ -120,13 +120,13 @@ void initMVV_LVA() {
 }
 
 // 20percent see function
-U64 getLeastValuablePiece(Board* b, U64 attadef, int side, int attackerPiece) {
+bitboard_t getLeastValuablePiece(Board* b, bitboard_t attadef, int side, int attackerPiece) {
 	attadef &= b->color[side];
  	if (!attadef) {
 		return 0ULL;
 	}
 
-	U64 lva;
+	bitboard_t lva;
 	for (int i = PAWN; i <= KING; i++) {
 		lva = attadef & b->pieces[i];
 		if (lva) {
@@ -142,11 +142,11 @@ int see(Board* b, const int move) {
 	int attackerPiece = b->pieceAt(FROMSQ(move));
 	int gain[32], d = 0, side = b->side;
 
-	U64 occ = b->occupied;
-	U64 mayXray = b->pieces[PAWN] | b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
-	U64 attadef = b->squareAttacked(toSq);
-	U64 from = setMask[FROMSQ(move)];
-	U64 used = 0ULL, discovered = 0ULL;
+	bitboard_t occ = b->occupied;
+	bitboard_t mayXray = b->pieces[PAWN] | b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
+	bitboard_t attadef = b->squareAttacked(toSq);
+	bitboard_t from = setMask[FROMSQ(move)];
+	bitboard_t used = 0ULL, discovered = 0ULL;
 	
 	gain[d] = pieceScores[CAPTURED(move)];
 	do {
@@ -186,12 +186,12 @@ int see(Board* b, const int move) {
 /// Calculate possible single push pawn moves for white.
 /// </summary>
 /// <param name="board">Board</param>
-void whiteSinglePawnPush(Board* b, MOVE_S* move_s) {
+void whiteSinglePawnPush(Board* b, moveList_t* move_s) {
 	int sq;
-	U64 pushedPawns = (b->getPieces(PAWN, WHITE) << 8) & ~b->occupied;
+	bitboard_t pushedPawns = (b->getPieces(PAWN, WHITE) << 8) & ~b->occupied;
 
 	// divide proms and normal pushes
-	U64 promPawns = pushedPawns & RANK_8_HEX;
+	bitboard_t promPawns = pushedPawns & RANK_8_HEX;
 	pushedPawns = pushedPawns & ~RANK_8_HEX;
 
 	// normal pawn pushes
@@ -214,12 +214,12 @@ void whiteSinglePawnPush(Board* b, MOVE_S* move_s) {
 /// Calculate possible single push pawn moves for black.
 /// </summary>
 /// <param name="board">Board</param> 
-void blackSinglePawnPush(Board* board, MOVE_S* move_s) {
+void blackSinglePawnPush(Board* board, moveList_t* move_s) {
 	int sq;
-	U64 pushedPawns = (board->getPieces(PAWN, BLACK) >> 8) & ~board->occupied;
+	bitboard_t pushedPawns = (board->getPieces(PAWN, BLACK) >> 8) & ~board->occupied;
 
 	// divide proms and normal pushes
-	U64 promPawns = pushedPawns & RANK_1_HEX;
+	bitboard_t promPawns = pushedPawns & RANK_1_HEX;
 	pushedPawns = pushedPawns & ~RANK_1_HEX;
 
 	// normal pawn pushes
@@ -242,9 +242,9 @@ void blackSinglePawnPush(Board* board, MOVE_S* move_s) {
 /// Calculate all possible moves with pawnstart for white.
 /// </summary>
 /// <param name="board">Board</param>
-void whiteDoublePawnPush(Board* board, MOVE_S* move_s) {
+void whiteDoublePawnPush(Board* board, moveList_t* move_s) {
 	int sq;
-	U64 pushedPawns = (board->getPieces(PAWN, WHITE) << 8) & ~board->occupied;
+	bitboard_t pushedPawns = (board->getPieces(PAWN, WHITE) << 8) & ~board->occupied;
 	pushedPawns = (pushedPawns << 8) & ~board->occupied & RANK_4_HEX;
 
 	while (pushedPawns) {
@@ -257,9 +257,9 @@ void whiteDoublePawnPush(Board* board, MOVE_S* move_s) {
 /// Calculate all possible moves with pawnstart for black.
 /// </summary>
 /// <param name="board">Board</param>
-void blackDoublePawnPush(Board* board, MOVE_S* move_s) {
+void blackDoublePawnPush(Board* board, moveList_t* move_s) {
 	int sq;
-	U64 pushedPawns = (board->getPieces(PAWN, BLACK) >> 8) & ~board->occupied;
+	bitboard_t pushedPawns = (board->getPieces(PAWN, BLACK) >> 8) & ~board->occupied;
 	pushedPawns = (pushedPawns >> 8) & ~board->occupied & RANK_5_HEX;
 
 	while (pushedPawns) {
@@ -272,13 +272,13 @@ void blackDoublePawnPush(Board* board, MOVE_S* move_s) {
 /// Generate all possible east attacks for white pawns
 /// </summary>
 /// <param name="board">Board</param>
-void whitePawnCaptures(Board* board, MOVE_S* move_s) {
+void whitePawnCaptures(Board* board, moveList_t* move_s) {
 	int sq, atk_sq;
-	U64 atks;
+	bitboard_t atks;
 
 	//divide in prom and non prom attacks
-	U64 whitePawns = board->getPieces(PAWN, WHITE);
-	U64 whitePawnProm = whitePawns & RANK_7_HEX;
+	bitboard_t whitePawns = board->getPieces(PAWN, WHITE);
+	bitboard_t whitePawnProm = whitePawns & RANK_7_HEX;
 	whitePawns &= ~RANK_7_HEX;
 
 	// en passant square
@@ -316,13 +316,13 @@ void whitePawnCaptures(Board* board, MOVE_S* move_s) {
 /// Generate all possible east attacks for white pawns.
 /// </summary>
 /// <param name="board">Board</param>
-void blackPawnCaptures(Board* board, MOVE_S* move_s) {
+void blackPawnCaptures(Board* board, moveList_t* move_s) {
 	int sq, atk_sq;
-	U64 atks;
+	bitboard_t atks;
 
 	//divide in prom and non prom attacks
-	U64 blackPawns = board->getPieces(PAWN, BLACK);
-	U64 blackPawnProm = blackPawns & RANK_2_HEX;
+	bitboard_t blackPawns = board->getPieces(PAWN, BLACK);
+	bitboard_t blackPawnProm = blackPawns & RANK_2_HEX;
 	blackPawns &= ~RANK_2_HEX;
 
 	// en passant square
@@ -356,10 +356,10 @@ void blackPawnCaptures(Board* board, MOVE_S* move_s) {
 	}
 }
 
-void addKnightMoves(Board* b, MOVE_S* move_s) {
+void addKnightMoves(Board* b, moveList_t* move_s) {
 	int sq, atk_sq;
-	U64 knights = b->getPieces(KNIGHT, b->side);
-	U64 atks;
+	bitboard_t knights = b->getPieces(KNIGHT, b->side);
+	bitboard_t atks;
 
 	while (knights) {
 		sq = popBit(&knights);
@@ -371,11 +371,11 @@ void addKnightMoves(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void addKnightCaptures(Board* b, MOVE_S* move_s) {
+void addKnightCaptures(Board* b, moveList_t* move_s) {
 	int sq, atk_sq;
 	int piece = (b->side == WHITE) ? N : n;
-	U64 knights = b->getPieces(KNIGHT, b->side);
-	U64 atks;
+	bitboard_t knights = b->getPieces(KNIGHT, b->side);
+	bitboard_t atks;
 
 	while (knights) {
 		sq = popBit(&knights);
@@ -387,9 +387,9 @@ void addKnightCaptures(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void addKingMoves(Board* b, MOVE_S* move_s) {
+void addKingMoves(Board* b, moveList_t* move_s) {
 	int sq, kSq = b->getKingSquare(b->side);
-	U64 kingMoves = kingAtkMask[kSq] & ~move_s->attackedSquares & ~b->occupied;
+	bitboard_t kingMoves = kingAtkMask[kSq] & ~move_s->attackedSquares & ~b->occupied;
 
 	while (kingMoves) {
 		sq = popBit(&kingMoves);
@@ -422,10 +422,10 @@ void addKingMoves(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void addKingCaptures(Board* b, MOVE_S* move_s) {
+void addKingCaptures(Board* b, moveList_t* move_s) {
 	int piece = (b->side == WHITE) ? K : k;
 	int atk_sq, kSq = b->getKingSquare(b->side);
-	U64 whiteKingAttacks = kingAtkMask[kSq] & ~move_s->attackedSquares & b->color[b->side^1];
+	bitboard_t whiteKingAttacks = kingAtkMask[kSq] & ~move_s->attackedSquares & b->color[b->side^1];
 
 	while (whiteKingAttacks) {
 		atk_sq = popBit(&whiteKingAttacks);
@@ -433,10 +433,10 @@ void addKingCaptures(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void addRookMoves(Board* b, MOVE_S* move_s) {
+void addRookMoves(Board* b, moveList_t* move_s) {
 	int sq, atk_sq;
-	U64 attackSet;
-	U64 rooks = b->getPieces(ROOK, b->side);
+	bitboard_t attackSet;
+	bitboard_t rooks = b->getPieces(ROOK, b->side);
 	while (rooks) {
 		sq = popBit(&rooks);
 		attackSet = lookUpRookMoves(sq, b->occupied);
@@ -449,10 +449,10 @@ void addRookMoves(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void addBishopMoves(Board* b, MOVE_S* move_s) {
+void addBishopMoves(Board* b, moveList_t* move_s) {
 	int sq, atk_sq;
-	U64 bishops = b->getPieces(BISHOP, b->side);
-	U64 attackSet;
+	bitboard_t bishops = b->getPieces(BISHOP, b->side);
+	bitboard_t attackSet;
 	while (bishops) {
 		sq = popBit(&bishops);
 		attackSet = lookUpBishopMoves(sq, b->occupied);
@@ -465,11 +465,11 @@ void addBishopMoves(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void addRookCaptures(Board* b, MOVE_S* move_s) {
+void addRookCaptures(Board* b, moveList_t* move_s) {
 	int piece = (b->side == WHITE) ? R : r;
 	int sq, atk_sq;
-	U64 captureSet;
-	U64 rooks = b->getPieces(ROOK, b->side);
+	bitboard_t captureSet;
+	bitboard_t rooks = b->getPieces(ROOK, b->side);
 	while (rooks) {
 		sq = popBit(&rooks);
 		captureSet = lookUpRookMoves(sq, b->occupied);
@@ -482,11 +482,11 @@ void addRookCaptures(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void addBishopCaptures(Board* board, MOVE_S* move_s) {
+void addBishopCaptures(Board* board, moveList_t* move_s) {
 	int piece = (board->side == WHITE) ? B : b;
 	int sq, atk_sq;
-	U64 captureSet;
-	U64 bishops = board->getPieces(BISHOP, board->side);
+	bitboard_t captureSet;
+	bitboard_t bishops = board->getPieces(BISHOP, board->side);
 	while (bishops) {
 		sq = popBit(&bishops);
 		captureSet = lookUpBishopMoves(sq, board->occupied);
@@ -500,10 +500,10 @@ void addBishopCaptures(Board* board, MOVE_S* move_s) {
 
 }
 
-void addQueenMoves(Board* b, MOVE_S* move_s) {
+void addQueenMoves(Board* b, moveList_t* move_s) {
 	int sq, atk_sq;
-	U64 attackSet;
-	U64 queen = b->getPieces(QUEEN, b->side);
+	bitboard_t attackSet;
+	bitboard_t queen = b->getPieces(QUEEN, b->side);
 	while (queen) {
 		sq = popBit(&queen);
 		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
@@ -516,11 +516,11 @@ void addQueenMoves(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void addQueenCaptures(Board* b, MOVE_S* move_s) {
+void addQueenCaptures(Board* b, moveList_t* move_s) {
 	int piece = (b->side == WHITE) ? Q : q;
 	int sq, atk_sq;
-	U64 attackSet;
-	U64 queen = b->getPieces(QUEEN, b->side);
+	bitboard_t attackSet;
+	bitboard_t queen = b->getPieces(QUEEN, b->side);
 	while (queen) {
 		sq = popBit(&queen);
 		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
@@ -533,7 +533,7 @@ void addQueenCaptures(Board* b, MOVE_S* move_s) {
 	}
 }
 
-void printGeneratedMoves(MOVE_S* move_s) {
+void printGeneratedMoves(moveList_t* move_s) {
 
 	cout << "\nGenerated " << move_s->moveCounter << " moves: " << endl;
 
