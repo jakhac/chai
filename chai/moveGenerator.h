@@ -4,9 +4,9 @@
 
 #include "board.h"
 #include "attacks.h"
-#include "move.h"
+//#include "move.h"
 
-void addCaptureMove(Board* b, moveList_t* move_s, int move, int movingPiece);
+extern int MVV_LVA[13][13];
 
 void initMVV_LVA();
 
@@ -18,7 +18,11 @@ void generateMoves(Board* b, moveList_t* move_s);
 
 void generateCaptures(Board* b, moveList_t* move_s);
 
-bool moveLegal(Board* b, const int move);
+bool moveLegal(Board* b, const move_t move);
+
+bool isLegal(Board* b, move_t move, bitboard_t attackedSquares, bool inCheck);
+
+bool isPseudoLegal(Board* b, move_t move, bitboard_t* attackedSquares);
 
 /* PAWN */
 void whiteSinglePawnPush(Board* b, moveList_t* move_s);

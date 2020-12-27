@@ -39,7 +39,7 @@ inline void printMove(const int move) {
 		return;
 	}
 
-	int promoted = PROMOTED(move);
+	int promoted = promPiece(move);
 	char promChar = ' ';
 
 	if (promoted) {
@@ -54,10 +54,10 @@ inline void printMove(const int move) {
 	}
 
 	string ret = "";
-	ret += ('a' + squareToFile[FROMSQ(move)]);
-	ret += ('1' + squareToRank[FROMSQ(move)]);
-	ret += ('a' + squareToFile[TOSQ(move)]);
-	ret += ('1' + squareToRank[TOSQ(move)]);
+	ret += ('a' + squareToFile[fromSq(move)]);
+	ret += ('1' + squareToRank[fromSq(move)]);
+	ret += ('a' + squareToFile[toSq(move)]);
+	ret += ('1' + squareToRank[toSq(move)]);
 
 	cout << ret << promChar << endl;
 }
@@ -68,25 +68,25 @@ inline string getStringMove(const int move) {
 	}
 
 
-	int promoted = PROMOTED(move);
+	int promoted = promPiece(move);
 	string promChar = " ";
 
 	if (promoted) {
-		promChar = 'q';
+		promChar = "q ";
 		if (promoted == n || promoted == N) {
-			promChar = 'n';
+			promChar = "n ";
 		} else if (promoted == r || promoted == R) {
-			promChar = 'r';
+			promChar = "r ";
 		} else if (promoted == b || promoted == B) {
-			promChar = 'b';
+			promChar = "b ";
 		}
 	}
 
 	string ret = "";
-	ret += ('a' + squareToFile[FROMSQ(move)]);
-	ret += ('1' + squareToRank[FROMSQ(move)]);
-	ret += ('a' + squareToFile[TOSQ(move)]);
-	ret += ('1' + squareToRank[TOSQ(move)]);
+	ret += ('a' + squareToFile[fromSq(move)]);
+	ret += ('1' + squareToRank[fromSq(move)]);
+	ret += ('a' + squareToFile[toSq(move)]);
+	ret += ('1' + squareToRank[toSq(move)]);
 
 	ret += promChar;
 	return ret;
@@ -98,13 +98,13 @@ inline string getStringMove(const int move) {
 /// <param name="move">Move</param>
 inline void printMoveStatus(int move) {
 	cout << "\n#### - Move Status" << endl;
-	cout << "From " << FROMSQ(move) << " to " << TOSQ(move) << endl;
-	cout << "Pawn start " << (move & MFLAGPS) << endl;
-	cout << "EP capture " << (move & MFLAGEP) << endl;
-	cout << "Castle move " << (move & MFLAGCA) << endl;
-	cout << "Promoted " << (move & MCHECKPROM) << endl;
-	cout << "Promoted piece " << (PROMOTED(move)) << endl;
-	cout << "Capture " << (move & MCHECKCAP) << " with captured piece " << CAPTURED(move) << endl;
+	cout << "From " << fromSq(move) << " to " << toSq(move) << endl;
+	cout << "Pawn start " << (move & MFLAG_PS) << endl;
+	cout << "EP capture " << (move & MFLAG_EP) << endl;
+	cout << "Castle move " << (move & MFLAG_CAS) << endl;
+	cout << "Promoted " << (move & MCHECK_PROM) << endl;
+	cout << "Promoted piece " << (promPiece(move)) << endl;
+	cout << "Capture " << (move & MCHECK_CAP) << " with captured piece " << capPiece(move) << endl;
 	cout << "####\n" << endl;
 }
 

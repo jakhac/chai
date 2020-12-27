@@ -29,42 +29,42 @@ int evalPST(Board* b, int side, float* t) {
 		kingPawnDistance += manhattenDistance[kSq][sq];
 
 		sq = (side == WHITE) ? sq : mirror64[sq];
-		score += (int) interpolate(PAWN_OPEN[sq], PAWN_ENDGAME[sq], *t);
+		score += (int)interpolate(PAWN_OPEN[sq], PAWN_ENDGAME[sq], *t);
 	}
 	kingPawnDistance /= max(1, pawnSum);
-	score += (int) interpolate(kingPawnDistance, kingPawnDistance*2, *t);
+	score += (int)interpolate(kingPawnDistance, kingPawnDistance * 2, *t);
 
 	// KNIGHTS
 	pieces = b->getPieces(KNIGHT, side);
 	while (pieces) {
 		sq = popBit(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
-		score += (int) interpolate(KNIGHT_OPEN[sq], KNIGHT_ENDGAME[sq], *t);
+		score += (int)interpolate(KNIGHT_OPEN[sq], KNIGHT_ENDGAME[sq], *t);
 	}
 
 	pieces = b->getPieces(BISHOP, side);
 	while (pieces) {
 		sq = popBit(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
-		score += (int) interpolate(BISHOP_OPEN[sq], BISHOP_ENDGAME[sq], *t);
+		score += (int)interpolate(BISHOP_OPEN[sq], BISHOP_ENDGAME[sq], *t);
 	}
 
 	pieces = b->getPieces(ROOK, side);
 	while (pieces) {
 		sq = popBit(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
-		score += (int) interpolate(ROOK_OPEN[sq], ROOK_ENDGAME[sq], *t);
+		score += (int)interpolate(ROOK_OPEN[sq], ROOK_ENDGAME[sq], *t);
 	}
 
 	pieces = b->getPieces(QUEEN, side);
 	while (pieces) {
 		sq = popBit(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
-		score += (int) interpolate(QUEEN_OPEN[sq], QUEEN_ENDGAME[sq], *t);
+		score += (int)interpolate(QUEEN_OPEN[sq], QUEEN_ENDGAME[sq], *t);
 	}
 
 	sq = (side == WHITE) ? kSq : mirror64[kSq];
-	score += (int) interpolate(KING_OPENING[sq], KING_ENDGAME[sq], *t);
+	score += (int)interpolate(KING_OPENING[sq], KING_ENDGAME[sq], *t);
 
 	return score;
 }
@@ -107,7 +107,7 @@ int passedPawns(Board* b, int side) {
 	}
 
 	//return passedScore;
-	return (int) interpolate(passedScore, scale(4, passedScore), (float) b->halfMoves);
+	return (int)interpolate(passedScore, scale(4, passedScore), (float)b->halfMoves);
 }
 
 int stackedPawn(Board* b, int side) {
@@ -132,7 +132,7 @@ int pawnChain(Board* b, int side) {
 	int sq;
 	while (pawns) {
 		sq = popBit(&pawns);
-		result += (bool) (tPawns & xMask[sq]);
+		result += (bool)(tPawns & xMask[sq]);
 	}
 
 	return result;
@@ -144,7 +144,7 @@ int openFilesRQ(Board* b, int side) {
 
 	// openFileBonus for rooks
 	bitboard_t rooks = b->getPieces(ROOK, side);
-	bitboard_t oppKing = b->getKingSquare(side^1);
+	bitboard_t oppKing = b->getKingSquare(side ^ 1);
 	while (rooks) {
 		sq = popBit(&rooks);
 		if (!(setMask[squareToFile[sq]] & pawns)) {
@@ -171,7 +171,7 @@ int openFilesRQ(Board* b, int side) {
 
 int bishopPair(Board* b, int side) {
 	ASSERT(((bool)(countBits(b->getPieces(BISHOP, side)) >= 2)) * 30 <= 30);
-	return ((bool) (countBits(b->getPieces(BISHOP, side)) >= 2)) * 30;
+	return ((bool)(countBits(b->getPieces(BISHOP, side)) >= 2)) * 30;
 }
 
 int kingSafety(Board* b, int side, float* t) {
@@ -183,7 +183,7 @@ int kingSafety(Board* b, int side, float* t) {
 	result += countBits(pawnShield[side][kSq] & pawns) * 3;
 
 	// punish attacked squares around king 
-	result += 8 - countBits(kingAtkMask[kSq] & b->attackedSquares[side^1]);
+	result += 8 - countBits(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
 
 	int openFilePenalty = 0;
 	// if not endgame
@@ -194,7 +194,7 @@ int kingSafety(Board* b, int side, float* t) {
 			result -= 8;
 		}
 
-		file = squareToFile[kSq-1];
+		file = squareToFile[kSq - 1];
 		if (fileValid(file) && !(FILE_LIST[file] & pawns)) {
 			result -= 5;
 		}
@@ -208,10 +208,10 @@ int kingSafety(Board* b, int side, float* t) {
 	// punish pinned pieces (excluding pawns) to kSq
 	result -= countBits(b->pinned(kSq, side) & ~pawns);
 
-	 //scale depending on gamestate
-	result = (int) interpolate(result*2, result, *t);
+	//scale depending on gamestate
+	result = (int)interpolate(result * 2, result, *t);
 
-	int attackedKingSquares = countBits(kingAtkMask[kSq] & b->attackedSquares[side^1]);
+	int attackedKingSquares = countBits(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
 	result -= kingZoneTropism[attackedKingSquares];
 
 	return result;
@@ -220,10 +220,10 @@ int kingSafety(Board* b, int side, float* t) {
 int mobility(Board* b, int side, float* t) {
 	int mobility = 0;
 	int restoreSide = b->side;
-	int interpolFactor = 
+	int interpolFactor =
 
-	// how many pieces are attacked by side
-	 mobility += countBits(b->attackedSquares[side] & b->color[side^1]) / 4;
+		// how many pieces are attacked by side
+		mobility += countBits(b->attackedSquares[side] & b->color[side ^ 1]) / 4;
 
 	// weighted sum of possible moves, reward knight, bishop and rook moves
 	moveList_t move_s[1];
@@ -240,24 +240,24 @@ int mobility(Board* b, int side, float* t) {
 		blackDoublePawnPush(b, move_s);
 		blackPawnCaptures(b, move_s);
 	}
-	mobility += (int) interpolate(move_s->moveCounter/6, move_s->moveCounter, *t);
-	move_s->moveCounter = 0;
+	mobility += (int)interpolate(move_s->cnt / 6, move_s->cnt, *t);
+	move_s->cnt = 0;
 
 	int pieceMoves = 0;
 	addBishopCaptures(b, move_s);
 	addBishopMoves(b, move_s);
-	mobility += move_s->moveCounter;
-	move_s->moveCounter = 0;
+	mobility += move_s->cnt;
+	move_s->cnt = 0;
 
 	addKnightMoves(b, move_s);
 	addKnightCaptures(b, move_s);
-	mobility += move_s->moveCounter;
-	move_s->moveCounter = 0;
+	mobility += move_s->cnt;
+	move_s->cnt = 0;
 
 	addRookMoves(b, move_s);
 	addRookCaptures(b, move_s);
-	mobility += move_s->moveCounter / 3;
-	move_s->moveCounter = 0;
+	mobility += move_s->cnt / 3;
+	move_s->cnt = 0;
 	b->side = restoreSide;
 
 	return mobility;
@@ -289,14 +289,14 @@ int evaluatePawns(Board* b, float* t) {
 
 	// passed
 	int passed = 5 * passedPawns(b, WHITE) - passedPawns(b, BLACK);
-	passed = (int) interpolate(passed, passed + 20, *t);
+	passed = (int)interpolate(passed, passed + 20, *t);
 	// blocked pawns
 
 	// stacked pawns
 	score += stackedPawn(b, WHITE) - stackedPawn(b, BLACK);
 
 	// pawn mobility
-	score += pawnChain(b, WHITE), - pawnChain(b, BLACK);
+	score += pawnChain(b, WHITE), -pawnChain(b, BLACK);
 
 	// rams
 
@@ -326,20 +326,20 @@ int eval(Board* b) {
 	}
 
 	// squares controlled
-	int centerSquares = (countBits(b->attackedSquares[WHITE] & CENTER_SQUARES) - 
+	int centerSquares = (countBits(b->attackedSquares[WHITE] & CENTER_SQUARES) -
 		countBits(b->attackedSquares[BLACK] & CENTER_SQUARES));
 	int surroundingSquares = countBits(b->attackedSquares[WHITE] & ~CENTER_SQUARES) -
 		countBits(b->attackedSquares[BLACK] & ~CENTER_SQUARES);
 	int kingSquares = countBits(b->attackedSquares[WHITE] & kingAtkMask[b->getKingSquare(WHITE)]) -
 		countBits(b->attackedSquares[BLACK] & kingAtkMask[b->getKingSquare(BLACK)]);
 
-	eval += surroundingSquares + 2*centerSquares + 3*kingSquares;
+	eval += surroundingSquares + 2 * centerSquares + 3 * kingSquares;
 
 
 	eval += pawnEval;
 	eval += evalPST(b, WHITE, &interpolFactor) - evalPST(b, BLACK, &interpolFactor);
 	eval += materialScore(b, WHITE) - materialScore(b, BLACK);
-	eval += openFilesRQ(b, WHITE) - openFilesRQ(b,  BLACK);
+	eval += openFilesRQ(b, WHITE) - openFilesRQ(b, BLACK);
 	eval += bishopPair(b, WHITE) - bishopPair(b, BLACK);
 	eval += kingSafety(b, WHITE, &interpolFactor) - kingSafety(b, BLACK, &interpolFactor);
 	eval += mobility(b, WHITE, &interpolFactor) - mobility(b, BLACK, &interpolFactor);

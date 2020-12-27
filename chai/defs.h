@@ -4,12 +4,12 @@
 #include <string>
 #include <cassert>
 
+#include "move.h"
 #include "types.h"
 
 using namespace std;
 
-
-// if defined, readInput is disabled
+//if defined, readInput is disabled
 #define TESTING
 
 #define DEBUG
@@ -30,7 +30,7 @@ exit(1);}
 const int NUM_SQUARES = 64;
 const int MAX_GAME_MOVES = 2048;
 const int MAX_POSITION_MOVES = 256;
-const int MAX_DEPTH = 32;
+const int MAX_DEPTH = 64;
 const int NO_SCORE = 10000000;
 const int NO_MOVE = 0;
 
@@ -39,10 +39,15 @@ const int MATE = 29000;
 const int ISMATE = MATE - MAX_DEPTH;
 const int R_NULL = 2;
 
+constexpr auto NULL_MOVE = -1;
+
 const bool IS_PV = true;
 const bool NO_PV = false;
 const bool DO_NULL = true;
 const bool NO_NULL = false;
+
+
+#define HISTORY_MAX 0x4000 // maximum score before rescale in history heuristic
 
 const bitboard_t RANK_1_HEX = 0xFF;
 const bitboard_t RANK_2_HEX = 0xFF00;
@@ -65,13 +70,13 @@ const bitboard_t FILE_H_HEX = 0x8080808080808080;
 const bitboard_t CENTER_SQUARES = (1ULL << D4) | (1ULL << D5) | (1ULL << E4) | (1ULL << E5);
 
 const bitboard_t FILE_LIST[8] = {
-    FILE_A_HEX, FILE_B_HEX, FILE_C_HEX, FILE_D_HEX,
-    FILE_E_HEX, FILE_F_HEX, FILE_G_HEX, FILE_H_HEX 
+	FILE_A_HEX, FILE_B_HEX, FILE_C_HEX, FILE_D_HEX,
+	FILE_E_HEX, FILE_F_HEX, FILE_G_HEX, FILE_H_HEX
 };
 
 const bitboard_t RANK_LIST[8] = {
-    RANK_1_HEX, RANK_2_HEX, RANK_3_HEX, RANK_4_HEX,
-    RANK_5_HEX, RANK_6_HEX, RANK_7_HEX, RANK_8_HEX
+	RANK_1_HEX, RANK_2_HEX, RANK_3_HEX, RANK_4_HEX,
+	RANK_5_HEX, RANK_6_HEX, RANK_7_HEX, RANK_8_HEX
 };
 
 const bitboard_t BLACK_SQUARES = 0xAA55AA55AA55AA55;
@@ -127,21 +132,10 @@ const bitboard_t rand64();
 const bitboard_t randomFewBits();
 const int file_rank_2_sq(int f, int r);
 
-// move macros
-#define MOVE(f,t,ca,pro,fl) ( (f) | ((t) << 7) | ( (ca) << 14 ) | ( (pro) << 20 ) | fl )
-#define FROMSQ(m) ((m) & 0x7F)
-#define TOSQ(m) (((m)>>7) & 0x7F)
-#define CAPTURED(m) (((m)>>14) & 0xF)
-#define PROMOTED(m) (((m)>>20) & 0xF)
 
-// set bits (flags) in move
-constexpr auto MFLAGEP = 0x40000;
-constexpr auto MFLAGPS = 0x80000;
-constexpr auto MFLAGCA = 0x1000000;
 
-// check only, do not set bits
-constexpr auto MCHECKCAP = 0x3C000;
-constexpr auto MCHECKPROM = 0xF00000;
 
-constexpr auto NULLMOVE = 0;
+
+
+
 

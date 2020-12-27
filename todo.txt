@@ -4,16 +4,35 @@ TEST
 - add asserts everywhere
 
 MOVE GEN
+# dont score moves in movegen
+	-> gen moves
+	-> in alpha-beta, score_moves() scores all moves and swaps best to first
+	-> rest of moves are accessed by move picker
+- run move gen after hash move failed -> pvs still possible?
 - check evasion
-- quiesence move gen (checks, captures, promotions, ?)
+- quiesence move gen (checks, captures, promotions, ?), no see score for special captures PxQ
+- Jazz:leaves_king_in_check for move generation instead of inCheck() -> only check pinned pieces / king attacks
+
+
+- push, check with isLegal only
+- generateMoves in 3 modes: full, check evasion, quiesence
+- 
+
 
 PROJECT
 - use fixed zobrist keys (jazz)
 - clean up utils, attacks, helper bitboards
-- detect endgames
+- detect endgames (knight, bishop endgame, light/dark squared bishop)
+- iid if no hash move
+- try hash move before generating moves?
+- define MCHECKPROMCAP
+- use inline functions for bit move macros
+- update typedefs, src, structs, key_t, ...
+- inline move functions, no flags
+- implement moveOrdering functions 
 
 REWRITE SEARCH
-- Adaptive null move pruning
+- Adaptive null move pruning -> drop into qui
 - Mate distance pruning
 - delta pruning
 - futility pruning / reverse null move pruning
@@ -23,20 +42,23 @@ REWRITE SEARCH
 - pvs
 - late move reductions
 - see reductions
-- killer moves
-- counter moves
-- history heuristic
-- use prepocessor options?
+
+# killer moves
+# matekiller moves
+# counter moves
+# history heuristic
 
 HASH TABLE
 - prefetch table instruction
 - buckets
 - rework table probing (in search)
+- hash table with negative depth in qsearch
 
 EVALUATION
-- lazy eval for search
+- lazy eval for qsearch or pruning areas
 - more heuristics
 - traps, pins
+- (texel) tuning
 
 POSSIBLE
 - Lazy SMP

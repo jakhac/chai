@@ -1,10 +1,14 @@
 #pragma once
+#pragma warning(push)
+#pragma warning(disable:6386)
+#pragma warning(disable:6385)
 
 #include <chrono>
 #include <iomanip>
 
 #include "tt.h"
 #include "eval.h"
+#include "moveOrdering.h"
 
 /// <summary>Maximum ply reached in alphaBeta and quiesence search</summary>
 extern int selDepth;
@@ -20,7 +24,7 @@ extern int selDepth;
 /// <param name="nullOk">Enables null move pruning in node</param>
 /// <param name="pvNode">Determines the current node type</param>
 /// <returns>Best score found in search</returns>
-int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode);
+int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine);
 
 /// <summary>
 /// Quiesence search pushes all captures to evaluate a stable and quiet position.
@@ -71,7 +75,7 @@ bool isThreeFoldRepetition(Board* b);
 /// <param name="b">Current board</param>
 /// <param name="move_s">Move struct with all moves and scores</param>
 /// <param name="curIdx">Current index in moveList</param>
-void moveSwapper(Board* b, moveList_t* move_s, int curIdx);
+void getNextMove(Board* b, moveList_t* move_s, int curIdx);
 
 /// <summary>
 /// Swap to moves and their score in given MOVE_S struct. Returns if id1 is equal to id2.

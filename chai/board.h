@@ -9,6 +9,7 @@
 #include "undo.h"
 #include "info.h"
 #include "attacks.h"
+#include "move.h"
 
 /// <summary>
 /// Board uses 8 bitboards to store each piece and squares occupied by each color. A chess game should only uses 
@@ -74,10 +75,22 @@ public:
 	pawntable_t pawnTable[1];
 
 	/// <summary>Stores the pv line</summary>
-	int pvArray[MAX_DEPTH];
+	move_t pvArray[MAX_DEPTH];
 
-	/// <summary>Stores up to 2 killer moves for each depth</summary>
-	int killer[2][MAX_DEPTH];
+	/// <summary>Stores up to 2 killer moves for each ply</summary>
+	move_t killer[2][MAX_GAME_MOVES];
+
+	/// <summary>Stores up mate killer moves for each ply</summary>
+	move_t mateKiller[MAX_GAME_MOVES];
+
+	/// <summary>Stores history heuristic for both sides with [PIECE][TO] indices </summary>
+	int histHeuristic[13][64];
+
+	/// <summary>Stores maximum history score</summary> // TODO reset in reset()
+	int histMax = 0;
+
+	/// <summary>Store counter moves for FROM and TO square of the previous move</summary>
+	move_t counterHeuristic[64][64][2];
 
 	/// <summary>
 	/// Count major pieces (n, b, r, q, k) on current board

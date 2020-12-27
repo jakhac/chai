@@ -65,7 +65,7 @@ bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
 
 	if (b->tt->table[index].zobKey == b->zobristKey) {
 		*move = b->tt->table[index].move;
-		
+
 		if (b->tt->table[index].depth >= depth) {
 			b->tt->valueHit++;
 
@@ -73,7 +73,7 @@ bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
 			ASSERT(b->tt->table[index].flag >= TT_ALPHA && b->tt->table[index].flag <= TT_SCORE);
 
 			*score = b->tt->table[index].score;
-			
+
 			if (*score > ISMATE) *score -= b->ply;
 			else if (*score < -ISMATE) *score += b->ply;
 
@@ -109,7 +109,7 @@ int probePV(Board* b) {
 	if (b->tt->table[index].zobKey == b->zobristKey) {
 		return b->tt->table[index].move;
 	}
-	
+
 	return 0;
 }
 
@@ -126,7 +126,6 @@ int getPVLine(Board* b, const int maxDepth) {
 	while (b->ply > 0) {
 		b->pop();
 	}
-
 	return count;
 }
 

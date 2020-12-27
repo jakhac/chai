@@ -1,7 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include "defs.h"
+#include "types.h"
 
 /*
 Move format is bits in hex
@@ -18,22 +17,84 @@ Move format is bits in hex
 0010 0000 0000 0000 0000 0000 0000 -> prom flag 0x2000000
 */
 
-//0000 0111 1100 0000 0000 0000
-//0000 0011 1100 0000 0000 0000
-class Move {
+/// <summary> Move flags enPas move. </summary>
+constexpr auto MFLAG_EP = 0x40000;
 
-public:
+/// <summary> Move flags pawn start (double push) move. </summary>
+constexpr auto MFLAG_PS = 0x80000;
 
-	int move;
-	int score;
+/// <summary> Move flags castling move. </summary>
+constexpr auto MFLAG_CAS = 0x1000000;
 
-	Move() = default;
-	Move(int _move, int _score) {
-		move = _move;
-		score = _score;
-	}
+/// <summary> Checks, if EP flag is set. </summary>
+constexpr auto MCHECK_EP = 0x40000;
 
-	int createBitMove(int from, int to, int cap, int prom, int flag);
+/// <summary> Checks, if a piece is captured. </summary>
+constexpr auto MCHECK_CAP = 0x3C000;
 
-};
+/// <summary> Checks, if move is a promotion. </summary>
+constexpr auto MCHECK_PROM = 0xF00000;
+
+/// <summary> Checks, if move is a promotion or capture. </summary>
+constexpr auto MCHECK_PROMCAP = MCHECK_PROM | MCHECK_CAP;
+
+/// <summary> Checks, if move is castling. </summary>
+constexpr auto MCHECK_CAS = 0x1000000;
+
+/// <summary>
+/// Serialize a move into bit move.
+/// </summary>
+/// <param name="from">From square</param>
+/// <param name="to">To square</param>
+/// <param name="captured">Captured piece, 0 if none</param>
+/// <param name="promoted">Promoting piece, 0 if none</param>
+/// <param name="flag">EP, PS, CA flag (OR them together if necessary)</param>
+/// <returns></returns>
+inline move_t serializeMove(int from, int to, int captured, int promoted, int flag) {
+	move_t move = 0;
+	move |= from;
+	move |= (to << 7);
+	move |= (captured << 14);
+	move |= (promoted << 20);
+	move |= flag;
+
+	return move;
+}
+
+/// <summary>
+/// Get the fromSq of a serialized move.
+/// </summary>
+/// <param name="move">Serialized move</param>
+/// <returns>From square</returns>
+inline int fromSq(move_t move) {
+	return move & 0x7F;
+}
+
+/// <summary>
+/// Get the toSq of a serialized move.
+/// </summary>
+/// <param name="move">Serialized move</param>
+/// <returns>To square</returns>
+inline int toSq(move_t move) {
+	return (move >> 7) & 0x7F;
+}
+
+/// <summary>
+/// Get the captured piece of a serialized move.
+/// </summary>
+/// <param name="move">Serialized move</param>
+/// <returns>Captured piece or 0 if none</returns>
+inline int capPiece(move_t move) {
+	return (move >> 14) & 0xF;
+}
+
+/// <summary>
+/// Get the promoted piece of a serialized move.
+/// </summary>
+/// <param name="move">Serializedm move</param>
+/// <returns>Promoted piece or 0 if none</returns>
+inline int promPiece(move_t move) {
+	return (move >> 20) & 0xF;
+}
+
 
