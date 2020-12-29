@@ -7,7 +7,7 @@ long long Perft::perftRoot(Board* b, int depth) {
 
 	leafNodes = 0;
 	moveList_t _moveList[1];
-	generateMoves(b, _moveList);
+	generateMoves(b, _moveList, b->isCheck(b->side));
 
 	int move;
 	int moveNum = 0;
@@ -42,7 +42,7 @@ void Perft::perft(Board* b, int depth) {
 	}
 
 	moveList_t _moveList[1];
-	generateMoves(b, _moveList);
+	generateMoves(b, _moveList, b->isCheck(b->side));
 
 	ASSERT(b->attackerSet(b->side ^ 1) == _moveList->attackedSquares);
 
@@ -65,7 +65,7 @@ long long Perft::perftLegalRoot(Board* b, int depth) {
 
 	leafNodes = 0;
 	moveList_t _moveList[1];
-	generateMoves(b, _moveList);
+	generateMoves(b, _moveList, b->isCheck(b->side));
 
 	bool inCheck = b->isCheck(b->side);
 	int move;
@@ -74,7 +74,7 @@ long long Perft::perftLegalRoot(Board* b, int depth) {
 		move = _moveList->moves[i];
 
 		//skip illegal moves
-		if (isLegal(b, move, _moveList->attackedSquares, inCheck)) {
+		if (isLegal(b, move, inCheck)) {
 			b->push(move);
 
 			long long cumnodes = leafNodes;
@@ -105,7 +105,7 @@ void Perft::perftLegal(Board* b, int depth) {
 	}
 
 	moveList_t _moveList[1];
-	generateMoves(b, _moveList);
+	generateMoves(b, _moveList, b->isCheck(b->side));
 
 	bool inCheck = b->isCheck(b->side);
 	ASSERT(b->attackerSet(b->side ^ 1) == _moveList->attackedSquares);
@@ -115,7 +115,7 @@ void Perft::perftLegal(Board* b, int depth) {
 		move = _moveList->moves[i];
 
 		//skip illegal moves
-		if (isLegal(b, move, _moveList->attackedSquares, inCheck)) {
+		if (isLegal(b, move, inCheck)) {
 			b->push(move);
 			ASSERT(!b->isCheck(b->side ^ 1));
 

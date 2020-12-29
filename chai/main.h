@@ -15,6 +15,16 @@
 #include "uci.h"
 #include "search.h"
 
+
+static Board board;
+
+static Perft perft;
+
+static moveList_t move_s[1];
+
+static search_t s[1];
+
+
 /// <summary>
 /// Main function to run chess in console.
 /// </summary>

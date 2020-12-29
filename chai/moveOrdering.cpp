@@ -6,16 +6,20 @@ static void updateBestMove(int* scores, int* bestIdx, int curIdx) {
 	}
 }
 
-void scoreMoves(Board* b, moveList_t* moveList, move_t* hashMove) {
+void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove) {
 	move_t currentMove = NO_MOVE;
-	int seeScore, mvvLvaScore;
+	int seeScore = 0;
+	int mvvLvaScore = 0;
 	int bestIdx = 0;
+
+	// set all scores to 0
+	for (int i = 0; i < moveList->cnt; i++) moveList->scores[i] = 0;
 
 	for (int i = 0; i < moveList->cnt; i++) {
 		currentMove = moveList->moves[i];
 
 		// hash move
-		if (currentMove == *hashMove) {
+		if (currentMove == hashMove) {
 			moveList->scores[i] = HASH_MOVE;
 
 			updateBestMove(moveList->scores, &bestIdx, i);
@@ -41,6 +45,7 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t* hashMove) {
 				seeScore = see(b, currentMove);
 				mvvLvaScore = MVV_LVA[capPiece(currentMove)][b->pieceAt(fromSq(currentMove))];
 				ASSERT(mvvLvaScore > 0);
+				ASSERT(mvvLvaScore < 1000);
 
 				if (seeScore > 0) {
 					moveList->scores[i] = GOOD_CAPTURE + mvvLvaScore;
@@ -82,16 +87,24 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t* hashMove) {
 		}
 
 		// counter move
-		if (b->ply > 0) {
-			move_t prevMove = b->undoHistory[b->ply - 1].move;
-			move_t counterMove = b->counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side];
-			if (currentMove == counterMove) {
-				moveList->scores[moveList->cnt] = COUNTER_SCORE;
-			}
+		//if (b->ply > 0) {
+		//	move_t prevMove = b->undoHistory[b->ply - 1].move;
+		//	move_t counterMove = b->counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side];
 
-			updateBestMove(moveList->scores, &bestIdx, i);
-			continue;
-		}
+		//	//b->printBoard();
+		//	//cout << "Prev move was " << getStringMove(prevMove) << endl;
+		//	//cout << "Counter is " << getStringMove(counterMove) << endl;
+		//	//cout << "Unscored move is " << moveList->scores[i] << endl;
+		//	//string m;
+		//	//getline(cin, m);
+
+		//	if (currentMove == counterMove) {
+		//		moveList->scores[moveList->cnt] = COUNTER_SCORE;
+		//	}
+
+		//	updateBestMove(moveList->scores, &bestIdx, i);
+		//	continue;
+		//}
 
 		// castle move
 		if (currentMove & MCHECK_CAS) {
@@ -104,12 +117,10 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t* hashMove) {
 		// last resort: history heuristic
 		int histScore = b->histHeuristic[b->pieceAt(fromSq(currentMove))][toSq(currentMove)];
 		moveList->scores[i] = QUIET_SCORE + (histScore / 250);
-
 		updateBestMove(moveList->scores, &bestIdx, i);
-		continue;
 	}
 
-	if (bestIdx != -1) {
+	if (moveList->cnt > 1) {
 		move_t temp = moveList->moves[0];
 		moveList->moves[0] = moveList->moves[bestIdx];
 		moveList->moves[0] = temp;

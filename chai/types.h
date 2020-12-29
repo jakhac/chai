@@ -91,6 +91,7 @@ struct search_t {
 struct pv_line_t {
 	uint8_t len;
 	move_t line[64 * 64]; // MAX DEPTH
+	//move_t line[64]; // MAX DEPTH
 };
 
 // TODO use typedefs?

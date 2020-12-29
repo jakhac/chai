@@ -97,7 +97,7 @@ inline string getStringMove(const int move) {
 /// </summary>
 /// <param name="move">Move</param>
 inline void printMoveStatus(int move) {
-	cout << "\n#### - Move Status" << endl;
+	cout << "\n#### - Move Status: " << getStringMove(move) << endl;
 	cout << "From " << fromSq(move) << " to " << toSq(move) << endl;
 	cout << "Pawn start " << (move & MFLAG_PS) << endl;
 	cout << "EP capture " << (move & MFLAG_EP) << endl;

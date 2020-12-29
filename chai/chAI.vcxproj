@@ -152,6 +152,7 @@
     <ClInclude Include="moveGenerator.h" />
     <ClInclude Include="moveOrdering.h" />
     <ClInclude Include="perft.h" />
+    <ClInclude Include="pieceKeys.h" />
     <ClInclude Include="search.h" />
     <ClInclude Include="tt.h" />
     <ClInclude Include="types.h" />

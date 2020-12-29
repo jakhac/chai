@@ -11,6 +11,8 @@
 #include "board.h"
 #include "search.h"
 
+#define VERSION "v2.1 (29.12)"
+
 void uciMode(Board* b, search_t* s);
 
 void uciParsePosition(Board* b, string cmd);

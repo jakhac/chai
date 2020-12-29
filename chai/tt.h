@@ -4,7 +4,7 @@
 #include "moveGenerator.h"
 
 /// <summary>Size of the transposition table</summary>
-const int ttSize = 0x100000 * 128;
+const int ttSize = 0x100000 * 16;
 
 /// <summary>Size of the pawn table</summary>
 const int pawnTableSize = 0x100000 * 8;

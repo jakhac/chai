@@ -11,7 +11,7 @@ void checkSearchInfo(search_t* s) {
 
 	// read input causes tests to wait for cin and does not terminate
 #ifndef TESTING
-	readInput(s);
+	//readInput(s);
 #endif // TESTING
 
 }
@@ -71,7 +71,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	ASSERT(b->checkBoard());
 	ASSERT(beta > alpha);
 
-	pv_line_t localPV[1];
+	pv_line_t localPV[1]{};
 	localPV->len = 0;
 
 	// drop in quiesence if max depth is reached
@@ -103,16 +103,16 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 	// probe hash table for pv move and early cutoff
 	int score = -INF;
-	int pvMove = NO_MOVE;
-	b->tt->probed++;
-	if (probeTT(b, &pvMove, &score, alpha, beta, depth)) {
-		b->tt->hit++;
+	move_t pvMove = NO_MOVE;
+	//b->tt->probed++;
+	//if (probeTT(b, &pvMove, &score, alpha, beta, depth)) {
+	//	b->tt->hit++;
 
-		//	// in pvNodes return exact scores only
-		//	if (!pvNode || (score > alpha && score < beta)) {
-		//		return score;
-		//	}
-	}
+	//	// in pvNodes return exact scores only
+	//	if (!pvNode || (score > alpha && score < beta)) {
+	//		return score;
+	//	}
+	//}
 
 	// mate distance pruning
 	/*if (b->ply != 0) {
@@ -153,22 +153,21 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		if (score >= beta) return beta;
 	}*/
 
-
 	moveList_t moveList[1];
-	generateMoves(b, moveList);
+	generateMoves(b, moveList, inCheck);
 
 	// check if hash move is possible
-	if (pvMove != NO_MOVE) {
-		for (int i = 0; i < moveList->cnt; i++) {
-			if (pvMove == moveList->moves[i]) {
-				s->pvHits++;
-				moveList->scores[i] = HASH_MOVE;
-				break;
-			}
-		}
-	}
+	//if (pvMove != NO_MOVE) {
+	//	for (int i = 0; i < moveList->cnt; i++) {
+	//		if (pvMove == moveList->moves[i]) {
+	//			s->pvHits++;
+	//			moveList->scores[i] = HASH_MOVE;
+	//			break;
+	//		}
+	//	}
+	//}
 
-	scoreMoves(b, moveList, &pvMove);
+	scoreMoves(b, moveList, pvMove);
 
 	move_t currentMove;
 	move_t bestMove = NO_MOVE;
@@ -198,8 +197,6 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		getNextMove(b, moveList, i);
 		currentMove = moveList->moves[i];
 		ASSERT(currentMove != NO_MOVE);
-
-		// if (leavesKingInCheck(board, move, inCheck) continue;
 
 		if (!b->push(currentMove)) continue;
 
@@ -324,7 +321,6 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 				&& !(currentMove & MCHECK_PROM)
 				&& currentMove != NULL_MOVE) {
 				move_t prevMove = b->undoHistory[b->ply - 1].move;
-
 				if (prevMove != NULL_MOVE) {
 					b->counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side] = currentMove;
 				}
@@ -337,7 +333,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 		/*
 		* If the currentMove scores higher than bestMove, update score and move.
-		* This might be useful when this position is stored into ttable.
+		* This might be useful when this position is stored into the ttable.
 		*/
 		if (score > bestScore) {
 			bestScore = score;
@@ -352,7 +348,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 				alpha = score;
 
 				pvLine->line[0] = currentMove;
-				memcpy(pvLine->line + 1, localPV->line, localPV->len * sizeof(move_t));
+				memcpy(pvLine->line + 1, localPV->line, localPV->len * sizeof(currentMove));
 				pvLine->len = localPV->len + 1;
 				ASSERT(pvLine->len <= MAX_DEPTH);
 			}
@@ -392,7 +388,6 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 		checkSearchInfo(s);
 	}
 
-
 	s->nodes++;
 
 	if ((isRepetition(b) || b->fiftyMove >= 100) && b->ply > 0) {
@@ -425,7 +420,9 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 	score = -INF;
 
 	moveList_t move_s[1];
-	generateCaptures(b, move_s);
+	generateQuiesence(b, move_s);
+
+	scoreMoves(b, move_s, NO_MOVE);
 
 	//if (pvMove != NO_MOVE && CAPTURED(pvMove)) {
 	//	for (int i = 0; i < move_s->moveCounter; i++) {
@@ -449,8 +446,9 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 			continue;
 		}
 
+		// TODO see pruning is NOT correct, adjust to nerw move ordering
 		// SEE pruning, skip nodes with negative see score
-		if (move_s->scores[i] < 0 && !(MCHECK_PROM & currentMove)) continue;
+		//if (move_s->scores[i] < 0 && !(MCHECK_PROM & currentMove)) continue;
 
 		if (!b->push(currentMove)) continue;
 
@@ -541,7 +539,6 @@ int search(Board* b, search_t* s) {
 	int bestScore = -INF;
 	int pvMoves = 0;
 	int pvNum = 0;
-	pv_line_t pvLine[1];
 
 	log("Entered search");
 
@@ -563,11 +560,6 @@ int search(Board* b, search_t* s) {
 		selDepth = 0;
 		b->ply = 0;
 
-		// clear pvline??
-		pvLine->len = 0;
-		for (int i = 0; i < 64; i++) {
-			pvLine->line[i] = 0;
-		}
 
 		bestScore = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV, pvLine);
 		//bestScore = search_aspiration(b, s, currentDepth, bestScore);
@@ -593,7 +585,6 @@ int search(Board* b, search_t* s) {
 		}
 #endif // TT_PV_LINE
 
-
 		cout << "\n";
 		cout << "Ordering percentage: \t\t" << setprecision(3) << fixed << (float)(s->fhf / s->fh) << endl;
 		//cout << "T table hit percentage: \t" << setprecision(3) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
@@ -602,7 +593,7 @@ int search(Board* b, search_t* s) {
 		//cout << "Pawn table hit percentage: \t" << setprecision(3) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
 		//cout << "Pawn table memory used: \t" << setprecision(5) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
 		//cout << "Pawn table collisions: \t\t" << setprecision(3) << fixed << b->pawnTable->collided << endl;
-		cout << endl;
+		//cout << endl;
 
 		// quit when checkmate was found
 		/*if (currentDepth > 1 && bestScore > ISMATE) {
@@ -611,6 +602,7 @@ int search(Board* b, search_t* s) {
 		}*/
 
 		cout << "\n";
+
 	}
 
 	fflush(stdout);

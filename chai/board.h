@@ -10,6 +10,7 @@
 #include "info.h"
 #include "attacks.h"
 #include "move.h"
+#include "pieceKeys.h"
 
 /// <summary>
 /// Board uses 8 bitboards to store each piece and squares occupied by each color. A chess game should only uses 
@@ -58,18 +59,18 @@ public:
 	bitboard_t attackedSquares[2] = { 0ULL, 0ULL };
 
 	/// <summary>Unique 64bit number for each piece on each square. En pas key is stored as piece 0.</summary>
-	bitboard_t pieceKeys[13][64];
+	//bitboard_t pieceKeys[13][64];
 
 	/// <summary>Castle keys</summary>
 	bitboard_t castleKeys[16];
 
 	/// <summary>Side key for color change. Hash into zobristKey if white.</summary>
-	bitboard_t sideKey;
+	//bitboard_t sideKey;
 
 	/// <summary>Stack stores pushed moves as Undo objects.</summary>
 	undo_t undoHistory[MAX_GAME_MOVES];
 
-	/// <summary>PV Table -> TODO transposition table</summary>
+	//<summary>Transposition table</summary>
 	ttable_t tt[1];
 
 	pawntable_t pawnTable[1];
@@ -80,13 +81,13 @@ public:
 	/// <summary>Stores up to 2 killer moves for each ply</summary>
 	move_t killer[2][MAX_GAME_MOVES];
 
-	/// <summary>Stores up mate killer moves for each ply</summary>
+	/// <summary>Stores up mate killer moves for each ply</summary> 
 	move_t mateKiller[MAX_GAME_MOVES];
 
 	/// <summary>Stores history heuristic for both sides with [PIECE][TO] indices </summary>
 	int histHeuristic[13][64];
 
-	/// <summary>Stores maximum history score</summary> // TODO reset in reset()
+	/// <summary>Stores maximum history score</summary>
 	int histMax = 0;
 
 	/// <summary>Store counter moves for FROM and TO square of the previous move</summary>
@@ -250,6 +251,15 @@ public:
 	bitboard_t attackerSet(int side);
 
 	/// <summary>
+	/// Generate bitboard with containing all pieces that can block the given square.
+	/// King moves are not included. Bitboard shows origin of pieces that can block.
+	/// </summary>
+	/// <param name="side">Side of blocking pieces</param>
+	/// <param name="blockSq">Square that has to be occupied</param>
+	/// <returns>Bitboard with blocker pieces</returns>
+	bitboard_t blockerSet(int side, int blockSq);
+
+	/// <summary>
 	/// Check if given side attacks given square.
 	/// </summary>
 	/// <param name="square">Square to check attacks on</param>
@@ -257,7 +267,12 @@ public:
 	/// <returns></returns>
 	bitboard_t squareAttackedBy(int square, int side);
 
-	bitboard_t squareAttacked(int square);
+	/// <summary>
+	/// Get all pieces attacking the given square, independet of side.
+	/// </summary>
+	/// <param name="square">Square to check</param>
+	/// <returns>Bitboard with attackers / defenders</returns>
+	bitboard_t squareAtkDef(int square);
 
 	/// <summary>
 	/// Check if given side is currently in check.

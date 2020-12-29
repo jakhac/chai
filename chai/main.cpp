@@ -46,24 +46,21 @@
 *	+ pv move in quiesence
 */
 
-
 int main() {
-
-	Board b;
-	Perft perft;
-	moveList_t move_s[1];
-	search_t s[1];
-
-	init(&b);
-	b.parseFen(STARTING_FEN);
-	//b.parseFen("8/7K/8/8/8/8/R7/7k w - - 0 1 ");
-	b.printBoard();
+	init(&board);
+	board.parseFen(STARTING_FEN);
+	board.printBoard();
 	log("\nStartup");
 
-	play(&b, &perft, s);
+	//generateMoves(&board, move_s, false);
+	//scoreMoves(&board, move_s, NO_MOVE);
+	//printGeneratedMoves(move_s);
+	//return 0;
 
-	if (b.tt->table != NULL) free(b.tt->table);
-	if (b.pawnTable->table != NULL) free(b.pawnTable->table);
+	play(&board, &perft, s);
+
+	if (board.tt->table != NULL) free(board.tt->table);
+	if (board.pawnTable->table != NULL) free(board.pawnTable->table);
 	return 0;
 }
 
@@ -97,7 +94,7 @@ void play(Board* b, Perft* p, search_t* s) {
 				getPVLine(b, s->depth);
 
 				moveList_t move_s[1];
-				generateMoves(b, move_s);
+				generateMoves(b, move_s, b->isCheck(b->side));
 				b->push(move_s->moves[move_s->cnt / 3]);
 				cout << "Push move " << b->halfMoves << ". " << getStringMove(move_s->moves[move_s->cnt / 2]) << endl;
 				b->printBoard();
@@ -163,7 +160,7 @@ void play(Board* b, Perft* p, search_t* s) {
 
 		// PUSH MOVE IN ALGEBRAIC NOTATION
 		moveList_t _move_s[1];
-		generateMoves(b, _move_s);
+		generateMoves(b, _move_s, b->isCheck(b->side));
 
 		int parsedMove = b->parseMove(m);
 		bool flag_found = false;

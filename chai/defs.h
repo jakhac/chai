@@ -2,17 +2,15 @@
 
 #include "stdlib.h"
 #include <string>
-#include <cassert>
 
 #include "move.h"
 #include "types.h"
 
 using namespace std;
 
-//if defined, readInput is disabled
 #define TESTING
 
-#define DEBUG
+//#define DEBUG
 
 #ifndef DEBUG
 #define ASSERT(n)
@@ -45,9 +43,6 @@ const bool IS_PV = true;
 const bool NO_PV = false;
 const bool DO_NULL = true;
 const bool NO_NULL = false;
-
-
-#define HISTORY_MAX 0x4000 // maximum score before rescale in history heuristic
 
 const bitboard_t RANK_1_HEX = 0xFF;
 const bitboard_t RANK_2_HEX = 0xFF00;

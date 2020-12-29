@@ -35,15 +35,22 @@ const int QUIET_SCORE = 5000;
 
 const int CASTLE_SCORE = 500;
 
+//static int MVV_LVA[13][13];
+
+///// <summary>
+///// Initialize mvv-lva scores for all piece pairings. Only called once at start.
+///// </summary>
+//void initMVV_LVA();
+
 /// <summary>
 /// Score moves according to moveOrdering.h rules. After scoring every move,
 /// best move is swapped to last position (moves[cnt] = bestMove).
 /// </summary>
 /// <param name="b">Reference to board</param>
 /// <param name="moveList">Reference to moveList to score moves in</param>
-/// <param name="hashMove">Rerefence to hash move fonud in pvLine or ttable</param>
+/// <param name="hashMove">Hash move fonud in pvLine or ttable</param>
 /// <returns>Amount of major pieces</returns>
-void scoreMoves(Board* b, moveList_t* moveList, move_t* hashMove);
+void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove);
 
 /// <summary>
 /// Update the index of the move with highest score yet. Used to swap best move to the

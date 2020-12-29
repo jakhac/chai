@@ -72,6 +72,9 @@
     <ClInclude Include="moveOrdering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pieceKeys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="board.cpp">

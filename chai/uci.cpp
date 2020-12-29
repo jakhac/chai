@@ -44,7 +44,7 @@ void uciParsePosition(Board* b, string cmd) {
 		b->parseFen(fen);
 
 	} else if (!cmd.substr(0, 23).compare("position startpos moves")) {
-		 /*position startpos moves b2b4 a7a5 b4a5 b7b6 a5b6 h7h6 b6c7 g7g6 c7b8q d8c7*/
+		/*position startpos moves b2b4 a7a5 b4a5 b7b6 a5b6 h7h6 b6c7 g7g6 c7b8q d8c7*/
 		b->parseFen(STARTING_FEN);
 		int cnt = 24;
 		string move;
@@ -65,8 +65,7 @@ void uciParsePosition(Board* b, string cmd) {
 
 	} else if (!cmd.compare("position startpos")) {
 		b->parseFen(STARTING_FEN);
-	}
-	else {
+	} else {
 		cout << "uciParsePosition failed\n";
 		log("uciParsePosition failed");
 	}
@@ -78,7 +77,7 @@ void uciParsePosition(Board* b, string cmd) {
 }
 
 void uciParseGo(Board* b, search_t* s, string cmd) {
-	int depth = -1,  movesLeft = 30, moveTime = -1;
+	int depth = -1, movesLeft = 30, moveTime = -1;
 	int time = -1, inc = 0;
 	s->timeSet = false;
 
@@ -98,7 +97,7 @@ void uciParseGo(Board* b, search_t* s, string cmd) {
 		if (tokens[i] == "movetime") moveTime = stoi(tokens[i + 1]);
 		if (tokens[i] == "depth") depth = stoi(tokens[i + 1]);
 	}
-	 
+
 	// if fixed search time is set
 	if (moveTime != -1) {
 		time = moveTime;
@@ -135,13 +134,14 @@ void uciParseGo(Board* b, search_t* s, string cmd) {
 	}
 
 	cout << "time " << time << ", start " << s->startTime << ", stop " << s->stopTime
-		 << ", depth " << s->depth  << ", timeset " << s->timeSet << endl;
+		<< ", depth " << s->depth << ", timeset " << s->timeSet << endl;
 
 	log("Parse go finished, start search now");
 	search(b, s);
 }
 
 void init(Board* b) {
+	cout << "Initialize chai. " << VERSION << endl;
 
 	auto start = std::chrono::high_resolution_clock::now();
 	initClearSetMask();
@@ -151,7 +151,7 @@ void init(Board* b) {
 	initMVV_LVA();
 	initEvalMasks();
 	initManhattenMask();
-	
+
 	initTT(b->tt);
 	initPawnTable(b->pawnTable);
 

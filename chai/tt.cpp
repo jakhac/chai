@@ -117,7 +117,7 @@ int getPVLine(Board* b, const int maxDepth) {
 	int move = probePV(b);
 	int count = 0;
 
-	while (move != 0 && count < maxDepth && moveLegal(b, move)) {
+	while (move != 0 && count < maxDepth && isLegal(b, move, b->isCheck(b->side))) {
 		b->push(move);
 		b->pvArray[count++] = move;
 		move = probePV(b);

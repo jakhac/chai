@@ -13,6 +13,12 @@
 /// <summary>Maximum ply reached in alphaBeta and quiesence search</summary>
 extern int selDepth;
 
+/// <summary>Maximum score before rescale in history heuristic</summary>
+const int HISTORY_MAX = 0x4000;
+
+// TODO ?
+static pv_line_t pvLine[1];
+
 /// <summary>
 /// Alpha beta algorithm root. Searches current board for best move and score.
 /// </summary>
