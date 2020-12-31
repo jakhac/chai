@@ -124,7 +124,7 @@ void uciParseGo(Board* b, search_t* s, string cmd) {
 			s->stopTime = s->startTime + time + inc;
 		}
 
-		ASSERT(s->startTime < s->stopTime);
+		Assert(s->startTime < s->stopTime);
 	}
 
 	if (depth == -1) {

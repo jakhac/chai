@@ -18,7 +18,7 @@ void checkSearchInfo(search_t* s) {
 
 bool isRepetition(Board* b) {
 	for (int index = b->undoPly - b->fiftyMove; index < b->undoPly - 1; ++index) {
-		ASSERT(index >= 0 && index < MAX_GAME_MOVES);
+		Assert(index >= 0 && index < MAX_GAME_MOVES);
 		if (b->zobristKey == b->undoHistory[index].zobKey) {
 			return true;
 		}
@@ -68,8 +68,8 @@ void swapMove(moveList_t* move_s, int id1, int id2) {
 }
 
 int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine) {
-	ASSERT(b->checkBoard());
-	ASSERT(beta > alpha);
+	Assert(b->checkBoard());
+	Assert(beta > alpha);
 
 	pv_line_t localPV[1]{};
 	localPV->len = 0;
@@ -104,15 +104,15 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	// probe hash table for pv move and early cutoff
 	int score = -INF;
 	move_t pvMove = NO_MOVE;
-	//b->tt->probed++;
-	//if (probeTT(b, &pvMove, &score, alpha, beta, depth)) {
-	//	b->tt->hit++;
+	b->tt->probed++;
+	if (probeTT(b, &pvMove, &score, alpha, beta, depth)) {
+		b->tt->hit++;
 
-	//	// in pvNodes return exact scores only
-	//	if (!pvNode || (score > alpha && score < beta)) {
-	//		return score;
-	//	}
-	//}
+		// in pvNodes return exact scores only
+		if (!pvNode || (score > alpha && score < beta)) {
+			return score;
+		}
+	}
 
 	// mate distance pruning
 	/*if (b->ply != 0) {
@@ -157,15 +157,15 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	generateMoves(b, moveList, inCheck);
 
 	// check if hash move is possible
-	//if (pvMove != NO_MOVE) {
-	//	for (int i = 0; i < moveList->cnt; i++) {
-	//		if (pvMove == moveList->moves[i]) {
-	//			s->pvHits++;
-	//			moveList->scores[i] = HASH_MOVE;
-	//			break;
-	//		}
-	//	}
-	//}
+	if (pvMove != NO_MOVE) {
+		for (int i = 0; i < moveList->cnt; i++) {
+			if (pvMove == moveList->moves[i]) {
+				s->pvHits++;
+				moveList->scores[i] = HASH_MOVE;
+				break;
+			}
+		}
+	}
 
 	scoreMoves(b, moveList, pvMove);
 
@@ -196,7 +196,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	for (int i = 0; i < moveList->cnt; i++) {
 		getNextMove(b, moveList, i);
 		currentMove = moveList->moves[i];
-		ASSERT(currentMove != NO_MOVE);
+		Assert(currentMove != NO_MOVE);
 
 		if (!b->push(currentMove)) continue;
 
@@ -271,7 +271,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 				b->killer[1][b->ply] = b->killer[0][b->ply];
 				b->killer[0][b->ply] = currentMove;
 
-				ASSERT(b->killer[1][b->ply] != b->killer[0][b->ply]);
+				Assert(b->killer[1][b->ply] != b->killer[0][b->ply]);
 			}
 
 			/*
@@ -350,7 +350,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 				pvLine->line[0] = currentMove;
 				memcpy(pvLine->line + 1, localPV->line, localPV->len * sizeof(currentMove));
 				pvLine->len = localPV->len + 1;
-				ASSERT(pvLine->len <= MAX_DEPTH);
+				Assert(pvLine->len <= MAX_DEPTH);
 			}
 		}
 	}
@@ -365,7 +365,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		}
 	}
 
-	ASSERT(alpha >= oldAlpha); // alpha cant get worse
+	Assert(alpha >= oldAlpha); // alpha cant get worse
 
 	// if alpha has changed, a better move has been found -> adjust pv table
 	if (alpha != oldAlpha) {
@@ -380,7 +380,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 }
 
 int quiesence(int alpha, int beta, Board* b, search_t* s) {
-	ASSERT(b->checkBoard());
+	Assert(b->checkBoard());
 	selDepth = max(selDepth, b->ply);
 
 	// check for time and depth
@@ -414,13 +414,14 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 		alpha = standPat;
 	}
 
+	bool inCheck = b->isCheck(b->side);
 	int legalMoves = 0;
 	int oldAlpha = alpha;
 	int bestMove = 0;
 	score = -INF;
 
 	moveList_t move_s[1];
-	generateQuiesence(b, move_s);
+	generateQuiesence(b, move_s, inCheck);
 
 	scoreMoves(b, move_s, NO_MOVE);
 
@@ -437,7 +438,9 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 	for (int i = 0; i < move_s->cnt; i++) {
 		getNextMove(b, move_s, i);
 		int currentMove = move_s->moves[i];
-		ASSERT(currentMove & MCHECK_CAP || currentMove & MFLAG_EP);
+
+		// either position is a check or we capture / promote / enpas
+		Assert(inCheck || (currentMove & MCHECK_PROMCAP || currentMove & MFLAG_EP));
 
 		// Delta cutoff: prune moves that cannot improve over alpha
 		bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
@@ -446,7 +449,7 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 			continue;
 		}
 
-		// TODO see pruning is NOT correct, adjust to nerw move ordering
+		// TODO see pruning might not be correct, adjust to new move ordering
 		// SEE pruning, skip nodes with negative see score
 		//if (move_s->scores[i] < 0 && !(MCHECK_PROM & currentMove)) continue;
 
@@ -471,7 +474,7 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 		}
 	}
 
-	ASSERT(alpha >= oldAlpha);
+	Assert(alpha >= oldAlpha);
 
 	return alpha;
 }

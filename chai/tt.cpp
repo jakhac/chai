@@ -30,11 +30,11 @@ void clearTT(ttable_t* tt) {
 void storeTT(Board* b, int move, int score, int flag, int depth) {
 	int index = b->zobristKey % b->tt->entries;
 
-	ASSERT(index >= 0 && index <= b->tt->entries - 1);
-	ASSERT(depth >= 1 && depth <= MAX_DEPTH);
-	ASSERT(flag >= TT_ALPHA && flag <= TT_SCORE);
-	ASSERT(score >= -INF && score <= INF);
-	ASSERT(b->ply >= 0 && b->ply <= MAX_DEPTH);
+	Assert(index >= 0 && index <= b->tt->entries - 1);
+	Assert(depth >= 1 && depth <= MAX_DEPTH);
+	Assert(flag >= TT_ALPHA && flag <= TT_SCORE);
+	Assert(score >= -INF && score <= INF);
+	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
 	if (score > ISMATE) score += b->ply;
 	else if (score < -ISMATE) score -= b->ply;
@@ -56,12 +56,12 @@ void storeTT(Board* b, int move, int score, int flag, int depth) {
 bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
 	int index = b->zobristKey % b->tt->entries;
 
-	ASSERT(index >= 0 && index <= b->tt->entries - 1);
-	ASSERT(depth >= 1 && depth <= MAX_DEPTH);
-	ASSERT(alpha < beta);
-	ASSERT(alpha >= -INF && alpha <= INF);
-	ASSERT(beta >= -INF && beta <= INF);
-	ASSERT(b->ply >= 0 && b->ply <= MAX_DEPTH);
+	Assert(index >= 0 && index <= b->tt->entries - 1);
+	Assert(depth >= 1 && depth <= MAX_DEPTH);
+	Assert(alpha < beta);
+	Assert(alpha >= -INF && alpha <= INF);
+	Assert(beta >= -INF && beta <= INF);
+	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
 	if (b->tt->table[index].zobKey == b->zobristKey) {
 		*move = b->tt->table[index].move;
@@ -69,8 +69,8 @@ bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
 		if (b->tt->table[index].depth >= depth) {
 			b->tt->valueHit++;
 
-			ASSERT(b->tt->table[index].depth >= 1 && b->tt->table[index].depth <= MAX_DEPTH);
-			ASSERT(b->tt->table[index].flag >= TT_ALPHA && b->tt->table[index].flag <= TT_SCORE);
+			Assert(b->tt->table[index].depth >= 1 && b->tt->table[index].depth <= MAX_DEPTH);
+			Assert(b->tt->table[index].flag >= TT_ALPHA && b->tt->table[index].flag <= TT_SCORE);
 
 			*score = b->tt->table[index].score;
 
@@ -94,7 +94,7 @@ bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
 				case TT_SCORE:
 					return true;
 					break;
-				default: ASSERT(false) break;
+				default: Assert(false) break;
 			}
 		}
 	}
@@ -104,7 +104,7 @@ bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
 
 int probePV(Board* b) {
 	int index = b->zobristKey % b->tt->entries;
-	ASSERT(index >= 0 && index <= b->tt->entries - 1);
+	Assert(index >= 0 && index <= b->tt->entries - 1);
 
 	if (b->tt->table[index].zobKey == b->zobristKey) {
 		return b->tt->table[index].move;
@@ -158,7 +158,7 @@ void clearPawnTable(pawntable_t* pawnTable) {
 
 void storePawnEntry(Board* b, const int eval) {
 	int index = b->zobristPawnKey % b->pawnTable->entries;
-	ASSERT(index >= 0 && index <= b->pawnTable->entries - 1);
+	Assert(index >= 0 && index <= b->pawnTable->entries - 1);
 
 	if (b->pawnTable->table[index].zobristPawnKey == 0ULL) {
 		// count every new entry
@@ -173,7 +173,7 @@ void storePawnEntry(Board* b, const int eval) {
 
 int probePawnEntry(Board* b) {
 	int index = b->zobristPawnKey % b->pawnTable->entries;
-	ASSERT(index >= 0 && index <= b->pawnTable->entries - 1);
+	Assert(index >= 0 && index <= b->pawnTable->entries - 1);
 
 	if (b->pawnTable->table[index].zobristPawnKey == b->zobristPawnKey) {
 		return b->pawnTable->table[index].eval;

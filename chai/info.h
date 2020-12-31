@@ -5,10 +5,11 @@
 #include <iostream>
 #include <bitset>
 
-/// <summary>
-/// Print referenced bitboard.
-/// </summary>
-/// <param name="bb">Bitboard</param>
+/**
+ * Print referenced bitboard.
+ *
+ * @param  bb Bitboard.
+ */
 inline void printBitBoard(bitboard_t* bb) {
 	bitboard_t shiftBit = 1ULL;
 	int sq;
@@ -28,10 +29,11 @@ inline void printBitBoard(bitboard_t* bb) {
 	}
 }
 
-/// <summary>
-/// Print move in algebraic notation and promotions if possible
-/// </summary>
-/// <param name="move">Move</param>
+/**
+ * Print move in algebraic notation and promotions if possible
+ *
+ * @param  move Move.
+ */
 inline void printMove(const int move) {
 
 	if (move == -1) {
@@ -62,6 +64,13 @@ inline void printMove(const int move) {
 	cout << ret << promChar << endl;
 }
 
+/**
+ * Returns the algebraic notation of given move.
+ *
+ * @param  move The move.
+ *
+ * @returns The move in algebraic notation.
+ */
 inline string getStringMove(const int move) {
 	if (move == -1) {
 		return "0000";
@@ -92,10 +101,11 @@ inline string getStringMove(const int move) {
 	return ret;
 }
 
-/// <summary>
-/// Print all flags and attributes of given move.
-/// </summary>
-/// <param name="move">Move</param>
+/**
+ * Print all flags and attributes of given move.
+ *
+ * @param  move Move.
+ */
 inline void printMoveStatus(int move) {
 	cout << "\n#### - Move Status: " << getStringMove(move) << endl;
 	cout << "From " << fromSq(move) << " to " << toSq(move) << endl;
@@ -108,10 +118,11 @@ inline void printMoveStatus(int move) {
 	cout << "####\n" << endl;
 }
 
-/// <summary>
-/// Print binary format of given integer.
-/// </summary>
-/// /// <param name="x">unsigned long long number</param>
+/**
+ * Print binary format of given integer.
+ *
+ * @param  x A bitboard_t to process.
+ */
 inline void printBinary(bitboard_t x) {
 	std::bitset<64> b(x);
 	cout << b << endl;

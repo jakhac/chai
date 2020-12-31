@@ -2,6 +2,9 @@
 
 #include "types.h"
 
+/**
+ * 64-Bit keys for each piece on each square. First entry contains EnPassant keys.
+ */
 const bitboard_t pieceKeys[13][64] = {
 	{ // En passant key
 		0, 0, 0, 0, 0, 0, 0, 0,
@@ -233,5 +236,8 @@ const bitboard_t pieceKeys[13][64] = {
 	}
 };
 
+/**
+ * Side to  move key used in zobrist hashing.
+ */
 const bitboard_t sideKey = (bitboard_t)0x873af583ac467d88ll;
 

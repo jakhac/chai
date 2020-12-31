@@ -13,13 +13,15 @@
 #include "mask.h"
 #include "windows.h"
 
-/// <summary>
-/// Moves all set bits in the given bitboard n squares west and returns the new
-/// bitboard, discarding those that fall off the edge.
-/// </summary>
-/// <param name="board">Board to move bits west on</param>
-/// <param name="n">Number of squares to move west</param>
-/// <returns>New bitboard with shifted bits to west</returns>
+/**
+ * Moves all set bits in the given bitboard n squares west and returns the new bitboard,
+ * discarding those that fall off the edge.
+ *
+ * @param  board Board to move bits west on.
+ * @param  n	 Number of squares to move west.
+ *
+ * @returns New bitboard with shifted bits to west.
+ */
 inline bitboard_t westN(bitboard_t board, int n) {
 	bitboard_t newBoard = board;
 	for (int i = 0; i < n; i++) {
@@ -28,10 +30,20 @@ inline bitboard_t westN(bitboard_t board, int n) {
 	return newBoard;
 }
 
+/**
+ * Gets current time milliseconds.
+ *
+ * @returns The time in milliseconds.
+ */
 inline int getTimeMs() {
-	return (int) GetTickCount64();
+	return (int)GetTickCount64();
 }
 
+/**
+ * Determines if we can input waiting
+ *
+ * @returns True if input is waiting, else false.
+ */
 inline bool inputWaiting() {
 	static int init = 0, pipe;
 	static HANDLE inh;
@@ -56,6 +68,12 @@ inline bool inputWaiting() {
 	}
 }
 
+/**
+ * Read input from command line during search. Sets stop to true,
+ * if search has to be aborted.
+ *
+ * @param  s The search info.
+ */
 inline void readInput(search_t* s) {
 	int bytes;
 	char input[256] = "", * endc;
@@ -79,6 +97,11 @@ inline void readInput(search_t* s) {
 	}
 }
 
+/**
+ * Gets the time
+ *
+ * @returns The time.
+ */
 inline string getTime() {
 	char str[32]{};
 	time_t a = time(nullptr);
@@ -88,19 +111,26 @@ inline string getTime() {
 	return str;
 }
 
+/**
+ * Write logging information into log.txt file.
+ *
+ * @param  logMsg Message to write into log file.
+ */
 inline void log(string logMsg) {
 	ofstream ofs("log.txt", std::ios_base::out | std::ios_base::app);
 	ofs << getTime() << "\t" << logMsg << '\n';
 	ofs.close();
 }
 
-/// <summary>
-/// Moves all set bits in the given bitboard n squares east and returns the new
-/// bitboard, discarding those that fall off the edge.
-/// </summary>
-/// <param name="board">Board to move bits east on</param>
-/// <param name="n">Number of squares to move east</param>
-/// <returns>New bitboard with shifted bits to east</returns>
+/**
+ * Moves all set bits in the given bitboard n squares east and returns the new bitboard,
+ * discarding those that fall off the edge.
+ *
+ * @param  board Board to move bits east on.
+ * @param  n	 Number of squares to move east.
+ *
+ * @returns New bitboard with shifted bits to east.
+ */
 inline bitboard_t eastN(bitboard_t board, int n) {
 	bitboard_t newBoard = board;
 	for (int i = 0; i < n; i++) {
@@ -109,29 +139,35 @@ inline bitboard_t eastN(bitboard_t board, int n) {
 	return newBoard;
 }
 
-/// <summary>
-/// Return zero indexed row of given square.
-/// </summary>
-/// <param name="square">Square to check row on</param>
-/// <returns>Zero indexed row</returns>
+/**
+ * Return zero indexed row of given square.
+ *
+ * @param  square Square to check row on.
+ *
+ * @returns Zero indexed row.
+ */
 inline int row(int square) {
 	return square / 8;
 }
 
-/// <summary>
-/// Return zero indexed column of given square.
-/// </summary>
-/// <param name="square">Square to check column on</param>
-/// <returns>Zero indexed column</returns>
+/**
+ * Return zero indexed column of given square.
+ *
+ * @param  square Square to check column on.
+ *
+ * @returns Zero indexed column.
+ */
 inline int col(int square) {
 	return square % 8;
 }
 
-/// <summary>
-/// Bit scan forward and return index. If Board is 0 return -1. Uses compiler bitscan.
-/// </summary>
-/// <param name="board">Board</param>
-/// <returns>INdex of first found bit</returns>
+/**
+ * Bit scan forward and return index. If Board is 0 return -1. Uses compiler bitscan.
+ *
+ * @param  board Board.
+ *
+ * @returns INdex of first found bit.
+ */
 inline int bitscanForward(bitboard_t board) {
 	if (board == 0ULL) return -1;
 
@@ -140,11 +176,13 @@ inline int bitscanForward(bitboard_t board) {
 	return (int)ret;
 }
 
-/// <summary>
-/// Reversed bit scan forward amd return index. If Board is 0 return -1.
-/// </summary>
-/// <param name="board">Board</param>
-/// <returns>Index of first found bit</returns>
+/**
+ * Reversed bit scan forward amd return index. If Board is 0 return -1.
+ *
+ * @param  board Board.
+ *
+ * @returns Index of first found bit.
+ */
 inline int bitscanReverse(bitboard_t board) {
 	if (board == 0ULL) return -1;
 
@@ -153,21 +191,24 @@ inline int bitscanReverse(bitboard_t board) {
 	return (int)ret;
 }
 
-/// <summary>
-/// Counts bits of given ULL integer.
-/// </summary>
-/// <param name="bb">Bitboard to count bits on</param>
-/// <returns>Amount of bits set to 1 in bb</returns>
+/**
+ * Counts bits of given ULL integer.
+ *
+ * @param  bb Bitboard to count bits on.
+ *
+ * @returns Amount of bits set to 1 in bb.
+ */
 inline int countBits(bitboard_t bb) {
 	return (int)__popcnt64(bb);
 }
 
-
-/// <summary>
-/// Pops least significant bit from bitboard and returns index.
-/// </summary>
-/// <param name="bb">Bitboard to pop lsb on</param>
-/// <returns>Index of popped bit</returns>
+/**
+ * Pops least significant bit from bitboard and returns index.
+ *
+ * @param  bb Bitboard to pop lsb on.
+ *
+ * @returns Index of popped bit.
+ */
 inline int popBit(bitboard_t* bb) {
 	unsigned long ret;
 	_BitScanForward64(&ret, *bb);
@@ -175,20 +216,22 @@ inline int popBit(bitboard_t* bb) {
 	return (int)ret;
 }
 
-/// <summary>
-/// Set bit at given bitboard.
-/// </summary>
-/// <param name="bb">Bitboard to set bit on</param>
-/// <param name="i">Index of bit that is set to 1</param>
+/**
+ * Set bit at given bitboard.
+ *
+ * @param  bb Bitboard to set bit on.
+ * @param  i  Index of bit that is set to 1.
+ */
 inline void setBit(bitboard_t* bb, int i) {
 	*bb |= setMask[i];
 }
 
-/// <summary>
-/// Clear bit at given bitboard.
-/// </summary>
-/// <param name="bb">Bitboard to clear bit on</param>
-/// <param name="i">Index of bit that is set to 0</param>
+/**
+ * Clear bit at given bitboard.
+ *
+ * @param  bb Bitboard to clear bit on.
+ * @param  i  Index of bit that is set to 0.
+ */
 inline void clearBit(bitboard_t* bb, int i) {
 	*bb &= clearMask[i];
 }

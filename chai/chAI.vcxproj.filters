@@ -54,9 +54,6 @@
     <ClInclude Include="types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="undo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="uci.h">
       <Filter>Header Files</Filter>
     </ClInclude>

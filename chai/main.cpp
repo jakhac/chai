@@ -1,20 +1,6 @@
 #include "main.h"
 
 /*
-* - Evaluation improvements:
-*		King Safety
-*		Pawn Structure
-*		Mobility
-*
-* - Check evasion in quiesence?
-* - Late move _pruning_
-* - Try pv move before move generation
-* - Refactor eval.cpp
-* - Move Ordering, extra bonus for promotions
-* - code documentation
-*/
-
-/*
 * 500 Games vs TSCP181 with 40/0.4
 *
 * 275-162-63 (61%) +78
@@ -51,11 +37,6 @@ int main() {
 	board.parseFen(STARTING_FEN);
 	board.printBoard();
 	log("\nStartup");
-
-	//generateMoves(&board, move_s, false);
-	//scoreMoves(&board, move_s, NO_MOVE);
-	//printGeneratedMoves(move_s);
-	//return 0;
 
 	play(&board, &perft, s);
 

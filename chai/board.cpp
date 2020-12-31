@@ -17,25 +17,25 @@ int dirFromTo[64][64];
 bitboard_t lineBB[64][64];
 
 
-int Board::checkBoard() {
+bool Board::checkBoard() {
 
 	// check castle permission
-	ASSERT(castlePermission >= 0 && castlePermission <= 15);
+	Assert(castlePermission >= 0 && castlePermission <= 15);
 
 	// check min/max pieces on board
-	ASSERT(countBits(occupied) >= 2 && countBits(occupied) <= 32);
+	Assert(countBits(occupied) >= 2 && countBits(occupied) <= 32);
 
 	// check valid en pas square and rank regarding side
 	if (side == WHITE) {
-		ASSERT(enPas == 0 || ((enPas <= H6) && (enPas >= A6)));
+		Assert(enPas == 0 || ((enPas <= H6) && (enPas >= A6)));
 	} else {
-		ASSERT(enPas == 0 || ((enPas <= H3) && (enPas >= A3)));
+		Assert(enPas == 0 || ((enPas <= H3) && (enPas >= A3)));
 	}
 
-	ASSERT(zobristKey == generateZobristKey());
-	ASSERT(zobristPawnKey == generatePawnHashKey());
+	Assert(zobristKey == generateZobristKey());
+	Assert(zobristPawnKey == generatePawnHashKey());
 
-	return 1;
+	return true;
 }
 
 void Board::setPiece(int piece, int square, int side) {
@@ -264,7 +264,7 @@ void Board::parseFen(string fen) {
 	}
 
 	// assert for correct position
-	ASSERT(fen[index] == 'w' || fen[index] == 'b');
+	Assert(fen[index] == 'w' || fen[index] == 'b');
 	side = (fen[index] == 'w') ? WHITE : BLACK;
 	index += 2;
 
@@ -283,15 +283,15 @@ void Board::parseFen(string fen) {
 		index++;
 	}
 	index++;
-	ASSERT(castlePermission >= 0 && castlePermission <= 15);
+	Assert(castlePermission >= 0 && castlePermission <= 15);
 
 	// en passant square
 	if (fen[index] != '-') {
 		file = fen[index] - 'a';
 		rank = fen[index + 1] - '1';
 
-		ASSERT(file >= FILE_A && file <= FILE_H);
-		ASSERT(rank >= RANK_1 && rank <= RANK_8);
+		Assert(file >= FILE_A && file <= FILE_H);
+		Assert(rank >= RANK_1 && rank <= RANK_8);
 
 		enPas = file_rank_2_sq(file, rank);
 		index += 3;
@@ -380,10 +380,10 @@ bool Board::push(int move) {
 		printMoveStatus(move);
 	}
 
-	ASSERT(squareOnBoard(from_square));
-	ASSERT(squareOnBoard(to_square));
-	ASSERT(pieceValid(movingPiece));
-	ASSERT(undoPly >= 0 && undoPly <= MAX_GAME_MOVES);
+	Assert(squareOnBoard(from_square));
+	Assert(squareOnBoard(to_square));
+	Assert(pieceValid(movingPiece));
+	Assert(undoPly >= 0 && undoPly <= MAX_GAME_MOVES);
 
 	fiftyMove++;
 
@@ -397,7 +397,7 @@ bool Board::push(int move) {
 	// clear to_square and move piece
 	if (MCHECK_CAP & move) {
 		int captured = capPiece(move);
-		ASSERT(captured != K && captured != k);
+		Assert(captured != K && captured != k);
 		fiftyMove = 0;
 		zobristKey ^= pieceKeys[captured][to_square];
 		clearPiece(captured, to_square, side ^ 1);
@@ -452,7 +452,7 @@ bool Board::push(int move) {
 			case G1: pushCastle(H1, F1, side); break;
 			case C8: pushCastle(A8, D8, side); break;
 			case G8: pushCastle(H8, F8, side); break;
-			default: ASSERT(0); break;
+			default: Assert(0); break;
 		}
 	} else if (pieceRook[movingPiece]) {
 		switch (from_square) {
@@ -476,8 +476,8 @@ bool Board::push(int move) {
 	undoPly++;
 	ply++;
 
-	ASSERT(zobristPawnKey == generatePawnHashKey());
-	ASSERT(zobristKey == generateZobristKey());
+	Assert(zobristPawnKey == generatePawnHashKey());
+	Assert(zobristKey == generateZobristKey());
 	if (isCheck(side ^ 1)) {
 		pop();
 		return false;
@@ -489,7 +489,7 @@ bool Board::push(int move) {
 void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 	int rook = pieceAt(clearRookSq);
 
-	ASSERT(rook == r || rook == R);
+	Assert(rook == r || rook == R);
 
 	zobristKey ^= pieceKeys[rook][clearRookSq];
 	clearPiece(ROOK, clearRookSq, side);
@@ -501,7 +501,7 @@ void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 }
 
 void Board::pushNull() {
-	ASSERT(!isCheck(side));
+	Assert(!isCheck(side));
 
 	undo_t undo_s[1]{};
 	undo_s->enPas = enPas;
@@ -518,8 +518,8 @@ void Board::pushNull() {
 	side ^= 1;
 	zobristKey ^= sideKey;
 
-	ASSERT(zobristKey == generateZobristKey());
-	ASSERT(zobristPawnKey == generatePawnHashKey());
+	Assert(zobristKey == generateZobristKey());
+	Assert(zobristPawnKey == generatePawnHashKey());
 
 	// update gameState variable and store in undo struct
 
@@ -547,7 +547,7 @@ undo_t Board::pop() {
 	undoPly--;
 	ply--;
 
-	ASSERT(undoPly >= 0);
+	Assert(undoPly >= 0);
 
 	undo_t undo = undoHistory[undoPly];
 
@@ -563,7 +563,7 @@ undo_t Board::pop() {
 
 	// trivial case for null moves
 	if (undo.move == -1) {
-		ASSERT(ply >= 0);
+		Assert(ply >= 0);
 		return undo;
 	}
 
@@ -599,16 +599,16 @@ undo_t Board::pop() {
 			case G1: popCastle(F1, H1, WHITE); break;
 			case C8: popCastle(D8, A8, BLACK); break;
 			case G8: popCastle(F8, H8, BLACK); break;
-			default: ASSERT(0);
+			default: Assert(0);
 		}
 	}
 
-	ASSERT(checkBoard());
+	Assert(checkBoard());
 	return undo;
 }
 
 void Board::popCastle(int clearRookSq, int setRookSq, int side) {
-	ASSERT(pieceAt(clearRookSq) == R || pieceAt(clearRookSq) == r);
+	Assert(pieceAt(clearRookSq) == R || pieceAt(clearRookSq) == r);
 	clearPiece(ROOK, clearRookSq, side);
 	setPiece(ROOK, setRookSq, side);
 }
@@ -788,6 +788,7 @@ bitboard_t Board::squareAtkDef(int square) {
 }
 
 bitboard_t Board::isCheck(int side) {
+	// TODO use early return
 	return squareAttackedBy(getKingSquare(side), side ^ 1);
 }
 

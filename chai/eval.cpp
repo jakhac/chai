@@ -170,7 +170,7 @@ int openFilesRQ(Board* b, int side) {
 }
 
 int bishopPair(Board* b, int side) {
-	ASSERT(((bool)(countBits(b->getPieces(BISHOP, side)) >= 2)) * 30 <= 30);
+	Assert(((bool)(countBits(b->getPieces(BISHOP, side)) >= 2)) * 30 <= 30);
 	return ((bool)(countBits(b->getPieces(BISHOP, side)) >= 2)) * 30;
 }
 
@@ -360,7 +360,7 @@ int contemptFactor(Board* b) {
 		case BLACK:
 			return (contempt < -100) ? 50 : 0;
 			break;
-		default: ASSERT(0) break;
+		default: Assert(0) break;
 	}
 }
 

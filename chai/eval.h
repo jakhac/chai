@@ -3,21 +3,25 @@
 #include "board.h"
 #include "tt.h"
 
-/// <summary>
-/// Main evaluation function calculates static board evaulation.
-/// </summary>
-/// <param name="b">Current board to evaluate</param>
-/// <returns>Score in centipawns</returns>
+/**
+ * Main evaluation function calculates static board evaulation.
+ *
+ * @param  b Current board to evaluate.
+ *
+ * @returns Score in centipawns.
+ */
 int eval(Board* b);
 
-/// <summary>
-/// Evaulate all pieces of given side regarding piece square tables. 
-/// Opening and endgame tables are interpolated based on halfMoves and material.
-/// </summary>
-/// <param name="b"></param>
-/// <param name="side"></param>
-/// <param name="t"></param>
-/// <returns></returns>
+/**
+ * Evaulate all pieces of given side regarding piece square tables. Opening and endgame tables
+ * are interpolated based on halfMoves and material.
+ *
+ * @param  b    Board reference.
+ * @param  side Current side to score.
+ * @param  t    Interpolation factor.
+ *
+ * @returns An int.
+ */
 int evalPST(Board* b, int side, float* t);
 
 int materialScore(Board* b, int side);
@@ -42,11 +46,13 @@ float interpolate(int a, int b, float t);
 
 int scale(int scaler, int pressure);
 
-/// <summary>
-/// Return superiority/inferiority based on material on board.
-/// </summary>
-/// <param name="b">Board</param>
-/// <returns>Superiority/inferiority score viewed as player to move (signed)</returns>
+/**
+ * Return superiority/inferiority based on material on board.
+ *
+ * @param  b Board.
+ *
+ * @returns Superiority/inferiority score viewed as player to move (signed)
+ */
 int contemptFactor(Board* b);
 
 const int PAWN_OPEN[64] = {
@@ -62,7 +68,7 @@ const int PAWN_OPEN[64] = {
 
 const int PAWN_ENDGAME[64] = {
 	  0,  0,  0,  0,  0,  0,  0,  0
-	-20,-20,-20,-20,-20,-20,-20,-20,
+	- 20,-20,-20,-20,-20,-20,-20,-20,
 	  0,  0,  0,  0,  0,  0,  0,  0,
 	 10, 10, 10, 10, 10, 10, 10, 10,
 	 15, 15, 15, 15, 15, 15, 15, 15,
@@ -84,7 +90,7 @@ const int KNIGHT_OPEN[64] = {
 
 const int KNIGHT_ENDGAME[64] = {
 	-50,-40,-30,-30,-30,-30,-40,-50
-	-40,-20,  0,  5,  5,  0,-20,-40,
+	- 40,-20,  0,  5,  5,  0,-20,-40,
 	-30,  5, 10, 15, 15, 10,  5,-30,
 	-30,  0, 15, 20, 20, 15,  0,-30,
 	-30,  5, 15, 20, 20, 15,  5,-30,
@@ -106,7 +112,7 @@ const int BISHOP_OPEN[64] = {
 
 const int BISHOP_ENDGAME[64] = {
 	-20,-10,-10,-10,-10,-10,-10,-20
-	-10,  5,  0,  0,  0,  0,  5,-10,
+	- 10,  5,  0,  0,  0,  0,  5,-10,
 	-10, 10, 10, 10, 10, 10, 10,-10,
 	-10,  0, 10, 10, 10, 10,  0,-10,
 	-10,  5,  5, 10, 10,  5,  5,-10,
@@ -116,14 +122,14 @@ const int BISHOP_ENDGAME[64] = {
 };
 
 const int ROOK_OPEN[64] = {
-    0,  0, 20,  5,  5, 20,  0,  0,
-    5,  0,  0,  0,  0,  0,  0,  5,
+	0,  0, 20,  5,  5, 20,  0,  0,
+	5,  0,  0,  0,  0,  0,  0,  5,
    -5,  0,  0,  0,  0,  0,  0, -5,
    -5,  0,  0,  0,  0,  0,  0, -5,
    -5,  0,  0,  0,  0,  0,  0, -5,
    -5,  0,  0,  0,  0,  0,  0, -5,
    -5,  0,  0,  0,  0,  0,  0, -5,
-    0,  0,  0,  0,  0,  0,  0,  0
+	0,  0,  0,  0,  0,  0,  0,  0
 };
 
 const int ROOK_ENDGAME[64] = {
@@ -139,7 +145,7 @@ const int ROOK_ENDGAME[64] = {
 
 const int QUEEN_OPEN[64] = {
 	-20,-10,-10, -5, -5,-10,-10,-20
-	-10,  0,  5,  0,  0,  0,  0,-10,
+	- 10,  0,  5,  0,  0,  0,  0,-10,
 	-10,  5,  5,  5,  5,  5,  0,-10,
 	  0,  0,  5,  5,  5,  5,  0, -5,
 	 -5,  0,  5,  5,  5,  5,  0, -5,
@@ -150,7 +156,7 @@ const int QUEEN_OPEN[64] = {
 
 const int QUEEN_ENDGAME[64] = {
 	-20,-10,-10, -5, -5,-10,-10,-20
-	-10,  0,  5,  0,  0,  0,  0,-10,
+	- 10,  0,  5,  0,  0,  0,  0,-10,
 	-10,  5,  5,  5,  5,  5,  0,-10,
 	  0,  0,  5,  5,  5,  5,  0, -5,
 	 -5,  0,  5,  5,  5,  5,  0, -5,
@@ -172,7 +178,7 @@ const int KING_OPENING[64] = {
 
 const int KING_ENDGAME[64] = {
 	-50,-30,-30,-30,-30,-30,-30,-50
-	-30,-30,  0,  0,  0,  0,-30,-30,
+	- 30,-30,  0,  0,  0,  0,-30,-30,
 	-30,-10, 20, 30, 30, 20,-10,-30,
 	-30,-10, 30, 40, 40, 30,-10,-30,
 	-30,-10, 30, 40, 40, 30,-10,-30,
@@ -201,7 +207,7 @@ extern bitboard_t pawnShield[2][64];
 extern bitboard_t xMask[64];
 
 const int passedBonus[2][8] = {
-	{ 200, 100, 60, 35, 20, 10, 5, 0 }, 
+	{ 200, 100, 60, 35, 20, 10, 5, 0 },
 	{ 0, 5, 10, 20, 35, 60, 100, 200 }
 };
 

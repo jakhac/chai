@@ -2,20 +2,22 @@
 
 #include "stdlib.h"
 #include <string>
+#include <cassert>
 
 #include "move.h"
 #include "types.h"
 
+#define VERSION "v2.1.1 (29.12)"
+
 using namespace std;
 
 #define TESTING
-
-//#define DEBUG
+#define DEBUG
 
 #ifndef DEBUG
-#define ASSERT(n)
+#define Assert(n)
 #else
-#define ASSERT(n) \
+#define Assert(n) \
 if(!(n)) { \
 printf("%s - Failed",#n); \
 printf("On %s ",__DATE__); \

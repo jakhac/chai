@@ -4,9 +4,6 @@
 
 #include "defs.h"
 
-#ifndef MASK_H
-#define MASK_H
-
 // clear set bit masks
 extern bitboard_t setMask[64];
 extern bitboard_t clearMask[64];
@@ -35,9 +32,9 @@ extern bitboard_t pawnShield[2][64];
 extern bitboard_t xMask[64];
 extern int manhattenDistance[64][64];
 
-/// <summary>
-/// Initialize clear and set mask arrays for usage.
-/// </summary>
+/**
+ * Initialize clear and set mask arrays for usage.
+ */
 inline void initClearSetMask() {
 	int index = 0;
 
@@ -53,9 +50,9 @@ inline void initClearSetMask() {
 	}
 }
 
-/// <summary>
-/// Initialize arrays to index square to files and ranks.
-/// </summary>
+/**
+ * Initialize arrays to index square to files and ranks.
+ */
 inline void initSquareToRankFile() {
 	int sq;
 	for (int rank = RANK_8; rank >= RANK_1; rank--) {
@@ -68,9 +65,9 @@ inline void initSquareToRankFile() {
 	}
 }
 
-/// <summary>
-/// Initialize attacker mask for all pieces.
-/// </summary>
+/**
+ * Initialize attacker mask for all pieces.
+ */
 inline void initAttackerMasks() {
 	int offSet = 0;
 
@@ -104,6 +101,10 @@ inline void initAttackerMasks() {
 	}
 }
 
+
+/**
+ * Initializes the eval masks.
+ */
 inline void initEvalMasks() {
 	int file;
 	bitboard_t left, right;
@@ -149,6 +150,10 @@ inline void initEvalMasks() {
 	}
 }
 
+
+/**
+ * Initializes the manhatten mask.
+ */
 inline void initManhattenMask() {
 	int file1, file2, rank1, rank2;
 	int rankDistance, fileDistance;
@@ -167,9 +172,9 @@ inline void initManhattenMask() {
 	}
 }
 
-/// <summary>
-/// Initialize obstructed array. All bits set between start and end square.
-/// </summary>
+/**
+ * Initialize obstructed array. All bits set between start and end square.
+ */
 inline void initObstructed() {
 	const int kingd[8] = { -9, -1, 7, 8, 9, 1, -7, -8 };
 
@@ -195,14 +200,19 @@ inline void initObstructed() {
 	}
 }
 
+/**
+ * Initializes the line.
+ *
+ * @returns Bitboard;
+ */
 inline vector<bitboard_t> initLine() {
 
 	bitboard_t midDiagonalUp = 0x8040201008040201;
 	bitboard_t midDiagonalDown = 0x0102040810204080;
 	bitboard_t vertical = FILE_A_HEX;
 	bitboard_t horizontal = RANK_1_HEX;
-	vector<bitboard_t> axis = { midDiagonalDown, midDiagonalUp, vertical, horizontal, 
-		FILE_B_HEX, FILE_C_HEX, FILE_D_HEX, FILE_E_HEX, 
+	vector<bitboard_t> axis = { midDiagonalDown, midDiagonalUp, vertical, horizontal,
+		FILE_B_HEX, FILE_C_HEX, FILE_D_HEX, FILE_E_HEX,
 		FILE_F_HEX, FILE_G_HEX, FILE_H_HEX };
 
 	for (int i = 1; i < 8; i++) {
@@ -236,22 +246,39 @@ inline vector<bitboard_t> initLine() {
 	return axis;
 }
 
+/**
+ * Returns a bitboard with line set between s1 and s2.
+ *
+ * @param  s1 First point on the line.
+ * @param  s2 Second point on the line.
+ *
+ * @returns A bitboard_t.
+ */
 inline bitboard_t line_bb(int s1, int s2) {
 	return lineBB[s1][s2];
 }
 
+/**
+ * Checks if three square are aligned (horizontal, vertical, diagonal)
+ *
+ * @param  s1 The first square.
+ * @param  s2 The second square.
+ * @param  s3 The third square.
+ *
+ * @returns True if it succeeds, false if it fails.
+ */
 inline bool aligned(int s1, int s2, int s3) {
 	return line_bb(s1, s2) & s3;
 }
 
-/// <summary>
-/// Returns bitboard with all bits sets between sq1 and sq2
-/// </summary>
-/// <param name="sq1">Square 1</param>
-/// <param name="sq2">Square 2</param>
-/// <returns></returns>
+/**
+ * Returns bitboard with all bits sets between sq1 and sq2
+ *
+ * @param  sq1 Square 1.
+ * @param  sq2 Square 2.
+ *
+ * @returns A bitboard_t.
+ */
 inline bitboard_t obstructed(int sq1, int sq2) {
 	return inBetween[sq1][sq2];
 }
-
-#endif // !MASK_H

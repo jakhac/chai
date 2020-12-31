@@ -43,17 +43,17 @@ namespace {
 		EXPECT_EQ(pPerft->perftRoot(pBoard, 3), 97862);
 	}
 
-	TEST_F(PerftTest, END_POS_1) {
+	TEST_F(PerftTest, END_FEN_1) {
 		pBoard->parseFen(END_FEN_1);
 		EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 89363);
 	}
 
-	TEST_F(PerftTest, END_POS_2) {
+	TEST_F(PerftTest, END_FEN_2) {
 		pBoard->parseFen(END_FEN_2);
 		EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 54703);
 	}
 
-	TEST_F(PerftTest, END_POS_3) {
+	TEST_F(PerftTest, END_FEN_3) {
 		pBoard->parseFen(END_FEN_3);
 		EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 67197);
 	}

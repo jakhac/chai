@@ -1,17 +1,28 @@
 #pragma once
 
-/// <summary>
-/// Checks if index is square on board.
-/// </summary>
-/// <param name="sq">Square to check</param>
-/// <returns>True if square is valid</returns>
+/**
+ * Checks if index is square on board.
+ *
+ * @param  sq Square to check.
+ *
+ * @returns True if square is valid.
+ */
 int squareOnBoard(int sq);
 
-/// <summary>
-/// Checks if piece has valid index, where [1, 13] ist valid and zero is non valid.
-/// </summary>
-/// <param name="piece">Piece</param>
-/// <returns>True if piece is valid</returns>
+/**
+ * Checks if piece has valid index, where [1, 13] ist valid and zero is non valid.
+ *
+ * @param  piece Piece to check.
+ *
+ * @returns True if piece is valid.
+ */
 int pieceValid(int piece);
 
+/**
+ * File valid
+ *
+ * @param  file The file to check.
+ *
+ * @returns True if it succeeds, false if it fails.
+ */
 bool fileValid(int file);

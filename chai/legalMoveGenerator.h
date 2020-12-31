@@ -24,6 +24,7 @@ void _blackPawnCaptures(Board* b, moveList_t* move_s);
 /// </summary>
 /// <param name="b">Board</param>
 /// <param name="side">Side to move</param>
+
 void _addKnightMoves(Board* b, moveList_t* move_s);
 
 /// <summary>
