@@ -33,7 +33,8 @@ void addBlockersForSq(Board* b, moveList_t* moveList, int blockingSq);
 bool isLegal(Board* b, move_t move, bool inCheck);
 
 /**
- * Generate all possible single white pawn pushes and add to moveList.
+ * Generate all possible single white pawn pushes and add to moveList. Does not include
+ * promotions, they are handled in a seperate function.
  *
  * @param  b	    Board.
  * @param  moveList moveList struct to add moves to.
@@ -41,7 +42,8 @@ bool isLegal(Board* b, move_t move, bool inCheck);
 void whiteSinglePawnPush(Board* b, moveList_t* moveList);
 
 /**
- * Generate all possible single black pawn pushes and add to moveList.
+ * Generate all possible single black pawn pushes and add to moveList. Does not include
+ * promotions, they are handled in a seperate function.
  *
  * @param  b	    Board.
  * @param  moveList moveList struct to add moves to.

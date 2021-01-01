@@ -1,7 +1,4 @@
 TEST
-- test different move gens
-- test mating positions, winning positions
-- add asserts everywhere
 
 MOVE GEN
 # dont score moves in movegen
@@ -15,7 +12,6 @@ PROJECT
 - detect endgames (knight, bishop endgame, light/dark squared bishop)
 - iid if no hash move
 - try hash move before generating moves?
-- use inline functions for bit move macros
 - update typedefs, src, structs, key_t, ...
 
 REWRITE SEARCH
@@ -35,8 +31,13 @@ REWRITE SEARCH
 # counter moves
 # history heuristic
 
+QUIESENCE:
+- see pruning
+- hash table with negative depth in qsearch
+- add checkers in first quiesence ply
+
 HASH TABLE
-- prefetch table instruction
+# prefetch table instruction
 - buckets
 - rework table probing (in search)
 - hash table with negative depth in qsearch

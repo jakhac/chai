@@ -1,42 +1,15 @@
 #include "main.h"
 
-/*
-* 500 Games vs TSCP181 with 40/0.4
-*
-* 275-162-63 (61%) +78
-*	- pvs
-*	- lmr
-*	- futility pruning
-*	- static null move pruning
-*	- pv move in quiesence
-*
-* 285-133-82 (65%) +108
-*	- pvs
-*	- lmr
-*	- futility pruning
-*	- static null move pruning
-*	+ pv move in quiesence
-*
-* 312-108-80 (70%) +147
-*	- pvs
-*	- lmr
-*	+ futility pruning
-*	- static null move pruning
-*	+ pv move in quiesence
-*
-* 353-112-70 (71%) +156 [310-119-71 (70%) +147]
-*	- pvs
-*	- lmr
-*	+ futility pruning
-*	+ static null move pruning
-*	+ pv move in quiesence
-*/
-
 int main() {
 	init(&board);
-	board.parseFen(STARTING_FEN);
+	board.parseFen(BUG_FEN);
 	board.printBoard();
 	log("\nStartup");
+
+	//moveList_t moveList[1];
+	//generateQuiesence(&board, moveList, false);
+	//scoreMovesQuiesence(&board, moveList);
+	//return 0;
 
 	play(&board, &perft, s);
 

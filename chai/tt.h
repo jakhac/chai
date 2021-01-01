@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "board.h"
 #include "moveGenerator.h"
 
@@ -26,6 +28,13 @@ void initTT(ttable_t* pvTable_s);
  * @param  pvTable_s Transposition table.
  */
 void clearTT(ttable_t* pvTable_s);
+
+/**
+ * Prefetch tt entry into cache using assembly instructions.
+ *
+ * @param  key The zobrist hash of current board.
+ */
+void prefetchTTEntry(Board* b);
 
 /**
  * Store a transposition entry containing score, score flag, move and depth in in transposition

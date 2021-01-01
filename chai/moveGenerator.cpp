@@ -64,51 +64,6 @@ void generateQuiesence(Board* b, moveList_t* moveList, bool inCheck) {
 	addKingCaptures(b, moveList);
 }
 
-bool isLegal(Board* b, move_t move, bool inCheck) {
-
-	// if inCheck, push move and test for legality
-	if (inCheck) {
-		if (!b->push(move)) {
-			return false;
-		}
-		b->pop();
-		return true;
-	}
-
-	int kSq = b->getKingSquare(b->side);
-	int from = fromSq(move);
-	int to = toSq(move);
-
-	// if king is moving, check if toSq is attacked by opp
-	if (from == kSq) {
-		bitboard_t attackedSquares = b->attackerSet(b->side ^ 1);
-		return !(attackedSquares & setMask[toSq(move)]);
-	}
-
-	// if moving piece is pinned to king, check if toSq is within pinning line + pinner
-	bitboard_t pinned = b->pinned(kSq, b->side);
-	if (pinned & setMask[fromSq(move)]) {
-
-		bitboard_t pinner = b->pinner(kSq, b->side);
-		bitboard_t pinningLine;
-		int pinnerSq;
-
-		// find pinner for moving piece
-		while (&pinner) {
-			pinnerSq = popBit(&pinner);
-			pinningLine = line_bb(pinnerSq, kSq);
-
-			if (pinningLine & setMask[from]) {
-				break;
-			}
-		}
-		// check if pinned piece is moving along pinning line
-		return pinningLine & setMask[to];
-	}
-
-	return true;
-}
-
 void generateCheckEvasions(Board* b, moveList_t* moveList) {
 	int kSq = b->getKingSquare(b->side);
 	int blockerSq;
@@ -167,6 +122,51 @@ void generateCheckEvasions(Board* b, moveList_t* moveList) {
 	}
 }
 
+bool isLegal(Board* b, move_t move, bool inCheck) {
+
+	// if inCheck, push move and test for legality
+	if (inCheck) {
+		if (!b->push(move)) {
+			return false;
+		}
+		b->pop();
+		return true;
+	}
+
+	int kSq = b->getKingSquare(b->side);
+	int from = fromSq(move);
+	int to = toSq(move);
+
+	// if king is moving, check if toSq is attacked by opp
+	if (from == kSq) {
+		bitboard_t attackedSquares = b->attackerSet(b->side ^ 1);
+		return !(attackedSquares & setMask[toSq(move)]);
+	}
+
+	// if moving piece is pinned to king, check if toSq is within pinning line + pinner
+	bitboard_t pinned = b->pinned(kSq, b->side);
+	if (pinned & setMask[fromSq(move)]) {
+
+		bitboard_t pinner = b->pinner(kSq, b->side);
+		bitboard_t pinningLine;
+		int pinnerSq;
+
+		// find pinner for moving piece
+		while (&pinner) {
+			pinnerSq = popBit(&pinner);
+			pinningLine = line_bb(pinnerSq, kSq);
+
+			if (pinningLine & setMask[from]) {
+				break;
+			}
+		}
+		// check if pinned piece is moving along pinning line
+		return pinningLine & setMask[to];
+	}
+
+	return true;
+}
+
 void addBlockersForSq(Board* b, moveList_t* moveList, int blockingSq) {
 	bitboard_t blocker = b->blockerSet(b->side, blockingSq);
 
@@ -202,15 +202,6 @@ void whiteSinglePawnPush(Board* board, moveList_t* moveList) {
 		sq = popBit(&pushedPawns);
 		moveList->moves[moveList->cnt++] = serializeMove(sq - 8, sq, EMPTY, EMPTY, EMPTY);
 	}
-
-	// prom pawn pushes
-	//while (promPawns) {
-	//	sq = popBit(&promPawns);
-	//	moveList->moves[moveList->cnt++] = serializeMove(sq - 8, sq, EMPTY, Q, EMPTY);
-	//	moveList->moves[moveList->cnt++] = serializeMove(sq - 8, sq, EMPTY, R, EMPTY);
-	//	moveList->moves[moveList->cnt++] = serializeMove(sq - 8, sq, EMPTY, B, EMPTY);
-	//	moveList->moves[moveList->cnt++] = serializeMove(sq - 8, sq, EMPTY, N, EMPTY);
-	//}
 }
 
 void blackSinglePawnPush(Board* board, moveList_t* moveList) {
@@ -227,15 +218,6 @@ void blackSinglePawnPush(Board* board, moveList_t* moveList) {
 		sq = popBit(&pushedPawns);
 		moveList->moves[moveList->cnt++] = serializeMove(sq + 8, sq, EMPTY, EMPTY, EMPTY);
 	}
-
-	//// prom pawn pushes
-	//while (promPawns) {
-	//	sq = popBit(&promPawns);
-	//	moveList->moves[moveList->cnt++] = serializeMove(sq + 8, sq, EMPTY, q, EMPTY);
-	//	moveList->moves[moveList->cnt++] = serializeMove(sq + 8, sq, EMPTY, r, EMPTY);
-	//	moveList->moves[moveList->cnt++] = serializeMove(sq + 8, sq, EMPTY, b, EMPTY);
-	//	moveList->moves[moveList->cnt++] = serializeMove(sq + 8, sq, EMPTY, n, EMPTY);
-	//}
 }
 
 void whitePawnPushProm(Board* b, moveList_t* moveList) {

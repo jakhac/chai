@@ -788,7 +788,7 @@ bitboard_t Board::squareAtkDef(int square) {
 }
 
 bitboard_t Board::isCheck(int side) {
-	// TODO use early return
+	// TODO use early return or write gives check function
 	return squareAttackedBy(getKingSquare(side), side ^ 1);
 }
 

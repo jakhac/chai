@@ -50,7 +50,7 @@ constexpr auto MCHECK_PROM = 0xF00000;
 /**
  * Checks, if move is a promotion or capture.
  */
-constexpr auto MCHECK_PROMCAP = MCHECK_PROM | MCHECK_CAP;
+constexpr auto MCHECK_PROM_OR_CAP = MCHECK_PROM | MCHECK_CAP;
 
 /**
  * Checks, if move is castling.

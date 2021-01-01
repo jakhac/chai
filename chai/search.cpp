@@ -101,6 +101,9 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		depth = min(depth + 1, MAX_DEPTH);
 	}
 
+	// prefetch ttable entry into cache
+	prefetchTTEntry(b);
+
 	// probe hash table for pv move and early cutoff
 	int score = -INF;
 	move_t pvMove = NO_MOVE;
@@ -156,7 +159,8 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	moveList_t moveList[1];
 	generateMoves(b, moveList, inCheck);
 
-	// check if hash move is possible
+	// score hash move -> check already done in scoreMoves
+	/*// check if hash move is possible
 	if (pvMove != NO_MOVE) {
 		for (int i = 0; i < moveList->cnt; i++) {
 			if (pvMove == moveList->moves[i]) {
@@ -165,9 +169,9 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 				break;
 			}
 		}
-	}
+	}*/
 
-	scoreMoves(b, moveList, pvMove);
+	scoreMovesAlphaBeta(b, moveList, pvMove);
 
 	move_t currentMove;
 	move_t bestMove = NO_MOVE;
@@ -289,9 +293,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			* in check (already considered in move ordering). Remember maximum history score and
 			* rescale if needed to prevent overflow.
 			*/
-			if (!inCheck
-				&& !(currentMove & MCHECK_CAP)
-				&& !(currentMove & MCHECK_PROM)) {
+			if (!inCheck && !(currentMove & MCHECK_PROM_OR_CAP)) {
 				int piece = b->pieceAt(fromSq(currentMove));
 				int to = toSq(currentMove);
 
@@ -317,8 +319,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			*/
 			if (!inCheck
 				&& b->ply > 0
-				&& !(currentMove & MCHECK_CAP)
-				&& !(currentMove & MCHECK_PROM)
+				&& !(currentMove & MCHECK_PROM_OR_CAP)
 				&& currentMove != NULL_MOVE) {
 				move_t prevMove = b->undoHistory[b->ply - 1].move;
 				if (prevMove != NULL_MOVE) {
@@ -339,7 +340,8 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			bestScore = score;
 			bestMove = currentMove;
 
-			/* If the currentMove scores higher than alpha, the principal variation
+			/*
+			* If the currentMove scores higher than alpha, the principal variation
 			* is updated because a better move for this position has been found.
 			* This information can be stored in (counter) history heuristic to improve
 			* further move ordering.
@@ -403,13 +405,7 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 		return beta;
 	}
 
-	int score = -INF;
-	//int pvMove = NO_MOVE;
-	//b->tt->probed++;
-	// //try pvMove found from hash table
-	//probeTT(b, &pvMove, &score, alpha, beta, MAX_DEPTH + 1);
-
-   // rise alpha to stand pat
+	// rise alpha to stand pat
 	if (standPat > alpha) {
 		alpha = standPat;
 	}
@@ -418,40 +414,42 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 	int legalMoves = 0;
 	int oldAlpha = alpha;
 	int bestMove = 0;
-	score = -INF;
+	int score = -INF;
 
-	moveList_t move_s[1];
-	generateQuiesence(b, move_s, inCheck);
+	moveList_t moveList[1];
+	generateQuiesence(b, moveList, inCheck);
 
-	scoreMoves(b, move_s, NO_MOVE);
+	// If in check, all evading moves are generated and have to be scored differently.
+	// Quiesence move ordering only handles captures and promotions.
+	if (inCheck) {
+		scoreMovesAlphaBeta(b, moveList, NO_MOVE);
+	} else {
+		scoreMovesQuiesence(b, moveList);
+	}
 
-	//if (pvMove != NO_MOVE && CAPTURED(pvMove)) {
-	//	for (int i = 0; i < move_s->moveCounter; i++) {
-	//		if (pvMove == move_s->moveList[i]) {
-	//			s->pvHits++;
-	//			move_s->moveScore[i] = 2000000;
-	//			break;
-	//		}
-	//	}
-	//}
-
-	for (int i = 0; i < move_s->cnt; i++) {
-		getNextMove(b, move_s, i);
-		int currentMove = move_s->moves[i];
+	// TODO explain state
+	for (int i = 0; i < moveList->cnt; i++) {
+		getNextMove(b, moveList, i);
+		int currentMove = moveList->moves[i];
 
 		// either position is a check or we capture / promote / enpas
-		Assert(inCheck || (currentMove & MCHECK_PROMCAP || currentMove & MFLAG_EP));
+		Assert(inCheck || (currentMove & MCHECK_PROM_OR_CAP || currentMove & MFLAG_EP));
 
 		// Delta cutoff: prune moves that cannot improve over alpha
 		bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
-		if (standPat + pieceScores[capPiece(currentMove)] + 200 < alpha &&
+		/*if (standPat + pieceScores[capPiece(currentMove)] + 200 < alpha &&
 			!endGame && !(MCHECK_PROM & currentMove)) {
 			continue;
-		}
+		}*/
 
-		// TODO see pruning might not be correct, adjust to new move ordering
-		// SEE pruning, skip nodes with negative see score
-		//if (move_s->scores[i] < 0 && !(MCHECK_PROM & currentMove)) continue;
+		/*
+		* If SEE score is negative, this is a losing capture. Since there is little to no chance that
+		* this move raises alpha, it can be pruned. Do not prune forced captures, since this position
+		* still not resolved.
+		*/
+		if (!inCheck && moveList->scores[i] < (BAD_CAPTURE + MVV_LVA_UBOUND)) {
+			continue;
+		}
 
 		if (!b->push(currentMove)) continue;
 
@@ -470,7 +468,7 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 				return beta;
 			}
 			alpha = score;
-			bestMove = move_s->moves[i];
+			bestMove = moveList->moves[i];
 		}
 	}
 
@@ -590,13 +588,13 @@ int search(Board* b, search_t* s) {
 
 		cout << "\n";
 		cout << "Ordering percentage: \t\t" << setprecision(3) << fixed << (float)(s->fhf / s->fh) << endl;
-		//cout << "T table hit percentage: \t" << setprecision(3) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
-		//cout << "T table hit used: \t\t" << (float)(b->tt->valueHit) / (b->tt->probed) << endl;
-		//cout << "T table memory used: \t\t" << setprecision(5) << fixed << (float)(b->tt->stored) / (b->tt->entries) << endl;
-		//cout << "Pawn table hit percentage: \t" << setprecision(3) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
-		//cout << "Pawn table memory used: \t" << setprecision(5) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
-		//cout << "Pawn table collisions: \t\t" << setprecision(3) << fixed << b->pawnTable->collided << endl;
-		//cout << endl;
+		cout << "T table hit percentage: \t" << setprecision(3) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
+		cout << "T table hit used: \t\t" << (float)(b->tt->valueHit) / (b->tt->probed) << endl;
+		cout << "T table memory used: \t\t" << setprecision(5) << fixed << (float)(b->tt->stored) / (b->tt->entries) << endl;
+		cout << "Pawn table hit percentage: \t" << setprecision(3) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
+		cout << "Pawn table memory used: \t" << setprecision(5) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
+		cout << "Pawn table collisions: \t\t" << setprecision(3) << fixed << b->pawnTable->collided << endl;
+		cout << endl;
 
 		// quit when checkmate was found
 		/*if (currentDepth > 1 && bestScore > ISMATE) {

@@ -102,6 +102,11 @@ bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
 	return false;
 }
 
+void prefetchTTEntry(Board* b) {
+	int index = b->zobristKey % b->tt->entries;
+	_m_prefetch(&b->tt->table[index]);
+}
+
 int probePV(Board* b) {
 	int index = b->zobristKey % b->tt->entries;
 	Assert(index >= 0 && index <= b->tt->entries - 1);
