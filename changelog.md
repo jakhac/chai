@@ -74,7 +74,6 @@
   - Negative see pruning
   - `scoreMovesQuiesence`
   - No stand pat pruning when in check
-  - ***TODO: generate tactical moves and checkers at first qui ply***
 - Transposition Table
   - Prefetch transposition table
   - Size = 128MB
@@ -82,7 +81,7 @@
   - moveScores in alphaBeta swapped moves but not scores
   - counterMoves, EP moves, castleMoves scored wrong at index
   - assign correct PROMOTION bonus in alphaBeta and qui moveScoring
-- ***TODO: Reference movegen getline(fen)***
+- Chose FEN in perft option
 
 # Todo
 
@@ -123,7 +122,7 @@
 - Quiesence
   - see pruning
   - hash table with negative depth in qsearch
-  - add checkers in first quiesence ply
+  - Add checkers in first quiesence ply
 
 - Hash table
   - ~~prefetch table instruction~~
