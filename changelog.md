@@ -62,27 +62,27 @@
   - Size = 16MB
   - Hash move used in move ordering
 
-**Change log from 01.01.21**
+**Change log from 03.01.21**
 - Results
   - chai - TSCP181 &rarr;
   - chai - Bubble &rarr;
 - Move Ordering:
   - Promoting captures are sorted higher than normal captures
-  - ***Decrement entries***
 - Quiesence
   - Removed Delta cutoff
-  - ***TODO: checkers at first qui ply***
-  - ***TODO: `lazySee()` Early exit in see calculation (attackerVal < capVal)***
-  - ***TODO: negative see pruning***
-  - ***TODO: no stand pat pruning when in check***
-  - ***TODO: `scoreMovesQuiesence()`***
+  - Early return in see calculation for quiesence (attackerVal < capVal), `lazySee()`
+  - Negative see pruning
+  - `scoreMovesQuiesence`
+  - No stand pat pruning when in check
+  - ***TODO: generate tactical moves and checkers at first qui ply***
 - Transposition Table
   - Prefetch transposition table
   - Size = 128MB
 - Fixes and bugs
   - moveScores in alphaBeta swapped moves but not scores
   - counterMoves, EP moves, castleMoves scored wrong at index
-  - assign PROMOTION bonus in alphaBeta and qui moveScoring
+  - assign correct PROMOTION bonus in alphaBeta and qui moveScoring
+- ***TODO: Reference movegen getline(fen)***
 
 # Todo
 
@@ -92,14 +92,16 @@
   - ~~check evasion~~
   -  ~~quiesence move gen (captures, promotions, check evasions)~~
   - add checks in first ply
-  - special see function with early exit for captures like PxQ
-  - ***faster isCheck method? instead of inCheck() -> only check pinned pieces / king attacks of last move***
+  - ~~special see function with early exit for captures like PxQ~~
+  - Early return inCheck function is fastest and most reliable, do not use isLegal or leaesKingInCheck
+    - ~~faster isCheck method? instead of inCheck() -> only check pinned pieces / king attacks of last move~~
 
 - Project
   - clean up utils, attacks, helper bitboards
   - detect endgames (knight, bishop endgame, light/dark squared bishop)
   - try hash move before generating moves?
   - update typedefs, src, structs, key_t, ...
+  - Error handler for invalid FEN
 
 - Alpha Beta
   - adaptive null move pruning -> drop into qui

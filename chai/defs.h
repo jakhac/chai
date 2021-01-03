@@ -7,12 +7,12 @@
 #include "move.h"
 #include "types.h"
 
-#define VERSION "v2.1.1 (29.12)"
+#define VERSION "v2.1.2 0301"
 
 using namespace std;
 
-#define TESTING
-#define DEBUG
+//#define TESTING
+//#define DEBUG
 
 #ifndef DEBUG
 #define Assert(n)

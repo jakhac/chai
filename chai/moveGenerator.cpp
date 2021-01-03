@@ -10,6 +10,7 @@ void generateMoves(Board* b, moveList_t* moveList, bool inCheck) {
 	}
 	Assert(!b->isCheck(b->side));
 
+
 	if (b->side == WHITE) {
 		whiteSinglePawnPush(b, moveList);
 		whitePawnPushProm(b, moveList);
@@ -38,7 +39,7 @@ void generateMoves(Board* b, moveList_t* moveList, bool inCheck) {
 	addQueenCaptures(b, moveList);
 }
 
-void generateQuiesence(Board* b, moveList_t* moveList, bool inCheck) {
+void generateQuiescence(Board* b, moveList_t* moveList, bool inCheck) {
 	moveList->cnt = 0;
 	moveList->attackedSquares = b->attackerSet(b->side ^ 1);
 
@@ -72,7 +73,7 @@ void generateCheckEvasions(Board* b, moveList_t* moveList) {
 	Assert(b->isCheck(b->side));
 	Assert(countBits(attacker) > 0);
 
-	// Single Check: legal king moves + (blocks or captures by non-pinned pieces)
+	// Single Check: blocks or captures by non-pinned pieces are possible
 	if (countBits(attacker) < 2) {
 		int attackerSq = bitscanForward(attacker);
 		int attackerPiece = b->pieceAt(attackerSq);
@@ -89,13 +90,32 @@ void generateCheckEvasions(Board* b, moveList_t* moveList) {
 
 		// Always: squareAttackedBy -> calculate attacks to piece that delivers check
 		bitboard_t defender = b->squareAttackedBy(attackerSq, b->side);
+		bitboard_t promDefends = 0ULL;
+
+		// defenders that promote with capture
+		if (attacker & (RANK_1_HEX | RANK_8_HEX)) {
+			promDefends = defender & b->pieces[PAWN] & (RANK_2_HEX | RANK_7_HEX);
+		}
+
+		defender &= ~promDefends;
 		int defenderSq;
 		while (defender) {
 			defenderSq = popBit(&defender);
 			moveList->moves[moveList->cnt++] = serializeMove(defenderSq, attackerSq, attackerPiece, EMPTY, EMPTY);
 		}
 
-		// if pawn threating check can be captured en passant
+		// Promoting with capturing the checking piece
+		while (promDefends) {
+			int pieceOffset = (b->side == WHITE) ? 0 : 6;
+			defenderSq = popBit(&promDefends);
+
+			moveList->moves[moveList->cnt++] = serializeMove(defenderSq, attackerSq, attackerPiece, Q + pieceOffset, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(defenderSq, attackerSq, attackerPiece, R + pieceOffset, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(defenderSq, attackerSq, attackerPiece, B + pieceOffset, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(defenderSq, attackerSq, attackerPiece, N + pieceOffset, EMPTY);
+		}
+
+		// if pawn is threatening check but can be captured en passant
 		if (b->enPas) {
 			if (b->side == WHITE) {
 				if (b->enPas == attackerSq + 8 && b->pieceAt(attackerSq - 1) == P) {
@@ -113,58 +133,104 @@ void generateCheckEvasions(Board* b, moveList_t* moveList) {
 				}
 			}
 		}
-
-		addKingCheckEvasions(b, moveList);
-
-	} else {
-		// Double Check: king moves only
-		addKingCheckEvasions(b, moveList);
 	}
+
+	// Always add king evasions to non-attacked squares
+	addKingCheckEvasions(b, moveList);
 }
 
-bool isLegal(Board* b, move_t move, bool inCheck) {
+void generateQuietCheckers(Board* b, moveList_t* moveList) {
+	Assert(!b->isCheck(b->side));
 
-	// if inCheck, push move and test for legality
-	if (inCheck) {
-		if (!b->push(move)) {
-			return false;
-		}
-		b->pop();
-		return true;
-	}
+	int sq, atk_sq;
+	int oppkSq = b->getKingSquare(b->side ^ 1);
+	int ownkSq = b->getKingSquare(b->side);
+	bitboard_t pieces;
+	bitboard_t kingBoard = setMask[oppkSq];
 
-	int kSq = b->getKingSquare(b->side);
-	int from = fromSq(move);
-	int to = toSq(move);
+	// Pawn pushes that check the king
+	bitboard_t pawns;
+	if (b->side == WHITE) {
+		pawns = (b->getPieces(PAWN, WHITE) << 8) & ~b->occupied;
 
-	// if king is moving, check if toSq is attacked by opp
-	if (from == kSq) {
-		bitboard_t attackedSquares = b->attackerSet(b->side ^ 1);
-		return !(attackedSquares & setMask[toSq(move)]);
-	}
-
-	// if moving piece is pinned to king, check if toSq is within pinning line + pinner
-	bitboard_t pinned = b->pinned(kSq, b->side);
-	if (pinned & setMask[fromSq(move)]) {
-
-		bitboard_t pinner = b->pinner(kSq, b->side);
-		bitboard_t pinningLine;
-		int pinnerSq;
-
-		// find pinner for moving piece
-		while (&pinner) {
-			pinnerSq = popBit(&pinner);
-			pinningLine = line_bb(pinnerSq, kSq);
-
-			if (pinningLine & setMask[from]) {
-				break;
+		pieces = pawns;
+		while (pieces) {
+			sq = popBit(&pieces);
+			if (pawnAtkMask[WHITE][sq] & kingBoard) {
+				moveList->moves[moveList->cnt++] = serializeMove(sq - 8, sq, EMPTY, EMPTY, EMPTY);
 			}
 		}
-		// check if pinned piece is moving along pinning line
-		return pinningLine & setMask[to];
+
+		pieces = (pawns << 8) & ~b->occupied;
+		while (pieces) {
+			sq = popBit(&pieces);
+			if (pawnAtkMask[WHITE][sq] & kingBoard) {
+				moveList->moves[moveList->cnt++] = serializeMove(sq - 16, sq, EMPTY, EMPTY, EMPTY);
+			}
+		}
+	} else {
+		pawns = (b->getPieces(PAWN, BLACK) >> 8) & ~b->occupied;
+
+		pieces = pawns;
+		while (pieces) {
+			sq = popBit(&pieces);
+			if (pawnAtkMask[BLACK][sq] & kingBoard) {
+				moveList->moves[moveList->cnt++] = serializeMove(sq + 8, sq, EMPTY, EMPTY, EMPTY);
+			}
+		}
+
+		pieces = (pawns << 8) & ~b->occupied;
+		while (pieces) {
+			sq = popBit(&pieces);
+			if (pawnAtkMask[BLACK][sq] & kingBoard) {
+				moveList->moves[moveList->cnt++] = serializeMove(sq + 16, sq, EMPTY, EMPTY, EMPTY);
+			}
+		}
 	}
 
-	return true;
+	// Sliders that attack king: check if a piece can slide to kingAtkLines -> found quiet check
+	bitboard_t kingAtkLines = lookUpBishopMoves(oppkSq, b->occupied);
+	pieces = b->getPieces(BISHOP, b->side) | b->getPieces(QUEEN, b->side);
+
+	bitboard_t diagMoves;
+	while (pieces) {
+		sq = popBit(&pieces);
+		diagMoves = lookUpBishopMoves(sq, b->occupied) & ~b->occupied;
+		diagMoves &= kingAtkLines;
+
+		while (diagMoves) {
+			atk_sq = popBit(&diagMoves);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, EMPTY, EMPTY, EMPTY);
+		}
+	}
+
+	kingAtkLines = lookUpRookMoves(oppkSq, b->occupied);
+	bitboard_t vertHoriMoves;
+	pieces = b->getPieces(ROOK, b->side) | b->getPieces(QUEEN, b->side);
+	while (pieces) {
+		sq = popBit(&pieces);
+		vertHoriMoves = lookUpRookMoves(sq, b->occupied) & ~b->occupied;
+		vertHoriMoves &= kingAtkLines;
+
+		while (vertHoriMoves) {
+			atk_sq = popBit(&vertHoriMoves);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, EMPTY, EMPTY, EMPTY);
+		}
+	}
+
+	// Knight moves that check king
+	bitboard_t knightChecks;
+	bitboard_t kingKnightPattern = knightAtkMask[oppkSq];
+	pieces = b->getPieces(KNIGHT, b->side);
+	while (pieces) {
+		sq = popBit(&pieces);
+		knightChecks = knightAtkMask[sq] & kingKnightPattern & ~b->occupied;
+
+		while (knightChecks) {
+			atk_sq = popBit(&knightChecks);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, EMPTY, EMPTY, EMPTY);
+		}
+	}
 }
 
 void addBlockersForSq(Board* b, moveList_t* moveList, int blockingSq) {
@@ -550,8 +616,12 @@ void addKingCheckEvasions(Board* b, moveList_t* moveList) {
 	int kSq = b->getKingSquare(b->side);
 	int to;
 
-	bitboard_t quietSquares = kingAtkMask[kSq] & ~moveList->attackedSquares & ~b->occupied;
-	bitboard_t capSquares = kingAtkMask[kSq] & ~moveList->attackedSquares & b->color[b->side ^ 1];
+	b->clearPiece(piece, kSq, b->side);
+	bitboard_t atkSquares = b->attackerSet(b->side ^ 1);
+	b->setPiece(piece, kSq, b->side);
+
+	bitboard_t quietSquares = kingAtkMask[kSq] & ~atkSquares & ~b->occupied;
+	bitboard_t capSquares = kingAtkMask[kSq] & ~atkSquares & b->color[b->side ^ 1];
 
 	// generate quiet check evasions
 	while (quietSquares) {

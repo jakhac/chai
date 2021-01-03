@@ -75,7 +75,7 @@ int see(Board* b, const int move);
 /**
  * Calculates static exchange evalution starting with given move. Includes early exit with
  * estiamted SEE score if the captured piece is worth more than the attacker piece.
- * Currently used in quiesence move ordering, since stand pat allows to not capture back
+ * Currently used in quiescence move ordering, since stand pat allows to not capture back
  * if exchange is already won.
  *
  * @param  b    Current board.
@@ -97,12 +97,12 @@ int lazySee(Board* b, const int move);
 void scoreMovesAlphaBeta(Board* b, moveList_t* moveList, move_t hashMove);
 
 /**
- * Score moves quiesence
+ * Score moves quiescence
  *
  * @param  b	    Reference to board.
  * @param  moveList Reference to moveList to score moves in.
  */
-void scoreMovesQuiesence(Board* b, moveList_t* moveList);
+void scoreMovesQuiescence(Board* b, moveList_t* moveList);
 
 /**
  * Update the index of the move with highest score yet. Used to swap best move to the end after

@@ -58,20 +58,20 @@ namespace {
 		EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 67197);
 	}
 
-	TEST_F(PerftTest, START_POS_EGAL) {
-		pBoard->parseFen(STARTING_FEN);
-		EXPECT_EQ(pPerft->perftLegalRoot(pBoard, 4), 197281);
-	}
+	//TEST_F(PerftTest, START_POS_EGAL) {
+	//	pBoard->parseFen(STARTING_FEN);
+	//	EXPECT_EQ(pPerft->perftLegalRoot(pBoard, 4), 197281);
+	//}
 
-	TEST_F(PerftTest, MID_FEN_LEGAL) {
-		pBoard->parseFen(MID_FEN);
-		EXPECT_EQ(pPerft->perftLegalRoot(pBoard, 3), 97862);
-	}
+	//TEST_F(PerftTest, MID_FEN_LEGAL) {
+	//	pBoard->parseFen(MID_FEN);
+	//	EXPECT_EQ(pPerft->perftLegalRoot(pBoard, 3), 97862);
+	//}
 
-	TEST_F(PerftTest, END_POS_3_LEGAL) {
-		pBoard->parseFen(END_FEN_3);
-		EXPECT_EQ(pPerft->perftLegalRoot(pBoard, 4), 67197);
-	}
+	//TEST_F(PerftTest, END_POS_3_LEGAL) {
+	//	pBoard->parseFen(END_FEN_3);
+	//	EXPECT_EQ(pPerft->perftLegalRoot(pBoard, 4), 67197);
+	//}
 
 } // namespace perft
 

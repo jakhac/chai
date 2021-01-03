@@ -40,6 +40,7 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="testCheckers.cpp" />
     <ClCompile Include="testMoves.cpp" />
     <ClCompile Include="testSearch.cpp" />
     <ClCompile Include="testSee.cpp" />

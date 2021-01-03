@@ -787,9 +787,117 @@ bitboard_t Board::squareAtkDef(int square) {
 	return attacker;
 }
 
-bitboard_t Board::isCheck(int side) {
-	// TODO use early return or write gives check function
-	return squareAttackedBy(getKingSquare(side), side ^ 1);
+bool Board::isCheck(int side) {
+	//return squareAttackedBy(getKingSquare(side), side ^ 1);
+	int kSq = getKingSquare(side);
+
+	if (pawnAtkMask[side][kSq] & getPieces(PAWN, side ^ 1)) {
+		return true;
+	}
+
+	if (knightAtkMask[kSq] & getPieces(KNIGHT, side ^ 1)) {
+		return true;
+	}
+
+	if (lookUpBishopMoves(kSq, occupied) & (getPieces(BISHOP, side ^ 1) | getPieces(QUEEN, side ^ 1))) {
+		return true;
+	}
+
+	if (lookUpRookMoves(kSq, occupied) & (getPieces(ROOK, side ^ 1) | getPieces(QUEEN, side ^ 1))) {
+		return true;
+	}
+
+	return false;
+}
+
+bool Board::leavesKingInCheck(Board* b, const move_t move, const bool inCheck) {
+	cout << "Do not use. Board::leavesKingInCheck did not passed perft testing.\n"; exit(0);
+	// Always return true if in check, because check evasions gen only adds legal evasions
+	if (inCheck) {
+		return false;
+	}
+	Assert(!isCheck(side));
+
+	// does move leave the king in check?
+
+	int to = toSq(move);
+	int from = fromSq(move);
+	int movingPiece = pieceAt(from);
+
+	// If moving piece is king, check if to square is attacked by opponent.
+	if (movingPiece == K || movingPiece == k) {
+		bitboard_t atks = attackerSet(side ^ 1) & setMask[to];
+		return atks;
+	}
+
+	// if moving piece is pinned to king, check if toSq is within pinning line + pinner
+	int kSq = getKingSquare(side);
+	bitboard_t pinned = b->pinned(kSq, b->side);
+	if (pinned & setMask[fromSq(move)]) {
+		bitboard_t pinner = b->pinner(kSq, b->side);
+		bitboard_t pinningLine;
+		int pinnerSq;
+
+		// find pinner for moving piece
+		while (&pinner) {
+			pinnerSq = popBit(&pinner);
+			pinningLine = line_bb(pinnerSq, kSq);
+
+			if (pinningLine & setMask[from]) {
+				break;
+			}
+		}
+		// check if pinned piece is moving along pinning line
+		return !(pinningLine & setMask[to]);
+	}
+
+	// Check if enPas capture discovers check
+	if (MCHECK_EP & move) {
+		Assert(enPas > 0);
+		Assert(to == enPas);
+		Assert(piecePawn[movingPiece]);
+		// check all obstructed lines between king and sliders with both pawns removed
+
+		// remove both pawns and check for if king can be attacked
+		int offSet = (side == WHITE) ? -8 : 8;
+		int capPawn = pieceAt(enPas + offSet);
+
+		clearPiece(capPawn, enPas + offSet, side ^ 1); // clear captured pawn
+		clearPiece(movingPiece, from, side); // clear en passanting pawn
+
+		bool legal = squareAttackedBy(kSq, side ^ 1);
+
+		setPiece(capPawn, from, side ^ 1);
+		setPiece(movingPiece, enPas + offSet, side);
+
+		return legal;
+
+		/*bitboard_t capturedPawn = setMask[enPas];
+		bitboard_t diagPawn = setMask[from];
+		bitboard_t slidingAttackers = b->getPieces(ROOK, side ^ 1) | b->getPieces(QUEEN, side ^ 1) | b->getPieces(BISHOP, side ^ 1);
+
+		int sq, kSq = b->getKingSquare(side);
+		bitboard_t obstructedLine;
+		while (slidingAttackers) {
+			sq = popBit(&slidingAttackers);
+			obstructedLine = obstructed(sq, kSq);
+
+			// Skip if there is no line between kSq and captured pawn
+			if (!obstructedLine) {
+				continue;
+			}
+
+			// Found discovered en passant check if:
+			// Obstructed line between kSq and attacker without captured pawn is empty
+			if (!(obstructedLine & (b->occupied & ~capturedPawn))) {
+				printBitBoard(&obstructedLine);
+				cout << "Attacker on sq " << sq << endl;
+				return true;
+			}
+		}*/
+	}
+
+	return false;
 }
 
 bool Board::castleValid(int castle, bitboard_t* attackerSet) {

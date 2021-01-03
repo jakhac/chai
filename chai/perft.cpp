@@ -6,8 +6,9 @@ long long Perft::perftRoot(Board* b, int depth) {
 	auto start = std::chrono::high_resolution_clock::now();
 
 	leafNodes = 0;
+	bool inCheck = b->isCheck(b->side);
 	moveList_t _moveList[1];
-	generateMoves(b, _moveList, b->isCheck(b->side));
+	generateMoves(b, _moveList, inCheck);
 
 	int move;
 	int moveNum = 0;
@@ -33,7 +34,6 @@ long long Perft::perftRoot(Board* b, int depth) {
 }
 
 void Perft::perft(Board* b, int depth) {
-
 	Assert(b->checkBoard());
 
 	if (depth == 0) {
@@ -41,8 +41,28 @@ void Perft::perft(Board* b, int depth) {
 		return;
 	}
 
+	bool inCheck = b->isCheck(b->side);
 	moveList_t _moveList[1];
-	generateMoves(b, _moveList, b->isCheck(b->side));
+	generateMoves(b, _moveList, inCheck);
+
+	// check if quiet checkers all deliver check
+	/*if (!inCheck) {
+		moveList_t checkers[1];
+		generateQuietCheckers(b, checkers);
+
+		for (int i = 0; i < checkers->cnt; i++) {
+			if (!b->push(checkers->moves[i])) continue;
+
+			if (!b->isCheck(b->side)) {
+				b->printBoard();
+				cout << "Move " << getStringMove(checkers->moves[i]) << " does not check opp king" << endl;
+				exit(0);
+			}
+
+			b->pop();
+		}
+	}*/
+
 
 	Assert(b->attackerSet(b->side ^ 1) == _moveList->attackedSquares);
 
@@ -58,74 +78,74 @@ void Perft::perft(Board* b, int depth) {
 	}
 }
 
-long long Perft::perftLegalRoot(Board* b, int depth) {
-	Assert(b->checkBoard());
-	printf("\nPerft to depth %d\n", depth);
-	auto start = std::chrono::high_resolution_clock::now();
-
-	leafNodes = 0;
-	moveList_t _moveList[1];
-	generateMoves(b, _moveList, b->isCheck(b->side));
-
-	bool inCheck = b->isCheck(b->side);
-	int move;
-	int moveNum = 0;
-	for (int i = 0; i < _moveList->cnt; i++) {
-		move = _moveList->moves[i];
-
-		//skip illegal moves
-		if (isLegal(b, move, inCheck)) {
-			b->push(move);
-
-			long long cumnodes = leafNodes;
-			perft(b, depth - 1);
-
-			Assert(b->undoPly > 0);
-			b->pop();
-			long long oldnodes = leafNodes - cumnodes;
-
-			cout << getStringMove(move) << " : " << oldnodes << endl;
-		}
-	}
-
-	cout << "\nTest Complete : " << leafNodes << " nodes visited" << endl;
-	auto stop = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-	cout << duration.count() << "ms\n";
-	return leafNodes;
-}
-
-void Perft::perftLegal(Board* b, int depth) {
-
-	Assert(b->checkBoard());
-
-	if (depth == 0) {
-		leafNodes++;
-		return;
-	}
-
-	moveList_t _moveList[1];
-	generateMoves(b, _moveList, b->isCheck(b->side));
-
-	bool inCheck = b->isCheck(b->side);
-	Assert(b->attackerSet(b->side ^ 1) == _moveList->attackedSquares);
-
-	int move;
-	for (int i = 0; i < _moveList->cnt; i++) {
-		move = _moveList->moves[i];
-
-		//skip illegal moves
-		if (isLegal(b, move, inCheck)) {
-			b->push(move);
-			Assert(!b->isCheck(b->side ^ 1));
-
-			perftLegal(b, depth - 1);
-
-			Assert(b->undoPly > 0);
-			b->pop();
-		}
-	}
-}
+//long long Perft::perftLegalRoot(Board* b, int depth) {
+//	Assert(b->checkBoard());
+//	printf("\nPerft to depth %d\n", depth);
+//	auto start = std::chrono::high_resolution_clock::now();
+//
+//	leafNodes = 0;
+//	moveList_t _moveList[1];
+//	generateMoves(b, _moveList, b->isCheck(b->side));
+//
+//	bool inCheck = b->isCheck(b->side);
+//	int move;
+//	int moveNum = 0;
+//	for (int i = 0; i < _moveList->cnt; i++) {
+//		move = _moveList->moves[i];
+//
+//		//skip illegal moves
+//		if (isLegal(b, move, inCheck)) {
+//			b->push(move);
+//
+//			long long cumnodes = leafNodes;
+//			perft(b, depth - 1);
+//
+//			Assert(b->undoPly > 0);
+//			b->pop();
+//			long long oldnodes = leafNodes - cumnodes;
+//
+//			cout << getStringMove(move) << " : " << oldnodes << endl;
+//		}
+//	}
+//
+//	cout << "\nTest Complete : " << leafNodes << " nodes visited" << endl;
+//	auto stop = std::chrono::high_resolution_clock::now();
+//	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+//	cout << duration.count() << "ms\n";
+//	return leafNodes;
+//}
+//
+//void Perft::perftLegal(Board* b, int depth) {
+//
+//	Assert(b->checkBoard());
+//
+//	if (depth == 0) {
+//		leafNodes++;
+//		return;
+//	}
+//
+//	moveList_t _moveList[1];
+//	generateMoves(b, _moveList, b->isCheck(b->side));
+//
+//	bool inCheck = b->isCheck(b->side);
+//	Assert(b->attackerSet(b->side ^ 1) == _moveList->attackedSquares);
+//
+//	int move;
+//	for (int i = 0; i < _moveList->cnt; i++) {
+//		move = _moveList->moves[i];
+//
+//		//skip illegal moves
+//		if (isLegal(b, move, inCheck)) {
+//			b->push(move);
+//			Assert(!b->isCheck(b->side ^ 1));
+//
+//			perftLegal(b, depth - 1);
+//
+//			Assert(b->undoPly > 0);
+//			b->pop();
+//		}
+//	}
+//}
 
 //long long Perft::perftBulkRoot(Board* b, int depth) {
 //	ASSERT(b->checkBoard());

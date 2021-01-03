@@ -7,8 +7,9 @@ int main() {
 	log("\nStartup");
 
 	//moveList_t moveList[1];
-	//generateQuiesence(&board, moveList, false);
-	//scoreMovesQuiesence(&board, moveList);
+	//generateMoves(&board, moveList, board.isCheck(board.side));
+	//generateQuietCheckers(&board, moveList);
+	//printGeneratedMoves(moveList);
 	//return 0;
 
 	play(&board, &perft, s);
@@ -85,6 +86,13 @@ void play(Board* b, Perft* p, search_t* s) {
 		}
 
 		if (m == "perft") {
+			cout << "Skip or enter FEN: ";
+			getline(cin, m);
+			if (m.size() > 0) {
+				b->parseFen(m);
+				b->printBoard();
+			}
+
 			cout << "Perft this position to depth ";
 			getline(cin, m);
 			if (stoi(m) >= 1 && stoi(m) <= 15) {

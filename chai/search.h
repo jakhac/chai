@@ -11,7 +11,7 @@
 #include "moveOrdering.h"
 
 /**
- * Maximum ply reached in alphaBeta and quiesence search.
+ * Maximum ply reached in alphaBeta and quiescence search.
  */
 extern int selDepth;
 
@@ -42,16 +42,16 @@ static pv_line_t pvLine[1];
 int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine);
 
 /**
- * Quiesence search pushes all captures to evaluate a stable and quiet position.
+ * Quiescence search pushes all captures to evaluate a stable and quiet position.
  *
  * @param  alpha Lower bound, minimum score the side is assured of.
  * @param  beta  Upper bound, maximum score the opponent is assured of.
  * @param  b	 Current board.
  * @param  s	 Search info containing search parameters.
  *
- * @returns Best score found in quiesences search.
+ * @returns Best score found in quiescences search.
  */
-int quiesence(int alpha, int beta, Board* b, search_t* s);
+int quiescence(int alpha, int beta, Board* b, search_t* s);
 
 /**
  * Root function that starts alphaBeta search in iterative deepening framework.

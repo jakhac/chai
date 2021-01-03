@@ -74,14 +74,14 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	pv_line_t localPV[1]{};
 	localPV->len = 0;
 
-	// drop in quiesence if max depth is reached
+	// drop in quiescence if max depth is reached
 	if (depth <= 0 || b->ply > MAX_DEPTH) {
 		pvLine->len = 0;
-		return quiesence(alpha, beta, b, s);
+		return quiescence(alpha, beta, b, s);
 	}
 
 	// check for time and depth
-	if ((s->nodes & 2048) == 0) {
+	if ((s->nodes & 2047) == 0) {
 		checkSearchInfo(s);
 	}
 
@@ -203,6 +203,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		Assert(currentMove != NO_MOVE);
 
 		if (!b->push(currentMove)) continue;
+		// if (!inCheck || leavesKingInCheck()) continue;
 
 		// Futility pruning: skip moves that are futile and have no chance of raising alpha
 		// if at least one legal move was made before
@@ -272,6 +273,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 				&& !inCheck
 				&& !(currentMove & MCHECK_PROM)
 				&& b->killer[0][b->ply] != currentMove) {
+
 				b->killer[1][b->ply] = b->killer[0][b->ply];
 				b->killer[0][b->ply] = currentMove;
 
@@ -381,12 +383,12 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	return alpha;
 }
 
-int quiesence(int alpha, int beta, Board* b, search_t* s) {
+int quiescence(int alpha, int beta, Board* b, search_t* s) {
 	Assert(b->checkBoard());
 	selDepth = max(selDepth, b->ply);
 
 	// check for time and depth
-	if ((s->nodes & 2048) == 0) {
+	if ((s->nodes & 2047) == 0) {
 		checkSearchInfo(s);
 	}
 
@@ -397,37 +399,46 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 	}
 
 	int standPat = eval(b);
+	bool inCheck = b->isCheck(b->side);
 
 	if (b->ply > MAX_DEPTH - 1) return standPat;
 
-	// stand pat pruning
-	if (standPat >= beta) {
-		return beta;
+
+	/*
+	* If a position scores higher than alpha, update the value to keep a lower bound of the
+	* position. If the evaluation is already above beta, there is no point in searching all captures,
+	* because there is no need to recapture in a good position. Do not prune when in check: these positions
+	* may contain a non-tactical move that raises alpha or possibly no move due to serious mate threat.
+	*/
+	if (!inCheck) {
+		if (standPat > alpha) {
+			alpha = standPat;
+		}
+		if (standPat >= beta) {
+			return beta;
+		}
 	}
 
-	// rise alpha to stand pat
-	if (standPat > alpha) {
-		alpha = standPat;
-	}
-
-	bool inCheck = b->isCheck(b->side);
 	int legalMoves = 0;
 	int oldAlpha = alpha;
 	int bestMove = 0;
 	int score = -INF;
 
 	moveList_t moveList[1];
-	generateQuiesence(b, moveList, inCheck);
+	generateQuiescence(b, moveList, inCheck);
 
 	// If in check, all evading moves are generated and have to be scored differently.
-	// Quiesence move ordering only handles captures and promotions.
+	// Quiescence move ordering only handles captures and promotions.
 	if (inCheck) {
 		scoreMovesAlphaBeta(b, moveList, NO_MOVE);
 	} else {
-		scoreMovesQuiesence(b, moveList);
+		scoreMovesQuiescence(b, moveList);
 	}
 
-	// TODO explain state
+	/*
+	* There are no cutoffs in this node yet. Generate all captures, promotions or check evasions
+	* and expand this node.
+	*/
 	for (int i = 0; i < moveList->cnt; i++) {
 		getNextMove(b, moveList, i);
 		int currentMove = moveList->moves[i];
@@ -436,7 +447,7 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 		Assert(inCheck || (currentMove & MCHECK_PROM_OR_CAP || currentMove & MFLAG_EP));
 
 		// Delta cutoff: prune moves that cannot improve over alpha
-		bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
+		//bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
 		/*if (standPat + pieceScores[capPiece(currentMove)] + 200 < alpha &&
 			!endGame && !(MCHECK_PROM & currentMove)) {
 			continue;
@@ -444,17 +455,16 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 
 		/*
 		* If SEE score is negative, this is a losing capture. Since there is little to no chance that
-		* this move raises alpha, it can be pruned. Do not prune forced captures, since this position
-		* still not resolved.
+		* this move raises alpha, it can be pruned.
 		*/
-		if (!inCheck && moveList->scores[i] < (BAD_CAPTURE + MVV_LVA_UBOUND)) {
+		if (moveList->scores[i] < (BAD_CAPTURE + MVV_LVA_UBOUND)) {
 			continue;
 		}
 
 		if (!b->push(currentMove)) continue;
 
 		legalMoves++;
-		score = -quiesence(-beta, -alpha, b, s);
+		score = -quiescence(-beta, -alpha, b, s);
 		b->pop();
 
 		if (s->stopped) {
@@ -462,14 +472,23 @@ int quiesence(int alpha, int beta, Board* b, search_t* s) {
 		}
 
 		if (score > alpha) {
-			if (score >= beta) {
-				if (legalMoves == 1) s->fhf++;
-				s->fh++;
-				return beta;
-			}
 			alpha = score;
 			bestMove = moveList->moves[i];
 		}
+
+		/**
+		 * Beta cutoff: Move is too good and the opponent already a way to defend this attack.
+		 */
+		if (score >= beta) {
+			// stats
+			if (legalMoves == 1) {
+				s->fhf++;
+			}
+			s->fh++;
+
+			return beta;
+		}
+
 	}
 
 	Assert(alpha >= oldAlpha);
@@ -548,8 +567,13 @@ int search(Board* b, search_t* s) {
 	selDepth = 0;
 	b->ply = 0;
 	bestScore = alphaBeta(-INF, INF, 1, b, s, DO_NULL, IS_PV, pvLine);
+
+#ifdef TT_PV
 	pvMoves = getPVLine(b, 1);
 	bestMove = b->pvArray[0];
+#else
+	bestMove = pvLine->line[0];
+#endif // TT_PV
 
 	fflush(stdout);
 	cout << "info depth 1 seldepth " << selDepth << " score cp " << bestScore
@@ -561,26 +585,30 @@ int search(Board* b, search_t* s) {
 		selDepth = 0;
 		b->ply = 0;
 
-
 		bestScore = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV, pvLine);
 		//bestScore = search_aspiration(b, s, currentDepth, bestScore);
 
 		// forced stop, break and use pv line of previous iteration
 		if (s->stopped) break;
 
+#ifdef TT_PV
 		pvMoves = getPVLine(b, currentDepth);
 		bestMove = b->pvArray[0];
 
 		fflush(stdout);
 		cout << "info depth " << currentDepth << " seldepth " << selDepth << " score cp " << bestScore << " nodes " << s->nodes << " time " << (getTimeMs() - s->startTime);
-
 		cout << " pv ";
 
-#ifdef TT_PV
 		for (int i = 0; i < pvMoves; i++) {
 			cout << getStringMove(b->pvArray[i]);
 		}
 #else
+		bestMove = pvLine->line[0];
+
+		fflush(stdout);
+		cout << "info depth " << currentDepth << " seldepth " << selDepth << " score cp " << bestScore << " nodes " << s->nodes << " time " << (getTimeMs() - s->startTime);
+		cout << " pv ";
+
 		for (int i = 0; i < currentDepth; i++) {
 			cout << getStringMove(pvLine->line[i]);
 		}

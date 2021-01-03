@@ -7,9 +7,11 @@
 
 void generateMoves(Board* b, moveList_t* moveList, bool inCheck);
 
-void generateQuiesence(Board* b, moveList_t* moveList, bool inCheck);
+void generateQuiescence(Board* b, moveList_t* moveList, bool inCheck);
 
 void generateCheckEvasions(Board* b, moveList_t* moveList);
+
+void generateQuietCheckers(Board* b, moveList_t* moveList);
 
 /**
  * Generate all blockers for the blocking square and add them to the moveList. Kings cannot
@@ -20,17 +22,6 @@ void generateCheckEvasions(Board* b, moveList_t* moveList);
  * @param  blockingSq Square to be blocked.
  */
 void addBlockersForSq(Board* b, moveList_t* moveList, int blockingSq);
-
-/**
- * Check if move leaves king in check.
- *
- * @param  b	   Board.
- * @param  move    Move to check.
- * @param  inCheck True if current position is in check.
- *
- * @returns True if legal, false if not.
- */
-bool isLegal(Board* b, move_t move, bool inCheck);
 
 /**
  * Generate all possible single white pawn pushes and add to moveList. Does not include

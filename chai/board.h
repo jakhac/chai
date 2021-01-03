@@ -355,11 +355,16 @@ public:
 	/**
 	 * Check if given side is currently in check.
 	 *
-	 * @param  side Side to check state.
+	 * @param  side The side thats possibly in check.
 	 *
 	 * @returns Returns the mask of pieces giving check.
 	 */
-	bitboard_t isCheck(int side);
+	bool isCheck(int side);
+
+	/**
+	 * ´Deprecated.
+	 */
+	bool leavesKingInCheck(Board* b, const move_t move, const bool inCheck);
 
 	/**
 	 * Check if castle move is valid: castle permission, current check, empty squares between rook

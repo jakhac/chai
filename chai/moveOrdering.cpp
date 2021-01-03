@@ -29,7 +29,7 @@ bitboard_t getLeastValuablePiece(Board* b, bitboard_t atkDef, int side, int atta
 }
 
 int see(Board* b, const int move) {
-	Assert(pieceValid(capPiece(move)));
+	Assert(pieceValid(capPiece(move)) || MCHECK_EP & move);
 
 	int to = toSq(move);
 	int attackerPiece = b->pieceAt(fromSq(move));
@@ -260,7 +260,7 @@ void scoreMovesAlphaBeta(Board* b, moveList_t* moveList, move_t hashMove) {
 
 }
 
-void scoreMovesQuiesence(Board* b, moveList_t* moveList) {
+void scoreMovesQuiescence(Board* b, moveList_t* moveList) {
 	int mvvLvaScore = 0;
 	int seeScore = 0;
 	move_t currentMove;
@@ -268,7 +268,7 @@ void scoreMovesQuiesence(Board* b, moveList_t* moveList) {
 	for (int i = 0; i < moveList->cnt; i++) {
 		currentMove = moveList->moves[i];
 
-		// All moves in quiesence are either captures or promotions, check evasions
+		// All moves in quiescence are either captures or promotions, check evasions
 		// are scored like alphaBeta movegen.
 		Assert(currentMove & MCHECK_PROM_OR_CAP || currentMove & MCHECK_EP);
 		Assert(pieceValid(b->pieceAt(fromSq(currentMove))));

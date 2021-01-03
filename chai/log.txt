@@ -7750,3 +7750,634 @@ Startup
 Startup
 17:46:02	s
 17:46:02	Entered search
+00:08:35	parseFen() finished.
+00:08:35	
+Startup
+00:09:15	s
+00:09:15	Entered search
+00:09:39	parseFen() finished.
+00:09:39	
+Startup
+00:09:40	s
+00:09:40	Entered search
+00:10:04	parseFen() finished.
+00:10:04	
+Startup
+00:10:05	s
+00:10:05	Entered search
+00:12:31	parseFen() finished.
+00:12:31	
+Startup
+00:12:33	s
+00:12:33	Entered search
+00:40:30	parseFen() finished.
+00:40:30	
+Startup
+00:40:30	s
+00:40:30	Entered search
+00:40:56	parseFen() finished.
+00:40:56	
+Startup
+00:40:56	s
+00:40:56	Entered search
+00:41:08	parseFen() finished.
+00:41:08	
+Startup
+00:41:09	s
+00:41:09	Entered search
+00:41:57	parseFen() finished.
+00:41:57	
+Startup
+00:41:58	s
+00:41:58	Entered search
+01:19:08	parseFen() finished.
+01:19:08	
+Startup
+01:19:42	parseFen() finished.
+01:19:42	
+Startup
+01:26:57	parseFen() finished.
+01:26:57	
+Startup
+01:55:47	parseFen() finished.
+01:55:47	
+Startup
+02:03:56	parseFen() finished.
+02:03:56	
+Startup
+02:06:35	parseFen() finished.
+02:06:35	
+Startup
+02:06:35	parseFen() finished.
+02:07:11	parseFen() finished.
+02:07:11	
+Startup
+02:07:11	parseFen() finished.
+02:08:49	parseFen() finished.
+02:08:49	
+Startup
+02:08:50	parseFen() finished.
+02:09:41	parseFen() finished.
+02:09:41	
+Startup
+02:09:41	parseFen() finished.
+02:09:55	parseFen() finished.
+02:09:55	
+Startup
+02:09:55	parseFen() finished.
+02:10:36	parseFen() finished.
+02:10:36	
+Startup
+02:10:36	parseFen() finished.
+02:19:35	parseFen() finished.
+02:19:35	
+Startup
+02:19:39	parseFen() finished.
+02:19:39	
+Startup
+02:19:49	parseFen() finished.
+02:19:49	
+Startup
+02:19:52	perft
+02:20:12	parseFen() finished.
+02:20:12	
+Startup
+02:20:15	perft
+02:20:28	parseFen() finished.
+02:20:28	
+Startup
+02:20:34	perft
+02:22:06	parseFen() finished.
+02:22:06	
+Startup
+02:22:08	perft
+02:24:45	parseFen() finished.
+02:24:45	
+Startup
+02:24:47	perft
+02:24:54	parseFen() finished.
+02:24:54	
+Startup
+02:24:55	perft
+02:25:33	parseFen() finished.
+02:25:33	
+Startup
+02:25:35	perft
+02:30:16	parseFen() finished.
+02:30:16	
+Startup
+02:31:23	parseFen() finished.
+02:31:23	
+Startup
+02:31:51	parseFen() finished.
+02:31:51	
+Startup
+02:32:32	parseFen() finished.
+02:32:32	
+Startup
+02:32:50	parseFen() finished.
+02:32:50	
+Startup
+02:33:04	parseFen() finished.
+02:33:04	
+Startup
+02:36:47	parseFen() finished.
+02:36:47	
+Startup
+02:37:14	parseFen() finished.
+02:37:14	
+Startup
+02:38:41	parseFen() finished.
+02:38:41	
+Startup
+02:39:04	parseFen() finished.
+02:39:04	
+Startup
+02:39:21	parseFen() finished.
+02:39:21	
+Startup
+02:39:23	perft
+02:42:49	parseFen() finished.
+02:42:49	
+Startup
+02:43:27	parseFen() finished.
+02:43:27	
+Startup
+02:43:30	perft
+02:44:48	parseFen() finished.
+02:44:48	
+Startup
+02:44:49	perft
+02:45:33	parseFen() finished.
+02:45:33	
+Startup
+02:45:34	perft
+02:45:39	parseFen() finished.
+02:45:39	
+Startup
+02:45:40	perft
+02:45:45	parseFen() finished.
+02:45:45	
+Startup
+02:45:58	parseFen() finished.
+02:45:59	
+Startup
+02:46:00	perft
+02:46:03	parseFen() finished.
+02:46:03	
+Startup
+02:46:05	perft
+02:48:07	parseFen() finished.
+02:48:07	
+Startup
+02:48:13	perft"
+02:48:14	4
+02:48:15	perft
+02:52:01	parseFen() finished.
+02:52:01	
+Startup
+02:52:25	parseFen() finished.
+02:52:25	
+Startup
+02:52:36	parseFen() finished.
+02:52:36	
+Startup
+02:52:41	parseFen() finished.
+02:52:41	
+Startup
+02:52:50	parseFen() finished.
+02:52:50	
+Startup
+02:52:53	perft
+02:56:02	parseFen() finished.
+02:56:02	
+Startup
+02:57:03	parseFen() finished.
+02:57:03	
+Startup
+02:57:05	perft
+02:58:34	parseFen() finished.
+02:58:34	
+Startup
+02:58:35	perft
+03:00:09	parseFen() finished.
+03:00:09	
+Startup
+03:00:35	parseFen() finished.
+03:00:35	
+Startup
+03:01:11	parseFen() finished.
+03:01:11	
+Startup
+03:01:25	parseFen() finished.
+03:01:25	
+Startup
+03:01:37	parseFen() finished.
+03:01:37	
+Startup
+03:01:39	perft
+03:02:07	parseFen() finished.
+03:02:07	
+Startup
+03:02:10	perft
+03:04:17	parseFen() finished.
+03:04:17	
+Startup
+03:04:18	perft
+03:07:03	parseFen() finished.
+03:07:03	
+Startup
+03:07:51	parseFen() finished.
+03:07:51	
+Startup
+03:08:03	parseFen() finished.
+03:08:03	
+Startup
+03:08:20	parseFen() finished.
+03:08:20	
+Startup
+03:08:38	parseFen() finished.
+03:08:38	
+Startup
+03:08:40	perft
+03:08:49	parseFen() finished.
+03:08:49	
+Startup
+03:08:59	parseFen() finished.
+03:08:59	
+Startup
+03:09:01	perft
+03:10:01	parseFen() finished.
+03:10:01	
+Startup
+03:10:41	parseFen() finished.
+03:10:41	
+Startup
+03:11:57	parseFen() finished.
+03:11:57	
+Startup
+03:12:54	parseFen() finished.
+03:12:54	
+Startup
+03:13:58	parseFen() finished.
+03:13:58	
+Startup
+03:14:00	parseFen() finished.
+03:14:00	
+Startup
+03:14:06	parseFen() finished.
+03:14:06	
+Startup
+03:14:20	parseFen() finished.
+03:14:20	
+Startup
+03:14:23	perft
+03:14:40	parseFen() finished.
+03:14:40	
+Startup
+03:14:43	perft
+03:18:27	. . . . 1 . . .
+03:18:27	. . . . 1 . . .
+03:18:27	. . . . 1 . . .
+03:18:27	. . . . . . . .
+03:18:27	. . . . . . . .
+03:19:38	parseFen() finished.
+03:19:38	
+Startup
+03:19:52	perft
+03:20:16	parseFen() finished.
+03:20:16	
+Startup
+03:21:53	parseFen() finished.
+03:21:53	
+Startup
+03:22:04	parseFen() finished.
+03:22:04	
+Startup
+03:22:06	perft
+03:41:14	parseFen() finished.
+03:41:14	
+Startup
+03:42:25	parseFen() finished.
+03:42:25	
+Startup
+03:42:38	parseFen() finished.
+03:42:38	
+Startup
+03:42:41	perft
+03:47:37	parseFen() finished.
+03:47:37	
+Startup
+01:50:23	parseFen() finished.
+01:50:23	
+Startup
+01:50:46	perft 6
+01:50:48	perf
+01:50:48	
+01:50:51	perft
+01:51:10	parseFen() finished.
+01:51:10	
+Startup
+01:51:12	perft
+01:52:45	parseFen() finished.
+01:52:45	
+Startup
+01:52:46	s
+01:52:46	Entered search
+01:52:51	parseFen() finished.
+01:52:51	
+Startup
+01:52:53	perft
+01:53:18	parseFen() finished.
+01:53:18	
+Startup
+01:53:22	parseFen() finished.
+01:53:22	
+Startup
+01:54:29	parseFen() finished.
+01:54:29	
+Startup
+01:55:06	parseFen() finished.
+01:55:06	
+Startup
+01:57:12	parseFen() finished.
+01:57:12	
+Startup
+01:57:29	parseFen() finished.
+01:57:29	
+Startup
+02:02:08	parseFen() finished.
+02:02:08	
+Startup
+02:02:38	parseFen() finished.
+02:02:38	
+Startup
+02:06:25	parseFen() finished.
+02:06:25	
+Startup
+02:38:00	parseFen() finished.
+02:38:00	
+Startup
+02:38:10	parseFen() finished.
+02:38:10	
+Startup
+02:38:17	perft
+02:38:34	parseFen() finished.
+02:38:34	
+Startup
+02:38:36	perft
+02:39:24	parseFen() finished.
+02:39:24	
+Startup
+02:39:25	perft
+02:43:51	parseFen() finished.
+02:43:52	
+Startup
+02:43:54	perft
+02:44:15	parseFen() finished.
+02:44:15	
+Startup
+02:44:16	perft
+02:48:55	parseFen() finished.
+02:48:55	
+Startup
+02:49:26	parseFen() finished.
+02:49:26	
+Startup
+02:50:04	parseFen() finished.
+02:50:04	
+Startup
+02:50:26	parseFen() finished.
+02:50:26	
+Startup
+02:50:28	perft
+02:51:02	parseFen() finished.
+02:51:02	
+Startup
+02:51:04	perft
+03:03:08	parseFen() finished.
+03:03:08	
+Startup
+03:03:10	perft
+03:05:23	parseFen() finished.
+03:05:23	
+Startup
+03:05:25	perft
+03:05:37	parseFen() finished.
+03:05:37	
+Startup
+03:05:39	perft
+03:05:47	parseFen() finished.
+03:05:47	
+Startup
+03:05:49	perft
+03:08:14	parseFen() finished.
+03:08:14	
+Startup
+03:08:16	perft
+03:10:05	parseFen() finished.
+03:10:05	
+Startup
+03:10:07	perft
+03:12:23	parseFen() finished.
+03:12:23	
+Startup
+03:12:27	perft
+03:18:08	parseFen() finished.
+03:18:08	
+Startup
+03:18:21	parseFen() finished.
+03:18:21	
+Startup
+03:18:32	parseFen() finished.
+03:18:32	
+Startup
+03:18:37	parseFen() finished.
+03:18:37	
+Startup
+03:22:04	parseFen() finished.
+03:22:04	
+Startup
+03:35:03	parseFen() finished.
+03:35:03	
+Startup
+03:36:18	parseFen() finished.
+03:36:18	
+Startup
+03:36:52	parseFen() finished.
+03:36:52	
+Startup
+03:36:55	perft
+03:39:49	parseFen() finished.
+03:39:50	
+Startup
+03:39:53	perft
+03:45:54	parseFen() finished.
+03:45:54	
+Startup
+03:46:14	parseFen() finished.
+03:46:14	
+Startup
+03:46:16	perft
+03:47:41	parseFen() finished.
+03:47:41	
+Startup
+03:47:42	perft
+03:49:26	parseFen() finished.
+03:49:26	
+Startup
+03:49:27	perft
+03:55:26	parseFen() finished.
+03:55:26	
+Startup
+03:55:28	perft
+03:56:34	parseFen() finished.
+03:56:34	
+Startup
+03:56:35	perft
+03:58:31	parseFen() finished.
+03:58:31	
+Startup
+03:58:33	perft
+03:58:56	parseFen() finished.
+03:58:56	
+Startup
+03:59:00	parseFen() finished.
+03:59:00	
+Startup
+03:59:11	parseFen() finished.
+03:59:11	
+Startup
+03:59:13	perft
+04:01:25	parseFen() finished.
+04:01:25	
+Startup
+04:01:44	parseFen() finished.
+04:01:44	
+Startup
+04:01:46	perft
+04:02:32	parseFen() finished.
+04:02:32	
+Startup
+04:02:34	perft
+04:08:04	parseFen() finished.
+04:08:04	
+Startup
+04:08:07	perft
+04:09:41	parseFen() finished.
+04:09:41	
+Startup
+04:09:43	perft
+15:19:19	parseFen() finished.
+15:19:19	
+Startup
+15:19:36	perft
+15:20:05	parseFen() finished.
+15:20:05	
+Startup
+15:20:07	perft
+15:20:10	parseFen() finished.
+15:24:31	parseFen() finished.
+15:24:31	
+Startup
+15:24:46	perft
+15:34:04	parseFen() finished.
+15:34:04	parseFen() finished.
+15:34:04	
+Startup
+15:34:33	parseFen() finished.
+15:34:33	parseFen() finished.
+15:34:33	
+Startup
+15:35:06	parseFen() finished.
+15:35:06	parseFen() finished.
+15:35:06	
+Startup
+15:36:01	parseFen() finished.
+15:36:01	parseFen() finished.
+15:36:01	
+Startup
+15:36:38	parseFen() finished.
+15:36:38	parseFen() finished.
+15:36:38	
+Startup
+15:37:54	parseFen() finished.
+15:37:54	parseFen() finished.
+15:37:54	
+Startup
+15:38:41	parseFen() finished.
+15:38:41	parseFen() finished.
+15:38:41	
+Startup
+15:39:31	parseFen() finished.
+15:39:31	
+Startup
+15:40:07	parseFen() finished.
+15:40:07	
+Startup
+15:41:26	parseFen() finished.
+15:41:26	
+Startup
+15:44:59	parseFen() finished.
+15:44:59	
+Startup
+15:54:03	parseFen() finished.
+15:54:03	
+Startup
+15:55:59	parseFen() finished.
+15:55:59	
+Startup
+15:56:01	perft
+15:56:11	parseFen() finished.
+15:56:11	
+Startup
+15:56:13	perft
+15:57:20	parseFen() finished.
+15:57:20	
+Startup
+15:57:21	perft
+16:00:50	parseFen() finished.
+16:00:50	
+Startup
+16:00:51	perft
+16:01:12	parseFen() finished.
+16:01:12	
+Startup
+16:01:15	perft
+16:01:55	parseFen() finished.
+16:01:55	
+Startup
+16:01:57	perft
+16:02:28	parseFen() finished.
+16:02:28	
+Startup
+16:02:31	perft
+16:02:43	parseFen() finished.
+16:02:43	
+Startup
+16:02:46	perft
+16:03:31	parseFen() finished.
+16:03:31	
+Startup
+16:03:34	perft
+16:03:37	parseFen() finished.
+16:03:54	parseFen() finished.
+16:03:54	
+Startup
+16:04:00	perft
+16:04:00	parseFen() finished.
+16:08:31	parseFen() finished.
+16:08:31	
+Startup
+16:08:33	s
+16:08:33	Entered search
+16:12:15	parseFen() finished.
+16:12:15	
+Startup
+16:12:18	s
+16:12:18	Entered search
+16:13:04	parseFen() finished.
+16:13:04	
+Startup
+16:13:05	s
+16:13:05	Entered search
