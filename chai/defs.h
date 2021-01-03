@@ -23,8 +23,9 @@ printf("%s - Failed",#n); \
 printf("On %s ",__DATE__); \
 printf("At %s ",__TIME__); \
 printf("In File %s ",__FILE__); \
-printf("At Line %d\n",__LINE__); \
-exit(1);}
+printf("At Line %d\n",__LINE__); \<
+exit(1);
+}
 #endif
 
 const int NUM_SQUARES = 64;

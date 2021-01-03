@@ -567,13 +567,8 @@ int search(Board* b, search_t* s) {
 	selDepth = 0;
 	b->ply = 0;
 	bestScore = alphaBeta(-INF, INF, 1, b, s, DO_NULL, IS_PV, pvLine);
-
-#ifdef TT_PV
 	pvMoves = getPVLine(b, 1);
 	bestMove = b->pvArray[0];
-#else
-	bestMove = pvLine->line[0];
-#endif // TT_PV
 
 	fflush(stdout);
 	cout << "info depth 1 seldepth " << selDepth << " score cp " << bestScore
@@ -591,30 +586,25 @@ int search(Board* b, search_t* s) {
 		// forced stop, break and use pv line of previous iteration
 		if (s->stopped) break;
 
-#ifdef TT_PV
 		pvMoves = getPVLine(b, currentDepth);
 		bestMove = b->pvArray[0];
 
 		fflush(stdout);
 		cout << "info depth " << currentDepth << " seldepth " << selDepth << " score cp " << bestScore << " nodes " << s->nodes << " time " << (getTimeMs() - s->startTime);
+
 		cout << " pv ";
 
+#ifdef TT_PV
 		for (int i = 0; i < pvMoves; i++) {
 			cout << getStringMove(b->pvArray[i]);
 		}
 #else
-		bestMove = pvLine->line[0];
-
-		fflush(stdout);
-		cout << "info depth " << currentDepth << " seldepth " << selDepth << " score cp " << bestScore << " nodes " << s->nodes << " time " << (getTimeMs() - s->startTime);
-		cout << " pv ";
-
 		for (int i = 0; i < currentDepth; i++) {
 			cout << getStringMove(pvLine->line[i]);
 		}
 #endif // TT_PV_LINE
 
-		cout << "\n";
+		/*cout << "\n";
 		cout << "Ordering percentage: \t\t" << setprecision(3) << fixed << (float)(s->fhf / s->fh) << endl;
 		cout << "T table hit percentage: \t" << setprecision(3) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
 		cout << "T table hit used: \t\t" << (float)(b->tt->valueHit) / (b->tt->probed) << endl;
@@ -622,7 +612,7 @@ int search(Board* b, search_t* s) {
 		cout << "Pawn table hit percentage: \t" << setprecision(3) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
 		cout << "Pawn table memory used: \t" << setprecision(5) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
 		cout << "Pawn table collisions: \t\t" << setprecision(3) << fixed << b->pawnTable->collided << endl;
-		cout << endl;
+		cout << endl;*/
 
 		// quit when checkmate was found
 		/*if (currentDepth > 1 && bestScore > ISMATE) {

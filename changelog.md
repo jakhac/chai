@@ -81,7 +81,7 @@
   - moveScores in alphaBeta swapped moves but not scores
   - counterMoves, EP moves, castleMoves scored wrong at index
   - assign correct PROMOTION bonus in alphaBeta and qui moveScoring
-- Chose FEN in perft option
+- Choose FEN in perft option
 
 # Todo
 
