@@ -8381,3 +8381,31 @@ Startup
 Startup
 16:13:05	s
 16:13:05	Entered search
+17:01:57	parseFen() finished.
+17:01:57	
+Startup
+17:01:57	s
+17:01:57	Entered search
+17:02:32	parseFen() finished.
+17:02:32	
+Startup
+17:02:32	s
+17:02:32	Entered search
+17:03:07	parseFen() finished.
+17:03:07	
+Startup
+17:03:09	s
+17:03:09	Entered search
+17:03:14	Left search and cout bestmove found
+17:04:42	parseFen() finished.
+17:04:42	
+Startup
+17:04:43	s
+17:04:43	Entered search
+17:04:48	Left search and cout bestmove found
+17:12:15	parseFen() finished.
+17:12:15	
+Startup
+17:12:16	s
+17:12:16	Entered search
+17:12:21	Left search and cout bestmove found

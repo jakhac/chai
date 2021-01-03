@@ -123,7 +123,8 @@ int getPVLine(Board* b, const int maxDepth) {
 	int count = 0;
 
 	//cout << "PV line needs legality check for hash move" << endl;
-	while (move != 0 && count < maxDepth /*&& isLegal(b, move, b->isCheck(b->side))*/) {
+	//while (move != 0 && count < maxDepth && isLegal(b, move, b->isCheck(b->side))*/) {
+	while (move != NO_MOVE && count < maxDepth && isLegal(b, move)) {
 		b->push(move);
 		b->pvArray[count++] = move;
 		move = probePV(b);
@@ -132,6 +133,7 @@ int getPVLine(Board* b, const int maxDepth) {
 	while (b->ply > 0) {
 		b->pop();
 	}
+
 	return count;
 }
 

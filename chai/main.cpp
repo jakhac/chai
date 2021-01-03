@@ -61,9 +61,9 @@ void play(Board* b, Perft* p, search_t* s) {
 		if (m == "s") {
 			s->depth = 12;
 			s->startTime = getTimeMs();
-			s->stopTime = getTimeMs() + 10000;
+			s->stopTime = getTimeMs() + 5000;
 
-			s->timeSet = false;
+			s->timeSet = true;
 			s->depthSet = true;
 			search(b, s);
 			continue;

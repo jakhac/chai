@@ -254,6 +254,21 @@ void addBlockersForSq(Board* b, moveList_t* moveList, int blockingSq) {
 
 }
 
+// to validate hash move
+bool isLegal(Board* b, const move_t move) {
+	bool inCheck = b->isCheck(b->side);
+	moveList_t moveList[1];
+	generateMoves(b, moveList, inCheck);
+
+	for (int i = 0; i < moveList->cnt; i++) {
+		if (moveList->moves[i] == move) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void whiteSinglePawnPush(Board* board, moveList_t* moveList) {
 	int sq;
 	bitboard_t pushedPawns = (board->getPieces(PAWN, WHITE) << 8) & ~board->occupied;

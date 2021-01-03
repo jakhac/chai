@@ -362,7 +362,7 @@ public:
 	bool isCheck(int side);
 
 	/**
-	 * ´Deprecated.
+	 * Deprecated.
 	 */
 	bool leavesKingInCheck(Board* b, const move_t move, const bool inCheck);
 
