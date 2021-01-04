@@ -25,6 +25,9 @@ const int HISTORY_MAX = 0x4000;
  */
 static pv_line_t pvLine[1];
 
+static int quiescenceChecks[MAX_DEPTH];
+
+
 /**
  * Alpha beta algorithm root. Searches current board for best move and score.
  *
@@ -51,7 +54,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
  *
  * @returns Best score found in quiescences search.
  */
-int quiescence(int alpha, int beta, Board* b, search_t* s);
+int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t* pvLine);
 
 /**
  * Root function that starts alphaBeta search in iterative deepening framework.

@@ -613,7 +613,6 @@ void Board::popCastle(int clearRookSq, int setRookSq, int side) {
 	setPiece(ROOK, setRookSq, side);
 }
 
-//TODO combine pinner and pinned
 bitboard_t Board::pinner(int kSq, int kSide) {
 	bitboard_t kingSlider = lookUpRookMoves(kSq, occupied);
 	bitboard_t potPinned = kingSlider & color[kSide];
@@ -789,27 +788,24 @@ bitboard_t Board::squareAtkDef(int square) {
 
 bool Board::isCheck(int side) {
 	//return squareAttackedBy(getKingSquare(side), side ^ 1);
-	int kSq = getKingSquare(side);
 
+	int kSq = getKingSquare(side);
 	if (pawnAtkMask[side][kSq] & getPieces(PAWN, side ^ 1)) {
 		return true;
 	}
-
 	if (knightAtkMask[kSq] & getPieces(KNIGHT, side ^ 1)) {
 		return true;
 	}
-
 	if (lookUpBishopMoves(kSq, occupied) & (getPieces(BISHOP, side ^ 1) | getPieces(QUEEN, side ^ 1))) {
 		return true;
 	}
-
 	if (lookUpRookMoves(kSq, occupied) & (getPieces(ROOK, side ^ 1) | getPieces(QUEEN, side ^ 1))) {
 		return true;
 	}
-
 	return false;
 }
 
+// does move leave the king in check?
 bool Board::leavesKingInCheck(Board* b, const move_t move, const bool inCheck) {
 	cout << "Do not use. Board::leavesKingInCheck did not passed perft testing.\n"; exit(0);
 	// Always return true if in check, because check evasions gen only adds legal evasions
@@ -818,7 +814,6 @@ bool Board::leavesKingInCheck(Board* b, const move_t move, const bool inCheck) {
 	}
 	Assert(!isCheck(side));
 
-	// does move leave the king in check?
 
 	int to = toSq(move);
 	int from = fromSq(move);
@@ -932,4 +927,19 @@ bool Board::castleValid(int castle, bitboard_t* attackerSet) {
 	return true;
 }
 
+void Board::backup_principle_variation(Board* game, int depth, move_t move) {
+	int c;
+	/* Copy principle variation */
+	if (game->length_of_variation[depth + 1] >= (depth + 1)) {
+		game->principle_variation[depth][depth] = move;
+
+		for (c = depth + 1; c < game->length_of_variation[depth + 1]; c++) {
+
+			game->principle_variation[c][depth] = game->principle_variation[c][depth + 1];
+		}
+
+		game->length_of_variation[depth] = game->length_of_variation[depth + 1];
+		game->quiescence_depth_of_variation[depth] = game->quiescence_depth_of_variation[depth + 1];
+	}
+}
 

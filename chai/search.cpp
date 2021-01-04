@@ -77,7 +77,10 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	// drop in quiescence if max depth is reached
 	if (depth <= 0 || b->ply > MAX_DEPTH) {
 		pvLine->len = 0;
-		return quiescence(alpha, beta, b, s);
+		//return eval(b);
+		int qui = quiescence(alpha, beta, 0, b, s, localPV);
+		//Assert(qui < INF);
+		return qui;
 	}
 
 	// check for time and depth
@@ -203,7 +206,6 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		Assert(currentMove != NO_MOVE);
 
 		if (!b->push(currentMove)) continue;
-		// if (!inCheck || leavesKingInCheck()) continue;
 
 		// Futility pruning: skip moves that are futile and have no chance of raising alpha
 		// if at least one legal move was made before
@@ -341,6 +343,10 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		if (score > bestScore) {
 			bestScore = score;
 			bestMove = currentMove;
+			Assert(bestScore < INF);
+
+			b->backup_principle_variation(b, depth + 1, currentMove);
+
 
 			/*
 			* If the currentMove scores higher than alpha, the principal variation
@@ -383,7 +389,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	return alpha;
 }
 
-int quiescence(int alpha, int beta, Board* b, search_t* s) {
+int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t* pvLine) {
 	Assert(b->checkBoard());
 	selDepth = max(selDepth, b->ply);
 
@@ -403,6 +409,9 @@ int quiescence(int alpha, int beta, Board* b, search_t* s) {
 
 	if (b->ply > MAX_DEPTH - 1) return standPat;
 
+	// pv line
+	pv_line_t localPV[1]{};
+	localPV->len = 0;
 
 	/*
 	* If a position scores higher than alpha, update the value to keep a lower bound of the
@@ -426,6 +435,26 @@ int quiescence(int alpha, int beta, Board* b, search_t* s) {
 
 	moveList_t moveList[1];
 	generateQuiescence(b, moveList, inCheck);
+	quiescenceChecks[abs(depth)] = inCheck;
+
+	if (moveList->cnt == 0) {
+		// checkmate
+		if (inCheck) {
+
+			// forced check?
+			for (int i = depth; i <= 0; i += 2) {
+				if (!quiescenceChecks[i]) {
+					return standPat;
+				}
+			}
+
+			return -MATE + b->ply;
+		}
+
+		// no tactical moves
+		return standPat;
+	}
+
 
 	// If in check, all evading moves are generated and have to be scored differently.
 	// Quiescence move ordering only handles captures and promotions.
@@ -457,14 +486,14 @@ int quiescence(int alpha, int beta, Board* b, search_t* s) {
 		* If SEE score is negative, this is a losing capture. Since there is little to no chance that
 		* this move raises alpha, it can be pruned.
 		*/
-		if (moveList->scores[i] < (BAD_CAPTURE + MVV_LVA_UBOUND)) {
-			continue;
-		}
+		//if (legalMoves && moveList->scores[i] < (BAD_CAPTURE + MVV_LVA_UBOUND)) {
+			//continue;
+		//}
 
 		if (!b->push(currentMove)) continue;
 
 		legalMoves++;
-		score = -quiescence(-beta, -alpha, b, s);
+		score = -quiescence(-beta, -alpha, depth - 1, b, s, localPV);
 		b->pop();
 
 		if (s->stopped) {
@@ -474,6 +503,11 @@ int quiescence(int alpha, int beta, Board* b, search_t* s) {
 		if (score > alpha) {
 			alpha = score;
 			bestMove = moveList->moves[i];
+
+			pvLine->line[0] = currentMove;
+			memcpy(pvLine->line + 1, localPV->line, localPV->len * sizeof(currentMove));
+			pvLine->len = localPV->len + 1;
+			Assert(pvLine->len <= MAX_DEPTH);
 		}
 
 		/**
@@ -491,8 +525,8 @@ int quiescence(int alpha, int beta, Board* b, search_t* s) {
 
 	}
 
-	Assert(alpha >= oldAlpha);
 
+	Assert(alpha >= oldAlpha);
 	return alpha;
 }
 
@@ -582,6 +616,8 @@ int search(Board* b, search_t* s) {
 
 		bestScore = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV, pvLine);
 		//bestScore = search_aspiration(b, s, currentDepth, bestScore);
+		//Assert(bestScore < INF);
+		//Assert(bestScore > -INF);
 
 		// forced stop, break and use pv line of previous iteration
 		if (s->stopped) break;
@@ -598,11 +634,33 @@ int search(Board* b, search_t* s) {
 		for (int i = 0; i < pvMoves; i++) {
 			cout << getStringMove(b->pvArray[i]);
 		}
-#else
-		for (int i = 0; i < currentDepth; i++) {
+#endif
+#define STRUCT_PV
+#ifdef STRUCT_PV
+		for (int i = 0; i < pvLine->len; i++) {
 			cout << getStringMove(pvLine->line[i]);
 		}
-#endif // TT_PV_LINE
+#endif // STRUCT_PV
+#ifdef TREE_PV
+		//for (int i = 0; i < b->length_of_variation[currentDepth]; i++) {
+		//	cout << getStringMove(pvLine->line[i]);
+		//}
+
+		int c;
+		int root_move_number = 0;
+
+		if (b->side) {
+			root_move_number = 1;
+			//cout << ". ... ," << (int)(b->moves_played) / 2 + 1);
+		}
+		for (c = 0; c < b->length_of_variation[0]; c++) {
+			//if (((root_move_number + c) & 1) == 0)
+				//cout << ". " << (int) (root_move_number + b->undoPly) / 2 + 1);
+			cout << getStringMove(b->principle_variation[c][0]) << endl;
+		}
+
+#endif // TREE_PV
+
 
 		/*cout << "\n";
 		cout << "Ordering percentage: \t\t" << setprecision(3) << fixed << (float)(s->fhf / s->fh) << endl;

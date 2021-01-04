@@ -2,7 +2,8 @@
 
 int main() {
 	init(&board);
-	board.parseFen(BUG_FEN);
+	board.parseFen(END_FEN_1);
+	//board.parseFen("1B6/P1P4k/8/1q6/8/K7/7p/5q2 b - - 0 1");
 	board.printBoard();
 	log("\nStartup");
 
@@ -42,8 +43,8 @@ void play(Board* b, Perft* p, search_t* s) {
 				s->startTime = getTimeMs();
 				s->stopTime = getTimeMs() + 10000;
 
-				s->timeSet = false;
-				s->depthSet = true;
+				s->timeSet = true;
+				s->depthSet = false;
 				search(b, s);
 
 				getPVLine(b, s->depth);
@@ -63,7 +64,7 @@ void play(Board* b, Perft* p, search_t* s) {
 			s->startTime = getTimeMs();
 			s->stopTime = getTimeMs() + 5000;
 
-			s->timeSet = true;
+			s->timeSet = false;
 			s->depthSet = true;
 			search(b, s);
 			continue;

@@ -1,0 +1,4 @@
+Failed : zobristKey != generateZobristKey()
+In File  : F:\SmartGit-Repositories\chai\chai\board.cpp
+At Line 
+ : 35

@@ -134,6 +134,13 @@ public:
 	*/
 	move_t counterHeuristic[64][64][2];
 
+	move_t principle_variation[MAX_DEPTH][MAX_DEPTH];
+	int length_of_variation[MAX_DEPTH];
+	int quiescence_depth_of_variation[MAX_DEPTH];
+	bool hash_hit[MAX_DEPTH];
+
+	void backup_principle_variation(Board* game, int depth, move_t move);
+
 	/**
 	 * Count major pieces (n, b, r, q, k) on current board
 	 *

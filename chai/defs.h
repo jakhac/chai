@@ -3,6 +3,8 @@
 #include "stdlib.h"
 #include <string>
 #include <cassert>
+#include <iostream>
+#include <fstream>
 
 #include "move.h"
 #include "types.h"
@@ -14,6 +16,17 @@ using namespace std;
 //#define TESTING
 //#define DEBUG
 
+/**
+ * Write logging information into log.txt file.
+ *
+ * @param  logMsg Message to write into log file.
+ */
+inline void logDebug(string logMsg, string msg) {
+	ofstream ofs("../assertLog.txt", std::ios_base::out | std::ios_base::app);
+	string t = logMsg + " : " + msg + "\n\n";
+	ofs.close();
+}
+
 #ifndef DEBUG
 #define Assert(n)
 #else
@@ -23,9 +36,11 @@ printf("%s - Failed",#n); \
 printf("On %s ",__DATE__); \
 printf("At %s ",__TIME__); \
 printf("In File %s ",__FILE__); \
-printf("At Line %d\n",__LINE__); \<
-exit(1);
-}
+printf("At Line %d\n",__LINE__); \
+logDebug("Failed", #n); \
+logDebug("In File ", __FILE__); \
+logDebug("At Line ", to_string(__LINE__)); \
+exit(1); }
 #endif
 
 const int NUM_SQUARES = 64;
