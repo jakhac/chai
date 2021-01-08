@@ -165,6 +165,7 @@
     <ClCompile Include="board.cpp" />
     <ClCompile Include="defs.cpp" />
     <ClCompile Include="eval.cpp" />
+    <ClCompile Include="info.cpp" />
     <ClCompile Include="legalMoveGenerator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="move.cpp" />
