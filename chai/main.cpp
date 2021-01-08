@@ -7,6 +7,8 @@ int main() {
 	board.printBoard();
 	log("\nStartup");
 
+	// development
+
 	//moveList_t moveList[1];
 	//generateMoves(&board, moveList, board.isCheck(board.side));
 	//generateQuietCheckers(&board, moveList);
