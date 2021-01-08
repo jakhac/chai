@@ -157,7 +157,7 @@
     <ClInclude Include="tt.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="uci.h" />
-    <ClInclude Include="util.h" />
+    <ClInclude Include="bitUtils.h" />
     <ClInclude Include="validate.h" />
   </ItemGroup>
   <ItemGroup>

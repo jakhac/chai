@@ -94,3 +94,77 @@ void printBinary(bitboard_t x) {
 	std::bitset<64> b(x);
 	cout << b << endl;
 }
+
+void printSearchInfo(Board* b, search_t* s) {
+	cout << "\n";
+	cout << "Ordering percentage: \t\t" << setprecision(3) << fixed << (float)(s->fhf / s->fh) << endl;
+	cout << "T table hit percentage: \t" << setprecision(3) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
+	cout << "T table hit used: \t\t" << (float)(b->tt->valueHit) / (b->tt->probed) << endl;
+	cout << "T table memory used: \t\t" << setprecision(5) << fixed << (float)(b->tt->stored) / (b->tt->entries) << endl;
+	cout << "Pawn table hit percentage: \t" << setprecision(3) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
+	cout << "Pawn table memory used: \t" << setprecision(5) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
+	cout << "Pawn table collisions: \t\t" << setprecision(3) << fixed << b->pawnTable->collided << endl;
+	cout << endl;
+}
+
+void log(string logMsg) {
+	ofstream ofs("log.txt", std::ios_base::out | std::ios_base::app);
+	ofs << getTime() << "\t" << logMsg << '\n';
+	ofs.close();
+}
+
+void readInput(search_t* s) {
+	int bytes;
+	char input[256] = "", * endc;
+
+	if (inputWaiting()) {
+		s->stopped = true;
+		do {
+			bytes = _read(_fileno(stdin), input, 256);
+		} while (bytes < 0);
+		endc = strchr(input, '\n');
+		if (endc)
+			*endc = 0;
+
+		if (strlen(input) > 0) {
+			if (!strncmp(input, "quit", 4)) {
+				cout << "READ INPUT: quit" << endl;
+				s->quit = true;
+			}
+		}
+		return;
+	}
+}
+
+string getTime() {
+	char str[32]{};
+	time_t a = time(nullptr);
+	struct tm time_info;
+
+	if (localtime_s(&time_info, &a) == 0) strftime(str, sizeof(str), "%H:%M:%S", &time_info);
+	return str;
+}
+
+bool inputWaiting() {
+	static int init = 0, pipe;
+	static HANDLE inh;
+	DWORD dw;
+
+	if (!init) {
+		init = 1;
+		inh = GetStdHandle(STD_INPUT_HANDLE);
+		pipe = !GetConsoleMode(inh, &dw);
+		if (!pipe) {
+			SetConsoleMode(inh, dw & ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT));
+			FlushConsoleInputBuffer(inh);
+		}
+	}
+	if (pipe) {
+		if (!PeekNamedPipe(inh, NULL, 0, NULL, &dw, NULL))
+			return 1;
+		return dw;
+	} else {
+		GetNumberOfConsoleInputEvents(inh, &dw);
+		return dw <= 1 ? 0 : dw;
+	}
+}

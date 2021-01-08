@@ -437,6 +437,7 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 	generateQuiescence(b, moveList, inCheck);
 	quiescenceChecks[abs(depth)] = inCheck;
 
+	// TODO doc
 	if (moveList->cnt == 0) {
 		// checkmate
 		if (inCheck) {
@@ -616,8 +617,8 @@ int search(Board* b, search_t* s) {
 
 		bestScore = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV, pvLine);
 		//bestScore = search_aspiration(b, s, currentDepth, bestScore);
-		//Assert(bestScore < INF);
-		//Assert(bestScore > -INF);
+		Assert(bestScore < INF);
+		Assert(bestScore > -INF);
 
 		// forced stop, break and use pv line of previous iteration
 		if (s->stopped) break;
@@ -641,36 +642,9 @@ int search(Board* b, search_t* s) {
 			cout << getStringMove(pvLine->line[i]);
 		}
 #endif // STRUCT_PV
-#ifdef TREE_PV
-		//for (int i = 0; i < b->length_of_variation[currentDepth]; i++) {
-		//	cout << getStringMove(pvLine->line[i]);
-		//}
-
-		int c;
-		int root_move_number = 0;
-
-		if (b->side) {
-			root_move_number = 1;
-			//cout << ". ... ," << (int)(b->moves_played) / 2 + 1);
-		}
-		for (c = 0; c < b->length_of_variation[0]; c++) {
-			//if (((root_move_number + c) & 1) == 0)
-				//cout << ". " << (int) (root_move_number + b->undoPly) / 2 + 1);
-			cout << getStringMove(b->principle_variation[c][0]) << endl;
-		}
-
-#endif // TREE_PV
 
 
-		/*cout << "\n";
-		cout << "Ordering percentage: \t\t" << setprecision(3) << fixed << (float)(s->fhf / s->fh) << endl;
-		cout << "T table hit percentage: \t" << setprecision(3) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
-		cout << "T table hit used: \t\t" << (float)(b->tt->valueHit) / (b->tt->probed) << endl;
-		cout << "T table memory used: \t\t" << setprecision(5) << fixed << (float)(b->tt->stored) / (b->tt->entries) << endl;
-		cout << "Pawn table hit percentage: \t" << setprecision(3) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
-		cout << "Pawn table memory used: \t" << setprecision(5) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
-		cout << "Pawn table collisions: \t\t" << setprecision(3) << fixed << b->pawnTable->collided << endl;
-		cout << endl;*/
+		printSearchInfo(b, s);
 
 		// quit when checkmate was found
 		/*if (currentDepth > 1 && bestScore > ISMATE) {
@@ -679,7 +653,6 @@ int search(Board* b, search_t* s) {
 		}*/
 
 		cout << "\n";
-
 	}
 
 	fflush(stdout);
