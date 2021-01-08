@@ -9,7 +9,7 @@
 #include "move.h"
 #include "types.h"
 
-#define VERSION "v2.1.2 0301"
+#define VERSION "v2.2.1"
 
 using namespace std;
 
