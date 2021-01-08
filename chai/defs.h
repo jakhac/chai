@@ -6,12 +6,13 @@
 #include <iostream>
 #include <fstream>
 
+using namespace std;
+
 #include "move.h"
 #include "types.h"
 
 #define VERSION "v2.2.1"
 
-using namespace std;
 
 //#define TESTING
 //#define DEBUG
@@ -27,6 +28,7 @@ inline void logDebug(string logMsg, string msg) {
 	ofs.close();
 }
 
+
 #ifndef DEBUG
 #define Assert(n)
 #else
@@ -40,7 +42,8 @@ printf("At Line %d\n",__LINE__); \
 logDebug("Failed", #n); \
 logDebug("In File ", __FILE__); \
 logDebug("At Line ", to_string(__LINE__)); \
-exit(1); }
+exit(1); \
+}
 #endif
 
 const int NUM_SQUARES = 64;
