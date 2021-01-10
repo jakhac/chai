@@ -15,6 +15,11 @@ const int ttSize = 0x100000 * 128;
  */
 const int pawnTableSize = 0x100000 * 8;
 
+/*
+* Determines the number of buckets used in ttable.
+*/
+const int BUCKETS = 3;
+
 /**
  * Initialize transposition table: Clear used or allocated memory and re-allocate.
  *
@@ -106,6 +111,13 @@ void clearPawnTable(pawntable_t* pawnTable);
 void storePawnEntry(Board* b, const int eval);
 
 /**
+ * Prefetch pawn entry in cache line using assembly instruction.
+ *
+ * @param  b The current board.
+ */
+void prefetchPawnEntry(Board* b);
+
+/**
  * Probe pawn table and return score if found.
  *
  * @param  b Current board.
@@ -113,3 +125,11 @@ void storePawnEntry(Board* b, const int eval);
  * @returns An int.
  */
 int probePawnEntry(Board* b);
+
+/**
+ * Free memory allocated for ttable and ptable.
+ *
+ * @param  b The board with both hash tables.
+ */
+void destroyTranspositionTables(Board* b);
+

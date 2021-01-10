@@ -2,8 +2,7 @@
 
 int main() {
 	init(&board);
-	board.parseFen(END_FEN_1);
-	//board.parseFen("1B6/P1P4k/8/1q6/8/K7/7p/5q2 b - - 0 1");
+	board.parseFen(STARTING_FEN);
 	board.printBoard();
 	log("\nStartup");
 
@@ -15,8 +14,7 @@ int main() {
 
 	play(&board, &perft, s);
 
-	if (board.tt->table != NULL) free(board.tt->table);
-	if (board.pawnTable->table != NULL) free(board.pawnTable->table);
+	destroyTranspositionTables(&board);
 	return 0;
 }
 

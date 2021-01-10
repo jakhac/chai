@@ -3,43 +3,10 @@
 - Time: 40/0.4
 - Opponents: TSCP181, Bubble
  
-# Elo Results
-
-<!---
-
-* 275-162-63 (61%) +78
-*	- pvs
-*	- lmr
-*	- futility pruning
-*	- static null move pruning
-*	- pv move in quiesence
-*
-* 285-133-82 (65%) +108
-*	- pvs
-*	- lmr
-*	- futility pruning
-*	- static null move pruning
-*	+ pv move in quiesence
-*
-* 312-108-80 (70%) +147
-*	- pvs
-*	- lmr
-*	+ futility pruning
-*	- static null move pruning
-*	+ pv move in quiesence
-*
-* 353-112-70 (71%) +156 [310-119-71 (70%) +147]
-*	- pvs
-*	- lmr
-*	+ futility pruning
-*	+ static null move pruning
-*	+ pv move in quiesence
--->
-
-**Change log from 30.12.20**
-- Results
+**Change log from v2.0 (30.12.20)**
+<!-- - Results
   - chai - TSCP181 &rarr; *241-189-70* (+35)
-  - chai - Bubble &rarr; *108-337-55* (-173)
+  - chai - Bubble &rarr; *108-337-55* (-173) -->
 - AlphaBeta
   - Standard alpha-beta pruning
   - Check Extensions:
@@ -62,15 +29,15 @@
   - Size = 16MB
   - Hash move used in move ordering
 
-**Change log from 03.01.21**
-- Results
-  - chai - TSCP181 &rarr;
-  - chai - Bubble &rarr;
+**Change log from v2.1 (03.01.21)**
+<!-- - Results
+  - chai - TSCP181 &rarr; 252-187-61 (+49)
+  - chai - Bubble &rarr; 92-342-66 ( -191) -->
 - Move Ordering:
   - Promoting captures are sorted higher than normal captures
 - Quiesence
   - Removed Delta cutoff
-  - Early return in see calculation for quiesence (attackerVal < capVal), `lazySee()`
+  - `lazySee()` early return in see calculation for quiesence (attackerVal < capVal)
   - Negative see pruning
   - `scoreMovesQuiesence`
   - No stand pat pruning when in check
@@ -81,10 +48,22 @@
   - moveScores in alphaBeta swapped moves but not scores
   - counterMoves, EP moves, castleMoves scored wrong at index
   - assign correct PROMOTION bonus in alphaBeta and qui moveScoring
-- Choose FEN in perft option
+- Features
+  - Choose FEN in perft option
+
+**Changes in v2.2**
+- [x] Compiler Optimizations **DISABLED IN DEVELOPMENT**
+- Quiescence
+  - [x] Forced checkmates are detected in quiescence
+  - [x] Generate checkers at first ply
+- Transposition Table
+  - [x] Prefetch Pawn Table
+  - [ ] Buckets
+  - [ ] Refactor usage of ttable hits
 
 # Todo
 
+- ~~Compiler optimizations~~
 - Move Generation
   - ~~`scoreMoves()` instead of scoring while generating~~
   - run move gen after hash move failed -> pvs still possible?
@@ -92,7 +71,7 @@
   -  ~~quiesence move gen (captures, promotions, check evasions)~~
   - add checks in first ply
   - ~~special see function with early exit for captures like PxQ~~
-  - Early return inCheck function is fastest and most reliable, do not use isLegal or leaesKingInCheck
+  - ~~Early return inCheck function is fastest and most reliable, do not use isLegal or leaesKingInCheck~~
     - ~~faster isCheck method? instead of inCheck() -> only check pinned pieces / king attacks of last move~~
 
 - Project
@@ -117,7 +96,7 @@
   - ~~killer moves~~
   - ~~matekiller moves~~
   - ~~counter moves~~
-  - ~~history heuristic~~ ***Decrement bad moves?***
+  - ~~history heuristic~~
 
 - Quiesence
   - see pruning

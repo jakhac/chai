@@ -25,8 +25,11 @@ const int HISTORY_MAX = 0x4000;
  */
 static pv_line_t pvLine[1];
 
+/**
+ * Remember checks given in quiescence to detect checkmates. Quiescence depths are stored
+ * as absolute values.
+ */
 static int quiescenceChecks[MAX_DEPTH];
-
 
 /**
  * Alpha beta algorithm root. Searches current board for best move and score.
@@ -45,7 +48,8 @@ static int quiescenceChecks[MAX_DEPTH];
 int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine);
 
 /**
- * Quiescence search pushes all captures to evaluate a stable and quiet position.
+ * Quiescence search pushes all captures to evaluate a stable and quiet position. AlphaBeta
+ * always drops into quiescence with depth 0.
  *
  * @param  alpha Lower bound, minimum score the side is assured of.
  * @param  beta  Upper bound, maximum score the opponent is assured of.
@@ -115,4 +119,12 @@ void getNextMove(Board* b, moveList_t* move_s, int curIdx);
  * @param  id2    Second index.
  */
 void swapMove(moveList_t* move_s, int id1, int id2);
+
+/**
+ * Print search information to console.
+ *
+ * @param  b Current board.
+ * @param  s This search info printed to console.
+ */
+void printSearchInfo(Board* b, search_t* s);
 

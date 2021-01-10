@@ -9,8 +9,8 @@ typedef int move_t;
 
 struct moveList_t {
 	int cnt = 0;
-	int moves[220]; // MAX POSITION MOVES
-	int scores[220]; // MAX POSITION MOVES
+	int moves[256]; // MAX POSITION MOVES
+	int scores[256]; // MAX POSITION MOVES
 
 	bitboard_t attackedSquares = 0ULL;
 };
@@ -25,16 +25,16 @@ struct undo_t {
 };
 
 struct ttable_entry_t {
-	bitboard_t zobKey;
-	int move;
-	int score;
-	uint8_t flag;
-	uint8_t depth;
+	uint8_t flag = 0;
+	uint8_t depth = 0;
+	bitboard_t zobKey = 0x0;
+	int score = 0;
+	int move = 0;
 };
 
 struct ttable_t {
 	ttable_entry_t* table = NULL;
-	int entries = 0;
+	int buckets = 0;
 
 	// measure successful probes
 	int probed;
@@ -49,7 +49,7 @@ struct ttable_t {
 
 struct pawntable_entry_t {
 	bitboard_t zobristPawnKey;
-	int eval;
+	uint16_t eval;
 };
 
 struct pawntable_t {

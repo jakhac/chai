@@ -95,16 +95,8 @@ void printBinary(bitboard_t x) {
 	cout << b << endl;
 }
 
-void printSearchInfo(Board* b, search_t* s) {
+void printSearchInfo(Board* b) {
 	cout << "\n";
-	cout << "Ordering percentage: \t\t" << setprecision(3) << fixed << (float)(s->fhf / s->fh) << endl;
-	cout << "T table hit percentage: \t" << setprecision(3) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
-	cout << "T table hit used: \t\t" << (float)(b->tt->valueHit) / (b->tt->probed) << endl;
-	cout << "T table memory used: \t\t" << setprecision(5) << fixed << (float)(b->tt->stored) / (b->tt->entries) << endl;
-	cout << "Pawn table hit percentage: \t" << setprecision(3) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
-	cout << "Pawn table memory used: \t" << setprecision(5) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
-	cout << "Pawn table collisions: \t\t" << setprecision(3) << fixed << b->pawnTable->collided << endl;
-	cout << endl;
 }
 
 void log(string logMsg) {

@@ -12,7 +12,7 @@
  *
  * @param  board Board.
  *
- * @returns INdex of first found bit.
+ * @returns Index of first found bit.
  */
 inline int bitscanForward(bitboard_t board) {
 	if (board == 0ULL) return -1;

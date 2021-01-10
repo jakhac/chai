@@ -15,7 +15,7 @@ using namespace std;
 
 
 //#define TESTING
-//#define DEBUG
+#define ASSERT
 
 /**
  * Write logging information into log.txt file.
@@ -28,8 +28,7 @@ inline void logDebug(string logMsg, string msg) {
 	ofs.close();
 }
 
-
-#ifndef DEBUG
+#ifndef ASSERT
 #define Assert(n)
 #else
 #define Assert(n) \
@@ -44,7 +43,7 @@ logDebug("In File ", __FILE__); \
 logDebug("At Line ", to_string(__LINE__)); \
 exit(1); \
 }
-#endif
+#endif // ASSERT
 
 const int NUM_SQUARES = 64;
 const int MAX_GAME_MOVES = 2048;

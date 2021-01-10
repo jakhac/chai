@@ -13,6 +13,8 @@
 #include <iomanip> // put_time
 #include "windows.h"
 
+using namespace std;
+
 /**
  * Print referenced bitboard.
  *
@@ -49,14 +51,6 @@ void printMoveStatus(int move);
  * @param  x A bitboard_t to process.
  */
 void printBinary(bitboard_t x);
-
-/**
- * Print search information to console.
- *
- * @param  b Current board.
- * @param  s This search info printed to console.
- */
-void printSearchInfo(Board* b, search_t* s);
 
 /**
  * Write logging information into log.txt file.
