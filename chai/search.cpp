@@ -11,7 +11,7 @@ void checkSearchInfo(search_t* s) {
 
 	// read input causes tests to wait for cin and does not terminate
 #ifndef TESTING
-	//readInput(s);
+	readInput(s);
 #endif // TESTING
 
 }
@@ -71,16 +71,13 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	Assert(b->checkBoard());
 	Assert(beta > alpha);
 
-	pv_line_t localPV[1]{};
+	pv_line_t localPV[1];
 	localPV->len = 0;
 
 	// drop in quiescence if max depth is reached
 	if (depth <= 0 || b->ply > MAX_DEPTH) {
 		pvLine->len = 0;
-		//return eval(b);
-		int qui = quiescence(alpha, beta, 0, b, s, localPV);
-		//Assert(qui < INF);
-		return qui;
+		return quiescence(alpha, beta, 0, b, s, localPV);
 	}
 
 	// check for time and depth
@@ -345,13 +342,10 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			bestMove = currentMove;
 			Assert(bestScore < INF);
 
-			b->backup_principle_variation(b, depth + 1, currentMove);
-
-
 			/*
 			* If the currentMove scores higher than alpha, the principal variation
 			* is updated because a better move for this position has been found.
-			* This information can be stored in (counter) history heuristic to improve
+			* This information can be stored in (counter) history heuristic to improve mulm
 			* further move ordering.
 			*/
 			if (score > alpha) {
@@ -404,14 +398,11 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 		return contemptFactor(b);
 	}
 
+	//if (b->ply > MAX_DEPTH - 1) return standPat;
+
 	int standPat = eval(b);
 	bool inCheck = b->isCheck(b->side);
-
-	if (b->ply > MAX_DEPTH - 1) return standPat;
-
-	// pv line
-	pv_line_t localPV[1]{};
-	localPV->len = 0;
+	quiescenceChecks[abs(depth)] = inCheck;
 
 	/*
 	* If a position scores higher than alpha, update the value to keep a lower bound of the
@@ -435,13 +426,21 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 
 	moveList_t moveList[1];
 	generateQuiescence(b, moveList, inCheck);
-	quiescenceChecks[abs(depth)] = inCheck;
 
+	// First ply of quiescence generates checkers, if there is no check at current position.
+	if (!inCheck && depth == 0) {
+		generateQuietCheckers(b, moveList);
+	}
+
+	// Check evasions are enabled, might encounter a forced checkmate
 	if (moveList->cnt == 0) {
-		// checkmate
-		if (inCheck) {
 
-			// forced check?
+		/**
+		 * If no moves were generated and all previous positions were check, meaning forced,
+		 * this position is a checkmate and returns mate score. If a non-checking position was found,
+		 * return stand pat because mate was not forced.
+		 */
+		if (inCheck) {
 			for (int i = depth; i <= 0; i += 2) {
 				if (!quiescenceChecks[i]) {
 					return standPat;
@@ -451,18 +450,23 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 			return -MATE + b->ply;
 		}
 
-		// no tactical moves
+		// Immediatly return standPat score if neither check nor tactical moves possible.
 		return standPat;
 	}
 
-
-	// If in check, all evading moves are generated and have to be scored differently.
-	// Quiescence move ordering only handles captures and promotions.
-	if (inCheck) {
+	/*
+	* Check evasions and first ply may contain non-tactical moves and are scored with standard function.
+	* Tactical moves are scored with faster scorer.
+	*/
+	if (inCheck || depth == 0) {
 		scoreMovesAlphaBeta(b, moveList, NO_MOVE);
 	} else {
 		scoreMovesQuiescence(b, moveList);
 	}
+
+	// Local PV line
+	pv_line_t localPV[1]{};
+	localPV->len = 0;
 
 	/*
 	* There are no cutoffs in this node yet. Generate all captures, promotions or check evasions
@@ -472,8 +476,7 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 		getNextMove(b, moveList, i);
 		int currentMove = moveList->moves[i];
 
-		// either position is a check or we capture / promote / enpas
-		Assert(inCheck || (currentMove & MCHECK_PROM_OR_CAP || currentMove & MFLAG_EP));
+		Assert(depth == 0 || inCheck || (currentMove & MCHECK_PROM_OR_CAP || currentMove & MFLAG_EP));
 
 		// Delta cutoff: prune moves that cannot improve over alpha
 		//bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
@@ -484,11 +487,13 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 
 		/*
 		* If SEE score is negative, this is a losing capture. Since there is little to no chance that
-		* this move raises alpha, it can be pruned.
+		* this move raises alpha, it can be pruned. Proms are ignored, because PROM_SCORE > BAD_CAPTURE.
 		*/
-		//if (legalMoves && moveList->scores[i] < (BAD_CAPTURE + MVV_LVA_UBOUND)) {
-			//continue;
-		//}
+		if (legalMoves
+			&& moveList->scores[i] < (BAD_CAPTURE + MVV_LVA_UBOUND)) {
+			Assert(!(MCHECK_PROM & currentMove));
+			continue;
+		}
 
 		if (!b->push(currentMove)) continue;
 
@@ -522,9 +527,7 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 
 			return beta;
 		}
-
 	}
-
 
 	Assert(alpha >= oldAlpha);
 	return alpha;
@@ -616,8 +619,8 @@ int search(Board* b, search_t* s) {
 
 		bestScore = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV, pvLine);
 		//bestScore = search_aspiration(b, s, currentDepth, bestScore);
-		//Assert(bestScore < INF);
-		//Assert(bestScore > -INF);
+		Assert(bestScore < INF);
+		Assert(bestScore > -INF);
 
 		// forced stop, break and use pv line of previous iteration
 		if (s->stopped) break;
@@ -641,36 +644,8 @@ int search(Board* b, search_t* s) {
 			cout << getStringMove(pvLine->line[i]);
 		}
 #endif // STRUCT_PV
-#ifdef TREE_PV
-		//for (int i = 0; i < b->length_of_variation[currentDepth]; i++) {
-		//	cout << getStringMove(pvLine->line[i]);
-		//}
 
-		int c;
-		int root_move_number = 0;
-
-		if (b->side) {
-			root_move_number = 1;
-			//cout << ". ... ," << (int)(b->moves_played) / 2 + 1);
-		}
-		for (c = 0; c < b->length_of_variation[0]; c++) {
-			//if (((root_move_number + c) & 1) == 0)
-				//cout << ". " << (int) (root_move_number + b->undoPly) / 2 + 1);
-			cout << getStringMove(b->principle_variation[c][0]) << endl;
-		}
-
-#endif // TREE_PV
-
-
-		/*cout << "\n";
-		cout << "Ordering percentage: \t\t" << setprecision(3) << fixed << (float)(s->fhf / s->fh) << endl;
-		cout << "T table hit percentage: \t" << setprecision(3) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
-		cout << "T table hit used: \t\t" << (float)(b->tt->valueHit) / (b->tt->probed) << endl;
-		cout << "T table memory used: \t\t" << setprecision(5) << fixed << (float)(b->tt->stored) / (b->tt->entries) << endl;
-		cout << "Pawn table hit percentage: \t" << setprecision(3) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
-		cout << "Pawn table memory used: \t" << setprecision(5) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
-		cout << "Pawn table collisions: \t\t" << setprecision(3) << fixed << b->pawnTable->collided << endl;
-		cout << endl;*/
+		printSearchInfo(b, s);
 
 		// quit when checkmate was found
 		/*if (currentDepth > 1 && bestScore > ISMATE) {
@@ -679,7 +654,6 @@ int search(Board* b, search_t* s) {
 		}*/
 
 		cout << "\n";
-
 	}
 
 	fflush(stdout);
@@ -691,4 +665,14 @@ int search(Board* b, search_t* s) {
 	return bestScore;
 }
 
-
+void printSearchInfo(Board* b, search_t* s) {
+	cout << "\n";
+	cout << "Ordering percentage: \t\t" << setprecision(3) << fixed << (float)(s->fhf / s->fh) << endl;
+	cout << "T table hit percentage: \t" << setprecision(3) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
+	cout << "T table hit used: \t\t" << (float)(b->tt->valueHit) / (b->tt->probed) << endl;
+	cout << "T table memory used: \t\t" << setprecision(5) << fixed << (float)(b->tt->stored) / (b->tt->buckets) << endl;
+	cout << "Pawn table hit percentage: \t" << setprecision(3) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
+	cout << "Pawn table memory used: \t" << setprecision(5) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
+	cout << "Pawn table collisions: \t\t" << setprecision(3) << fixed << b->pawnTable->collided << endl;
+	cout << endl;
+}

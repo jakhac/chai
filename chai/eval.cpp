@@ -310,6 +310,8 @@ int eval(Board* b) {
 	int eval = 0;
 	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
+	prefetchPawnEntry(b);
+
 	// calculate reused bitboards once and share between functions
 	b->attackedSquares[WHITE] = b->attackerSet(WHITE);
 	b->attackedSquares[BLACK] = b->attackerSet(BLACK);

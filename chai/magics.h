@@ -1,7 +1,7 @@
 #pragma once
 
 #include "defs.h"
-#include "util.h"
+#include "bitUtils.h"
 
 const int RBits[64] = {
   12, 11, 11, 11, 11, 11, 11, 12,

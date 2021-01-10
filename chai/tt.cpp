@@ -1,8 +1,8 @@
 #include "tt.h"
 
 void initTT(ttable_t* tt) {
-	tt->entries = ttSize / sizeof(ttable_entry_t);
-	tt->entries -= 2;
+	tt->buckets = ttSize / (sizeof(ttable_entry_t) * BUCKETS);
+	tt->buckets -= 2;
 	tt->stored = 0;
 
 	if (tt->table != NULL) {
@@ -10,27 +10,23 @@ void initTT(ttable_t* tt) {
 	}
 
 	// dynamically allocate memory hash table
-	tt->table = (ttable_entry_t*)malloc(tt->entries * sizeof(ttable_entry_t));
+	tt->table = (ttable_entry_t*)malloc(tt->buckets * (sizeof(ttable_entry_t) * BUCKETS));
 	clearTT(tt);
 
-	cout << "Transposition table initialized with " << tt->entries << " entries." << endl;
+	cout << "Transposition table initialized with " << tt->buckets
+		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl;
+
 }
 
 void clearTT(ttable_t* tt) {
 	ttable_entry_t* ttEntry;
-	for (ttEntry = tt->table; ttEntry < tt->table + tt->entries; ttEntry++) {
-		ttEntry->zobKey = 0ULL;
-		ttEntry->move = 0;
-		ttEntry->depth = 0;
-		ttEntry->flag = 0;
-		ttEntry->score = 0;
-	}
+	memset(tt->table, 0, (tt->buckets * sizeof(ttable_entry_t) * BUCKETS));
 }
 
 void storeTT(Board* b, int move, int score, int flag, int depth) {
-	int index = b->zobristKey % b->tt->entries;
+	int index = b->zobristKey % b->tt->buckets;
 
-	Assert(index >= 0 && index <= b->tt->entries - 1);
+	Assert(index >= 0 && index <= b->tt->buckets - 1);
 	Assert(depth >= 1 && depth <= MAX_DEPTH);
 	Assert(flag >= TT_ALPHA && flag <= TT_SCORE);
 	Assert(score >= -INF && score <= INF);
@@ -46,70 +42,119 @@ void storeTT(Board* b, int move, int score, int flag, int depth) {
 		b->tt->stored++;
 	}
 
-	b->tt->table[index].move = move;
-	b->tt->table[index].zobKey = b->zobristKey;
-	b->tt->table[index].flag = flag;
-	b->tt->table[index].score = score;
-	b->tt->table[index].depth = depth;
+	// compute pointer to current bucket: pTable + (index * buckets)
+	int entry = index * BUCKETS;
+	ttable_entry_t* bucket = b->tt->table + entry;
+
+	bucket->move = move;
+	bucket->zobKey = b->zobristKey;
+	bucket->flag = flag;
+	bucket->score = score;
+	bucket->depth = depth;
+
+	Assert(b->tt->table[index * BUCKETS].move == move);
 }
 
 bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
-	int index = b->zobristKey % b->tt->entries;
+	int index = b->zobristKey % b->tt->buckets;
 
-	Assert(index >= 0 && index <= b->tt->entries - 1);
+	Assert(index >= 0 && index <= b->tt->buckets - 1);
 	Assert(depth >= 1 && depth <= MAX_DEPTH);
 	Assert(alpha < beta);
 	Assert(alpha >= -INF && alpha <= INF);
 	Assert(beta >= -INF && beta <= INF);
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
-	if (b->tt->table[index].zobKey == b->zobristKey) {
-		*move = b->tt->table[index].move;
+	int entry = index * BUCKETS;
+	ttable_entry_t* bucket = b->tt->table + entry;
 
-		if (b->tt->table[index].depth >= depth) {
-			b->tt->valueHit++;
+	for (int i = 0; i < BUCKETS; i++) {
+		bucket = bucket + i;
 
-			Assert(b->tt->table[index].depth >= 1 && b->tt->table[index].depth <= MAX_DEPTH);
-			Assert(b->tt->table[index].flag >= TT_ALPHA && b->tt->table[index].flag <= TT_SCORE);
+		// matching entry in bucket?
+		if (bucket->zobKey == b->zobristKey) {
+			Assert(i == 0);
+			*move = bucket->move;
 
-			*score = b->tt->table[index].score;
+			if (bucket->depth >= depth) {
+				b->tt->valueHit++;
 
-			if (*score > ISMATE) *score -= b->ply;
-			else if (*score < -ISMATE) *score += b->ply;
+				Assert(bucket->depth >= 1 && bucket->depth <= MAX_DEPTH);
+				Assert(bucket->flag >= TT_ALPHA && bucket->flag <= TT_SCORE);
 
-			// if current alpha is lower than stored alpha, no move will increase alpha -> return stored alpha
-			switch (b->tt->table[index].flag) {
-				case TT_ALPHA:
-					if (*score <= alpha) {
-						*score = alpha;
+				*score = bucket->score;
+
+				if (*score > ISMATE) *score -= b->ply;
+				else if (*score < -ISMATE) *score += b->ply;
+
+				// if current alpha is lower than stored alpha, no move will 
+				// increase alpha -> return stored alpha
+				switch (bucket->flag) {
+					case TT_ALPHA:
+						if (*score <= alpha) {
+							*score = alpha;
+							return true;
+						}
+						break;
+					case TT_BETA:
+						if (*score >= beta) {
+							*score = beta;
+							return true;
+						}
+						break;
+					case TT_SCORE:
 						return true;
-					}
-					break;
-				case TT_BETA:
-					if (*score >= beta) {
-						*score = beta;
-						return true;
-					}
-					break;
-				case TT_SCORE:
-					return true;
-					break;
-				default: Assert(false) break;
+						break;
+					default: Assert(false) break;
+				}
 			}
+
 		}
+
 	}
+
+	//if (b->tt->table[index].zobKey == b->zobristKey) {
+	//	*move = b->tt->table[index].move;
+	//	if (b->tt->table[index].depth >= depth) {
+	//		b->tt->valueHit++;
+	//		Assert(b->tt->table[index].depth >= 1 && b->tt->table[index].depth <= MAX_DEPTH);
+	//		Assert(b->tt->table[index].flag >= TT_ALPHA && b->tt->table[index].flag <= TT_SCORE);
+	//		*score = b->tt->table[index].score;
+	//		if (*score > ISMATE) *score -= b->ply;
+	//		else if (*score < -ISMATE) *score += b->ply;
+	//		// if current alpha is lower than stored alpha, no move will increase alpha -> return stored alpha
+	//		switch (b->tt->table[index].flag) {
+	//			case TT_ALPHA:
+	//				if (*score <= alpha) {
+	//					*score = alpha;
+	//					return true;
+	//				}
+	//				break;
+	//			case TT_BETA:
+	//				if (*score >= beta) {
+	//					*score = beta;
+	//					return true;
+	//				}
+	//				break;
+	//			case TT_SCORE:
+	//				return true;
+	//				break;
+	//			default: Assert(false) break;
+	//		}
+	//	}
+	//}
 
 	return false;
 }
 
 void prefetchTTEntry(Board* b) {
-	int index = b->zobristKey % b->tt->entries;
+	int index = b->zobristKey % b->tt->buckets;
 	_m_prefetch(&b->tt->table[index]);
 }
 
 int probePV(Board* b) {
-	int index = b->zobristKey % b->tt->entries;
-	Assert(index >= 0 && index <= b->tt->entries - 1);
+	int index = b->zobristKey % b->tt->buckets;
+	Assert(index >= 0 && index <= b->tt->buckets - 1);
 
 	if (b->tt->table[index].zobKey == b->zobristKey) {
 		return b->tt->table[index].move;
@@ -179,6 +224,11 @@ void storePawnEntry(Board* b, const int eval) {
 	b->pawnTable->table[index].zobristPawnKey = b->zobristPawnKey;
 }
 
+void prefetchPawnEntry(Board* b) {
+	int index = b->zobristPawnKey % b->pawnTable->entries;
+	_m_prefetch(&b->pawnTable->table[index]);
+}
+
 int probePawnEntry(Board* b) {
 	int index = b->zobristPawnKey % b->pawnTable->entries;
 	Assert(index >= 0 && index <= b->pawnTable->entries - 1);
@@ -190,5 +240,10 @@ int probePawnEntry(Board* b) {
 	return NO_SCORE;
 }
 
-
-
+void destroyTranspositionTables(Board* b) {
+	if (b->tt->table != NULL) {
+		free(b->tt->table);
+	} else if (b->pawnTable->table != NULL) {
+		free(b->pawnTable->table);
+	}
+}

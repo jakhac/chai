@@ -926,20 +926,3 @@ bool Board::castleValid(int castle, bitboard_t* attackerSet) {
 
 	return true;
 }
-
-void Board::backup_principle_variation(Board* game, int depth, move_t move) {
-	int c;
-	/* Copy principle variation */
-	if (game->length_of_variation[depth + 1] >= (depth + 1)) {
-		game->principle_variation[depth][depth] = move;
-
-		for (c = depth + 1; c < game->length_of_variation[depth + 1]; c++) {
-
-			game->principle_variation[c][depth] = game->principle_variation[c][depth + 1];
-		}
-
-		game->length_of_variation[depth] = game->length_of_variation[depth + 1];
-		game->quiescence_depth_of_variation[depth] = game->quiescence_depth_of_variation[depth + 1];
-	}
-}
-
