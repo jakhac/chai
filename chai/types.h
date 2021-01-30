@@ -28,8 +28,8 @@ struct ttable_entry_t {
 	uint8_t flag = 0;
 	uint8_t depth = 0;
 	bitboard_t zobKey = 0x0;
-	int score = 0;
-	int move = 0;
+	int16_t score = 0;
+	move_t move = 0;
 };
 
 struct ttable_t {
@@ -49,7 +49,7 @@ struct ttable_t {
 
 struct pawntable_entry_t {
 	bitboard_t zobristPawnKey;
-	uint16_t eval;
+	int16_t eval;
 };
 
 struct pawntable_t {
@@ -76,6 +76,7 @@ struct search_t {
 	bool timeSet;
 
 	long nodes;
+	long qnodes;
 
 	bool quit = false;
 	bool stopped = false;
@@ -103,7 +104,7 @@ typedef enum COLORS { BLACK, WHITE, BOTH } color_t;
 enum CASTLING_RIGHTS { K_CASTLE = 1, Q_CASTLE = 2, k_CASTLE = 4, q_CASTLE = 8 };
 enum GAME_STATE { START, MID, END };
 
-enum { NONE, TT_ALPHA, TT_BETA, TT_SCORE };
+enum { TT_NONE, TT_ALPHA, TT_BETA, TT_SCORE };
 
 enum SQUARES {
 	A8 = 56, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD,

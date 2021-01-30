@@ -94,7 +94,7 @@ int lazySee(Board* b, const int move);
  * @param  moveList Reference to moveList to score moves in.
  * @param  hashMove Hash move found in pvLine or ttable.
  */
-void scoreMovesAlphaBeta(Board* b, moveList_t* moveList, move_t hashMove);
+void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove);
 
 /**
  * Score moves quiescence

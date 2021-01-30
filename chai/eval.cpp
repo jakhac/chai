@@ -302,6 +302,7 @@ int evaluatePawns(Board* b, float* t) {
 
 	// reward defended pawns
 
+	Assert(score < ISMATE);
 	return score;
 }
 
@@ -316,12 +317,11 @@ int eval(Board* b) {
 	b->attackedSquares[WHITE] = b->attackerSet(WHITE);
 	b->attackedSquares[BLACK] = b->attackerSet(BLACK);
 
-	int pawnEval = 0;
-	int probe = probePawnEntry(b);
 	b->pawnTable->probed++;
-	if (probe != NO_SCORE) {
+	int pawnEval = 0;
+	bool foundHash = probePawnEntry(b, &pawnEval);
+	if (foundHash) {
 		b->pawnTable->hit++;
-		pawnEval = probe;
 	} else {
 		pawnEval = evaluatePawns(b, &interpolFactor);
 		storePawnEntry(b, pawnEval);
@@ -337,7 +337,6 @@ int eval(Board* b) {
 
 	eval += surroundingSquares + 2 * centerSquares + 3 * kingSquares;
 
-
 	eval += pawnEval;
 	eval += evalPST(b, WHITE, &interpolFactor) - evalPST(b, BLACK, &interpolFactor);
 	eval += materialScore(b, WHITE) - materialScore(b, BLACK);
@@ -346,14 +345,15 @@ int eval(Board* b) {
 	eval += kingSafety(b, WHITE, &interpolFactor) - kingSafety(b, BLACK, &interpolFactor);
 	eval += mobility(b, WHITE, &interpolFactor) - mobility(b, BLACK, &interpolFactor);
 
+	Assert(abs(eval) < ISMATE);
+
 	// white scores positive and black scores negative
 	int sign = (b->side == WHITE) ? 1 : -1;
 	return eval * sign;
 }
 
 int contemptFactor(Board* b) {
-	int contempt = eval(b);
-	//int contempt = materialScore(b, WHITE) - materialScore(b, BLACK);
+	int contempt = eval(b); // TODO lazy eval
 
 	switch (b->side) {
 		case WHITE:

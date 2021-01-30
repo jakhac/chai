@@ -2,8 +2,18 @@
 
 #include "defs.h"
 #include "mask.h"
+#include "board.h"
+
 #include <iostream>
 #include <bitset>
+#include "io.h"
+#include <fstream>
+#include <chrono>  // chrono::system_clock
+#include <ctime>   // localtime
+#include <iomanip> // put_time
+#include "windows.h"
+
+using namespace std;
 
 /**
  * Print referenced bitboard.
@@ -41,3 +51,32 @@ void printMoveStatus(int move);
  * @param  x A bitboard_t to process.
  */
 void printBinary(bitboard_t x);
+
+/**
+ * Write logging information into log.txt file.
+ *
+ * @param  logMsg Message to write into log file.
+ */
+void log(string logMsg);
+
+/**
+ * Gets the time
+ *
+ * @returns The time.
+ */
+string getTime();
+
+/**
+ * Read input from command line during search. Sets stop to true,
+ * if search has to be aborted.
+ *
+ * @param  s The search info.
+ */
+void readInput(search_t* s);
+
+/**
+ * Determines if we can input waiting
+ *
+ * @returns True if input is waiting, else false.
+ */
+bool inputWaiting();

@@ -13,6 +13,7 @@ void initTT(ttable_t* tt) {
 	tt->table = (ttable_entry_t*)malloc(tt->buckets * (sizeof(ttable_entry_t) * BUCKETS));
 	clearTT(tt);
 
+	cout << "Buckets: " << BUCKETS << endl;
 	cout << "Transposition table initialized with " << tt->buckets
 		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl;
 
@@ -24,151 +25,125 @@ void clearTT(ttable_t* tt) {
 }
 
 void storeTT(Board* b, int move, int score, int flag, int depth) {
-	int index = b->zobristKey % b->tt->buckets;
+	int index = (b->zobristKey % b->tt->buckets) * BUCKETS;
 
-	Assert(index >= 0 && index <= b->tt->buckets - 1);
+	Assert(move != NO_MOVE);
+	Assert(index >= 0 && index <= (b->tt->buckets * BUCKETS) - 1);
 	Assert(depth >= 1 && depth <= MAX_DEPTH);
 	Assert(flag >= TT_ALPHA && flag <= TT_SCORE);
 	Assert(score >= -INF && score <= INF);
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
+	// TODO tableScorechecker opposite
 	if (score > ISMATE) score += b->ply;
 	else if (score < -ISMATE) score -= b->ply;
 
-	// stats
-	if (b->tt->table[index].zobKey != 0ULL) {
-		b->tt->collided++;
-	} else {
-		b->tt->stored++;
-	}
+	// Stats
+	b->tt->stored++;
 
 	// compute pointer to current bucket: pTable + (index * buckets)
-	int entry = index * BUCKETS;
-	ttable_entry_t* bucket = b->tt->table + entry;
+	ttable_entry_t* bucket = b->tt->table + index;
+	int offset = -1;
 
-	bucket->move = move;
-	bucket->zobKey = b->zobristKey;
-	bucket->flag = flag;
-	bucket->score = score;
-	bucket->depth = depth;
-
-	Assert(b->tt->table[index * BUCKETS].move == move);
-}
-
-bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth) {
-	int index = b->zobristKey % b->tt->buckets;
-
-	Assert(index >= 0 && index <= b->tt->buckets - 1);
-	Assert(depth >= 1 && depth <= MAX_DEPTH);
-	Assert(alpha < beta);
-	Assert(alpha >= -INF && alpha <= INF);
-	Assert(beta >= -INF && beta <= INF);
-	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
-
-	int entry = index * BUCKETS;
-	ttable_entry_t* bucket = b->tt->table + entry;
-
+	// Replacement strategy: new entry overwrites entry with lowest depth
+	int minDepth = MAX_DEPTH + 1;
 	for (int i = 0; i < BUCKETS; i++) {
-		bucket = bucket + i;
+		Assert((bucket + i)->depth >= 0 && (bucket + i)->depth <= MAX_DEPTH + 1);
 
-		// matching entry in bucket?
-		if (bucket->zobKey == b->zobristKey) {
-			Assert(i == 0);
-			*move = bucket->move;
-
-			if (bucket->depth >= depth) {
-				b->tt->valueHit++;
-
-				Assert(bucket->depth >= 1 && bucket->depth <= MAX_DEPTH);
-				Assert(bucket->flag >= TT_ALPHA && bucket->flag <= TT_SCORE);
-
-				*score = bucket->score;
-
-				if (*score > ISMATE) *score -= b->ply;
-				else if (*score < -ISMATE) *score += b->ply;
-
-				// if current alpha is lower than stored alpha, no move will 
-				// increase alpha -> return stored alpha
-				switch (bucket->flag) {
-					case TT_ALPHA:
-						if (*score <= alpha) {
-							*score = alpha;
-							return true;
-						}
-						break;
-					case TT_BETA:
-						if (*score >= beta) {
-							*score = beta;
-							return true;
-						}
-						break;
-					case TT_SCORE:
-						return true;
-						break;
-					default: Assert(false) break;
-				}
-			}
-
+		// Search for lowest depth => longest distance to root and least savings during search
+		if ((bucket + i)->depth < minDepth) {
+			minDepth = (bucket + i)->depth;
+			offset = i;
 		}
 
 	}
 
-	//if (b->tt->table[index].zobKey == b->zobristKey) {
-	//	*move = b->tt->table[index].move;
-	//	if (b->tt->table[index].depth >= depth) {
-	//		b->tt->valueHit++;
-	//		Assert(b->tt->table[index].depth >= 1 && b->tt->table[index].depth <= MAX_DEPTH);
-	//		Assert(b->tt->table[index].flag >= TT_ALPHA && b->tt->table[index].flag <= TT_SCORE);
-	//		*score = b->tt->table[index].score;
-	//		if (*score > ISMATE) *score -= b->ply;
-	//		else if (*score < -ISMATE) *score += b->ply;
-	//		// if current alpha is lower than stored alpha, no move will increase alpha -> return stored alpha
-	//		switch (b->tt->table[index].flag) {
-	//			case TT_ALPHA:
-	//				if (*score <= alpha) {
-	//					*score = alpha;
-	//					return true;
-	//				}
-	//				break;
-	//			case TT_BETA:
-	//				if (*score >= beta) {
-	//					*score = beta;
-	//					return true;
-	//				}
-	//				break;
-	//			case TT_SCORE:
-	//				return true;
-	//				break;
-	//			default: Assert(false) break;
-	//		}
-	//	}
-	//}
+	Assert(offset >= 0 && offset <= BUCKETS);
+
+	if ((bucket + offset)->flag != TT_NONE) {
+		b->tt->collided++;
+	}
+
+	// Replace entry has been determined: Store information 
+	(bucket + offset)->zobKey = b->zobristKey;
+	(bucket + offset)->move = move;
+	(bucket + offset)->flag = flag;
+	(bucket + offset)->score = score;
+	(bucket + offset)->depth = depth;
+}
+
+bool probeTT(Board* b, move_t* move, int* hashScore, int* hashFlag, int* hashDepth) {
+	int index = (b->zobristKey % b->tt->buckets) * BUCKETS;
+
+	Assert(index >= 0 && index <= (b->tt->buckets * BUCKETS) - 1);
+	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
+
+	ttable_entry_t* bucket = b->tt->table + index;
+	for (int i = 0; i < BUCKETS; i++) {
+		b->tt->probed++;
+
+		if (bucket->zobKey == b->zobristKey) {
+			Assert((bucket + i)->flag >= TT_ALPHA && (bucket + i)->flag <= TT_SCORE);
+			Assert((bucket + i)->move != NO_MOVE);
+			Assert((bucket + i)->score >= -INF && (bucket + i)->score <= INF);
+
+			if (!((bucket + i)->score >= -INF && (bucket + i)->score <= INF)) {
+				log("\n\nMatching zob key entry has scored " + (bucket + i)->score);
+			}
+
+			*hashDepth = (bucket + i)->depth;
+			*move = (bucket + i)->move;
+			*hashFlag = (bucket + i)->flag;
+			*hashScore = (bucket + i)->score;
+
+			return true;
+		}
+
+		// Jump to next entry in bucket
+		//bucket++;
+	}
 
 	return false;
 }
 
 void prefetchTTEntry(Board* b) {
 	int index = b->zobristKey % b->tt->buckets;
-	_m_prefetch(&b->tt->table[index]);
+	int entry = index * BUCKETS;
+
+	_m_prefetch(&b->tt->table[entry]);
 }
 
-int probePV(Board* b) {
+void ttableScoreChecker(Board* b, move_t* score) {
+	if (*score > ISMATE) {
+		*score -= b->ply;
+	} else if (*score < -ISMATE) {
+		*score += b->ply;
+	}
+}
+
+move_t probePV(Board* b) {
 	int index = b->zobristKey % b->tt->buckets;
+	int entry = index * BUCKETS;
 	Assert(index >= 0 && index <= b->tt->buckets - 1);
 
-	if (b->tt->table[index].zobKey == b->zobristKey) {
-		return b->tt->table[index].move;
+	ttable_entry_t* bucket = b->tt->table + entry;
+
+	for (int i = 0; i < BUCKETS; i++) {
+		if (bucket->zobKey == b->zobristKey) {
+			Assert(bucket->move != NO_MOVE);
+			return bucket->move;
+		}
+
+		bucket++;
 	}
 
-	return 0;
+	return NO_MOVE;
 }
 
 int getPVLine(Board* b, const int maxDepth) {
 	int move = probePV(b);
 	int count = 0;
 
-	//cout << "PV line needs legality check for hash move" << endl;
-	//while (move != 0 && count < maxDepth && isLegal(b, move, b->isCheck(b->side))*/) {
 	while (move != NO_MOVE && count < maxDepth && isLegal(b, move)) {
 		b->push(move);
 		b->pvArray[count++] = move;
@@ -229,21 +204,81 @@ void prefetchPawnEntry(Board* b) {
 	_m_prefetch(&b->pawnTable->table[index]);
 }
 
-int probePawnEntry(Board* b) {
+bool probePawnEntry(Board* b, int* hashScore) {
 	int index = b->zobristPawnKey % b->pawnTable->entries;
 	Assert(index >= 0 && index <= b->pawnTable->entries - 1);
 
 	if (b->pawnTable->table[index].zobristPawnKey == b->zobristPawnKey) {
-		return b->pawnTable->table[index].eval;
+		*hashScore = b->pawnTable->table[index].eval;
+		return true;
 	}
 
-	return NO_SCORE;
+	return false;
 }
 
 void destroyTranspositionTables(Board* b) {
 	if (b->tt->table != NULL) {
 		free(b->tt->table);
-	} else if (b->pawnTable->table != NULL) {
+	}
+	if (b->pawnTable->table != NULL) {
 		free(b->pawnTable->table);
 	}
+}
+
+void printTTStatus(Board* b) {
+
+	cout << "Buckets: " << b->tt->buckets << endl;
+	cout << "Entries: " << (b->tt->buckets * BUCKETS) << endl;
+	cout << "Collided: " << b->tt->collided << "/" << b->tt->stored << endl;
+	cout << endl;
+
+	ttable_entry_t* bucket = b->tt->table;
+
+	int firstEntries = 0;
+	int secEntries = 0;
+	int thirdEntries = 0;
+	int fourthEntries = 0;
+
+	for (int i = 0; i < b->tt->buckets; i++) {
+
+		for (int j = 0; j < BUCKETS; j++) {
+
+			// Count non-empty buckets
+			if (bucket->zobKey != 0x0) {
+
+				if (bucket->move == NO_MOVE) {
+
+					cout << "Depth " << (int)bucket->depth << endl;
+					cout << "Score " << (int)bucket->score << endl;
+					cout << "Flag " << (int)bucket->flag << endl;
+
+				}
+
+				Assert(bucket->move != NO_MOVE);
+
+				switch (j) {
+					case 0:
+						firstEntries++;
+						break;
+					case 1:
+						secEntries++;
+						break;
+					case 2:
+						thirdEntries++;
+						break;
+					case 3:
+						fourthEntries++;
+						break;
+					default: break;
+				}
+			}
+
+			bucket++;
+		}
+	}
+
+	cout << "First entries population: non-empty/buckets " << firstEntries << "/" << b->tt->buckets << endl;
+	cout << "Secon entries population: non-empty/buckets " << secEntries << "/" << b->tt->buckets << endl;
+	cout << "Third entries population: non-empty/buckets " << thirdEntries << "/" << b->tt->buckets << endl;
+	cout << "Fourth entries population: non-empty/buckets " << fourthEntries << "/" << b->tt->buckets << endl;
 }

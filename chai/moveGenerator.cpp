@@ -83,6 +83,7 @@ void generateCheckEvasions(Board* b, moveList_t* moveList) {
 			bitboard_t attackingLine = obstructed(kSq, attackerSq) & ~b->occupied;
 
 			while (attackingLine) {
+
 				blockerSq = popBit(&attackingLine);
 				addBlockersForSq(b, moveList, blockerSq);
 			}
@@ -239,6 +240,8 @@ void addBlockersForSq(Board* b, moveList_t* moveList, int blockingSq) {
 	int piece, sq;
 	int flag;
 	while (blocker) {
+
+
 		flag = 0;
 		sq = popBit(&blocker);
 		piece = b->pieceAt(sq);

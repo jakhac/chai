@@ -74,14 +74,19 @@ void Board::reset() {
 			histHeuristic[i][j] = 0;
 		}
 	}
-
 	histMax = 0;
 
-	color[0] = 0ULL;
-	color[1] = 0ULL;
+	// reset history of killer heuristic
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < MAX_DEPTH; j++) {
+			killer[i][j] = NO_MOVE;
+		}
+	}
 
 	for (int i = NO_PIECE; i <= KING; i++) pieces[i] = 0ULL;
 
+	color[0] = 0ULL;
+	color[1] = 0ULL;
 	occupied = 0ULL;
 }
 
@@ -125,6 +130,7 @@ bitboard_t Board::generateZobristKey() {
 	// hash in castlePermission
 	finalZobristKey ^= castleKeys[castlePermission];
 
+	Assert(finalZobristKey != 0);
 	return finalZobristKey;
 }
 
@@ -315,6 +321,64 @@ void Board::parseFen(string fen) {
 
 	checkBoard();
 	log("parseFen() finished.");
+}
+
+string Board::getFEN() {
+	int piece;
+	int empty = 0;
+	string fen = "";
+
+	int i = 0;
+	int r = RANK_8;
+	int f = FILE_A;
+
+	while (r >= RANK_1) {
+
+		f = FILE_A;
+		while (f <= FILE_H) {
+			i = file_rank_2_sq(f, r);
+
+			piece = pieceAt(i);
+			if (pieceValid(piece)) {
+				if (empty) {
+					fen += to_string(empty);
+					empty = 0;
+				}
+				fen += pieceChar[piece];
+			} else {
+				empty++;
+			}
+
+			f++;
+		}
+
+		if (empty) {
+			fen += to_string(empty);
+		}
+
+		empty = 0;
+
+		if (r != RANK_1) {
+			fen += "/";
+		}
+
+		r--;
+	}
+
+	if (side == WHITE) {
+		fen += " w KQkq ";
+	} else {
+		fen += " b KQkq ";
+	}
+
+	if (enPas) {
+		fen += ('a' + squareToFile[enPas]);
+		fen += ('1' + squareToRank[enPas]);
+	}
+
+	fen += " " + to_string(undoPly) + " " + to_string(halfMoves);
+
+	return fen;
 }
 
 int Board::parseMove(string move) {
