@@ -81,6 +81,18 @@
 - [x] Fixed incorrect eval type (`uint_16`) in pawn entry
 - [x] Alpha cutoff stored NO_MOVE in TT
 
+**Changes in v2.3**
+
+- Elo
+- Eval
+  - [ ] detect endgames (knight, bishop endgame, light/dark squared bishop)
+- AlphaBeta
+  - [ ] Null Move Pruning
+  - [ ] IID if no has move
+- Project
+  - [ ] Clean up utils, attacks, helper bitboards
+  - [ ] Error handler for invalid FEN
+
 # Todo
 
 - ~~Compiler optimizations~~

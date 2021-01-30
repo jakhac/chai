@@ -85,13 +85,6 @@ void play(Board* b, Perft* p, search_t* s) {
 		}
 
 		if (m == "perft") {
-			//cout << "Skip or enter FEN: ";
-			//getline(cin, m);
-			//if (m.size() > 0) {
-			//	b->parseFen(m);
-			//	b->printBoard();
-			//}
-
 			cout << "Perft this position to depth ";
 			getline(cin, m);
 			if (stoi(m) >= 1 && stoi(m) <= 15) {

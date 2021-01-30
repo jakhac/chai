@@ -12,7 +12,7 @@ using namespace std;
 #include "move.h"
 #include "types.h"
 
-#define VERSION "v2.2"
+#define VERSION "v2.3"
 
 
 //#define TESTING
