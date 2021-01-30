@@ -1,14 +1,16 @@
 #include "main.h"
 
+
 int main() {
 	init(&board);
 	board.parseFen(STARTING_FEN);
+	//board.parseFen("1Q6/P1P4k/8/8/8/8/3K3p/3q2q1 w - - 6 8");
 	board.printBoard();
 	log("\nStartup");
 
 	//moveList_t moveList[1];
 	//generateMoves(&board, moveList, board.isCheck(board.side));
-	//generateQuietCheckers(&board, moveList);
+	//addKingCheckEvasions(&board, moveList);
 	//printGeneratedMoves(moveList);
 	//return 0;
 
@@ -77,26 +79,33 @@ void play(Board* b, Perft* p, search_t* s) {
 			int d = getPVLine(b, MAX_DEPTH);
 			cout << "PV line length " << d << endl;
 			for (int i = 0; i < d; i++) {
-				cout << "Best move " << i << " is: ";
-				printMove(b->pvArray[i]);
-				cout << endl;
+				cout << "Best move " << i << " is: " << getStringMove(b->pvArray[i]) << endl;
 			}
 			continue;
 		}
 
 		if (m == "perft") {
-			cout << "Skip or enter FEN: ";
-			getline(cin, m);
-			if (m.size() > 0) {
-				b->parseFen(m);
-				b->printBoard();
-			}
+			//cout << "Skip or enter FEN: ";
+			//getline(cin, m);
+			//if (m.size() > 0) {
+			//	b->parseFen(m);
+			//	b->printBoard();
+			//}
 
 			cout << "Perft this position to depth ";
 			getline(cin, m);
 			if (stoi(m) >= 1 && stoi(m) <= 15) {
 				dividePerft(b, "-1", stoi(m));
 			}
+			continue;
+		}
+
+		if (m == "fen") {
+			cout << "Enter FEN: ";
+			getline(cin, m);
+			cout << "Parsed FEN into board." << endl;
+			b->parseFen(m);
+			b->printBoard();
 			continue;
 		}
 
@@ -171,6 +180,11 @@ void dividePerft(Board* b, string fen, int depth) {
 
 		cout << "\nDivide at move ";
 		getline(cin, move);
+
+		if (move == "quit") {
+			return;
+		}
+
 	}
 
 	cout << "Reached depth 0" << endl;

@@ -9292,3 +9292,1270 @@ Startup
 Startup
 02:57:10	s
 02:57:10	Entered search
+20:45:06	parseFen() finished.
+20:45:06	
+Startup
+20:45:23	s
+20:45:23	Entered search
+20:45:27	Left search and cout bestmove found
+20:45:30	s
+20:45:30	Entered search
+20:45:49	Left search and cout bestmove found
+20:45:49	s
+20:45:49	Entered search
+20:45:59	Left search and cout bestmove found
+20:49:46	parseFen() finished.
+20:49:46	
+Startup
+20:49:49	s
+20:49:49	Entered search
+20:52:42	parseFen() finished.
+20:52:42	
+Startup
+20:52:44	s
+20:52:44	Entered search
+20:52:47	Left search and cout bestmove found
+20:52:49	pv
+20:53:55	parseFen() finished.
+20:53:55	
+Startup
+20:54:02	s
+20:54:02	Entered search
+20:54:05	Left search and cout bestmove found
+20:54:07	#pv
+20:56:21	parseFen() finished.
+20:56:21	
+Startup
+20:56:27	s
+20:56:27	Entered search
+20:56:31	Left search and cout bestmove found
+20:56:33	pv
+22:47:25	parseFen() finished.
+22:47:25	
+Startup
+22:47:32	s
+22:47:32	Entered search
+22:47:40	Left search and cout bestmove found
+22:47:43	pv
+22:48:41	parseFen() finished.
+22:48:41	
+Startup
+22:48:47	s
+22:48:47	Entered search
+22:48:48	Left search and cout bestmove found
+22:48:50	pv
+22:49:29	parseFen() finished.
+22:49:29	
+Startup
+22:49:40	s
+22:49:40	Entered search
+22:49:45	Left search and cout bestmove found
+22:49:47	pv
+22:50:06	parseFen() finished.
+22:50:06	
+Startup
+22:50:10	s
+22:50:10	Entered search
+22:50:14	Left search and cout bestmove found
+22:50:16	pv
+22:52:50	parseFen() finished.
+22:52:50	
+Startup
+22:52:52	s
+22:52:52	Entered search
+22:52:52	Left search and cout bestmove found
+22:52:54	pv
+22:54:21	parseFen() finished.
+22:54:21	
+Startup
+22:54:23	s
+22:54:23	Entered search
+22:54:23	Left search and cout bestmove found
+22:54:27	pv
+22:54:48	parseFen() finished.
+22:54:48	
+Startup
+22:54:50	s
+22:54:50	Entered search
+22:54:50	Left search and cout bestmove found
+22:55:01	parseFen() finished.
+22:55:01	
+Startup
+22:55:05	s
+22:55:05	Entered search
+22:55:18	Left search and cout bestmove found
+22:55:20	pv
+00:56:28	parseFen() finished.
+00:56:28	
+Startup
+00:56:29	s
+00:56:29	Entered search
+00:56:34	Left search and cout bestmove found
+00:56:52	parseFen() finished.
+00:56:52	
+Startup
+00:56:53	s
+00:56:53	Entered search
+00:57:14	parseFen() finished.
+00:57:14	
+Startup
+00:57:15	s
+00:57:15	Entered search
+00:57:37	parseFen() finished.
+00:57:37	
+Startup
+00:57:38	s
+00:57:38	Entered search
+00:57:55	parseFen() finished.
+00:57:55	
+Startup
+00:57:57	s
+00:57:57	Entered search
+00:58:23	parseFen() finished.
+00:58:24	
+Startup
+00:58:26	s
+00:58:26	Entered search
+00:58:40	Left search and cout bestmove found
+00:58:42	s
+00:58:42	Entered search
+01:01:10	parseFen() finished.
+01:01:10	
+Startup
+01:01:11	s
+01:01:11	Entered search
+01:01:12	Left search and cout bestmove found
+01:01:14	s
+01:01:14	Entered search
+01:01:14	Left search and cout bestmove found
+01:02:39	parseFen() finished.
+01:02:40	
+Startup
+01:02:40	s
+01:02:40	Entered search
+01:02:40	Left search and cout bestmove found
+01:02:47	s
+01:02:47	Entered search
+01:02:47	Left search and cout bestmove found
+01:02:58	s
+01:02:58	Entered search
+01:02:58	Left search and cout bestmove found
+01:03:37	parseFen() finished.
+01:03:37	
+Startup
+01:03:38	s
+01:03:38	Entered search
+01:03:38	Left search and cout bestmove found
+01:03:40	s
+01:03:40	Entered search
+01:03:40	Left search and cout bestmove found
+01:07:25	parseFen() finished.
+01:07:25	
+Startup
+01:07:27	s
+01:07:27	Entered search
+01:09:32	parseFen() finished.
+01:09:32	
+Startup
+01:09:35	s
+01:09:35	Entered search
+01:09:35	Left search and cout bestmove found
+01:09:48	parseFen() finished.
+01:09:48	
+Startup
+01:10:02	parseFen() finished.
+01:10:02	
+Startup
+01:10:04	s
+01:10:04	Entered search
+01:10:04	Left search and cout bestmove found
+01:11:09	parseFen() finished.
+01:11:09	
+Startup
+01:11:11	s
+01:11:11	Entered search
+01:11:12	Left search and cout bestmove found
+01:11:42	parseFen() finished.
+01:11:42	
+Startup
+01:11:43	s
+01:11:43	Entered search
+01:12:10	parseFen() finished.
+01:12:10	
+Startup
+01:12:11	s
+01:12:11	Entered search
+01:12:11	Left search and cout bestmove found
+01:14:38	parseFen() finished.
+01:14:38	
+Startup
+01:14:38	s
+01:14:38	Entered search
+01:14:38	Left search and cout bestmove found
+01:17:34	parseFen() finished.
+01:17:34	
+Startup
+01:17:36	s
+01:17:36	Entered search
+01:17:36	Left search and cout bestmove found
+01:19:46	parseFen() finished.
+01:19:46	
+Startup
+01:19:46	s
+01:19:46	Entered search
+01:19:46	Left search and cout bestmove found
+01:20:44	parseFen() finished.
+01:20:44	
+Startup
+01:20:44	s
+01:20:44	Entered search
+01:20:44	Left search and cout bestmove found
+01:21:09	parseFen() finished.
+01:21:09	
+Startup
+01:21:27	s
+01:21:27	Entered search
+01:21:27	Left search and cout bestmove found
+01:22:00	parseFen() finished.
+01:22:00	
+Startup
+01:22:04	s
+01:22:04	Entered search
+01:22:04	Left search and cout bestmove found
+01:22:35	parseFen() finished.
+01:22:35	
+Startup
+01:22:36	s
+01:22:36	Entered search
+01:22:36	Left search and cout bestmove found
+01:22:49	parseFen() finished.
+01:22:49	
+Startup
+01:22:51	perft
+01:23:19	parseFen() finished.
+01:23:19	
+Startup
+01:23:21	s
+01:23:21	Entered search
+01:23:21	Left search and cout bestmove found
+01:23:33	parseFen() finished.
+01:23:33	
+Startup
+01:23:34	s
+01:23:34	Entered search
+01:23:34	Left search and cout bestmove found
+01:24:14	parseFen() finished.
+01:24:14	
+Startup
+01:24:16	s
+01:24:16	Entered search
+01:24:16	Left search and cout bestmove found
+01:26:22	parseFen() finished.
+01:26:22	
+Startup
+01:26:23	s
+01:26:23	Entered search
+01:26:24	Left search and cout bestmove found
+01:26:56	parseFen() finished.
+01:26:56	
+Startup
+01:26:57	s
+01:26:57	Entered search
+01:26:58	Left search and cout bestmove found
+01:27:35	parseFen() finished.
+01:27:35	
+Startup
+01:27:36	s
+01:27:36	Entered search
+01:27:36	Left search and cout bestmove found
+01:28:10	parseFen() finished.
+01:28:10	
+Startup
+01:28:13	s
+01:28:13	Entered search
+01:28:13	Left search and cout bestmove found
+01:28:26	parseFen() finished.
+01:28:26	
+Startup
+01:28:28	s
+01:28:28	Entered search
+01:28:29	Left search and cout bestmove found
+01:29:48	parseFen() finished.
+01:29:48	
+Startup
+01:29:49	s
+01:29:49	Entered search
+01:29:49	Left search and cout bestmove found
+01:32:59	parseFen() finished.
+01:32:59	
+Startup
+01:33:01	s
+01:33:01	Entered search
+01:33:01	Left search and cout bestmove found
+01:33:09	Assert(alpha);
+01:36:46	parseFen() finished.
+01:36:46	
+Startup
+01:36:54	s
+01:36:54	Entered search
+01:36:54	Left search and cout bestmove found
+01:37:24	parseFen() finished.
+01:37:24	
+Startup
+01:37:25	s
+01:37:25	Entered search
+01:37:25	Left search and cout bestmove found
+01:40:15	parseFen() finished.
+01:40:15	
+Startup
+01:40:16	s
+01:40:16	Entered search
+01:40:16	Left search and cout bestmove found
+01:40:16	
+01:40:51	parseFen() finished.
+01:40:51	
+Startup
+01:40:52	s
+01:40:52	Entered search
+01:40:52	Left search and cout bestmove found
+01:42:32	parseFen() finished.
+01:42:32	
+Startup
+01:42:33	s
+01:42:33	Entered search
+01:42:33	Left search and cout bestmove found
+01:43:27	parseFen() finished.
+01:43:27	
+Startup
+01:43:30	s
+01:43:30	Entered search
+01:43:30	Left search and cout bestmove found
+01:47:35	parseFen() finished.
+01:47:35	
+Startup
+01:47:42	s
+01:47:42	Entered search
+01:50:15	parseFen() finished.
+01:50:15	
+Startup
+01:50:16	s
+01:50:16	Entered search
+01:50:42	parseFen() finished.
+01:50:42	
+Startup
+01:50:43	s
+01:50:43	Entered search
+01:52:16	parseFen() finished.
+01:52:16	
+Startup
+01:52:18	s
+01:52:18	Entered search
+01:52:33	parseFen() finished.
+01:52:33	
+Startup
+01:52:34	s
+01:52:34	Entered search
+01:58:19	parseFen() finished.
+01:58:19	
+Startup
+01:58:20	s
+01:58:20	Entered search
+02:04:48	parseFen() finished.
+02:04:48	parseFen() finished.
+02:04:48	
+Startup
+02:06:04	parseFen() finished.
+02:06:04	parseFen() finished.
+02:06:04	
+Startup
+02:06:05	s
+02:06:05	Entered search
+02:07:30	parseFen() finished.
+02:07:30	parseFen() finished.
+02:07:30	
+Startup
+02:07:32	s
+02:07:32	Entered search
+02:09:11	parseFen() finished.
+02:09:11	parseFen() finished.
+02:09:11	
+Startup
+02:09:12	s
+02:09:12	Entered search
+02:10:06	parseFen() finished.
+02:10:06	parseFen() finished.
+02:10:06	
+Startup
+02:10:07	s
+02:10:07	Entered search
+02:10:54	parseFen() finished.
+02:10:54	
+Startup
+02:10:54	s
+02:10:54	Entered search
+02:11:22	parseFen() finished.
+02:11:22	parseFen() finished.
+02:11:22	
+Startup
+02:11:27	parseFen() finished.
+02:11:27	parseFen() finished.
+02:11:27	
+Startup
+02:11:48	parseFen() finished.
+02:11:48	parseFen() finished.
+02:11:48	
+Startup
+02:12:06	parseFen() finished.
+02:12:06	
+Startup
+02:12:19	s
+02:12:19	Entered search
+02:13:02	parseFen() finished.
+02:13:02	
+Startup
+02:13:03	s
+02:13:03	Entered search
+02:13:03	Left search and cout bestmove found
+02:13:31	parseFen() finished.
+02:13:31	
+Startup
+02:13:32	s
+02:13:32	Entered search
+02:13:42	parseFen() finished.
+02:13:42	
+Startup
+02:13:45	s
+02:13:45	Entered search
+02:14:05	parseFen() finished.
+02:14:05	
+Startup
+02:14:06	s
+02:14:06	Entered search
+02:19:06	parseFen() finished.
+02:19:06	
+Startup
+02:19:08	s
+02:19:08	Entered search
+02:19:37	parseFen() finished.
+02:19:37	
+Startup
+02:19:37	s
+02:19:37	Entered search
+02:20:31	parseFen() finished.
+02:20:31	
+Startup
+02:20:32	s
+02:20:32	Entered search
+02:21:05	parseFen() finished.
+02:21:05	
+Startup
+02:21:05	s
+02:21:05	Entered search
+02:21:54	parseFen() finished.
+02:21:54	
+Startup
+02:21:55	s
+02:21:55	Entered search
+02:22:38	parseFen() finished.
+02:22:38	
+Startup
+02:22:39	s
+02:22:39	Entered search
+02:22:39	Left search and cout bestmove found
+02:25:10	parseFen() finished.
+02:25:10	
+Startup
+02:25:11	s
+02:25:11	Entered search
+02:25:11	Left search and cout bestmove found
+02:27:57	parseFen() finished.
+02:27:57	
+Startup
+02:27:58	s
+02:27:58	Entered search
+02:28:59	parseFen() finished.
+02:28:59	
+Startup
+02:29:00	s
+02:29:00	Entered search
+02:34:15	parseFen() finished.
+02:34:15	
+Startup
+02:35:20	parseFen() finished.
+02:35:20	
+Startup
+02:35:21	s
+02:35:21	Entered search
+02:35:21	Left search and cout bestmove found
+02:35:40	parseFen() finished.
+02:35:40	
+Startup
+02:35:41	s
+02:35:41	Entered search
+02:35:41	Left search and cout bestmove found
+02:37:01	parseFen() finished.
+02:37:01	
+Startup
+02:37:02	s
+02:37:02	Entered search
+02:37:02	Left search and cout bestmove found
+02:39:07	parseFen() finished.
+02:39:07	
+Startup
+02:39:08	s
+02:39:08	Entered search
+02:39:08	Left search and cout bestmove found
+02:40:03	parseFen() finished.
+02:40:03	
+Startup
+02:40:04	s
+02:40:04	Entered search
+02:40:04	Left search and cout bestmove found
+02:40:27	parseFen() finished.
+02:40:27	
+Startup
+02:40:31	s
+02:40:31	Entered search
+02:42:24	parseFen() finished.
+02:42:24	
+Startup
+02:42:46	s
+02:42:46	Entered search
+02:43:38	parseFen() finished.
+02:43:38	
+Startup
+02:43:39	s
+02:43:39	Entered search
+02:44:44	parseFen() finished.
+02:44:44	
+Startup
+02:44:52	s
+02:44:52	Entered search
+02:45:25	Left search and cout bestmove found
+02:46:55	parseFen() finished.
+02:46:55	
+Startup
+02:46:55	s
+02:46:55	Entered search
+02:47:21	parseFen() finished.
+02:47:21	
+Startup
+02:47:23	s
+02:47:23	Entered search
+02:58:12	parseFen() finished.
+02:58:12	
+Startup
+02:58:14	s
+02:58:14	Entered search
+02:58:37	parseFen() finished.
+02:58:37	
+Startup
+02:58:38	s
+02:58:38	Entered search
+02:59:43	parseFen() finished.
+02:59:43	
+Startup
+02:59:45	s
+02:59:45	Entered search
+03:01:20	parseFen() finished.
+03:01:20	
+Startup
+03:01:22	s
+03:01:22	Entered search
+03:03:38	parseFen() finished.
+03:03:38	
+Startup
+03:03:39	s
+03:03:39	Entered search
+03:03:52	parseFen() finished.
+03:03:52	
+Startup
+03:03:53	s
+03:03:53	Entered search
+16:17:16	parseFen() finished.
+16:17:16	
+Startup
+16:18:08	s
+16:18:08	Entered search
+01:47:01	parseFen() finished.
+01:47:01	
+Startup
+01:47:06	s
+01:47:06	Entered search
+02:30:00	parseFen() finished.
+02:30:00	
+Startup
+02:30:01	s
+02:30:01	Entered search
+02:31:18	parseFen() finished.
+02:31:18	
+Startup
+02:31:19	s
+02:31:19	Entered search
+02:31:42	parseFen() finished.
+02:31:42	
+Startup
+02:31:42	s
+02:31:42	Entered search
+02:32:42	parseFen() finished.
+02:32:42	
+Startup
+02:32:43	s
+02:32:43	Entered search
+02:33:57	parseFen() finished.
+02:33:57	
+Startup
+02:33:58	s
+02:33:58	Entered search
+02:34:39	parseFen() finished.
+02:34:39	
+Startup
+02:34:39	s
+02:34:39	Entered search
+02:34:51	Left search and cout bestmove found
+02:34:53	pv
+02:35:41	parseFen() finished.
+02:35:41	
+Startup
+02:35:42	s
+02:35:42	Entered search
+02:35:55	parseFen() finished.
+02:35:55	
+Startup
+02:35:56	s
+02:35:56	Entered search
+02:37:04	parseFen() finished.
+02:37:04	
+Startup
+02:37:06	s
+02:37:06	Entered search
+02:38:00	parseFen() finished.
+02:38:00	
+Startup
+02:38:02	s
+02:38:02	Entered search
+02:39:08	parseFen() finished.
+02:39:08	
+Startup
+02:39:09	s
+02:39:09	Entered search
+02:39:56	parseFen() finished.
+02:39:56	
+Startup
+02:39:57	s
+02:39:57	Entered search
+02:40:29	parseFen() finished.
+02:40:29	
+Startup
+02:40:30	s
+02:40:30	Entered search
+02:41:53	parseFen() finished.
+02:41:53	
+Startup
+02:41:54	s
+02:41:54	Entered search
+02:48:33	parseFen() finished.
+02:48:33	
+Startup
+02:48:34	s
+02:48:34	Entered search
+02:51:09	parseFen() finished.
+02:51:09	
+Startup
+02:51:10	s
+02:51:10	Entered search
+02:52:34	parseFen() finished.
+02:52:34	
+Startup
+02:52:35	s
+02:52:35	Entered search
+02:53:37	parseFen() finished.
+02:53:37	
+Startup
+02:53:38	s
+02:53:38	Entered search
+02:54:21	parseFen() finished.
+02:54:21	
+Startup
+02:54:22	s
+02:54:22	Entered search
+02:56:11	parseFen() finished.
+02:56:11	
+Startup
+02:56:13	s
+02:56:13	Entered search
+02:56:32	parseFen() finished.
+02:56:32	
+Startup
+02:56:33	s
+02:56:33	Entered search
+02:58:17	parseFen() finished.
+02:58:17	
+Startup
+02:58:18	s
+02:58:18	Entered search
+03:03:09	parseFen() finished.
+03:03:09	
+Startup
+03:03:11	s
+03:03:11	Entered search
+03:06:16	parseFen() finished.
+03:06:16	
+Startup
+03:06:17	s
+03:06:17	Entered search
+03:07:52	parseFen() finished.
+03:07:52	
+Startup
+03:07:54	s
+03:07:54	Entered search
+14:11:18	parseFen() finished.
+14:11:18	
+Startup
+14:11:24	s
+14:11:24	Entered search
+14:12:01	parseFen() finished.
+14:12:01	
+Startup
+14:12:03	s
+14:12:03	Entered search
+14:12:31	parseFen() finished.
+14:12:31	
+Startup
+14:12:32	s
+14:12:32	Entered search
+14:13:14	parseFen() finished.
+14:13:14	
+Startup
+14:13:14	s
+14:13:14	Entered search
+14:13:35	Left search and cout bestmove found
+14:13:41	s
+14:13:41	Entered search
+00:37:49	parseFen() finished.
+00:37:49	
+Startup
+00:37:52	fen
+00:37:53	parseFen() finished.
+00:38:00	fen
+00:38:00	parseFen() finished.
+00:38:19	parseFen() finished.
+00:38:19	
+Startup
+00:38:21	fen
+00:38:21	parseFen() finished.
+00:38:29	perft
+00:50:09	parseFen() finished.
+00:50:09	
+Startup
+00:50:58	parseFen() finished.
+00:50:58	
+Startup
+00:51:18	parseFen() finished.
+00:51:18	
+Startup
+00:51:57	parseFen() finished.
+00:51:57	
+Startup
+00:52:18	parseFen() finished.
+00:52:18	
+Startup
+00:52:53	parseFen() finished.
+00:52:53	
+Startup
+00:53:24	parseFen() finished.
+00:53:24	
+Startup
+00:53:50	parseFen() finished.
+00:53:50	
+Startup
+00:54:11	parseFen() finished.
+00:54:11	
+Startup
+00:54:24	parseFen() finished.
+00:54:24	
+Startup
+00:58:09	parseFen() finished.
+00:58:09	
+Startup
+00:58:58	parseFen() finished.
+00:58:58	
+Startup
+00:59:41	parseFen() finished.
+00:59:41	
+Startup
+01:00:04	parseFen() finished.
+01:00:04	
+Startup
+01:04:05	parseFen() finished.
+01:04:05	
+Startup
+01:04:46	parseFen() finished.
+01:04:46	
+Startup
+01:05:18	parseFen() finished.
+01:05:18	
+Startup
+01:05:45	parseFen() finished.
+01:05:45	
+Startup
+01:06:01	parseFen() finished.
+01:06:01	
+Startup
+01:07:25	parseFen() finished.
+01:07:25	
+Startup
+01:07:52	parseFen() finished.
+01:07:52	
+Startup
+01:08:14	parseFen() finished.
+01:08:14	
+Startup
+01:10:40	parseFen() finished.
+01:10:40	
+Startup
+01:11:04	parseFen() finished.
+01:11:04	
+Startup
+01:12:04	parseFen() finished.
+01:12:04	
+Startup
+01:12:54	parseFen() finished.
+01:12:54	
+Startup
+01:17:54	parseFen() finished.
+01:17:54	
+Startup
+01:17:55	s
+01:17:55	Entered search
+01:18:50	parseFen() finished.
+01:18:50	
+Startup
+01:18:50	s
+01:18:50	Entered search
+01:19:46	parseFen() finished.
+01:19:46	
+Startup
+01:19:48	s
+01:19:48	Entered search
+01:21:55	parseFen() finished.
+01:21:55	
+Startup
+01:21:56	s
+01:21:56	Entered search
+01:23:02	parseFen() finished.
+01:23:02	
+Startup
+01:23:10	s
+01:23:10	Entered search
+01:23:49	parseFen() finished.
+01:23:49	
+Startup
+01:23:52	s
+01:23:52	Entered search
+01:24:57	parseFen() finished.
+01:24:57	
+Startup
+01:24:59	s
+01:24:59	Entered search
+01:26:42	parseFen() finished.
+01:26:42	
+Startup
+01:26:45	s
+01:26:45	Entered search
+01:27:23	parseFen() finished.
+01:27:23	
+Startup
+01:27:25	s
+01:27:25	Entered search
+01:30:59	parseFen() finished.
+01:30:59	
+Startup
+01:31:01	s
+01:31:01	Entered search
+01:31:28	parseFen() finished.
+01:31:28	
+Startup
+01:31:30	s
+01:31:30	Entered search
+01:31:59	parseFen() finished.
+01:31:59	
+Startup
+01:32:01	s
+01:32:01	Entered search
+01:32:34	parseFen() finished.
+01:32:34	
+Startup
+01:32:35	s
+01:32:35	Entered search
+14:19:04	parseFen() finished.
+14:19:04	
+Startup
+14:19:06	s
+14:19:06	Entered search
+14:19:10	parseFen() finished.
+14:19:10	
+Startup
+14:19:12	uci
+14:19:12	UCI MODE
+14:29:04	parseFen() finished.
+14:29:04	
+Startup
+14:29:06	s
+14:29:06	Entered search
+16:39:36	parseFen() finished.
+16:39:36	
+Startup
+16:39:37	s
+16:39:37	Entered search
+16:41:21	parseFen() finished.
+16:41:21	
+Startup
+16:41:21	s
+16:41:21	Entered search
+16:42:45	parseFen() finished.
+16:42:45	
+Startup
+16:42:46	s
+16:42:46	Entered search
+16:43:11	parseFen() finished.
+16:43:11	
+Startup
+16:43:11	s
+16:43:11	Entered search
+16:45:28	parseFen() finished.
+16:45:28	
+Startup
+16:45:30	s
+16:45:30	Entered search
+16:45:30	Failed
+16:45:30	In File 
+16:45:30	At Line 
+17:03:37	parseFen() finished.
+17:03:37	
+Startup
+17:03:39	s
+17:03:39	Entered search
+17:04:25	parseFen() finished.
+17:04:25	
+Startup
+17:04:27	s
+17:04:27	Entered search
+17:05:13	parseFen() finished.
+17:05:13	
+Startup
+17:05:14	S
+17:05:19	parseFen() finished.
+17:05:19	
+Startup
+17:05:21	S
+17:06:02	parseFen() finished.
+17:06:02	
+Startup
+17:06:04	S
+17:06:08	parseFen() finished.
+17:06:08	
+Startup
+17:06:09	s
+17:06:09	Entered search
+17:06:38	parseFen() finished.
+17:06:38	
+Startup
+17:06:39	s
+17:06:39	Entered search
+17:07:30	parseFen() finished.
+17:07:30	
+Startup
+17:07:31	s
+17:07:31	Entered search
+17:08:00	parseFen() finished.
+17:08:00	
+Startup
+17:08:01	s
+17:08:01	Entered search
+17:11:05	parseFen() finished.
+17:11:05	
+Startup
+17:11:07	s
+17:11:07	Entered search
+22:52:27	parseFen() finished.
+22:52:27	
+Startup
+22:52:37	parseFen() finished.
+22:52:37	
+Startup
+22:52:42	s
+22:52:42	Entered search
+22:53:45	Left search and cout bestmove found
+22:54:41	parseFen() finished.
+22:54:41	
+Startup
+22:54:46	s
+22:54:46	Entered search
+23:07:51	parseFen() finished.
+23:07:51	
+Startup
+23:07:53	s
+23:07:53	Entered search
+23:09:20	parseFen() finished.
+23:09:20	
+Startup
+23:09:21	s
+23:09:21	Entered search
+23:15:29	parseFen() finished.
+23:15:29	
+Startup
+23:15:31	s
+23:15:31	Entered search
+23:16:50	parseFen() finished.
+23:16:50	
+Startup
+23:16:51	s
+23:16:51	Entered search
+23:25:45	parseFen() finished.
+23:25:45	
+Startup
+23:25:47	s
+23:25:47	Entered search
+23:26:15	parseFen() finished.
+23:26:15	
+Startup
+23:26:16	s
+23:26:16	Entered search
+23:26:43	parseFen() finished.
+23:26:43	
+Startup
+23:26:44	s
+23:26:44	Entered search
+23:27:20	parseFen() finished.
+23:27:20	
+Startup
+23:27:25	s
+23:27:25	Entered search
+23:27:48	parseFen() finished.
+23:27:48	
+Startup
+23:27:50	s
+23:27:50	Entered search
+23:29:04	parseFen() finished.
+23:29:04	
+Startup
+23:29:05	s
+23:29:05	Entered search
+23:30:13	parseFen() finished.
+23:30:13	
+Startup
+23:30:19	s
+23:30:19	Entered search
+23:36:16	parseFen() finished.
+23:36:17	
+Startup
+23:36:17	s
+23:36:17	Entered search
+23:37:38	parseFen() finished.
+23:37:38	
+Startup
+23:37:39	s
+23:37:39	Entered search
+23:39:46	parseFen() finished.
+23:39:46	
+Startup
+23:39:48	s
+23:39:48	Entered search
+23:40:41	parseFen() finished.
+23:40:42	
+Startup
+23:40:44	s
+23:40:44	Entered search
+23:42:42	parseFen() finished.
+23:42:42	
+Startup
+23:42:43	s
+23:42:43	Entered search
+23:43:29	parseFen() finished.
+23:43:29	
+Startup
+23:43:30	s
+23:43:30	Entered search
+23:44:25	parseFen() finished.
+23:44:25	
+Startup
+23:44:25	s
+23:44:25	Entered search
+23:45:07	parseFen() finished.
+23:45:07	
+Startup
+23:45:08	s
+23:45:08	Entered search
+23:46:03	parseFen() finished.
+23:46:04	
+Startup
+23:46:04	s
+23:46:04	Entered search
+23:47:07	parseFen() finished.
+23:47:07	
+Startup
+23:48:06	parseFen() finished.
+23:48:06	
+Startup
+23:48:28	parseFen() finished.
+23:48:28	
+Startup
+23:49:08	parseFen() finished.
+23:49:08	
+Startup
+23:49:09	s
+23:49:09	Entered search
+23:51:41	parseFen() finished.
+23:51:41	
+Startup
+23:51:41	s
+23:51:41	Entered search
+23:54:00	parseFen() finished.
+23:54:00	
+Startup
+23:54:01	s
+23:54:01	Entered search
+23:55:02	parseFen() finished.
+23:55:02	
+Startup
+23:55:21	parseFen() finished.
+23:55:21	
+Startup
+23:55:22	s
+23:55:22	Entered search
+23:55:52	parseFen() finished.
+23:55:52	
+Startup
+23:59:47	parseFen() finished.
+23:59:47	
+Startup
+00:00:45	parseFen() finished.
+00:00:45	
+Startup
+00:01:03	parseFen() finished.
+00:01:03	
+Startup
+00:01:32	parseFen() finished.
+00:01:32	
+Startup
+00:02:35	parseFen() finished.
+00:02:35	
+Startup
+00:02:55	parseFen() finished.
+00:02:55	
+Startup
+00:03:03	s
+00:03:03	Entered search
+00:05:26	parseFen() finished.
+00:05:26	
+Startup
+00:05:28	s
+00:05:28	Entered search
+00:06:31	parseFen() finished.
+00:06:31	
+Startup
+00:06:33	s
+00:06:33	Entered search
+00:08:31	parseFen() finished.
+00:08:31	
+Startup
+00:08:32	s
+00:08:32	Entered search
+00:14:50	parseFen() finished.
+00:14:50	
+Startup
+00:14:54	s
+00:14:54	Entered search
+00:19:29	parseFen() finished.
+00:19:29	
+Startup
+00:19:30	s
+00:19:30	Entered search
+00:20:24	parseFen() finished.
+00:20:25	
+Startup
+00:20:25	s
+00:20:25	Entered search
+00:24:10	parseFen() finished.
+00:24:10	
+Startup
+01:37:10	parseFen() finished.
+01:37:10	
+Startup
+01:37:11	s
+01:37:11	Entered search
+01:39:18	parseFen() finished.
+01:39:18	
+Startup
+01:39:19	s
+01:39:19	Entered search
+01:39:24	Left search and cout bestmove found
+01:39:27	s
+01:39:27	Entered search
+01:39:52	parseFen() finished.
+01:39:52	
+Startup
+01:39:53	s
+01:39:53	Entered search
+01:40:08	Left search and cout bestmove found
+01:40:09	s
+01:40:09	Entered search
+01:41:13	parseFen() finished.
+01:41:13	
+Startup
+01:41:14	s
+01:41:14	Entered search
+01:42:14	parseFen() finished.
+01:42:14	
+Startup
+01:42:15	s
+01:42:15	Entered search
+01:42:29	parseFen() finished.
+01:42:29	
+Startup
+01:42:31	s
+01:42:31	Entered search
+01:42:36	Left search and cout bestmove found
+01:42:36	s
+01:42:36	Entered search
+01:50:38	parseFen() finished.
+01:50:38	
+Startup
+01:50:39	s
+01:50:39	Entered search
+01:51:07	parseFen() finished.
+01:51:07	
+Startup
+01:51:08	s
+01:51:08	Entered search
+01:51:47	parseFen() finished.
+01:51:47	
+Startup
+01:51:48	s
+01:51:48	Entered search
+01:52:06	parseFen() finished.
+01:52:06	
+Startup
+01:52:06	s
+01:52:06	Entered search
+01:52:48	parseFen() finished.
+01:52:48	
+Startup
+01:52:48	s
+01:52:48	Entered search
+01:53:05	parseFen() finished.
+01:53:05	
+Startup
+01:53:06	s
+01:53:06	Entered search
+01:53:20	parseFen() finished.
+01:53:20	
+Startup
+01:53:21	s
+01:53:21	Entered search
+14:59:45	parseFen() finished.
+14:59:45	
+Startup
+14:59:45	s
+14:59:45	Entered search

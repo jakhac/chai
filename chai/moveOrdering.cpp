@@ -133,7 +133,7 @@ static void updateBestMove(int* scores, int* bestIdx, int curIdx) {
 	}
 }
 
-void scoreMovesAlphaBeta(Board* b, moveList_t* moveList, move_t hashMove) {
+void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove) {
 	move_t currentMove;
 	int seeScore = 0;
 	int mvvLvaScore = 0;
@@ -190,6 +190,22 @@ void scoreMovesAlphaBeta(Board* b, moveList_t* moveList, move_t hashMove) {
 
 		// Only quiet moves left:
 
+		// promotion
+		if (currentMove & MCHECK_PROM) {
+			moveList->scores[i] = PROMOTION + b->pieceAt(fromSq(currentMove));
+
+			updateBestMove(moveList->scores, &bestIdx, i);
+			continue;
+		}
+
+		// mate killer
+		if (currentMove == b->mateKiller[b->ply]) {
+			moveList->scores[i] = MATE_KILLER;
+
+			updateBestMove(moveList->scores, &bestIdx, i);
+			continue;
+		}
+
 		// first killer
 		if (currentMove == b->killer[0][b->ply]) {
 			Assert(!(currentMove & MCHECK_CAP));
@@ -203,14 +219,6 @@ void scoreMovesAlphaBeta(Board* b, moveList_t* moveList, move_t hashMove) {
 		if (currentMove == b->killer[1][b->ply]) {
 			Assert(!(currentMove & MCHECK_CAP));
 			moveList->scores[i] = KILLER_SCORE_2;
-
-			updateBestMove(moveList->scores, &bestIdx, i);
-			continue;
-		}
-
-		// mate killer
-		if (currentMove == b->mateKiller[b->ply]) {
-			moveList->scores[i] = MATE_KILLER;
 
 			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
@@ -237,14 +245,6 @@ void scoreMovesAlphaBeta(Board* b, moveList_t* moveList, move_t hashMove) {
 			continue;
 		}
 
-		// promotion
-		if (currentMove & MCHECK_PROM) {
-			moveList->scores[i] = PROMOTION + b->pieceAt(fromSq(currentMove));
-
-			updateBestMove(moveList->scores, &bestIdx, i);
-			continue;
-		}
-
 		// last resort: history heuristic
 		int histScore = b->histHeuristic[b->pieceAt(fromSq(currentMove))][toSq(currentMove)];
 		moveList->scores[i] = QUIET_SCORE + (histScore / 250);
@@ -258,52 +258,4 @@ void scoreMovesAlphaBeta(Board* b, moveList_t* moveList, move_t hashMove) {
 	//	moveList->moves[0] = temp;
 	//}
 
-}
-
-void scoreMovesQuiescence(Board* b, moveList_t* moveList) {
-	int mvvLvaScore = 0;
-	int seeScore = 0;
-	move_t currentMove;
-
-	for (int i = 0; i < moveList->cnt; i++) {
-		currentMove = moveList->moves[i];
-
-		// All moves in quiescence are either captures or promotions, check evasions
-		// are scored like alphaBeta movegen.
-		Assert(currentMove & MCHECK_PROM_OR_CAP || currentMove & MCHECK_EP);
-		Assert(pieceValid(b->pieceAt(fromSq(currentMove))));
-
-		mvvLvaScore = MVV_LVA[capPiece(currentMove)][b->pieceAt(fromSq(currentMove))];
-
-		// EnPas captures
-		if (currentMove & MCHECK_EP) {
-			moveList->scores[i] = GOOD_CAPTURE + 105;
-			continue;
-		}
-
-		// Promoting captures
-		if (currentMove & MCHECK_PROM && currentMove & MCHECK_CAP) {
-			Assert(pieceValid(promPiece(currentMove)));
-			moveList->scores[i] = PROMOTING_CAPTURE + b->pieceAt(fromSq(currentMove));
-			continue;
-		}
-
-		// Promotions
-		if (currentMove & MCHECK_PROM) {
-			Assert(pieceValid(promPiece(currentMove)));
-			moveList->scores[i] = PROMOTION + b->pieceAt(fromSq(currentMove));
-			continue;
-		}
-
-		// Only plain captures left
-		seeScore = lazySee(b, currentMove);
-		if (seeScore > 0) {
-			moveList->scores[i] = GOOD_CAPTURE + mvvLvaScore;
-		} else if (seeScore == 0) {
-			moveList->scores[i] = EQUAL_CAPTURE + mvvLvaScore;
-		} else {
-			moveList->scores[i] = BAD_CAPTURE + mvvLvaScore;
-		}
-
-	}
 }

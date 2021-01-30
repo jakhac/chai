@@ -256,6 +256,8 @@ public:
 	 */
 	void parseFen(string fen);
 
+	string getFEN();
+
 	/**
 	 * Parse a move into a bit move. Sets flags and captures according to current board state.
 	 *

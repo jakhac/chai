@@ -1,12 +1,15 @@
 **Settings**
+
 - 500 Games against each opponent
 - Time: 40/0.4
 - Opponents: TSCP181, Bubble
- 
+
 **Change log from v2.0 (30.12.20)**
+
 <!-- - Results
   - chai - TSCP181 &rarr; *241-189-70* (+35)
   - chai - Bubble &rarr; *108-337-55* (-173) -->
+
 - AlphaBeta
   - Standard alpha-beta pruning
   - Check Extensions:
@@ -30,9 +33,11 @@
   - Hash move used in move ordering
 
 **Change log from v2.1 (03.01.21)**
+
 <!-- - Results
   - chai - TSCP181 &rarr; 252-187-61 (+49)
   - chai - Bubble &rarr; 92-342-66 ( -191) -->
+
 - Move Ordering:
   - Promoting captures are sorted higher than normal captures
 - Quiesence
@@ -52,29 +57,46 @@
   - Choose FEN in perft option
 
 **Changes in v2.2**
-- [x] Compiler Optimizations **DISABLED IN DEVELOPMENT**
+
+- Results
+  - Chai_2.2_1bucket - Chai_2.2_2bucket &rarr; 59%: 247-157-96 (+63)
+  - Chai_2.2_1bucket - Chai_2.2_4bucket &rarr; 75%: 335-86-79 (+191)
+  - Chai_2.2_1bucket - Chai_v2.1.2 &rarr; 62%: 252-132-116 (+85)
+  - Chai_2.2_1bucket - Tscp181 &rarr; 58%: 253-176-71 (+56)
+  - chai (1bucket) - TSCP181 &rarr; 52%: 232-212-56 (+14)
+  - chai (1bucket) - Bubble &rarr; 29%: 115-321-64 (-156)
+- [x] Compiler Optimizations **DISABLED WHILE TESTING v2.2**
 - Quiescence
   - [x] Forced checkmates are detected in quiescence
   - [x] Generate checkers at first ply
 - Transposition Table
   - [x] Prefetch Pawn Table
-  - [ ] Buckets
-  - [ ] Refactor usage of ttable hits
+  - [x] Buckets
+  - [x] Replacement Strategy: Overwrite lowest depth
+  - [x] Refactor usage of ttable hits
+- Features
+- [x] Parse FEN into board from console
+- [x] Print FEN
+- Bugfixes
+- [x] Fixed incorrect eval type (`uint_16`) in pawn entry
+- [x] Alpha cutoff stored NO_MOVE in TT
 
 # Todo
 
 - ~~Compiler optimizations~~
 - Move Generation
+
   - ~~`scoreMoves()` instead of scoring while generating~~
   - run move gen after hash move failed -> pvs still possible?
   - ~~check evasion~~
-  -  ~~quiesence move gen (captures, promotions, check evasions)~~
-  - add checks in first ply
+  - ~~quiesence move gen (captures, promotions, check evasions)~~
+  - ~~generate quiet checks~~
   - ~~special see function with early exit for captures like PxQ~~
   - ~~Early return inCheck function is fastest and most reliable, do not use isLegal or leaesKingInCheck~~
     - ~~faster isCheck method? instead of inCheck() -> only check pinned pieces / king attacks of last move~~
 
 - Project
+
   - clean up utils, attacks, helper bitboards
   - detect endgames (knight, bishop endgame, light/dark squared bishop)
   - try hash move before generating moves?
@@ -82,12 +104,13 @@
   - Error handler for invalid FEN
 
 - Alpha Beta
+
   - adaptive null move pruning -> drop into qui
   - mate distance pruning
   - delta pruning
   - futility pruning / reverse null move pruning
   - razoring
-  - tt probing
+  - ~~tt probing~~
   - aspiration windows
   - iid if no hash move
   - pvs
@@ -99,17 +122,20 @@
   - ~~history heuristic~~
 
 - Quiesence
-  - see pruning
+
+  - ~~see pruning~~
   - hash table with negative depth in qsearch
-  - Add checkers in first quiesence ply
+  - ~~Add checkers in first quiesence ply~~
 
 - Hash table
+
   - ~~prefetch table instruction~~
-  - buckets
-  - rework table probing (in search)
+  - ~~buckets~~
+  - ~~rework table probing (in search)~~
   - hash table with negative depth in qsearch
 
 - Evaluation
+
   - lazy eval for qsearch or pruning areas
   - more heuristics
   - traps, pins

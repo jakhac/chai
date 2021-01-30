@@ -71,13 +71,16 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	Assert(b->checkBoard());
 	Assert(beta > alpha);
 
-	pv_line_t localPV[1];
+	pv_line_t localPV[1]{};
 	localPV->len = 0;
 
 	// drop in quiescence if max depth is reached
 	if (depth <= 0 || b->ply > MAX_DEPTH) {
 		pvLine->len = 0;
-		return quiescence(alpha, beta, 0, b, s, localPV);
+
+		int ret = quiescence(alpha, beta, 0, b, s, localPV);
+		Assert(ret <= abs(INF));
+		return ret;
 	}
 
 	// check for time and depth
@@ -86,11 +89,6 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	}
 
 	s->nodes++;
-	// In case of draw (3-fold-rep or 50-move rule) decide wether current position is winnable and
-	// either score draw as 0 or penalize draw
-	if ((isRepetition(b) || b->fiftyMove >= 100) && b->ply > 0) {
-		return contemptFactor(b);
-	}
 
 	// variables relevant for mulitple pruning techniques
 	bool inCheck = b->isCheck(b->side);
@@ -101,19 +99,51 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		depth = min(depth + 1, MAX_DEPTH);
 	}
 
-	// prefetch ttable entry into cache
-	prefetchTTEntry(b);
+	// In case of draw (3-fold-rep or 50-move rule) decide wether current position is winnable and
+	// either score draw as 0 or penalize draw
+	if ((isRepetition(b) || b->fiftyMove >= 100) && b->ply > 0) {
+		return contemptFactor(b);
+	}
 
-	// probe hash table for pv move and early cutoff
-	int score = -INF;
-	move_t pvMove = NO_MOVE;
-	b->tt->probed++;
-	if (probeTT(b, &pvMove, &score, alpha, beta, depth)) {
+	//prefetchTTEntry(b);
+
+	/*
+	* Transposition Table Probing:
+	* Probe the TTable and look for useful information from previous transpositions. Return hashScore if hash table
+	* stored a better score at same or greater depth. Do not return if close to 50-move draw.
+	*/
+	int hashScore = -INF;
+	int hashDepth = -1;
+	int hashFlag = -1;
+	move_t hashMove = NO_MOVE;
+
+	bool hashStored = probeTT(b, &hashMove, &hashScore, &hashFlag, &hashDepth);
+	if (hashStored) {
 		b->tt->hit++;
 
-		// in pvNodes return exact scores only
-		if (!pvNode || (score > alpha && score < beta)) {
-			return score;
+		// Look for valueHit: This position has already been searched before with greater depth.
+		if (hashDepth >= depth && b->fiftyMove < 85) {
+			Assert(hashDepth >= 1 && hashDepth <= MAX_DEPTH);
+			Assert(hashFlag >= TT_ALPHA && hashFlag <= TT_SCORE);
+			Assert(hashScore >= -INF && hashScore <= INF);
+
+			// Convert mate scores
+			ttableScoreChecker(b, &hashScore);
+
+			if (hashFlag == TT_SCORE && !pvNode) {
+				b->tt->valueHit++;
+				return hashScore;
+			}
+
+			if (hashFlag == TT_BETA && beta <= hashScore) {
+				b->tt->valueHit++;
+				return hashScore;
+			}
+
+			if (hashFlag == TT_ALPHA && alpha >= hashScore) {
+				b->tt->valueHit++;
+				return hashScore;
+			}
 		}
 	}
 
@@ -124,7 +154,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		if (alpha >= beta) return alpha;
 	}*/
 
-	// static null move pruning (reverse futility pruning)
+	// static null move pruning (reverse futility pruning) // never drop into qs from null search
 	/*if (!pvNode && depth <= 3 && !inCheck && abs(beta - 1) > -ISMATE) {
 		switch (depth) {
 			case 1:
@@ -149,7 +179,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 		int r = (depth > 6) ? 3 : 2;
 
-		score = -alphaBeta(-beta, -beta + 1, depth - 1 - r, b, s, NO_NULL, NO_PV, localPV);
+		int score = -alphaBeta(-beta, -beta + 1, depth - 1 - r, b, s, NO_NULL, NO_PV, localPV);
 		b->pop();
 
 		if (s->stopped) return 0;
@@ -171,7 +201,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		}
 	}*/
 
-	scoreMovesAlphaBeta(b, moveList, pvMove);
+	scoreMoves(b, moveList, hashMove);
 
 	move_t currentMove;
 	move_t bestMove = NO_MOVE;
@@ -179,22 +209,16 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	int legalMoves = 0;
 	int oldAlpha = alpha;
 	int bestScore = -INF;
-	score = -INF;
-
-	// compare hash move and pv move, maybe use move from pv line if no hash move or iid
-	/*if (moveLegal(b, pvLine->line[b->ply - 1]) && pvMove == pvLine->line[b->ply - 1]) {
-		cout << "pv line equals hash move " << getStringMove(pvLine->line[b->ply - 1]) << endl;
-		pvMove = pvLine->line[b->ply - 1];
-	}*/
+	int score = -INF;
 
 	// set futility pruning flag
 	bool fPrune = false;
 	int fmargin[4] = { 0, 200, 325, 550 };
-	if (depth <= 3 && !inCheck && !pvNode && abs(alpha) < 9000) {
+	/*if (depth <= 3 && !inCheck && !pvNode && abs(alpha) < 9000) {
 		if (static_eval + fmargin[depth] <= alpha) {
 			fPrune = true;
 		}
-	}
+	}*/
 
 	// main move loop
 	for (int i = 0; i < moveList->cnt; i++) {
@@ -275,7 +299,6 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 				b->killer[1][b->ply] = b->killer[0][b->ply];
 				b->killer[0][b->ply] = currentMove;
-
 				Assert(b->killer[1][b->ply] != b->killer[0][b->ply]);
 			}
 
@@ -283,8 +306,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			* Mate Killers:
 			* If a move scores near checkmate, order it above standard killers.
 			*/
-			if (bestScore >= (MATE - 1000)
-				&& currentMove != NULL_MOVE) {
+			if (bestScore >= (MATE - 1000) && currentMove != NULL_MOVE) {
 				b->mateKiller[b->ply] = currentMove;
 			}
 
@@ -322,14 +344,18 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 				&& b->ply > 0
 				&& !(currentMove & MCHECK_PROM_OR_CAP)
 				&& currentMove != NULL_MOVE) {
+
 				move_t prevMove = b->undoHistory[b->ply - 1].move;
 				if (prevMove != NULL_MOVE) {
 					b->counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side] = currentMove;
 				}
 			}
 
+			Assert(currentMove != NO_MOVE);
+			Assert(abs(beta) <= INF);
+
 			// Store position with bestMove and beta flag
-			storeTT(b, bestMove, beta, TT_BETA, depth);
+			storeTT(b, currentMove, beta, TT_BETA, depth);
 			return beta;
 		}
 
@@ -345,8 +371,6 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			/*
 			* If the currentMove scores higher than alpha, the principal variation
 			* is updated because a better move for this position has been found.
-			* This information can be stored in (counter) history heuristic to improve mulm
-			* further move ordering.
 			*/
 			if (score > alpha) {
 				alpha = score;
@@ -359,24 +383,32 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		}
 	}
 
+	Assert(alpha >= oldAlpha);
+
+	// If no moves were possible in this node, position is either a checkmate or stalemate.
 	if (legalMoves == 0) {
-		// checkmate
 		if (inCheck) {
+			// Checkmate
 			return -MATE + b->ply;
 		} else {
-			// stalemate
+			// Stalemate
 			return 0;
 		}
 	}
 
-	Assert(alpha >= oldAlpha); // alpha cant get worse
-
-	// if alpha has changed, a better move has been found -> adjust pv table
+	/**
+	 * If alpha has been changed, a better and exact score can be stored to transposition table.
+	 * Alpha scores are stored, if no move could improve over alpha.
+	 */
 	if (alpha != oldAlpha) {
-		// exact score since alpha has improved
+		Assert(bestMove != NO_MOVE);
+		Assert(abs(bestScore) <= INF);
+
 		storeTT(b, bestMove, bestScore, TT_SCORE, depth);
-	} else {
-		// no improvemnt, keep lower bound
+	} else if (bestMove) {
+		Assert(bestMove != NO_MOVE);
+		Assert(abs(alpha) <= INF);
+
 		storeTT(b, bestMove, alpha, TT_ALPHA, depth);
 	}
 
@@ -392,13 +424,13 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 		checkSearchInfo(s);
 	}
 
-	s->nodes++;
+	s->qnodes++;
 
 	if ((isRepetition(b) || b->fiftyMove >= 100) && b->ply > 0) {
 		return contemptFactor(b);
 	}
 
-	//if (b->ply > MAX_DEPTH - 1) return standPat;
+	if (b->ply > MAX_DEPTH - 1) return eval(b);
 
 	int standPat = eval(b);
 	bool inCheck = b->isCheck(b->side);
@@ -411,17 +443,17 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 	* may contain a non-tactical move that raises alpha or possibly no move due to serious mate threat.
 	*/
 	if (!inCheck) {
-		if (standPat > alpha) {
-			alpha = standPat;
-		}
 		if (standPat >= beta) {
 			return beta;
+		}
+		if (standPat > alpha) {
+			alpha = standPat;
 		}
 	}
 
 	int legalMoves = 0;
 	int oldAlpha = alpha;
-	int bestMove = 0;
+	int bestMove = NO_MOVE;
 	int score = -INF;
 
 	moveList_t moveList[1];
@@ -432,18 +464,16 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 		generateQuietCheckers(b, moveList);
 	}
 
-	// Check evasions are enabled, might encounter a forced checkmate
+	/* Check evasions are enabled, might encounter a forced checkmate. If no moves were generated
+	 * and all previous positions were check, meaning forced, this position is a checkmate and
+	 * returns mate score. If a non-checking position was found, return stand pat because mate was not forced.
+	 */
 	if (moveList->cnt == 0) {
 
-		/**
-		 * If no moves were generated and all previous positions were check, meaning forced,
-		 * this position is a checkmate and returns mate score. If a non-checking position was found,
-		 * return stand pat because mate was not forced.
-		 */
 		if (inCheck) {
 			for (int i = depth; i <= 0; i += 2) {
 				if (!quiescenceChecks[i]) {
-					return standPat;
+					return standPat; // TODO return alpha?
 				}
 			}
 
@@ -451,18 +481,10 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 		}
 
 		// Immediatly return standPat score if neither check nor tactical moves possible.
-		return standPat;
+		return standPat; // TODO return alpha?
 	}
 
-	/*
-	* Check evasions and first ply may contain non-tactical moves and are scored with standard function.
-	* Tactical moves are scored with faster scorer.
-	*/
-	if (inCheck || depth == 0) {
-		scoreMovesAlphaBeta(b, moveList, NO_MOVE);
-	} else {
-		scoreMovesQuiescence(b, moveList);
-	}
+	scoreMoves(b, moveList, NO_MOVE);
 
 	// Local PV line
 	pv_line_t localPV[1]{};
@@ -476,7 +498,9 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 		getNextMove(b, moveList, i);
 		int currentMove = moveList->moves[i];
 
+		Assert(moveList->scores[i] >= 0);
 		Assert(depth == 0 || inCheck || (currentMove & MCHECK_PROM_OR_CAP || currentMove & MFLAG_EP));
+		Assert(currentMove != NO_MOVE);
 
 		// Delta cutoff: prune moves that cannot improve over alpha
 		//bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
@@ -487,11 +511,11 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 
 		/*
 		* If SEE score is negative, this is a losing capture. Since there is little to no chance that
-		* this move raises alpha, it can be pruned. Proms are ignored, because PROM_SCORE > BAD_CAPTURE.
+		* this move raises alpha, it can be pruned.
 		*/
 		if (legalMoves
+			&& !(MCHECK_PROM & currentMove)
 			&& moveList->scores[i] < (BAD_CAPTURE + MVV_LVA_UBOUND)) {
-			Assert(!(MCHECK_PROM & currentMove));
 			continue;
 		}
 
@@ -507,7 +531,7 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 
 		if (score > alpha) {
 			alpha = score;
-			bestMove = moveList->moves[i];
+			bestMove = currentMove;
 
 			pvLine->line[0] = currentMove;
 			memcpy(pvLine->line + 1, localPV->line, localPV->len * sizeof(currentMove));
@@ -534,7 +558,18 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 }
 
 void clearForSearch(Board* b, search_t* s) {
-	// reset history of killer heuristic
+	b->ply = 0;
+
+	// reset stats
+	b->tt->probed = 0;
+	b->tt->hit = 0;
+	b->tt->valueHit = 0;
+
+	// long term stats
+	b->tt->collided = 0;
+	b->tt->stored = 0;
+
+	// reset killers
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < MAX_DEPTH; j++) {
 			b->killer[i][j] = 0;
@@ -549,21 +584,14 @@ void clearForSearch(Board* b, search_t* s) {
 	}
 	b->histMax = 0;
 
-	// counter move history
+	// reset counter move history
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < NUM_SQUARES; j++) {
 			for (int k = 0; k < NUM_SQUARES; k++) {
-				b->counterHeuristic[j][k][i] = 1;
+				b->counterHeuristic[j][k][i] = NO_MOVE;
 			}
 		}
 	}
-
-	b->ply = 0;
-
-	// reset stats
-	b->tt->hit = 0;
-	b->tt->probed = 0;
-	b->tt->valueHit = 0;
 
 	b->pawnTable->collided = 0;
 	b->pawnTable->probed = 0;
@@ -572,6 +600,7 @@ void clearForSearch(Board* b, search_t* s) {
 	s->startTime = getTimeMs();
 	s->stopped = 0;
 	s->nodes = 0;
+	s->qnodes = 0;
 	s->fhf = 0;
 	s->fh = 0;
 }
@@ -604,14 +633,13 @@ int search(Board* b, search_t* s) {
 	selDepth = 0;
 	b->ply = 0;
 	bestScore = alphaBeta(-INF, INF, 1, b, s, DO_NULL, IS_PV, pvLine);
+
 	pvMoves = getPVLine(b, 1);
 	bestMove = b->pvArray[0];
 
-	fflush(stdout);
 	cout << "info depth 1 seldepth " << selDepth << " score cp " << bestScore
-		<< " nodes " << s->nodes << " time " << (getTimeMs() - s->startTime) << " pv "
+		<< " nodes " << (s->nodes + s->qnodes) << " time " << (getTimeMs() - s->startTime) << " pv "
 		<< getStringMove(bestMove) << "\n";
-	fflush(stdout);
 
 	for (int currentDepth = 2; currentDepth <= s->depth; currentDepth++) {
 		selDepth = 0;
@@ -628,51 +656,44 @@ int search(Board* b, search_t* s) {
 		pvMoves = getPVLine(b, currentDepth);
 		bestMove = b->pvArray[0];
 
-		fflush(stdout);
-		cout << "info depth " << currentDepth << " seldepth " << selDepth << " score cp " << bestScore << " nodes " << s->nodes << " time " << (getTimeMs() - s->startTime);
-
+		cout << "info depth " << currentDepth << " seldepth " << selDepth << " score cp " << bestScore << " nodes " << (s->nodes + s->qnodes) << " time " << (getTimeMs() - s->startTime);
 		cout << " pv ";
 
-#ifdef TT_PV
-		for (int i = 0; i < pvMoves; i++) {
-			cout << getStringMove(b->pvArray[i]);
-		}
-#endif
 #define STRUCT_PV
 #ifdef STRUCT_PV
 		for (int i = 0; i < pvLine->len; i++) {
 			cout << getStringMove(pvLine->line[i]);
 		}
+#else
+		for (int i = 0; i < pvMoves; i++) {
+			cout << getStringMove(b->pvArray[i]);
+		}
 #endif // STRUCT_PV
 
-		printSearchInfo(b, s);
-
-		// quit when checkmate was found
-		/*if (currentDepth > 1 && bestScore > ISMATE) {
-			cout << "\nEarly exit: found forced checkmate" << endl;
-			break;
-		}*/
+		//printSearchInfo(b, s);
 
 		cout << "\n";
 	}
 
-	fflush(stdout);
 	log("Left search and cout bestmove found");
 	cout << "\n";
 	cout << "bestmove " << getStringMove(bestMove) << "\n";
-	fflush(stdout);
 
 	return bestScore;
 }
 
 void printSearchInfo(Board* b, search_t* s) {
 	cout << "\n";
-	cout << "Ordering percentage: \t\t" << setprecision(3) << fixed << (float)(s->fhf / s->fh) << endl;
-	cout << "T table hit percentage: \t" << setprecision(3) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
-	cout << "T table hit used: \t\t" << (float)(b->tt->valueHit) / (b->tt->probed) << endl;
-	cout << "T table memory used: \t\t" << setprecision(5) << fixed << (float)(b->tt->stored) / (b->tt->buckets) << endl;
-	cout << "Pawn table hit percentage: \t" << setprecision(3) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
-	cout << "Pawn table memory used: \t" << setprecision(5) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
-	cout << "Pawn table collisions: \t\t" << setprecision(3) << fixed << b->pawnTable->collided << endl;
+	//cout << "AlphaBeta-Nodes: " << s->nodes << " Q-Nodes: " << s->qnodes << endl;
+	cout << "Ordering percentage: \t\t" << setprecision(4) << fixed << (float)(s->fhf / s->fh) << endl;
+	cout << "TTable hits/probed: \t\t" << setprecision(4) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
+	cout << "TTable valueHits/hits: \t\t" << setprecision(4) << fixed << (float)(b->tt->valueHit) / (b->tt->hit) << endl;
+	cout << "T table memory used: \t\t" << setprecision(4) << fixed << (float)(b->tt->stored) / (b->tt->buckets) << endl;
+	cout << "PTable hit percentage: \t\t" << setprecision(4) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
+	cout << "PTable memory used: \t\t" << setprecision(4) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
+	cout << "PTcollisions: \t\t\t" << setprecision(4) << fixed << b->pawnTable->collided << endl;
+	cout << endl;
+
+	printTTStatus(b);
 	cout << endl;
 }

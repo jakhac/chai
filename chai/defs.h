@@ -5,26 +5,36 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include <ctime>
 
 using namespace std;
 
 #include "move.h"
 #include "types.h"
 
-#define VERSION "v2.2.1"
+#define VERSION "v2.2"
 
 
 //#define TESTING
-#define ASSERT
+//#define ASSERT
 
 /**
  * Write logging information into log.txt file.
  *
  * @param  logMsg Message to write into log file.
  */
-inline void logDebug(string logMsg, string msg) {
-	ofstream ofs("../assertLog.txt", std::ios_base::out | std::ios_base::app);
-	string t = logMsg + " : " + msg + "\n\n";
+inline void logDebug(string logMsg, string file, string line) {
+	time_t now = time(0);
+	tm gmtm[1];
+	char buffer[26];
+
+	gmtime_s(gmtm, &now);
+	asctime_s(buffer, gmtm);
+
+	ofstream ofs("assertLog.txt", std::ios_base::app | std::ios_base::app);
+
+	string streamMsg = "At " + string(buffer) + " Error in:" + file + " at line " + line + "\n\n";
+	ofs << streamMsg;
 	ofs.close();
 }
 
@@ -38,9 +48,7 @@ printf("On %s ",__DATE__); \
 printf("At %s ",__TIME__); \
 printf("In File %s ",__FILE__); \
 printf("At Line %d\n",__LINE__); \
-logDebug("Failed", #n); \
-logDebug("In File ", __FILE__); \
-logDebug("At Line ", to_string(__LINE__)); \
+logDebug("Failed Assert in File", __FILE__, to_string(__LINE__)); \
 exit(1); \
 }
 #endif // ASSERT

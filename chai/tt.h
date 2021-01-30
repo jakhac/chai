@@ -5,6 +5,11 @@
 #include "board.h"
 #include "moveGenerator.h"
 
+/*
+* Determines the number of buckets used in ttable.
+*/
+#define BUCKETS 1
+
 /**
  * Size of the transposition table.
  */
@@ -14,11 +19,6 @@ const int ttSize = 0x100000 * 128;
  * Size of the pawn table.
  */
 const int pawnTableSize = 0x100000 * 8;
-
-/*
-* Determines the number of buckets used in ttable.
-*/
-const int BUCKETS = 3;
 
 /**
  * Initialize transposition table: Clear used or allocated memory and re-allocate.
@@ -35,7 +35,7 @@ void initTT(ttable_t* pvTable_s);
 void clearTT(ttable_t* pvTable_s);
 
 /**
- * Prefetch tt entry into cache using assembly instructions.
+ * Prefetch first tt entry of bucket into cache using assembly instructions.
  *
  * @param  key The zobrist hash of current board.
  */
@@ -43,7 +43,8 @@ void prefetchTTEntry(Board* b);
 
 /**
  * Store a transposition entry containing score, score flag, move and depth in in transposition
- * table if possible.
+ * table if possible. Entries are always written to empty bucket-entries if possible. If all
+ * full, the entry with lowest depth (longest to root) is replaced.
  *
  * @param  b	 Current board.
  * @param  move  Best move found for current board.
@@ -53,30 +54,38 @@ void prefetchTTEntry(Board* b);
  */
 void storeTT(Board* b, int move, int score, int flag, int depth);
 
-/** TODO rework
- * Probe pv
+/**
+ * Probe PV move from ttable.
  *
  * @param  b A Board to process.
  *
- * @returns An int.
+ * @returns The hash move if found, else NO_MOVE.
  */
-int probePV(Board* b);
+move_t probePV(Board* b);
 
 /**
- * Probe the transposition table. Always set the pv move, even if depth is not deep enough. If
- * stored depth is greater equal to the current depth, overwrite score reference if current
- * score cannot beat alpha/beta anymore.
+ * Checks if score from ttable is mate score. Update score according with ply to make engine visible to
+ * checkmate paths.
  *
- * @param  b	 Current board.
- * @param  move  Reference to move variable used in search.
- * @param  score Reference to score variable used in search.
- * @param  alpha Current lower bound found in search.
- * @param  beta  Current upper bound found in search.
- * @param  depth Current depth of search.
- *
- * @returns True if probing was successfull and alpha/beta/score was improved.
+ * @param  b	 The current board.
+ * @param  score The score to check.
  */
-bool probeTT(Board* b, int* move, int* score, int alpha, int beta, int depth);
+void ttableScoreChecker(Board* b, move_t* score);
+
+/**
+ * Probe the transposition table. If a hash entry with equal zobristKey is found, all
+ * information are written to referenced parameters. AlphaBeta search then decides if and
+ * how to use these. Iterates over all entries inside a bucket.
+ *
+ * @param  b		 Current board.
+ * @param  move		 Move of best entry.
+ * @param  hashScore Score of stored entry.
+ * @param  hashFlag  Flag of stored entry.
+ * @param  hashDepth Depth of stored entry.
+ *
+ * @returns True if hash entry was found, else false.
+ */
+bool probeTT(Board* b, move_t* move, int* hashScore, int* hashFlag, int* hashDepth);
 
 /**
  * Walk through best move stored in transposition table to collect principal variation line.
@@ -120,11 +129,12 @@ void prefetchPawnEntry(Board* b);
 /**
  * Probe pawn table and return score if found.
  *
- * @param  b Current board.
+ * @param  b		 Current board.
+ * @param  hashScore The pointer to hash score.
  *
- * @returns An int.
+ * @returns True if hash was found and score is assigned.
  */
-int probePawnEntry(Board* b);
+bool probePawnEntry(Board* b, int* hashScore);
 
 /**
  * Free memory allocated for ttable and ptable.
@@ -133,3 +143,5 @@ int probePawnEntry(Board* b);
  */
 void destroyTranspositionTables(Board* b);
 
+
+void printTTStatus(Board* b);
