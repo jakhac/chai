@@ -87,11 +87,12 @@
 - Eval
   - [ ] detect endgames (knight, bishop endgame, light/dark squared bishop)
 - AlphaBeta
-  - [ ] Null Move Pruning
-  - [ ] IID if no has move
+  - [x] Null Move Pruning
+  - [x] IID if no hash move
 - Project
   - [ ] Clean up utils, attacks, helper bitboards
   - [ ] Error handler for invalid FEN
+  - [x] UCI Mate in X option
 
 # Todo
 
@@ -132,6 +133,7 @@
   - ~~matekiller moves~~
   - ~~counter moves~~
   - ~~history heuristic~~
+  - null killer move?
 
 - Quiesence
 

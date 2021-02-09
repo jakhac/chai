@@ -15,6 +15,8 @@ void generateQuietCheckers(Board* b, moveList_t* moveList);
 
 bool isLegal(Board* b, const move_t move);
 
+bitboard_t hasSafePawnPush(Board* b, int side);
+
 /**
  * Generate all blockers for the blocking square and add them to the moveList. Kings cannot
  * block.

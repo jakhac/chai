@@ -21,7 +21,7 @@ void printBitBoard(bitboard_t* bb) {
 
 void printMove(const int move) {
 
-	if (move == -1) {
+	if (move == NULL_MOVE) {
 		cout << "0000" << endl;
 		return;
 	}
@@ -50,7 +50,7 @@ void printMove(const int move) {
 }
 
 string getStringMove(const int move) {
-	if (move == -1) {
+	if (move == NULL_MOVE) {
 		return "0000";
 	}
 
@@ -128,6 +128,42 @@ void readInput(search_t* s) {
 	}
 }
 
+void printUCI(search_t* s, int d, int selDpt, int score) {
+	string scoreStr = " score ";
+
+	if (abs(score) >= ISMATE) {
+		string sign = (score > 0) ? "" : "-";
+		scoreStr += sign + "M" + to_string(abs(MATE - abs(score)));
+	} else {
+		scoreStr += to_string(score);
+	}
+
+	cout << "info depth " << d
+		<< " seldepth " << selDpt
+		<< scoreStr
+		<< " nodes " << (s->nodes + s->qnodes)
+		<< " time " << (getTimeMs() - s->startTime);
+}
+
+void printPV(move_t* moves, int len) {
+	cout << " pv ";
+
+	for (int i = 0; i < len; i++) {
+		cout << getStringMove(moves[i]);
+	}
+
+	//#define STRUCT_PV
+	//#ifdef STRUCT_PV
+	//	for (int i = 0; i < pvLine->len; i++) {
+	//		cout << getStringMove(pvLine->line[i]);
+	//	}
+	//#else
+	//	for (int i = 0; i < pvMoves; i++) {
+	//		cout << getStringMove(b->pvArray[i]);
+	//	}
+	//#endif // STRUCT_PV
+}
+
 string getTime() {
 	char str[32]{};
 	time_t a = time(nullptr);
@@ -158,5 +194,6 @@ bool inputWaiting() {
 	} else {
 		GetNumberOfConsoleInputEvents(inh, &dw);
 		return dw <= 1 ? 0 : dw;
+
 	}
 }

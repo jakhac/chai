@@ -1,5 +1,7 @@
 #pragma once
 
+#include "defs.h"
+
 /**
  * Checks if index is square on board.
  *
@@ -26,3 +28,6 @@ int pieceValid(int piece);
  * @returns True if it succeeds, false if it fails.
  */
 bool fileValid(int file);
+
+//TODO
+bool pseudoValidBitMove(int move);

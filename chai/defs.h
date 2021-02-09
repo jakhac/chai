@@ -16,7 +16,7 @@ using namespace std;
 
 
 //#define TESTING
-//#define ASSERT
+#define ASSERT
 
 /**
  * Write logging information into log.txt file.
@@ -34,6 +34,21 @@ inline void logDebug(string logMsg, string file, string line) {
 	ofstream ofs("assertLog.txt", std::ios_base::app | std::ios_base::app);
 
 	string streamMsg = "At " + string(buffer) + " Error in:" + file + " at line " + line + "\n\n";
+	ofs << streamMsg;
+	ofs.close();
+}
+
+inline void logDebug(string logMsg) {
+	time_t now = time(0);
+	tm gmtm[1];
+	char buffer[26];
+
+	gmtime_s(gmtm, &now);
+	asctime_s(buffer, gmtm);
+
+	ofstream ofs("iid.txt", std::ios_base::app | std::ios_base::app);
+
+	string streamMsg = "At " + string(buffer) + logMsg + "\n\n";
 	ofs << streamMsg;
 	ofs.close();
 }
@@ -59,13 +74,13 @@ const int MAX_POSITION_MOVES = 256;
 const int MAX_DEPTH = 64;
 const int NO_SCORE = 10000000;
 const int NO_MOVE = 0;
+const int NULL_MOVE = 129; // B1-B1 used as nullmove (impossible move, never generated)
 
 const int INF = 30000;
 const int MATE = 29000;
 const int ISMATE = MATE - MAX_DEPTH;
 const int R_NULL = 2;
 
-constexpr auto NULL_MOVE = -1;
 
 const bool IS_PV = true;
 const bool NO_PV = false;

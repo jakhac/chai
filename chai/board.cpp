@@ -567,12 +567,12 @@ void Board::pushCastle(int clearRookSq, int setRookSq, int side) {
 void Board::pushNull() {
 	Assert(!isCheck(side));
 
-	undo_t undo_s[1]{};
-	undo_s->enPas = enPas;
-	undo_s->castle = castlePermission;
-	undo_s->zobKey = zobristKey;
-	undo_s->pawnKey = zobristPawnKey;
-	undo_s->move = NULL_MOVE;
+	undo_t undo_s{};
+	undo_s.enPas = enPas;
+	undo_s.castle = castlePermission;
+	undo_s.zobKey = zobristKey;
+	undo_s.pawnKey = zobristPawnKey;
+	undo_s.move = NULL_MOVE;
 
 	zobristKey ^= pieceKeys[EMPTY][enPas]; // ep out
 	enPas = 0;
@@ -587,8 +587,8 @@ void Board::pushNull() {
 
 	// update gameState variable and store in undo struct
 
-	undo_s->fiftyMove = fiftyMove;
-	undoHistory[undoPly] = *undo_s;
+	undo_s.fiftyMove = fiftyMove;
+	undoHistory[undoPly] = undo_s;
 
 	fiftyMove++; // might cause negative ply in isRepetition() check
 	halfMoves++;
@@ -626,7 +626,7 @@ undo_t Board::pop() {
 	enPas = undo.enPas;
 
 	// trivial case for null moves
-	if (undo.move == -1) {
+	if (undo.move == NULL_MOVE) {
 		Assert(ply >= 0);
 		return undo;
 	}

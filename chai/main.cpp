@@ -4,7 +4,7 @@
 int main() {
 	init(&board);
 	board.parseFen(STARTING_FEN);
-	//board.parseFen("1Q6/P1P4k/8/8/8/8/3K3p/3q2q1 w - - 6 8");
+	//board.parseFen("2rnqb2/1b3N2/p2PB1kp/1p2Q3/8/8/PP4PP/R4RK1 w - - 0 3");
 	board.printBoard();
 	log("\nStartup");
 

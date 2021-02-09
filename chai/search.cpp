@@ -67,20 +67,55 @@ void swapMove(moveList_t* move_s, int id1, int id2) {
 	move_s->scores[id2] = tempScore;
 }
 
+bool zugzwang(Board* b) {
+	bitboard_t bb;
+
+	// Less than 5 pieces on the board is obvious endgame
+	if (countBits(b->occupied) < 5) {
+		return true;
+	}
+
+	// Pawn endgame, no pieces left
+	bb = b->pieces[KNIGHT] | b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
+	if (!bb) {
+		return true;
+	}
+
+	// No pawns left on the board
+	bb = b->pieces[PAWN];
+	if (!bb) {
+		return true;
+	}
+
+	// Knight endgame (only pieces are knight, cannot lose tempo)
+	bb = b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
+	if (!bb) {
+		return true;
+	}
+
+	// All pawns of one side are blocked (cannot safely advance)
+	if (!hasSafePawnPush(b, b->side)) {
+		return true;
+	}
+
+	return false;
+}
+
 int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine) {
+	Assert(s);
+	Assert(b);
+	Assert(pvLine);
+	Assert(b->tt);
 	Assert(b->checkBoard());
 	Assert(beta > alpha);
 
 	pv_line_t localPV[1]{};
 	localPV->len = 0;
 
-	// drop in quiescence if max depth is reached
+	// Drop into quiescence if maximum depth is reached.
 	if (depth <= 0 || b->ply > MAX_DEPTH) {
 		pvLine->len = 0;
-
-		int ret = quiescence(alpha, beta, 0, b, s, localPV);
-		Assert(ret <= abs(INF));
-		return ret;
+		return quiescence(alpha, beta, 0, b, s, localPV);
 	}
 
 	// check for time and depth
@@ -92,11 +127,16 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 	// variables relevant for mulitple pruning techniques
 	bool inCheck = b->isCheck(b->side);
-	int static_eval = eval(b);
+	bool mateThreat = false;
+	int staticEval = eval(b);
+	int searchExt = 0;
+
+	int alphaIID = alpha;
+	int betaIID = beta;
 
 	// no evaluation if side is in check, no performance loss due to lower branching factor
 	if (inCheck) {
-		depth = min(depth + 1, MAX_DEPTH);
+		searchExt++;
 	}
 
 	// In case of draw (3-fold-rep or 50-move rule) decide wether current position is winnable and
@@ -105,7 +145,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		return contemptFactor(b);
 	}
 
-	//prefetchTTEntry(b);
+	prefetchTTEntry(b);
 
 	/*
 	* Transposition Table Probing:
@@ -117,7 +157,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	int hashFlag = -1;
 	move_t hashMove = NO_MOVE;
 
-	bool hashStored = probeTT(b, &hashMove, &hashScore, &hashFlag, &hashDepth);
+	bool hashStored = false; //probeTT(b, &hashMove, &hashScore, &hashFlag, &hashDepth);
 	if (hashStored) {
 		b->tt->hit++;
 
@@ -128,7 +168,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			Assert(hashScore >= -INF && hashScore <= INF);
 
 			// Convert mate scores
-			ttableScoreChecker(b, &hashScore);
+			hashToSearch(b, &hashScore);
 
 			if (hashFlag == TT_SCORE && !pvNode) {
 				b->tt->valueHit++;
@@ -186,22 +226,55 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		if (score >= beta) return beta;
 	}*/
 
+	/*
+	* Null Move Pruning:
+	* Give opposite side a free move and use nullScore as lower bound (alpha).
+	* If this position is still winning, e.g. fails high, it will never be reached.
+	* Restrict NMP to reasonable positions (zugzwang, depth, checks).
+	* TODO: skip pv nodes?
+	* TODO: avoid if static score < beta
+	*/
+	bool doNull = nullOk && !inCheck && abs(beta) < abs(ISMATE) && depth > 2 && !zugzwang(b);
+	if (doNull) {
+		int nullDepth = depth - 1 - R_NULL;
+
+		b->pushNull();
+		int nullScore = -alphaBeta(-beta, -beta + 1, nullDepth, b, s, NO_NULL, NO_PV, localPV);
+		b->pop();
+
+		// Even after giving opponent free move, we win.
+		if (nullScore >= beta && abs(nullScore) < ISMATE) {
+			//Beta cutoff->store in ttable
+			if (nullDepth > 0) {
+				storeTT(b, NO_MOVE, nullScore, TT_ALPHA, nullDepth);
+			}
+			return nullScore;
+		}
+
+		// Mate threat detection
+		if (abs(beta) > ISMATE && depth <= 5) {
+			mateThreat = true;
+			searchExt++;
+		}
+
+	}
+
+	/*
+	* Internal Iterative Deepening:
+	* If ttable probing does not find a hash move, there is no good move to start searching this
+	* position. IID searches with reduced depth and fills ttable entries to ensure hash move.
+	* TODO: only use IID in PV nodes?
+	*/
+	if (hashMove == NO_MOVE && depth > 4) {
+		int depthIID = (depth / 2) + 1;
+		alphaBeta(alphaIID, betaIID, depthIID, b, s, NO_NULL, NO_PV, localPV);
+
+		hashMove = probePV(b);
+	}
+
 	moveList_t moveList[1];
 	generateMoves(b, moveList, inCheck);
-
-	// score hash move -> check already done in scoreMoves
-	/*// check if hash move is possible
-	if (pvMove != NO_MOVE) {
-		for (int i = 0; i < moveList->cnt; i++) {
-			if (pvMove == moveList->moves[i]) {
-				s->pvHits++;
-				moveList->scores[i] = HASH_MOVE;
-				break;
-			}
-		}
-	}*/
-
-	scoreMoves(b, moveList, hashMove);
+	scoreMoves(b, moveList, hashMove); // TODO FIX ME
 
 	move_t currentMove;
 	move_t bestMove = NO_MOVE;
@@ -239,7 +312,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		legalMoves++;
 		int reduction = 0;
 
-		score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, NO_PV, localPV);
+		score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
 
 		/*if (legalMoves == 1) {
 			// always do full search on first move
@@ -306,7 +379,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			* Mate Killers:
 			* If a move scores near checkmate, order it above standard killers.
 			*/
-			if (bestScore >= (MATE - 1000) && currentMove != NULL_MOVE) {
+			if (bestScore >= (MATE - 1000) && currentMove > 1) {
 				b->mateKiller[b->ply] = currentMove;
 			}
 
@@ -343,10 +416,10 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			if (!inCheck
 				&& b->ply > 0
 				&& !(currentMove & MCHECK_PROM_OR_CAP)
-				&& currentMove != NULL_MOVE) {
+				&& currentMove > 1) { // TODO valid move
 
 				move_t prevMove = b->undoHistory[b->ply - 1].move;
-				if (prevMove != NULL_MOVE) {
+				if (pseudoValidBitMove(prevMove)) {
 					b->counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side] = currentMove;
 				}
 			}
@@ -355,7 +428,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			Assert(abs(beta) <= INF);
 
 			// Store position with bestMove and beta flag
-			storeTT(b, currentMove, beta, TT_BETA, depth);
+			//storeTT(b, currentMove, beta, TT_BETA, depth);
 			return beta;
 		}
 
@@ -484,7 +557,8 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 		return standPat; // TODO return alpha?
 	}
 
-	scoreMoves(b, moveList, NO_MOVE);
+	//scoreMoves(b, moveList, NO_MOVE);
+	for (int i = 0; i < moveList->cnt; i++) moveList->scores[i] = 0;
 
 	// Local PV line
 	pv_line_t localPV[1]{};
@@ -637,9 +711,10 @@ int search(Board* b, search_t* s) {
 	pvMoves = getPVLine(b, 1);
 	bestMove = b->pvArray[0];
 
-	cout << "info depth 1 seldepth " << selDepth << " score cp " << bestScore
-		<< " nodes " << (s->nodes + s->qnodes) << " time " << (getTimeMs() - s->startTime) << " pv "
-		<< getStringMove(bestMove) << "\n";
+	printUCI(s, 1, selDepth, bestScore);
+	printPV(pvLine->line, pvLine->len);
+	fflush(stdout);
+	cout << endl;
 
 	for (int currentDepth = 2; currentDepth <= s->depth; currentDepth++) {
 		selDepth = 0;
@@ -656,23 +731,13 @@ int search(Board* b, search_t* s) {
 		pvMoves = getPVLine(b, currentDepth);
 		bestMove = b->pvArray[0];
 
-		cout << "info depth " << currentDepth << " seldepth " << selDepth << " score cp " << bestScore << " nodes " << (s->nodes + s->qnodes) << " time " << (getTimeMs() - s->startTime);
-		cout << " pv ";
-
-#define STRUCT_PV
-#ifdef STRUCT_PV
-		for (int i = 0; i < pvLine->len; i++) {
-			cout << getStringMove(pvLine->line[i]);
-		}
-#else
-		for (int i = 0; i < pvMoves; i++) {
-			cout << getStringMove(b->pvArray[i]);
-		}
-#endif // STRUCT_PV
+		printUCI(s, currentDepth, selDepth, bestScore);
+		printPV(pvLine->line, pvLine->len);
+		fflush(stdout);
 
 		//printSearchInfo(b, s);
 
-		cout << "\n";
+		cout << endl;
 	}
 
 	log("Left search and cout bestmove found");

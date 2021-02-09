@@ -10,6 +10,9 @@
 #include "eval.h"
 #include "moveOrdering.h"
 
+#define DO_NULL 1
+#define NO_NULL 0
+
 /**
  * Maximum ply reached in alphaBeta and quiescence search.
  */
@@ -101,6 +104,15 @@ bool isRepetition(Board* b);
  * @returns True if three fold repetition is found, else false.
  */
 bool isThreeFoldRepetition(Board* b);
+
+/**
+ * Checks if current position might be a zugzwang. Considers endgame
+ *
+ * @param  b	  Current board.
+ *
+ * @returns True if current position is probably azugzwang, else false.
+ */
+bool zugzwang(Board* b);
 
 /**
  * Swaps the best move found in moveList with move at current index.

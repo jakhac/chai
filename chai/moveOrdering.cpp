@@ -145,6 +145,7 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove) {
 	for (int i = 0; i < moveList->cnt; i++) {
 		currentMove = moveList->moves[i];
 		Assert(currentMove != NO_MOVE);
+		Assert(currentMove != NULL_MOVE);
 
 		// hash move
 		if (currentMove == hashMove) {
