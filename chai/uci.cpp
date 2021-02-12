@@ -116,7 +116,7 @@ void uciParseGo(Board* b, search_t* s, string cmd) {
 		//if (time <= 3000) {
 			//cout << "Set time to 750ms due to low move time. (was " << time << ")" << endl;
 			//s->stopTime = s->startTime + 750;
-		if (time <= 1500) {
+		if (time <= 2000) {
 			s->stopTime = s->startTime + 300;
 		} else {
 			time /= movesLeft;
@@ -142,6 +142,13 @@ void uciParseGo(Board* b, search_t* s, string cmd) {
 
 void init(Board* b) {
 	cout << "Initialize chai. " << VERSION << endl;
+
+#ifdef ASSERT
+	cout << "Asserts: 1" << endl;
+#else
+	cout << "Asserts: 0" << endl;
+#endif // ASSERT
+
 
 	auto start = std::chrono::high_resolution_clock::now();
 	initClearSetMask();

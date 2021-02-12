@@ -29,5 +29,11 @@ int pieceValid(int piece);
  */
 bool fileValid(int file);
 
-//TODO
-bool pseudoValidBitMove(int move);
+/**
+ * Checks if move is peudo-legal
+ *
+ * @param move The move to check
+ *
+ * @returns True if move is neither NULL_MOVE, NO_MOVE and from and to square are legal.
+ */
+bool pseudoValidBitMove(move_t move);

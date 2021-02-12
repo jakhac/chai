@@ -12,6 +12,8 @@
  */
 int eval(Board* b);
 
+bool insufficientMaterial(Board* b);
+
 /**
  * Evaulate all pieces of given side regarding piece square tables. Opening and endgame tables
  * are interpolated based on halfMoves and material.

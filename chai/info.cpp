@@ -133,9 +133,9 @@ void printUCI(search_t* s, int d, int selDpt, int score) {
 
 	if (abs(score) >= ISMATE) {
 		string sign = (score > 0) ? "" : "-";
-		scoreStr += sign + "M" + to_string(abs(MATE - abs(score)));
+		scoreStr += "mate " + sign + to_string(MATE - abs(score));
 	} else {
-		scoreStr += to_string(score);
+		scoreStr += "cp " + to_string(score);
 	}
 
 	cout << "info depth " << d

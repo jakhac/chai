@@ -71,7 +71,7 @@ bool zugzwang(Board* b) {
 	bitboard_t bb;
 
 	// Less than 5 pieces on the board is obvious endgame
-	if (countBits(b->occupied) < 5) {
+	if (countBits(b->occupied) <= 5) {
 		return true;
 	}
 
@@ -157,7 +157,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	int hashFlag = -1;
 	move_t hashMove = NO_MOVE;
 
-	bool hashStored = false; //probeTT(b, &hashMove, &hashScore, &hashFlag, &hashDepth);
+	bool hashStored = probeTT(b, &hashMove, &hashScore, &hashFlag, &hashDepth);
 	if (hashStored) {
 		b->tt->hit++;
 
@@ -214,7 +214,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 	// adaptive null move pruning
 	/*bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
-	if (depth > 2 && nullOk && !endGame && !inCheck && !pvNode && static_eval >= beta) {
+	if (depth > 2 && nullOk && !endGame && !inCheck && !pvNode && staticEval >= beta) {
 		b->pushNull();
 
 		int r = (depth > 6) ? 3 : 2;
@@ -232,15 +232,25 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	* If this position is still winning, e.g. fails high, it will never be reached.
 	* Restrict NMP to reasonable positions (zugzwang, depth, checks).
 	* TODO: skip pv nodes?
-	* TODO: avoid if static score < beta
 	*/
-	bool doNull = nullOk && !inCheck && abs(beta) < abs(ISMATE) && depth > 2 && !zugzwang(b);
+	bool doNull = nullOk
+		&& !inCheck
+		&& depth > 3
+		&& staticEval > beta
+		&& abs(beta) < abs(ISMATE)
+		&& !zugzwang(b);
+
 	if (doNull) {
 		int nullDepth = depth - 1 - R_NULL;
+		int nullScore = 0;
 
 		b->pushNull();
-		int nullScore = -alphaBeta(-beta, -beta + 1, nullDepth, b, s, NO_NULL, NO_PV, localPV);
+		nullScore = -alphaBeta(-beta, -beta + 1, nullDepth, b, s, NO_NULL, NO_PV, localPV);
 		b->pop();
+
+		if (s->stopped) {
+			return 0;
+		}
 
 		// Even after giving opponent free move, we win.
 		if (nullScore >= beta && abs(nullScore) < ISMATE) {
@@ -256,7 +266,6 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			mateThreat = true;
 			searchExt++;
 		}
-
 	}
 
 	/*
@@ -274,7 +283,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 	moveList_t moveList[1];
 	generateMoves(b, moveList, inCheck);
-	scoreMoves(b, moveList, hashMove); // TODO FIX ME
+	scoreMoves(b, moveList, hashMove);
 
 	move_t currentMove;
 	move_t bestMove = NO_MOVE;
@@ -416,7 +425,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			if (!inCheck
 				&& b->ply > 0
 				&& !(currentMove & MCHECK_PROM_OR_CAP)
-				&& currentMove > 1) { // TODO valid move
+				&& pseudoValidBitMove(currentMove)) {
 
 				move_t prevMove = b->undoHistory[b->ply - 1].move;
 				if (pseudoValidBitMove(prevMove)) {
@@ -546,7 +555,7 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 		if (inCheck) {
 			for (int i = depth; i <= 0; i += 2) {
 				if (!quiescenceChecks[i]) {
-					return standPat; // TODO return alpha?
+					return standPat;
 				}
 			}
 
@@ -554,11 +563,10 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 		}
 
 		// Immediatly return standPat score if neither check nor tactical moves possible.
-		return standPat; // TODO return alpha?
+		return standPat;
 	}
 
-	//scoreMoves(b, moveList, NO_MOVE);
-	for (int i = 0; i < moveList->cnt; i++) moveList->scores[i] = 0;
+	scoreMoves(b, moveList, NO_MOVE);
 
 	// Local PV line
 	pv_line_t localPV[1]{};
@@ -696,7 +704,6 @@ int search_aspiration(Board* b, search_t* s, int depth, int bestScore) {
 
 int search(Board* b, search_t* s) {
 	int bestMove = 0;
-	int bestScore = -INF;
 	int pvMoves = 0;
 	int pvNum = 0;
 
@@ -706,12 +713,13 @@ int search(Board* b, search_t* s) {
 
 	selDepth = 0;
 	b->ply = 0;
-	bestScore = alphaBeta(-INF, INF, 1, b, s, DO_NULL, IS_PV, pvLine);
+
+	int score = alphaBeta(-INF, INF, 1, b, s, DO_NULL, NO_PV, pvLine);
 
 	pvMoves = getPVLine(b, 1);
 	bestMove = b->pvArray[0];
 
-	printUCI(s, 1, selDepth, bestScore);
+	printUCI(s, 1, selDepth, score);
 	printPV(pvLine->line, pvLine->len);
 	fflush(stdout);
 	cout << endl;
@@ -720,10 +728,10 @@ int search(Board* b, search_t* s) {
 		selDepth = 0;
 		b->ply = 0;
 
-		bestScore = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV, pvLine);
-		//bestScore = search_aspiration(b, s, currentDepth, bestScore);
-		Assert(bestScore < INF);
-		Assert(bestScore > -INF);
+		score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, NO_PV, pvLine);
+		//score = search_aspiration(b, s, currentDepth, score);
+
+		Assert(abs(score) < INF);
 
 		// forced stop, break and use pv line of previous iteration
 		if (s->stopped) break;
@@ -731,7 +739,7 @@ int search(Board* b, search_t* s) {
 		pvMoves = getPVLine(b, currentDepth);
 		bestMove = b->pvArray[0];
 
-		printUCI(s, currentDepth, selDepth, bestScore);
+		printUCI(s, currentDepth, selDepth, score);
 		printPV(pvLine->line, pvLine->len);
 		fflush(stdout);
 
@@ -743,8 +751,7 @@ int search(Board* b, search_t* s) {
 	log("Left search and cout bestmove found");
 	cout << "\n";
 	cout << "bestmove " << getStringMove(bestMove) << "\n";
-
-	return bestScore;
+	return score;
 }
 
 void printSearchInfo(Board* b, search_t* s) {

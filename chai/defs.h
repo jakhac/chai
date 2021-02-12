@@ -14,9 +14,8 @@ using namespace std;
 
 #define VERSION "v2.3"
 
-
 //#define TESTING
-#define ASSERT
+//#define ASSERT
 
 /**
  * Write logging information into log.txt file.

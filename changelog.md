@@ -85,7 +85,7 @@
 
 - Elo
 - Eval
-  - [ ] detect endgames (knight, bishop endgame, light/dark squared bishop)
+  - [x] detect endgames (knight, bishop endgame, light/dark squared bishop)
 - AlphaBeta
   - [x] Null Move Pruning
   - [x] IID if no hash move
@@ -93,6 +93,7 @@
   - [ ] Clean up utils, attacks, helper bitboards
   - [ ] Error handler for invalid FEN
   - [x] UCI Mate in X option
+  - [x] Low time regulations in `uciParseGo()`
 
 # Todo
 

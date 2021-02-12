@@ -313,6 +313,11 @@ int eval(Board* b) {
 
 	prefetchPawnEntry(b);
 
+	// Check insufficient material to detect drawn positions
+	if (countBits(b->occupied) <= 5 && insufficientMaterial(b)) {
+		return 0;
+	}
+
 	// calculate reused bitboards once and share between functions
 	b->attackedSquares[WHITE] = b->attackerSet(WHITE);
 	b->attackedSquares[BLACK] = b->attackerSet(BLACK);
@@ -364,5 +369,46 @@ int contemptFactor(Board* b) {
 			break;
 		default: Assert(0) break;
 	}
+}
+
+bool insufficientMaterial(Board* b) {
+
+	// King vs King
+	if (countBits(b->occupied) == 2) {
+		return true;
+	}
+
+	// 3 pieces on board:
+	if (countBits(b->occupied) == 3) {
+		// King Knight vs King
+		if (b->pieces[KNIGHT]) {
+			return true;
+		}
+
+		// King Bishop vs King
+		if (b->pieces[BISHOP]) {
+			return true;
+		}
+	}
+
+	if (countBits(b->occupied) == 4) {
+		// King Bishop vs King Bishop (all same color)
+		if (countBits(b->pieces[BISHOP] & WHITE_SQUARES) == 2 &&
+			countBits(b->pieces[BISHOP] & BLACK_SQUARES) == 2) {
+			return true;
+		}
+
+	}
+
+	if (countBits(b->occupied) == 5) {
+		// King Bishop Bishop vs King Bishop (all same color)
+		if (countBits(b->pieces[BISHOP] & WHITE_SQUARES) == 3 &&
+			countBits(b->pieces[BISHOP] & BLACK_SQUARES) == 3) {
+			return true;
+		}
+
+	}
+
+	return false;
 }
 
