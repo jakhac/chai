@@ -6,9 +6,10 @@
 
 **Change log from v2.0 (30.12.20)**
 
-<!-- - Results
-  - chai - TSCP181 &rarr; *241-189-70* (+35)
-  - chai - Bubble &rarr; *108-337-55* (-173) -->
+- Results
+
+  - chai - TSCP181 &rarr; _241-189-70_ (+35)
+  - chai - Bubble &rarr; _108-337-55_ (-173)
 
 - AlphaBeta
   - Standard alpha-beta pruning
@@ -34,9 +35,10 @@
 
 **Change log from v2.1 (03.01.21)**
 
-<!-- - Results
+- Results
+
   - chai - TSCP181 &rarr; 252-187-61 (+49)
-  - chai - Bubble &rarr; 92-342-66 ( -191) -->
+  - chai - Bubble &rarr; 92-342-66 (-191)
 
 - Move Ordering:
   - Promoting captures are sorted higher than normal captures
