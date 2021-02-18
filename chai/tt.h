@@ -13,7 +13,7 @@
 /**
  * Size of the transposition table.
  */
-const int ttSize = 0x100000 * 128;
+const int ttSize = 0x100000 * 256;
 
 /**
  * Size of the pawn table.
@@ -69,13 +69,22 @@ void storeTT(Board* b, int move, int score, int flag, int depth);
 move_t probePV(Board* b);
 
 /**
- * Checks if score from ttable is mate score. Update score according with ply to make engine visible to
- * checkmate paths.
+ * Checks if score from ttable is mate score. Update score according with ply to
+ * make engine visible to checkmate paths.
  *
  * @param  b	 The current board.
  * @param  score The score to check.
  */
-void ttableScoreChecker(Board* b, move_t* score);
+void hashToSearch(Board* b, move_t* score);
+
+/**
+ * Checks if score from search is mate score. Update score according with ply to
+ * make engine visible to checkmate paths.
+ *
+ * @param  b	 The current board.
+ * @param  score The score to check.
+ */
+void searchToHash(Board* b, move_t* score);
 
 /**
  * Probe the transposition table. If a hash entry with equal zobristKey is found, all

@@ -81,3 +81,45 @@ At Sat Jan 16 00:52:06 2021
 At Sat Jan 16 00:52:48 2021
  Error in:F:\SmartGit-Repositories\chai\chai\search.cpp at line 516
 
+At Sat Jan 30 23:23:22 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\search.cpp at line 197
+
+At Sat Jan 30 23:25:22 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\search.cpp at line 203
+
+At Mon Feb  1 00:55:56 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\tt.cpp at line 29
+
+At Mon Feb  1 00:56:26 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\tt.cpp at line 29
+
+At Mon Feb  1 01:10:32 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\tt.cpp at line 84
+
+At Sat Feb  6 22:11:36 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\board.cpp at line 568
+
+At Sat Feb  6 22:37:26 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\tt.cpp at line 135
+
+At Sun Feb  7 00:55:53 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\moveOrdering.cpp at line 148
+
+At Sun Feb  7 00:57:00 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\moveOrdering.cpp at line 153
+
+At Sun Feb  7 00:57:36 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\moveOrdering.cpp at line 154
+
+At Sun Feb  7 00:58:10 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\moveOrdering.cpp at line 156
+
+At Sun Feb  7 01:01:01 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\moveOrdering.cpp at line 156
+
+At Sun Feb  7 01:03:01 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\moveOrdering.cpp at line 157
+
+At Sun Feb  7 01:03:53 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\moveOrdering.cpp at line 158
+

@@ -34,9 +34,7 @@ void storeTT(Board* b, int move, int score, int flag, int depth) {
 	Assert(score >= -INF && score <= INF);
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
-	// TODO tableScorechecker opposite
-	if (score > ISMATE) score += b->ply;
-	else if (score < -ISMATE) score -= b->ply;
+	searchToHash(b, &score);
 
 	// Stats
 	b->tt->stored++;
@@ -87,10 +85,6 @@ bool probeTT(Board* b, move_t* move, int* hashScore, int* hashFlag, int* hashDep
 			Assert((bucket + i)->move != NO_MOVE);
 			Assert((bucket + i)->score >= -INF && (bucket + i)->score <= INF);
 
-			if (!((bucket + i)->score >= -INF && (bucket + i)->score <= INF)) {
-				log("\n\nMatching zob key entry has scored " + (bucket + i)->score);
-			}
-
 			*hashDepth = (bucket + i)->depth;
 			*move = (bucket + i)->move;
 			*hashFlag = (bucket + i)->flag;
@@ -98,9 +92,6 @@ bool probeTT(Board* b, move_t* move, int* hashScore, int* hashFlag, int* hashDep
 
 			return true;
 		}
-
-		// Jump to next entry in bucket
-		//bucket++;
 	}
 
 	return false;
@@ -113,11 +104,19 @@ void prefetchTTEntry(Board* b) {
 	_m_prefetch(&b->tt->table[entry]);
 }
 
-void ttableScoreChecker(Board* b, move_t* score) {
+void hashToSearch(Board* b, move_t* score) {
 	if (*score > ISMATE) {
 		*score -= b->ply;
 	} else if (*score < -ISMATE) {
 		*score += b->ply;
+	}
+}
+
+void searchToHash(Board* b, move_t* score) {
+	if (*score > ISMATE) {
+		score += b->ply;
+	} else if (*score < -ISMATE) {
+		score -= b->ply;
 	}
 }
 
@@ -248,9 +247,9 @@ void printTTStatus(Board* b) {
 
 				if (bucket->move == NO_MOVE) {
 
-					cout << "Depth " << (int)bucket->depth << endl;
-					cout << "Score " << (int)bucket->score << endl;
-					cout << "Flag " << (int)bucket->flag << endl;
+					//cout << "Depth " << (int)bucket->depth << endl;
+					//cout << "Score " << (int)bucket->score << endl;
+					//cout << "Flag " << (int)bucket->flag << endl;
 
 				}
 

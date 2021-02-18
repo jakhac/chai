@@ -272,6 +272,34 @@ bool isLegal(Board* b, const move_t move) {
 	return false;
 }
 
+bitboard_t hasSafePawnPush(Board* b, int side) {
+	bitboard_t safeSquares = 0ULL;
+	bitboard_t pawns = b->getPieces(PAWN, side);
+	bitboard_t oppPawns = b->getPieces(PAWN, side ^ 1);
+
+	int sq;
+	bitboard_t defendedSquares = 0ULL;
+	while (oppPawns) {
+		sq = popBit(&oppPawns);
+		defendedSquares |= pawnAtkMask[side ^ 1][sq];
+	}
+
+	// Look for: single pawn pushes, non blocked and not defended by opposite pawns
+	if (side == WHITE) {
+		safeSquares |= (pawns << 8) & ~b->occupied & ~defendedSquares;
+
+		pawns &= RANK_2_HEX;
+		safeSquares |= (((pawns << 8) & ~b->occupied) << 8) & ~defendedSquares;
+	} else {
+		safeSquares |= (pawns >> 8) & ~b->occupied & ~defendedSquares;
+
+		pawns &= RANK_7_HEX;
+		safeSquares |= (((pawns >> 8) & ~b->occupied) >> 8) & ~defendedSquares;
+	}
+
+	return safeSquares;
+}
+
 void whiteSinglePawnPush(Board* board, moveList_t* moveList) {
 	int sq;
 	bitboard_t pushedPawns = (board->getPieces(PAWN, WHITE) << 8) & ~board->occupied;

@@ -4,7 +4,8 @@
 int main() {
 	init(&board);
 	board.parseFen(STARTING_FEN);
-	//board.parseFen("1Q6/P1P4k/8/8/8/8/3K3p/3q2q1 w - - 6 8");
+	//board.parseFen(BUG_FEN);
+	//board.parseFen("rnb1Qb1r/pq4pp/4B3/B2n4/3P2kP/4P3/1P3PP1/R3K2R b KQ - 0 1");
 	board.printBoard();
 	log("\nStartup");
 
@@ -85,13 +86,6 @@ void play(Board* b, Perft* p, search_t* s) {
 		}
 
 		if (m == "perft") {
-			//cout << "Skip or enter FEN: ";
-			//getline(cin, m);
-			//if (m.size() > 0) {
-			//	b->parseFen(m);
-			//	b->printBoard();
-			//}
-
 			cout << "Perft this position to depth ";
 			getline(cin, m);
 			if (stoi(m) >= 1 && stoi(m) <= 15) {
@@ -102,8 +96,9 @@ void play(Board* b, Perft* p, search_t* s) {
 
 		if (m == "fen") {
 			cout << "Enter FEN: ";
+			cin.ignore();
 			getline(cin, m);
-			cout << "Parsed FEN into board." << endl;
+			cout << "Parsed FEN \"" << m << "\" into board." << endl;
 			b->parseFen(m);
 			b->printBoard();
 			continue;

@@ -13,6 +13,18 @@
 int eval(Board* b);
 
 /**
+ * Lazy evaluation function calculates static board evaulation. Considers piece values and
+ * PST sum.
+ *
+ * @param  b Current board to evaluate.
+ *
+ * @returns Score in centipawns.
+ */
+int lazyEval(Board* b);
+
+bool insufficientMaterial(Board* b);
+
+/**
  * Evaulate all pieces of given side regarding piece square tables. Opening and endgame tables
  * are interpolated based on halfMoves and material.
  *

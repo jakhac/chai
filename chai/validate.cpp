@@ -11,3 +11,11 @@ int pieceValid(int piece) {
 bool fileValid(int file) {
 	return (file >= 0) && (file <= 7);
 }
+
+bool pseudoValidBitMove(move_t move) {
+	if (move != NULL_MOVE && move != NO_MOVE) {
+		return true;
+	}
+
+	return false;
+}

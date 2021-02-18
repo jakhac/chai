@@ -1,9 +1,5 @@
 #pragma once
 
-#include "defs.h"
-#include "mask.h"
-#include "board.h"
-
 #include <iostream>
 #include <bitset>
 #include "io.h"
@@ -12,6 +8,10 @@
 #include <ctime>   // localtime
 #include <iomanip> // put_time
 #include "windows.h"
+
+#include "defs.h"
+#include "mask.h"
+#include "board.h"
 
 using namespace std;
 
@@ -53,6 +53,24 @@ void printMoveStatus(int move);
 void printBinary(bitboard_t x);
 
 /**
+ * Print UCI info to console.
+ *
+ * @param s A search info struct.
+ * @param d currentDepth.
+ * @param selDpt selDepth.
+ * @param score bestScore returned by search.
+ */
+void printUCI(search_t* s, int d, int selDpt, int score);
+
+/**
+ * Print pv line to console. Either hash-line form ttable probing or pvline struct.
+ *
+ * @param b The current board.
+ * @param pvLine pvLine struct filled by alphaBeta search.
+ */
+void printPV(move_t* moves, int len);
+
+/**
  * Write logging information into log.txt file.
  *
  * @param  logMsg Message to write into log file.
@@ -60,7 +78,7 @@ void printBinary(bitboard_t x);
 void log(string logMsg);
 
 /**
- * Gets the time
+ * Gets the time.
  *
  * @returns The time.
  */

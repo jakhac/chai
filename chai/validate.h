@@ -1,5 +1,7 @@
 #pragma once
 
+#include "defs.h"
+
 /**
  * Checks if index is square on board.
  *
@@ -26,3 +28,12 @@ int pieceValid(int piece);
  * @returns True if it succeeds, false if it fails.
  */
 bool fileValid(int file);
+
+/**
+ * Checks if move is peudo-legal
+ *
+ * @param move The move to check
+ *
+ * @returns True if move is neither NULL_MOVE, NO_MOVE and from and to square are legal.
+ */
+bool pseudoValidBitMove(move_t move);
