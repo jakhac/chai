@@ -26,7 +26,7 @@ void clearTT(ttable_t* tt) {
 void storeTT(Board* b, int move, int score, int flag, int depth) {
 	int index = (b->zobristKey % b->tt->buckets) * BUCKETS;
 
-	//Assert(move != NO_MOVE);
+	Assert(move != NO_MOVE);
 	Assert(index >= 0 && index <= (b->tt->buckets * BUCKETS) - 1);
 	Assert(depth >= 1 && depth <= MAX_DEPTH);
 	Assert(flag >= TT_ALPHA && flag <= TT_SCORE);
@@ -81,12 +81,8 @@ bool probeTT(Board* b, move_t* move, int* hashScore, int* hashFlag, int* hashDep
 
 		if (bucket->zobKey == b->zobristKey) {
 			Assert((bucket + i)->flag >= TT_ALPHA && (bucket + i)->flag <= TT_SCORE);
-			//Assert((bucket + i)->move != NO_MOVE);
+			Assert((bucket + i)->move != NO_MOVE);
 			Assert((bucket + i)->score >= -INF && (bucket + i)->score <= INF);
-
-			if (!((bucket + i)->score >= -INF && (bucket + i)->score <= INF)) {
-				log("\n\nMatching zob key entry has scored " + (bucket + i)->score);
-			}
 
 			*hashDepth = (bucket + i)->depth;
 			*move = (bucket + i)->move;
@@ -132,7 +128,7 @@ move_t probePV(Board* b) {
 
 	for (int i = 0; i < BUCKETS; i++) {
 		if (bucket->zobKey == b->zobristKey) {
-			//Assert(bucket->move != NO_MOVE);
+			Assert(bucket->move != NO_MOVE);
 			return bucket->move;
 		}
 
@@ -250,9 +246,9 @@ void printTTStatus(Board* b) {
 
 				if (bucket->move == NO_MOVE) {
 
-					cout << "Depth " << (int)bucket->depth << endl;
-					cout << "Score " << (int)bucket->score << endl;
-					cout << "Flag " << (int)bucket->flag << endl;
+					//cout << "Depth " << (int)bucket->depth << endl;
+					//cout << "Score " << (int)bucket->score << endl;
+					//cout << "Flag " << (int)bucket->flag << endl;
 
 				}
 

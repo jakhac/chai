@@ -10,8 +10,14 @@
 #include "eval.h"
 #include "moveOrdering.h"
 
-#define DO_NULL 1
-#define NO_NULL 0
+#define DO_NULL true
+#define NO_NULL false
+
+#define IS_PV true
+#define NO_PV false
+
+#define R_2 2
+#define R_3 3
 
 /**
  * Maximum ply reached in alphaBeta and quiescence search.

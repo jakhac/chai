@@ -4,6 +4,7 @@
 int main() {
 	init(&board);
 	board.parseFen(STARTING_FEN);
+	//board.parseFen(BUG_FEN);
 	//board.parseFen("rnb1Qb1r/pq4pp/4B3/B2n4/3P2kP/4P3/1P3PP1/R3K2R b KQ - 0 1");
 	board.printBoard();
 	log("\nStartup");
@@ -95,8 +96,9 @@ void play(Board* b, Perft* p, search_t* s) {
 
 		if (m == "fen") {
 			cout << "Enter FEN: ";
+			cin.ignore();
 			getline(cin, m);
-			cout << "Parsed FEN into board." << endl;
+			cout << "Parsed FEN \"" << m << "\" into board." << endl;
 			b->parseFen(m);
 			b->printBoard();
 			continue;

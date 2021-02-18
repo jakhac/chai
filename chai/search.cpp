@@ -102,50 +102,25 @@ bool zugzwang(Board* b) {
 }
 
 int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine) {
-	Assert(s);
-	Assert(b);
-	Assert(pvLine);
-	Assert(b->tt);
 	Assert(b->checkBoard());
 	Assert(beta > alpha);
 
-	pv_line_t localPV[1]{};
-	localPV->len = 0;
-
-	// Drop into quiescence if maximum depth is reached.
-	if (depth <= 0 || b->ply > MAX_DEPTH) {
-		pvLine->len = 0;
-		return quiescence(alpha, beta, 0, b, s, localPV);
-	}
-
-	// check for time and depth
-	if ((s->nodes & 2047) == 0) {
-		checkSearchInfo(s);
-	}
-
-	s->nodes++;
-
-	// variables relevant for mulitple pruning techniques
-	bool inCheck = b->isCheck(b->side);
-	bool mateThreat = false;
-	int staticEval = eval(b);
-	int searchExt = 0;
-
-	int alphaIID = alpha;
-	int betaIID = beta;
-
-	// no evaluation if side is in check, no performance loss due to lower branching factor
-	if (inCheck) {
-		searchExt++;
-	}
-
-	// In case of draw (3-fold-rep or 50-move rule) decide wether current position is winnable and
-	// either score draw as 0 or penalize draw
+	/*
+	* In case of draw (3-fold-rep or 50-move rule) decide wether current position is winnable and
+	* either score draw as 0 or penalize draw.
+	*/
 	if ((isRepetition(b) || b->fiftyMove >= 100) && b->ply > 0) {
 		return contemptFactor(b);
 	}
 
 	prefetchTTEntry(b);
+
+	// mate distance pruning
+	/*if (b->ply != 0) {
+		if (alpha < -ISMATE) alpha = -ISMATE;
+		if (beta > ISMATE - 1) beta = ISMATE - 1;
+		if (alpha >= beta) return alpha;
+	}*/
 
 	/*
 	* Transposition Table Probing:
@@ -187,12 +162,35 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		}
 	}
 
-	// mate distance pruning
-	/*if (b->ply != 0) {
-		if (alpha < -ISMATE) alpha = -ISMATE;
-		if (beta > ISMATE - 1) beta = ISMATE - 1;
-		if (alpha >= beta) return alpha;
-	}*/
+	pv_line_t localPV[1]{};
+	localPV->len = 0;
+
+	// Drop into quiescence if maximum depth is reached.
+	if (depth <= 0 || b->ply > MAX_DEPTH) {
+		pvLine->len = 0;
+		return quiescence(alpha, beta, 0, b, s, localPV);
+	}
+
+	// check for time and depth
+	if ((s->nodes & 2047) == 0) {
+		checkSearchInfo(s);
+	}
+
+	s->nodes++;
+
+	// variables relevant for mulitple pruning techniques
+	bool inCheck = b->isCheck(b->side);
+	bool mateThreat = false;
+	//int staticEval = eval(b);
+	int searchExt = 0;
+
+	int alphaIID = alpha;
+	int betaIID = beta;
+
+	// no evaluation if side is in check, no performance loss due to lower branching factor
+	if (inCheck) {
+		searchExt++;
+	}
 
 	// static null move pruning (reverse futility pruning) // never drop into qs from null search
 	/*if (!pvNode && depth <= 3 && !inCheck && abs(beta - 1) > -ISMATE) {
@@ -212,20 +210,6 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		}
 	}*/
 
-	// adaptive null move pruning
-	/*bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
-	if (depth > 2 && nullOk && !endGame && !inCheck && !pvNode && staticEval >= beta) {
-		b->pushNull();
-
-		int r = (depth > 6) ? 3 : 2;
-
-		int score = -alphaBeta(-beta, -beta + 1, depth - 1 - r, b, s, NO_NULL, NO_PV, localPV);
-		b->pop();
-
-		if (s->stopped) return 0;
-		if (score >= beta) return beta;
-	}*/
-
 	/*
 	* Null Move Pruning:
 	* Give opposite side a free move and use nullScore as lower bound (alpha).
@@ -233,30 +217,39 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	* Restrict NMP to reasonable positions (zugzwang, depth, checks).
 	* TODO: skip pv nodes?
 	*/
-	bool doNull = nullOk
-		&& !inCheck
-		&& depth > 3
-		&& staticEval > beta
-		&& abs(beta) < abs(ISMATE)
-		&& !zugzwang(b);
+	//bool doNull = nullOk
+	//	&& !inCheck
+	//	&& depth > 2
+	//	&& lazyEval(b) > beta
+	//	&& abs(beta) < abs(ISMATE)
+	//	&& countBits(b->occupied) > 7
+	//	&& !zugzwang(b);
 
-	if (doNull) {
-		int nullDepth = depth - 1 - R_NULL;
+	bool skipNull = !nullOk
+		|| inCheck
+		|| depth <= 2
+		|| !(lazyEval(b) > beta)
+		|| abs(beta) >= abs(ISMATE)
+		|| countBits(b->occupied) <= 6
+		|| zugzwang(b);
+
+	if (!skipNull) {
+		int reduction = (depth > 6) ? R_3 : R_2;
 		int nullScore = 0;
 
 		b->pushNull();
-		nullScore = -alphaBeta(-beta, -beta + 1, nullDepth, b, s, NO_NULL, NO_PV, localPV);
+		nullScore = -alphaBeta(-beta, -beta + 1, depth - 1 - reduction, b, s, NO_NULL, NO_PV, localPV);
 		b->pop();
 
 		if (s->stopped) {
 			return 0;
 		}
 
-		// Even after giving opponent free move, we win.
+		// Even after giving opponent free move, position is winning..
 		if (nullScore >= beta && abs(nullScore) < ISMATE) {
 			//Beta cutoff->store in ttable
-			if (nullDepth > 0) {
-				storeTT(b, NO_MOVE, nullScore, TT_ALPHA, nullDepth);
+			if (depth - 1 - reduction > 0) {
+				storeTT(b, NULL_MOVE, nullScore, TT_ALPHA, depth - 1 - reduction);
 			}
 			return nullScore;
 		}
@@ -295,15 +288,19 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 	// set futility pruning flag
 	bool fPrune = false;
-	int fmargin[4] = { 0, 200, 325, 550 };
-	/*if (depth <= 3 && !inCheck && !pvNode && abs(alpha) < 9000) {
-		if (static_eval + fmargin[depth] <= alpha) {
+	/*int fmargin[4] = { 0, 200, 325, 550 };
+	if (depth <= 3 && !inCheck && !pvNode && abs(alpha) < 9000) {
+		if (staticEval + fmargin[depth] <= alpha) {
 			fPrune = true;
 		}
 	}*/
 
-	// main move loop
+	/**
+	 * This position could not be refuted yet. Therefore, moves are generated
+	 * and searching continues.
+	 */
 	for (int i = 0; i < moveList->cnt; i++) {
+
 		getNextMove(b, moveList, i);
 		currentMove = moveList->moves[i];
 		Assert(currentMove != NO_MOVE);
@@ -312,7 +309,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 		// Futility pruning: skip moves that are futile and have no chance of raising alpha
 		// if at least one legal move was made before
-		/*if (legalMoves && fPrune && !(CAPTURED(currentMove) && !(MCHECKPROM & currentMove) &&
+		/*if (legalMoves && fPrune && !(capPiece(currentMove) && !(MCHECK_PROM & currentMove) &&
 			!b->squareAttackedBy(b->getKingSquare(b->side ^ 1), b->side))) {
 			b->pop();
 			continue;
@@ -328,7 +325,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, IS_PV, localPV);
 		} else {
 			// late move reduction
-			if (i > 3 && !CAPTURED(currentMove) && !inCheck && depth >= 3 && !pvNode) {
+			if (i > 3 && !capPiece(currentMove) && !inCheck && depth >= 3 && !pvNode) {
 				reduction = (i > 6) ? 2 : 3;
 			}
 
@@ -766,6 +763,6 @@ void printSearchInfo(Board* b, search_t* s) {
 	cout << "PTcollisions: \t\t\t" << setprecision(4) << fixed << b->pawnTable->collided << endl;
 	cout << endl;
 
-	printTTStatus(b);
+	//printTTStatus(b);
 	cout << endl;
 }

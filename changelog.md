@@ -64,7 +64,7 @@
   - Chai_2.2_1bucket - Chai_v2.1.2 &rarr; 62%: 252-132-116 (+85)
   - Chai_2.2_1bucket - Tscp181 &rarr; 58%: 253-176-71 (+56)
   - chai (1bucket) - TSCP181 &rarr; 52%: 232-212-56 (+14)
-  - chai (1bucket) - Bubble &rarr; 29%: 115-321-64 (-156)
+  - chai (1bucket) - Bubble &rarr; 29%: 115-321-64 (-1561)
 - [x] Compiler Optimizations **DISABLED WHILE TESTING v2.2**
 - Quiescence
   - [x] Forced checkmates are detected in quiescence
@@ -84,16 +84,39 @@
 **Changes in v2.3**
 
 - Elo
+  - ttSize=128MB
+    - chai - Chai_2.2_1bucket &rarr; 51%: 201-191-108 (+7)
+    - chai - TSCP181 &rarr; 56%: 244-186-70 (+42)
+    - chai - Bubble &rarr; 27%: 102-330-68 (-173)
+  - ttSize=200MB and reordered
+    - chai - Chai_2.2_1bucket &rarr; 49%: 196-184-120 (-7)
+    - chai - Bubble &rarr; 27%: 90-320-90 (-173)
+  - NMP (At least 7 pieces, d>2), ttSize=256MB, no-logs, `lazyEval()`
+    - chai - Chai_2.2_1bucket &rarr; 52%: 202-185-113 (+14)
+    - chai - Bubble &rarr; 34%: 123-286-91 (-115)
 - Eval
   - [x] detect endgames (knight, bishop endgame, light/dark squared bishop)
+  - [x] `lazyEval()` used in NMP and `contemptFactor()`
+- Transposition Table
+  - [x] ttSize=256MB
 - AlphaBeta
-  - [x] Null Move Pruning
+  - [x] Adaptive Null Move Pruning
   - [x] IID if no hash move
+  - [x] Reorder: Check for FiftyMove, Mate Distance Pruning (disabled) and TTable before dropping in quiescence
 - Project
-  - [ ] Clean up utils, attacks, helper bitboards
-  - [ ] Error handler for invalid FEN
   - [x] UCI Mate in X option
   - [x] Low time regulations in `uciParseGo()`
+  - [x] Removed `log()` in UCI calls
+
+**Changes in v2.4**
+
+- Elo
+- Eval
+- AlphaBeta
+  - [ ] mate distance pruning
+  - [ ] Use `lazyEval()` in NMP restrictions
+- Project
+  - [ ] update typedefs, src, structs, key_t
 
 # Todo
 
@@ -111,34 +134,38 @@
 
 - Project
 
-  - clean up utils, attacks, helper bitboards
-  - detect endgames (knight, bishop endgame, light/dark squared bishop)
-  - try hash move before generating moves?
+  - ~~detect endgames (knight, bishop endgame, light/dark squared bishop)~~
   - update typedefs, src, structs, key_t, ...
+  - Disable log (and use one fd for programm)
+  - Timeman.c: dynamic time management
   - Error handler for invalid FEN
+  - clean up utils, attacks, helper bitboards
 
 - Alpha Beta
 
-  - adaptive null move pruning -> drop into qui
   - mate distance pruning
-  - delta pruning
   - futility pruning / reverse null move pruning
   - razoring
   - ~~tt probing~~
   - aspiration windows
-  - iid if no hash move
+  - ~~iid if no hash move~~
   - pvs
   - late move reductions
   - see reductions
+  - try hash move before generating moves
+  - ~~reorder fiftyMove, mate distance pruning before quiescence~~
   - ~~killer moves~~
   - ~~matekiller moves~~
   - ~~counter moves~~
   - ~~history heuristic~~
+
+  - nmp drops into qui ?
   - null killer move?
 
 - Quiesence
 
   - ~~see pruning~~
+  - delta pruning
   - hash table with negative depth in qsearch
   - ~~Add checkers in first quiesence ply~~
 
@@ -147,12 +174,14 @@
   - ~~prefetch table instruction~~
   - ~~buckets~~
   - ~~rework table probing (in search)~~
+  - probe in qsearch
   - hash table with negative depth in qsearch
 
 - Evaluation
 
   - lazy eval for qsearch or pruning areas
   - more heuristics
+  - interpolation with pieces instead of moves
   - traps, pins
   - (texel) tuning
 

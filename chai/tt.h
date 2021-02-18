@@ -13,7 +13,7 @@
 /**
  * Size of the transposition table.
  */
-const int ttSize = 0x100000 * 128;
+const int ttSize = 0x100000 * 256;
 
 /**
  * Size of the pawn table.

@@ -12,7 +12,7 @@ using namespace std;
 #include "move.h"
 #include "types.h"
 
-#define VERSION "v2.3"
+#define VERSION "v2.3.2"
 
 //#define TESTING
 //#define ASSERT
@@ -78,13 +78,6 @@ const int NULL_MOVE = 129; // B1-B1 used as nullmove (impossible move, never gen
 const int INF = 30000;
 const int MATE = 29000;
 const int ISMATE = MATE - MAX_DEPTH;
-const int R_NULL = 2;
-
-
-const bool IS_PV = true;
-const bool NO_PV = false;
-const bool DO_NULL = true;
-const bool NO_NULL = false;
 
 const bitboard_t RANK_1_HEX = 0xFF;
 const bitboard_t RANK_2_HEX = 0xFF00;

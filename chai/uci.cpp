@@ -3,8 +3,6 @@
 void uciMode(Board* b, search_t* s) {
 	string cmd;
 
-	log("UCI MODE");
-
 	cout << "id name chai Chess Engine\n";
 	cout << "id author chai\n";
 	cout << "uciok\n";
@@ -12,7 +10,6 @@ void uciMode(Board* b, search_t* s) {
 	while (true) {
 		getline(cin, cmd);
 		fflush(stdout);
-		log("cmd received: " + cmd);
 
 		if (!cmd.compare("quit")) {
 			cout << "quit game\n";
@@ -32,13 +29,11 @@ void uciMode(Board* b, search_t* s) {
 
 		fflush(stdout);
 	}
-	log("Error: left uci loop");
 	cout << "Error: left uci loop" << endl;
 }
 
 void uciParsePosition(Board* b, string cmd) {
 	// parse fen
-	log("Parse position: " + cmd);
 	if (!cmd.substr(0, 12).compare("position fen")) {
 		string fen = cmd.substr(13, cmd.size());
 		b->parseFen(fen);
@@ -58,7 +53,6 @@ void uciParsePosition(Board* b, string cmd) {
 			parsedMove = b->parseMove(move);
 			b->push(parsedMove);
 		}
-		log("Pushed all moves from cmd");
 
 		// reset ply to 0 (incremented for each push call) for search
 		b->ply = 0;
@@ -67,9 +61,7 @@ void uciParsePosition(Board* b, string cmd) {
 		b->parseFen(STARTING_FEN);
 	} else {
 		cout << "uciParsePosition failed\n";
-		log("uciParsePosition failed");
 	}
-	log("Parsing complete");
 
 	b->printBoard();
 
@@ -80,8 +72,6 @@ void uciParseGo(Board* b, search_t* s, string cmd) {
 	int depth = -1, movesLeft = 30, moveTime = -1;
 	int time = -1, inc = 0;
 	s->timeSet = false;
-
-	log("Parse go: " + cmd);
 
 	istringstream iss(cmd);
 	vector<string> tokens{ istream_iterator<string>{iss},
@@ -113,9 +103,6 @@ void uciParseGo(Board* b, search_t* s, string cmd) {
 		s->timeSet = true;
 
 		// catch low time
-		//if (time <= 3000) {
-			//cout << "Set time to 750ms due to low move time. (was " << time << ")" << endl;
-			//s->stopTime = s->startTime + 750;
 		if (time <= 2000) {
 			s->stopTime = s->startTime + 300;
 		} else {
@@ -136,7 +123,6 @@ void uciParseGo(Board* b, search_t* s, string cmd) {
 	cout << "time " << time << ", start " << s->startTime << ", stop " << s->stopTime
 		<< ", depth " << s->depth << ", timeset " << s->timeSet << endl;
 
-	log("Parse go finished, start search now");
 	search(b, s);
 }
 

@@ -357,8 +357,30 @@ int eval(Board* b) {
 	return eval * sign;
 }
 
+int lazyEval(Board* b) {
+	int eval = 0;
+	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
+
+	b->pawnTable->probed++;
+	int pawnEval = 0;
+	bool foundHash = probePawnEntry(b, &pawnEval);
+	if (foundHash) {
+		b->pawnTable->hit++;
+		eval += pawnEval;
+	}
+
+	eval += evalPST(b, WHITE, &interpolFactor) - evalPST(b, BLACK, &interpolFactor);
+	eval += materialScore(b, WHITE) - materialScore(b, BLACK);
+
+	Assert(abs(eval) < ISMATE);
+
+	// white scores positive and black scores negative
+	int sign = (b->side == WHITE) ? 1 : -1;
+	return eval * sign;
+}
+
 int contemptFactor(Board* b) {
-	int contempt = eval(b); // TODO lazy eval
+	int contempt = lazyEval(b);
 
 	switch (b->side) {
 		case WHITE:
