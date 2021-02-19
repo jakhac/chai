@@ -20,7 +20,7 @@ int eval(Board* b);
  *
  * @returns Score in centipawns.
  */
-int lazyEval(Board* b);
+int lazyEvalulation(Board* b);
 
 bool insufficientMaterial(Board* b);
 
@@ -223,7 +223,7 @@ const int passedBonus[2][8] = {
 	{ 0, 5, 10, 20, 35, 60, 100, 200 }
 };
 
-const int kingZoneTropism[7] = { 0, 40, 60, 77, 87, 92, 95 };
+const int kingZoneTropism[9] = { 0, 40, 60, 77, 87, 92, 95, 97, 100 };
 
 const int openFileBonusR = 10;
 const int openFileBonusQ = 5;

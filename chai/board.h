@@ -57,12 +57,12 @@ public:
 	/**
 	 * Unique zobrist key.
 	 */
-	bitboard_t zobristKey = 0x0;
+	key_t zobristKey = 0x0;
 
 	/**
 	 * Unique zobrist pawn key.
 	 */
-	bitboard_t zobristPawnKey = 0x0;
+	key_t zobristPawnKey = 0x0;
 
 	/**
 	 * Store pieces for given color.
@@ -87,7 +87,7 @@ public:
 	/**
 	 * Castle keys. // TODO use fixed keys
 	 */
-	bitboard_t castleKeys[16];
+	key_t castleKeys[16];
 
 	/**
 	 * Stack stores pushed moves as Undo objects.
@@ -183,14 +183,14 @@ public:
 	 *
 	 * @returns Unique 64-bit number.
 	 */
-	bitboard_t generateZobristKey();
+	key_t generateZobristKey();
 
 	/**
 	 * Generate a unique pawn key for current board.
 	 *
 	 * @returns Unique 64-bit number.
 	 */
-	bitboard_t generatePawnHashKey();
+	key_t generatePawnHashKey();
 
 	/**
 	 * Get pieces of given index and color.

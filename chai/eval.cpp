@@ -212,8 +212,11 @@ int kingSafety(Board* b, int side, float* t) {
 	result = (int)interpolate(result * 2, result, *t);
 
 	int attackedKingSquares = countBits(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
+	Assert(attackedKingSquares <= 8);
+
 	result -= kingZoneTropism[attackedKingSquares];
 
+	Assert(abs(result) < ISMATE);
 	return result;
 }
 
@@ -302,7 +305,7 @@ int evaluatePawns(Board* b, float* t) {
 
 	// reward defended pawns
 
-	Assert(score < ISMATE);
+	Assert(abs(score) < ISMATE);
 	return score;
 }
 
@@ -343,11 +346,26 @@ int eval(Board* b) {
 	eval += surroundingSquares + 2 * centerSquares + 3 * kingSquares;
 
 	eval += pawnEval;
+	Assert(abs(eval) < ISMATE);
+
 	eval += evalPST(b, WHITE, &interpolFactor) - evalPST(b, BLACK, &interpolFactor);
+	Assert(abs(eval) < ISMATE);
+
 	eval += materialScore(b, WHITE) - materialScore(b, BLACK);
+	Assert(abs(eval) < ISMATE);
+
 	eval += openFilesRQ(b, WHITE) - openFilesRQ(b, BLACK);
+	Assert(abs(eval) < ISMATE);
+
 	eval += bishopPair(b, WHITE) - bishopPair(b, BLACK);
+	Assert(abs(eval) < ISMATE);
+
 	eval += kingSafety(b, WHITE, &interpolFactor) - kingSafety(b, BLACK, &interpolFactor);
+	if (!(abs(eval) < ISMATE)) {
+		cout << "Eval kingSafety: " << kingSafety(b, WHITE, &interpolFactor) << " " << kingSafety(b, BLACK, &interpolFactor) << endl;
+	}
+	Assert(abs(eval) < ISMATE);
+
 	eval += mobility(b, WHITE, &interpolFactor) - mobility(b, BLACK, &interpolFactor);
 
 	Assert(abs(eval) < ISMATE);
@@ -357,7 +375,7 @@ int eval(Board* b) {
 	return eval * sign;
 }
 
-int lazyEval(Board* b) {
+int lazyEvalulation(Board* b) {
 	int eval = 0;
 	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
@@ -380,7 +398,7 @@ int lazyEval(Board* b) {
 }
 
 int contemptFactor(Board* b) {
-	int contempt = lazyEval(b);
+	int contempt = lazyEvalulation(b);
 
 	switch (b->side) {
 		case WHITE:

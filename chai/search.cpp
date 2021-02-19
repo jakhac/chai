@@ -115,12 +115,22 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 	prefetchTTEntry(b);
 
-	// mate distance pruning
-	/*if (b->ply != 0) {
-		if (alpha < -ISMATE) alpha = -ISMATE;
-		if (beta > ISMATE - 1) beta = ISMATE - 1;
-		if (alpha >= beta) return alpha;
-	}*/
+	/**
+	 * Mate Distance Pruning:
+	 * If alpha or beta are already mate scores, bounds can be adjusted to prune irrelevant subtrees.
+	 * Mates are delivered faster, but does not speed are search.
+	 */
+	if (beta > (MATE - depth - 1)) {
+		beta = MATE - depth - 1;
+	}
+
+	if (alpha < (-MATE + depth)) {
+		alpha = -MATE + depth;
+	}
+
+	if (alpha >= beta) {
+		return alpha;
+	}
 
 	/*
 	* Transposition Table Probing:
@@ -129,7 +139,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	*/
 	int hashScore = -INF;
 	int hashDepth = -1;
-	int hashFlag = -1;
+	uint8_t hashFlag = TT_NONE;
 	move_t hashMove = NO_MOVE;
 
 	bool hashStored = probeTT(b, &hashMove, &hashScore, &hashFlag, &hashDepth);
@@ -181,6 +191,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	// variables relevant for mulitple pruning techniques
 	bool inCheck = b->isCheck(b->side);
 	bool mateThreat = false;
+	int lazyEval = lazyEvalulation(b);
 	//int staticEval = eval(b);
 	int searchExt = 0;
 
@@ -217,23 +228,15 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	* Restrict NMP to reasonable positions (zugzwang, depth, checks).
 	* TODO: skip pv nodes?
 	*/
-	//bool doNull = nullOk
-	//	&& !inCheck
-	//	&& depth > 2
-	//	&& lazyEval(b) > beta
-	//	&& abs(beta) < abs(ISMATE)
-	//	&& countBits(b->occupied) > 7
-	//	&& !zugzwang(b);
+	bool doNull = nullOk
+		&& !inCheck
+		&& depth > 2
+		&& lazyEval > beta
+		&& abs(beta) < abs(ISMATE)
+		&& countBits(b->occupied) > 7
+		&& !zugzwang(b);
 
-	bool skipNull = !nullOk
-		|| inCheck
-		|| depth <= 2
-		|| !(lazyEval(b) > beta)
-		|| abs(beta) >= abs(ISMATE)
-		|| countBits(b->occupied) <= 6
-		|| zugzwang(b);
-
-	if (!skipNull) {
+	if (doNull) {
 		int reduction = (depth > 6) ? R_3 : R_2;
 		int nullScore = 0;
 
@@ -257,7 +260,6 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		// Mate threat detection
 		if (abs(beta) > ISMATE && depth <= 5) {
 			mateThreat = true;
-			searchExt++;
 		}
 	}
 
@@ -285,42 +287,64 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	int oldAlpha = alpha;
 	int bestScore = -INF;
 	int score = -INF;
+	bool skipSearch = false;
 
-	// set futility pruning flag
-	bool fPrune = false;
-	/*int fmargin[4] = { 0, 200, 325, 550 };
-	if (depth <= 3 && !inCheck && !pvNode && abs(alpha) < 9000) {
-		if (staticEval + fmargin[depth] <= alpha) {
-			fPrune = true;
-		}
-	}*/
+
+	// Futility Pruning flag determines if f-pruning can be applied to this position.
+	// TODO: skip pv nodes
+	bool doFutility = !inCheck
+		&& depth <= 2
+		&& searchExt == 0
+		&& !mateThreat
+		&& abs(alpha) > 9000;
 
 	/**
 	 * This position could not be refuted yet. Therefore, moves are generated
 	 * and searching continues.
 	 */
 	for (int i = 0; i < moveList->cnt; i++) {
-
 		getNextMove(b, moveList, i);
 		currentMove = moveList->moves[i];
 		Assert(currentMove != NO_MOVE);
 
 		if (!b->push(currentMove)) continue;
 
-		// Futility pruning: skip moves that are futile and have no chance of raising alpha
-		// if at least one legal move was made before
-		/*if (legalMoves && fPrune && !(capPiece(currentMove) && !(MCHECK_PROM & currentMove) &&
-			!b->squareAttackedBy(b->getKingSquare(b->side ^ 1), b->side))) {
-			b->pop();
-			continue;
-		}*/
+		/**
+		 * Futility Pruning:
+		 * Try to prove that moves in a poor position cannot improve alpha and are futile. Either skip
+		 * moves at frontier nodes or do a search to see if position does fails high.
+		 */
+		if (doFutility
+			&& legalMoves > 0
+			//&& !(MCHECK_PROM_OR_CAP & currentMove)
+			) {
+
+			if (depth == 1 && lazyEval + FUTILITY_MARGIN_1 < alpha) {
+				//score = -alphaBeta(-(alpha + 1), -alpha, depth - 1, b, s, DO_NULL, NO_PV, localPV);
+				b->pop();
+				continue;
+			}
+
+			if (depth == 2 && lazyEval + FUTILITY_MARGIN_2 < alpha) {
+				score = -alphaBeta(-(alpha + 1), -alpha, depth - 1, b, s, DO_NULL, NO_PV, localPV);
+			}
+
+			// Research, if futile move turns out to improve alpha.
+			if (score > alpha && score < beta) {
+				score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
+			}
+
+			skipSearch = true;
+		}
 
 		legalMoves++;
-		int reduction = 0;
 
-		score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
+		if (!skipSearch) {
+			score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
+		}
 
-		/*if (legalMoves == 1) {
+		/*int reduction = 0;
+		if (legalMoves == 1) {
 			// always do full search on first move
 			score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, IS_PV, localPV);
 		} else {

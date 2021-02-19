@@ -113,12 +113,14 @@
 **Changes in v2.4**
 
 - Elo
-- Eval
 - AlphaBeta
-  - [ ] mate distance pruning
-  - [ ] Use `lazyEval()` in NMP restrictions
+  - [x] Mate Distance Pruning
+  - [ ] Futility Pruning
+  - [ ] Razoring
 - Project
-  - [ ] update typedefs, src, structs, key_t
+  - [x] Update typedefs: `key_t`
+- Bugfixes:
+  - [x] kingSafetyArray not enough values (8 atk sq possible)
 
 # Todo
 
@@ -137,7 +139,7 @@
 - Project
 
   - ~~detect endgames (knight, bishop endgame, light/dark squared bishop)~~
-  - update typedefs, src, structs, key_t, ...
+  - ~~update typedefs, src, structs, key_t, ...~~
   - Disable log (and use one fd for programm)
   - Timeman.c: dynamic time management
   - Error handler for invalid FEN
@@ -145,7 +147,7 @@
 
 - Alpha Beta
 
-  - mate distance pruning
+  - ~~mate distance pruning~~
   - futility pruning / reverse null move pruning
   - razoring
   - ~~tt probing~~
@@ -181,7 +183,6 @@
 
 - Evaluation
 
-  - lazy eval for qsearch or pruning areas
   - more heuristics
   - interpolation with pieces instead of moves
   - traps, pins

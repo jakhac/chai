@@ -19,6 +19,10 @@
 #define R_2 2
 #define R_3 3
 
+#define FUTILITY_MARGIN_1 300
+#define FUTILITY_MARGIN_2 500
+#define FUTILITY_MARGIN_3 900
+
 /**
  * Maximum ply reached in alphaBeta and quiescence search.
  */

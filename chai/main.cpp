@@ -3,9 +3,9 @@
 
 int main() {
 	init(&board);
-	board.parseFen(STARTING_FEN);
+	//board.parseFen(STARTING_FEN);
 	//board.parseFen(BUG_FEN);
-	//board.parseFen("rnb1Qb1r/pq4pp/4B3/B2n4/3P2kP/4P3/1P3PP1/R3K2R b KQ - 0 1");
+	board.parseFen("r7/3bb1kp/q4p1N/1pnPp1np/2p4Q/2P5/1PB3P1/2B2RK1 w - - 1 0");
 	board.printBoard();
 	log("\nStartup");
 

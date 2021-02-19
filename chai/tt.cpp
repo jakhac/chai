@@ -23,7 +23,7 @@ void clearTT(ttable_t* tt) {
 	memset(tt->table, 0, (tt->buckets * sizeof(ttable_entry_t) * BUCKETS));
 }
 
-void storeTT(Board* b, int move, int score, int flag, int depth) {
+void storeTT(Board* b, move_t move, int score, int flag, int depth) {
 	int index = (b->zobristKey % b->tt->buckets) * BUCKETS;
 
 	Assert(move != NO_MOVE);
@@ -69,7 +69,7 @@ void storeTT(Board* b, int move, int score, int flag, int depth) {
 	(bucket + offset)->depth = depth;
 }
 
-bool probeTT(Board* b, move_t* move, int* hashScore, int* hashFlag, int* hashDepth) {
+bool probeTT(Board* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* hashDepth) {
 	int index = (b->zobristKey % b->tt->buckets) * BUCKETS;
 
 	Assert(index >= 0 && index <= (b->tt->buckets * BUCKETS) - 1);
@@ -103,7 +103,7 @@ void prefetchTTEntry(Board* b) {
 	_m_prefetch(&b->tt->table[entry]);
 }
 
-void hashToSearch(Board* b, move_t* score) {
+void hashToSearch(Board* b, int* score) {
 	if (*score > ISMATE) {
 		*score -= b->ply;
 	} else if (*score < -ISMATE) {
@@ -111,7 +111,7 @@ void hashToSearch(Board* b, move_t* score) {
 	}
 }
 
-void searchToHash(Board* b, move_t* score) {
+void searchToHash(Board* b, int* score) {
 	if (*score > ISMATE) {
 		score += b->ply;
 	} else if (*score < -ISMATE) {

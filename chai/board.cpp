@@ -106,8 +106,8 @@ void Board::initHashKeys() {
 	}
 }
 
-bitboard_t Board::generateZobristKey() {
-	bitboard_t finalZobristKey = 0;
+key_t Board::generateZobristKey() {
+	key_t finalZobristKey = 0;
 	bitboard_t occ = occupied;
 	int square = 0;
 	int piece = 0;
@@ -134,9 +134,9 @@ bitboard_t Board::generateZobristKey() {
 	return finalZobristKey;
 }
 
-bitboard_t Board::generatePawnHashKey() {
+key_t Board::generatePawnHashKey() {
 	int sq;
-	bitboard_t finalPawnKey = 0x0;
+	key_t finalPawnKey = 0x0;
 	bitboard_t whitePawns = getPieces(PAWN, WHITE);
 	bitboard_t blackPawns = getPieces(PAWN, BLACK);
 
@@ -425,10 +425,10 @@ bool Board::push(int move) {
 	int promoted = promPiece(move);
 	int movingPiece = pieceAt(from_square);
 
-	// trivial case, kings cannot be captured
-	if (capPiece(move) == K || capPiece(move) == k) {
-		return false;
-	}
+	//// trivial case, kings cannot be captured
+	//if (capPiece(move) == K || capPiece(move) == k) {
+	//	return false;
+	//}
 
 	undo_t undo_s[1]{};
 	undo_s->enPas = enPas;
