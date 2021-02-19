@@ -119,6 +119,7 @@
   - [ ] Razoring
 - Project
   - [x] Update typedefs: `key_t`
+  - [ ] Rename executables according to version
 - Bugfixes:
   - [x] kingSafetyArray not enough values (8 atk sq possible)
 
