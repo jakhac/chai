@@ -314,6 +314,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		 * Try to prove that moves in a poor position cannot improve alpha and are futile. Either skip
 		 * moves at frontier nodes or do a search to see if position does fails high.
 		 */
+		skipSearch = false;
 		if (doFutility
 			&& legalMoves > 0
 			//&& !(MCHECK_PROM_OR_CAP & currentMove)
@@ -727,8 +728,6 @@ int search(Board* b, search_t* s) {
 	int bestMove = 0;
 	int pvMoves = 0;
 	int pvNum = 0;
-
-	log("Entered search");
 
 	clearForSearch(b, s);
 

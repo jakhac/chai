@@ -12,10 +12,10 @@ using namespace std;
 #include "move.h"
 #include "types.h"
 
-#define VERSION "v2.4"
+//#define VERSION "$(PROJ_VERSION)"
 
 //#define TESTING
-#define ASSERT
+//#define ASSERT
 
 /**
  * Write logging information into log.txt file.

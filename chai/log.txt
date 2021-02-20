@@ -54,3 +54,19 @@ Startup
 Startup
 01:35:50	s
 01:35:50	Entered search
+01:02:46	parseFen() finished.
+01:02:46	
+Startup.
+01:02:47	s
+01:02:47	Entered search
+01:03:21	parseFen() finished.
+01:03:21	
+Startup.
+01:03:23	s
+01:03:23	Entered search
+01:10:45	parseFen() finished.
+01:26:52	parseFen() finished.
+01:27:34	parseFen() finished.
+01:27:34	s
+01:27:57	parseFen() finished.
+01:27:59	s

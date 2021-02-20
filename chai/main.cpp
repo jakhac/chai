@@ -3,11 +3,10 @@
 
 int main() {
 	init(&board);
-	//board.parseFen(STARTING_FEN);
+	board.parseFen(STARTING_FEN);
 	//board.parseFen(BUG_FEN);
-	board.parseFen("r7/3bb1kp/q4p1N/1pnPp1np/2p4Q/2P5/1PB3P1/2B2RK1 w - - 1 0");
+	//board.parseFen("r7/3bb1kp/q4p1N/1pnPp1np/2p4Q/2P5/1PB3P1/2B2RK1 w - - 1 0");
 	board.printBoard();
-	log("\nStartup");
 
 	//moveList_t moveList[1];
 	//generateMoves(&board, moveList, board.isCheck(board.side));
