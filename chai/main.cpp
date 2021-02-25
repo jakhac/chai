@@ -5,7 +5,7 @@ int main() {
 	init(&board);
 	board.parseFen(STARTING_FEN);
 	//board.parseFen(BUG_FEN);
-	//board.parseFen("r7/3bb1kp/q4p1N/1pnPp1np/2p4Q/2P5/1PB3P1/2B2RK1 w - - 1 0");
+	//board.parseFen("3r1k2/1q1P4/5b2/p3p2p/1p6/1B3P2/PPPQ4/1K1R4 w - - 1 0");
 	board.printBoard();
 
 	//moveList_t moveList[1];
@@ -26,8 +26,6 @@ void play(Board* b, Perft* p, search_t* s) {
 	while (true) {
 		cout << "\n##################\n\n";
 		getline(cin, m);
-
-		log(m);
 
 		// POP MOVE FROM BOARD
 		if (m == "pop") {

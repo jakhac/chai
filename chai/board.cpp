@@ -61,6 +61,8 @@ void Board::reset() {
 	zobristPawnKey = 0x0;
 	castlePermission = 0;
 
+	// TODO reset mate killers
+
 	for (int i = 0; i < 64; i++) {
 		for (int j = 0; j < 64; j++) {
 			for (int k = 0; k < 2; k++) {
@@ -213,8 +215,13 @@ void Board::printBoard() {
 	cout << endl;
 }
 
-void Board::parseFen(string fen) {
+bool Board::parseFen(string fen) {
 	reset();
+
+	// Shortest fen (2 kings, no rights) "8/8/8/k7/K7/8/8/8 w - - 0 1"
+	if (fen.length() < 27) {
+		return true;
+	}
 
 	int file = FILE_A, rank = RANK_8;
 	int index = 0, square = 0, piece = 0, count = 0;
@@ -256,7 +263,7 @@ void Board::parseFen(string fen) {
 
 			default:
 				cout << "FEN error: " << fen[index] << endl;
-				return;
+				return true;
 		}
 
 		for (int i = 0; i < count; i++) {
@@ -320,7 +327,8 @@ void Board::parseFen(string fen) {
 	zobristKey = generateZobristKey();
 
 	checkBoard();
-	log("parseFen() finished.");
+
+	return false;
 }
 
 string Board::getFEN() {

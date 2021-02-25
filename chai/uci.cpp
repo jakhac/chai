@@ -63,7 +63,7 @@ void uciParsePosition(Board* b, string cmd) {
 		cout << "uciParsePosition failed\n";
 	}
 
-	b->printBoard();
+	//b->printBoard();
 
 	fflush(stdout);
 }

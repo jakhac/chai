@@ -15,6 +15,7 @@
 #include "uci.h"
 #include "search.h"
 
+#include "wrapper.h"
 
 static Board board;
 

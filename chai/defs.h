@@ -12,10 +12,8 @@ using namespace std;
 #include "move.h"
 #include "types.h"
 
-//#define VERSION "$(PROJ_VERSION)"
-
-//#define TESTING
-//#define ASSERT
+#define TESTING
+#define ASSERT
 
 /**
  * Write logging information into log.txt file.

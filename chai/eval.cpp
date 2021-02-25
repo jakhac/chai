@@ -398,6 +398,10 @@ int lazyEvalulation(Board* b) {
 }
 
 int contemptFactor(Board* b) {
+	if (insufficientMaterial(b)) {
+		return 0;
+	}
+
 	int contempt = lazyEvalulation(b);
 
 	switch (b->side) {

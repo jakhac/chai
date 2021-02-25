@@ -19,9 +19,12 @@
 #define R_2 2
 #define R_3 3
 
-#define FUTILITY_MARGIN_1 300
-#define FUTILITY_MARGIN_2 500
-#define FUTILITY_MARGIN_3 900
+//#define FUTILITY_MARGIN_1 300
+//#define FUTILITY_MARGIN_2 500
+//#define FUTILITY_MARGIN_3 900
+
+#define F1_MARGIN 125
+#define F2_MARGIN 550
 
 /**
  * Maximum ply reached in alphaBeta and quiescence search.
@@ -79,7 +82,7 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
  * @param  b Reference to current board.
  * @param  s Search info containing search parameters.
  *
- * @returns An int.
+ * @returns move_t Best move found search.
  */
 int search(Board* b, search_t* s);
 

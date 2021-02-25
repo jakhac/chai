@@ -11,6 +11,10 @@
 #include "board.h"
 #include "search.h"
 
+#ifndef VERSION
+#define VERSION "v3.x"
+#endif // !VERSION
+
 /**
  * Enters UCI mode. Described in http://wbec-ridderkerk.nl/html/UCIProtocol.html
  *

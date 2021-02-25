@@ -253,8 +253,9 @@ public:
 	 * generated zobristKey.
 	 *
 	 * @param  fen FEN Notation string of board.
+	 * @returns bool true if error occured or FEN invalid, else false.
 	 */
-	void parseFen(string fen);
+	bool parseFen(string fen);
 
 	string getFEN();
 
@@ -365,7 +366,7 @@ public:
 	bool isCheck(int side);
 
 	/**
-	 * Deprecated.
+	 * Deprecated, do not use.
 	 */
 	bool leavesKingInCheck(Board* b, const move_t move, const bool inCheck);
 

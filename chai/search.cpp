@@ -120,23 +120,21 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	 * If alpha or beta are already mate scores, bounds can be adjusted to prune irrelevant subtrees.
 	 * Mates are delivered faster, but does not speed are search.
 	 */
-	if (beta > (MATE - depth - 1)) {
-		beta = MATE - depth - 1;
-	}
+	 //if (beta > (MATE - depth - 1)) {
+	 //	beta = MATE - depth - 1;
+	 //}
+	 //if (alpha < (-MATE + depth)) {
+	 //	alpha = -MATE + depth;
+	 //}
+	 //if (alpha >= beta) {
+	 //	return alpha;
+	 //}
 
-	if (alpha < (-MATE + depth)) {
-		alpha = -MATE + depth;
-	}
-
-	if (alpha >= beta) {
-		return alpha;
-	}
-
-	/*
-	* Transposition Table Probing:
-	* Probe the TTable and look for useful information from previous transpositions. Return hashScore if hash table
-	* stored a better score at same or greater depth. Do not return if close to 50-move draw.
-	*/
+	 /*
+	 * Transposition Table Probing:
+	 * Probe the TTable and look for useful information from previous transpositions. Return hashScore if hash table
+	 * stored a better score at same or greater depth. Do not return if close to 50-move draw.
+	 */
 	int hashScore = -INF;
 	int hashDepth = -1;
 	uint8_t hashFlag = TT_NONE;
@@ -202,24 +200,6 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	if (inCheck) {
 		searchExt++;
 	}
-
-	// static null move pruning (reverse futility pruning) // never drop into qs from null search
-	/*if (!pvNode && depth <= 3 && !inCheck && abs(beta - 1) > -ISMATE) {
-		switch (depth) {
-			case 1:
-				if (static_eval - pieceScores[BISHOP] > beta) return beta;
-				break;
-			case 2:
-				if (static_eval - pieceScores[ROOK] > beta) return beta;
-				break;
-			case 3:
-				if (static_eval - pieceScores[QUEEN] > beta) depth--;
-				break;
-			default:
-				ASSERT(false);
-				break;
-		}
-	}*/
 
 	/*
 	* Null Move Pruning:
@@ -293,10 +273,11 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	// Futility Pruning flag determines if f-pruning can be applied to this position.
 	// TODO: skip pv nodes
 	bool doFutility = !inCheck
-		&& depth <= 2
+		&& depth == 1
 		&& searchExt == 0
 		&& !mateThreat
-		&& abs(alpha) > 9000;
+		&& abs(alpha) <= 10000
+		&& abs(beta) <= 10000;
 
 	/**
 	 * This position could not be refuted yet. Therefore, moves are generated
@@ -310,63 +291,45 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		if (!b->push(currentMove)) continue;
 
 		/**
-		 * Futility Pruning:
+		 * Futility Pruning: TODO doc
 		 * Try to prove that moves in a poor position cannot improve alpha and are futile. Either skip
 		 * moves at frontier nodes or do a search to see if position does fails high.
+		 *
+		 * Restrictions:
+		 * - No promotions or ep moves
+		 * - At least one legal move found
+		 * - Move does not give check (!)
 		 */
 		skipSearch = false;
 		if (doFutility
-			&& legalMoves > 0
-			//&& !(MCHECK_PROM_OR_CAP & currentMove)
+			&& legalMoves
+			&& !(MCHECK_PROM & currentMove)
+			&& !(MCHECK_EP & currentMove)
+			&& !b->isCheck(b->side)
 			) {
 
-			if (depth == 1 && lazyEval + FUTILITY_MARGIN_1 < alpha) {
-				//score = -alphaBeta(-(alpha + 1), -alpha, depth - 1, b, s, DO_NULL, NO_PV, localPV);
+			int capPieceValue = (MCHECK_CAP & currentMove) ? pieceScores[capPiece(currentMove)] : 200;
+
+			if (depth == 1 && lazyEval + capPieceValue + F1_MARGIN < alpha) {
+				s->futileCnt++;
 				b->pop();
 				continue;
-			}
-
-			if (depth == 2 && lazyEval + FUTILITY_MARGIN_2 < alpha) {
-				score = -alphaBeta(-(alpha + 1), -alpha, depth - 1, b, s, DO_NULL, NO_PV, localPV);
+				//score = -alphaBeta(-(alpha + 1), -alpha, depth, b, s, DO_NULL, NO_PV, localPV);
 			}
 
 			// Research, if futile move turns out to improve alpha.
-			if (score > alpha && score < beta) {
-				score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
-			}
+			//if (!(score > alpha && score < beta)) {
+				//b->pop();
+				//continue;
+			//}
 
-			skipSearch = true;
+			//s->futileFH++;
+			//score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, NO_PV, localPV);
 		}
 
 		legalMoves++;
 
-		if (!skipSearch) {
-			score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
-		}
-
-		/*int reduction = 0;
-		if (legalMoves == 1) {
-			// always do full search on first move
-			score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, IS_PV, localPV);
-		} else {
-			// late move reduction
-			if (i > 3 && !capPiece(currentMove) && !inCheck && depth >= 3 && !pvNode) {
-				reduction = (i > 6) ? 2 : 3;
-			}
-
-			// pvs
-			score = -alphaBeta(-alpha - 1, -alpha, depth - 1 - reduction, b, s, DO_NULL, NO_PV, localPV);
-
-			// check if pvs scores higher than alpha, if so do re-search
-			if (score > alpha && score < beta) {
-				score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, IS_PV, localPV);
-
-				// not necessary? already done ab pruning part
-				//if (score > alpha) {
-				//	alpha = score;
-				//}
-			}
-		}*/
+		score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
 
 		b->pop();
 
@@ -459,7 +422,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			Assert(abs(beta) <= INF);
 
 			// Store position with bestMove and beta flag
-			//storeTT(b, currentMove, beta, TT_BETA, depth);
+			storeTT(b, currentMove, beta, TT_BETA, depth);
 			return beta;
 		}
 
@@ -606,13 +569,6 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 		Assert(depth == 0 || inCheck || (currentMove & MCHECK_PROM_OR_CAP || currentMove & MFLAG_EP));
 		Assert(currentMove != NO_MOVE);
 
-		// Delta cutoff: prune moves that cannot improve over alpha
-		//bool endGame = countBits(b->occupied) <= 7 || b->countMajorPieces(b->side) <= 6;
-		/*if (standPat + pieceScores[capPiece(currentMove)] + 200 < alpha &&
-			!endGame && !(MCHECK_PROM & currentMove)) {
-			continue;
-		}*/
-
 		/*
 		* If SEE score is negative, this is a losing capture. Since there is little to no chance that
 		* this move raises alpha, it can be pruned.
@@ -673,6 +629,8 @@ void clearForSearch(Board* b, search_t* s) {
 	b->tt->collided = 0;
 	b->tt->stored = 0;
 
+	// TODO reset mate killer
+
 	// reset killers
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < MAX_DEPTH; j++) {
@@ -707,6 +665,8 @@ void clearForSearch(Board* b, search_t* s) {
 	s->qnodes = 0;
 	s->fhf = 0;
 	s->fh = 0;
+	s->futileFH = 0;
+	s->futileCnt = 0;
 }
 
 int search_aspiration(Board* b, search_t* s, int depth, int bestScore) {
@@ -765,10 +725,16 @@ int search(Board* b, search_t* s) {
 
 		//printSearchInfo(b, s);
 
+		//if (abs(score) > ISMATE) {
+		//	cout << "\n";
+		//	cout << "bestmove " << getStringMove(bestMove) << "\n";
+		//	return score;
+		//}
+
 		cout << endl;
+		//cout << "Futile moves pruned: \t\t" << s->futileCnt << endl;
 	}
 
-	log("Left search and cout bestmove found");
 	cout << "\n";
 	cout << "bestmove " << getStringMove(bestMove) << "\n";
 	return score;
@@ -784,6 +750,8 @@ void printSearchInfo(Board* b, search_t* s) {
 	cout << "PTable hit percentage: \t\t" << setprecision(4) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
 	cout << "PTable memory used: \t\t" << setprecision(4) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
 	cout << "PTcollisions: \t\t\t" << setprecision(4) << fixed << b->pawnTable->collided << endl;
+	//cout << "Futile failed/tried: \t\t\t" << s->futileFH << "/" << s->futileCnt << endl;
+	cout << "Futile moves pruned: \t\t" << s->futileCnt << endl;
 	cout << endl;
 
 	//printTTStatus(b);

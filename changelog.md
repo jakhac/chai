@@ -113,13 +113,24 @@
 **Changes in v2.4**
 
 - Elo
+  - F-Pruning at frontier nodes
+    - chai_v2.4 - chai_v2.3.2 &rarr; 54%: 203-162-135 (+28)
+    - chai - TSCP181 &rarr; 64%: 284-143-73 (+100)
+    - chai - Bubble &rarr; 30%: 115-311-74 (-147)
+  - F-Pruning at frontier nodes and enabled beta-cutoff store
+    - chai_v2.4 - chai_v2.3.2 &rarr; 65%: 268-116-116 (+108)
+    - chai - Bubble &rarr; 41%: 163-258-79 (-63)
 - AlphaBeta
-  - [x] Mate Distance Pruning
   - [ ] Futility Pruning
+  - [ ] Mate Distance Pruning
   - [ ] Razoring
+  - [x] ContemptFactor considers drawn piece-combinations
 - Project
   - [x] Update typedefs: `key_t`
-  - [ ] Rename executables according to version
+  - [x] Rename executables according to version
+  - [ ] Refactor `Board`-Class
+    - Convert `Board` to `struct board_t`
+    - Reduce `board_t` size and share huge arrays between instances if possible
 - Bugfixes:
   - [x] kingSafetyArray not enough values (8 atk sq possible)
 

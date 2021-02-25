@@ -113,6 +113,9 @@ struct search_t {
 	bool quit = false;
 	bool stopped = false;
 
+	int futileCnt;
+	int futileFH;
+
 	// fail high heuristics
 	float fh;
 	float fhf;
