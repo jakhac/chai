@@ -10,7 +10,7 @@ void initMVV_LVA() {
 	}
 }
 
-bitboard_t getLeastValuablePiece(Board* b, bitboard_t atkDef, int side, int attackerPiece) {
+bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkDef, int side, int attackerPiece) {
 	atkDef &= b->color[side];
 	if (!atkDef) {
 		return 0ULL;
@@ -28,16 +28,16 @@ bitboard_t getLeastValuablePiece(Board* b, bitboard_t atkDef, int side, int atta
 	return 0ULL;
 }
 
-int see(Board* b, const int move) {
+int see(board_t* b, const int move) {
 	Assert(pieceValid(capPiece(move)) || MCHECK_EP & move);
 
 	int to = toSq(move);
-	int attackerPiece = b->pieceAt(fromSq(move));
+	int attackerPiece = pieceAt(b, fromSq(move));
 	int gain[32]{}, d = 0, side = b->side;
 
 	bitboard_t occ = b->occupied;
 	bitboard_t mayXray = b->pieces[PAWN] | b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
-	bitboard_t attadef = b->squareAtkDef(to);
+	bitboard_t attadef = squareAtkDef(b, to);
 	bitboard_t from = setMask[fromSq(move)];
 	bitboard_t used = 0ULL, discovered = 0ULL;
 
@@ -55,14 +55,14 @@ int see(Board* b, const int move) {
 
 		if (from & mayXray) {
 			discovered = 0ULL;
-			discovered |= lookUpBishopMoves(to, occ) & (b->getPieces(QUEEN, side) | b->getPieces(BISHOP, side));
-			discovered |= lookUpRookMoves(to, occ) & (b->getPieces(QUEEN, side) | b->getPieces(ROOK, side));
+			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, QUEEN, side) | getPieces(b, BISHOP, side));
+			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, QUEEN, side) | getPieces(b, ROOK, side));
 			attadef |= discovered & ~used;
 		}
 
 		side ^= 1;
 		from = getLeastValuablePiece(b, attadef, side, attackerPiece);
-		attackerPiece = b->pieceAt(bitscanForward(from));
+		attackerPiece = pieceAt(b, bitscanForward(from));
 
 	} while (from && attackerPiece);
 	while (--d) {
@@ -74,16 +74,16 @@ int see(Board* b, const int move) {
 	return gain[0];
 }
 
-int lazySee(Board* b, const int move) {
+int lazySee(board_t* b, const int move) {
 	Assert(pieceValid(capPiece(move)));
 
 	int to = toSq(move);
-	int attackerPiece = b->pieceAt(fromSq(move));
+	int attackerPiece = pieceAt(b, fromSq(move));
 	int gain[32]{}, d = 0, side = b->side;
 
 	bitboard_t occ = b->occupied;
 	bitboard_t mayXray = b->pieces[PAWN] | b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
-	bitboard_t attadef = b->squareAtkDef(to);
+	bitboard_t attadef = squareAtkDef(b, to);
 	bitboard_t from = setMask[fromSq(move)];
 	bitboard_t used = 0ULL, discovered = 0ULL;
 
@@ -108,14 +108,14 @@ int lazySee(Board* b, const int move) {
 
 		if (from & mayXray) {
 			discovered = 0ULL;
-			discovered |= lookUpBishopMoves(to, occ) & (b->getPieces(QUEEN, side) | b->getPieces(BISHOP, side));
-			discovered |= lookUpRookMoves(to, occ) & (b->getPieces(QUEEN, side) | b->getPieces(ROOK, side));
+			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, QUEEN, side) | getPieces(b, BISHOP, side));
+			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, QUEEN, side) | getPieces(b, ROOK, side));
 			attadef |= discovered & ~used;
 		}
 
 		side ^= 1;
 		from = getLeastValuablePiece(b, attadef, side, attackerPiece);
-		attackerPiece = b->pieceAt(bitscanForward(from));
+		attackerPiece = pieceAt(b, bitscanForward(from));
 
 	} while (from && attackerPiece);
 	while (--d) {
@@ -133,7 +133,7 @@ static void updateBestMove(int* scores, int* bestIdx, int curIdx) {
 	}
 }
 
-void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove) {
+void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 	move_t currentMove;
 	int seeScore = 0;
 	int mvvLvaScore = 0;
@@ -168,11 +168,11 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove) {
 
 			if (currentMove & MCHECK_PROM) {
 				// Promoting captures
-				moveList->scores[i] = PROMOTING_CAPTURE + b->pieceAt(fromSq(currentMove));
+				moveList->scores[i] = PROMOTING_CAPTURE + pieceAt(b, fromSq(currentMove));
 			} else {
 				// Plain Captures
 				seeScore = see(b, currentMove);
-				mvvLvaScore = MVV_LVA[capPiece(currentMove)][b->pieceAt(fromSq(currentMove))];
+				mvvLvaScore = MVV_LVA[capPiece(currentMove)][pieceAt(b, fromSq(currentMove))];
 				Assert(mvvLvaScore > 0);
 				Assert(mvvLvaScore < MVV_LVA_UBOUND);
 
@@ -193,14 +193,14 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove) {
 
 		// promotion
 		if (currentMove & MCHECK_PROM) {
-			moveList->scores[i] = PROMOTION + b->pieceAt(fromSq(currentMove));
+			moveList->scores[i] = PROMOTION + pieceAt(b, fromSq(currentMove));
 
 			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
 		// mate killer
-		if (currentMove == b->mateKiller[b->ply]) {
+		if (currentMove == mateKiller[b->ply]) {
 			moveList->scores[i] = MATE_KILLER;
 
 			updateBestMove(moveList->scores, &bestIdx, i);
@@ -208,7 +208,7 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove) {
 		}
 
 		// first killer
-		if (currentMove == b->killer[0][b->ply]) {
+		if (currentMove == killer[0][b->ply]) {
 			Assert(!(currentMove & MCHECK_CAP));
 			moveList->scores[i] = KILLER_SCORE_1;
 
@@ -217,7 +217,7 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove) {
 		}
 
 		// second killer
-		if (currentMove == b->killer[1][b->ply]) {
+		if (currentMove == killer[1][b->ply]) {
 			Assert(!(currentMove & MCHECK_CAP));
 			moveList->scores[i] = KILLER_SCORE_2;
 
@@ -228,7 +228,7 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove) {
 		// counter move
 		if (b->ply > 0) {
 			move_t prevMove = b->undoHistory[b->ply - 1].move;
-			move_t counterMove = b->counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side];
+			move_t counterMove = counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side];
 
 			if (currentMove == counterMove) {
 				moveList->scores[i] = COUNTER_SCORE;
@@ -247,7 +247,7 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove) {
 		}
 
 		// last resort: history heuristic
-		int histScore = b->histHeuristic[b->pieceAt(fromSq(currentMove))][toSq(currentMove)];
+		int histScore = histHeuristic[pieceAt(b, fromSq(currentMove))][toSq(currentMove)];
 		moveList->scores[i] = QUIET_SCORE + (histScore / 250);
 		updateBestMove(moveList->scores, &bestIdx, i);
 	}

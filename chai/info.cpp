@@ -95,7 +95,7 @@ void printBinary(bitboard_t x) {
 	cout << b << endl;
 }
 
-void printSearchInfo(Board* b) {
+void printSearchInfo(board_t* b) {
 	cout << "\n";
 }
 

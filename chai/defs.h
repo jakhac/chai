@@ -7,13 +7,13 @@
 #include <fstream>
 #include <ctime>
 
-using namespace std;
-
 #include "move.h"
 #include "types.h"
 
-#define TESTING
-#define ASSERT
+using namespace std;
+
+//#define TESTING
+//#define ASSERT
 
 /**
  * Write logging information into log.txt file.
@@ -66,9 +66,7 @@ exit(1); \
 #endif // ASSERT
 
 const int NUM_SQUARES = 64;
-const int MAX_GAME_MOVES = 2048;
 const int MAX_POSITION_MOVES = 256;
-const int MAX_DEPTH = 64;
 const int NO_SCORE = 10000000;
 const int NO_MOVE = 0;
 const int NULL_MOVE = 129; // B1-B1 used as nullmove (impossible move, never generated)

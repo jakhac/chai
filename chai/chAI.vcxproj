@@ -179,6 +179,7 @@
     <ClCompile Include="info.cpp" />
     <ClCompile Include="legalMoveGenerator.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mask.cpp" />
     <ClCompile Include="move.cpp" />
     <ClCompile Include="moveGenerator.cpp" />
     <ClCompile Include="moveOrdering.cpp" />

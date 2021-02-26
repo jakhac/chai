@@ -1,6 +1,6 @@
 //#include "legalMoveGenerator.h"
 //
-//void _generateMoves(Board* b, moveList_t* move_s) {
+//void _generateMoves(board_t* b, moveList_t* move_s) {
 //	move_s->attackedSquares = b->attackerSet(b->side ^ 1);
 //
 //	//pawns
@@ -88,8 +88,8 @@
 ///// <summary>
 ///// Calculate possible single push pawn moves for white.
 ///// </summary>
-///// <param name="board">Board</param>
-//void _whiteSinglePawnPush(Board* board, moveList_t* move_s) {
+///// <param name="board">board_t</param>
+//void _whiteSinglePawnPush(board_t* board, moveList_t* move_s) {
 //	int sq, kSq = board->getKingSquare(WHITE);
 //	bitboard_t pinners = board->pinner(kSq, WHITE);
 //	bitboard_t pinned = board->pinned(kSq, WHITE);
@@ -147,8 +147,8 @@
 ///// <summary>
 ///// Calculate possible single push pawn moves for black.
 ///// </summary>
-///// <param name="board">Board</param> 
-//void _blackSinglePawnPush(Board* board, moveList_t* move_s) {
+///// <param name="board">board_t</param> 
+//void _blackSinglePawnPush(board_t* board, moveList_t* move_s) {
 //	int sq, kSq = board->getKingSquare(BLACK);
 //
 //	bitboard_t pinners = board->pinner(kSq, BLACK);
@@ -206,8 +206,8 @@
 ///// <summary>
 ///// Calculate all possible moves with pawnstart for white.
 ///// </summary>
-///// <param name="board">Board</param>
-//void _whiteDoublePawnPush(Board* board, moveList_t* move_s) {
+///// <param name="board">board_t</param>
+//void _whiteDoublePawnPush(board_t* board, moveList_t* move_s) {
 //	int potPinnedSq, sq, kSq = board->getKingSquare(WHITE);
 //	bitboard_t pinners = board->pinner(kSq, WHITE);
 //	bitboard_t pinned = board->pinned(kSq, WHITE);
@@ -238,8 +238,8 @@
 ///// <summary>
 ///// Calculate all possible moves with pawnstart for black.
 ///// </summary>
-///// <param name="board">Board</param>
-//void _blackDoublePawnPush(Board* board, moveList_t* move_s) {
+///// <param name="board">board_t</param>
+//void _blackDoublePawnPush(board_t* board, moveList_t* move_s) {
 //	int sq, kSq = board->getKingSquare(BLACK);
 //
 //	bitboard_t pinners = board->pinner(kSq, BLACK);
@@ -268,8 +268,8 @@
 ///// <summary>
 ///// Generate all possible east attacks for white pawns
 ///// </summary>
-///// <param name="board">Board</param>
-//void _whitePawnCaptures(Board* board, moveList_t* move_s) {
+///// <param name="board">board_t</param>
+//void _whitePawnCaptures(board_t* board, moveList_t* move_s) {
 //	int sq, atk_sq, kSq = board->getKingSquare(WHITE);
 //
 //	bitboard_t atks;
@@ -356,8 +356,8 @@
 ///// <summary>
 ///// Generate all possible east attacks for white pawns.
 ///// </summary>
-///// <param name="board">Board</param>
-//void _blackPawnCaptures(Board* board, moveList_t* move_s) {
+///// <param name="board">board_t</param>
+//void _blackPawnCaptures(board_t* board, moveList_t* move_s) {
 //	int sq, atk_sq, kSq = board->getKingSquare(BLACK);
 //
 //	bitboard_t atks;
@@ -439,7 +439,7 @@
 //	}
 //}
 //
-//void _addKnightMoves(Board* b, moveList_t* move_s) {
+//void _addKnightMoves(board_t* b, moveList_t* move_s) {
 //	int sq, atk_sq;
 //
 //	// LEGAL ADD leave pinned knights out of move gen, since the cant block / capture
@@ -456,7 +456,7 @@
 //	}
 //}
 //
-//void _addKnightCaptures(Board* b, moveList_t* move_s) {
+//void _addKnightCaptures(board_t* b, moveList_t* move_s) {
 //	int sq, atk_sq;
 //
 //	// LEGAL ADD leave pinned knights out of move gen, since the cant block / capture
@@ -473,7 +473,7 @@
 //	}
 //}
 //
-//void _addKingMoves(Board* b, moveList_t* move_s) {
+//void _addKingMoves(board_t* b, moveList_t* move_s) {
 //	int sq, kSq = b->getKingSquare(b->side);
 //	bitboard_t kingMoves = kingAtkMask[kSq] & ~move_s->attackedSquares & ~b->occupied;
 //
@@ -508,7 +508,7 @@
 //	}
 //}
 //
-//void _addKingCaptures(Board* b, moveList_t* move_s) {
+//void _addKingCaptures(board_t* b, moveList_t* move_s) {
 //	int atk_sq, kSq = b->getKingSquare(b->side);
 //	bitboard_t whiteKingAttacks = kingAtkMask[kSq] & ~move_s->attackedSquares & b->color[b->side ^ 1];
 //
@@ -518,7 +518,7 @@
 //	}
 //}
 //
-////void _addWhiteKingCaptures(Board board) {
+////void _addWhiteKingCaptures(board_t board) {
 ////	U64 wKing = board.getPieces(KING, WHITE);
 ////	int wSq = popBit(&wKing);
 ////
@@ -537,7 +537,7 @@
 ////	}
 ////}
 ////
-////void _addBlackKingCaptures(Board board) {
+////void _addBlackKingCaptures(board_t board) {
 ////	U64 bKing = board.getPieces(KING, BLACK);
 ////	int bSq = popBit(&bKing);
 ////
@@ -556,7 +556,7 @@
 ////	}
 ////}
 //
-//void _addRookMoves(Board* b, moveList_t* move_s) {
+//void _addRookMoves(board_t* b, moveList_t* move_s) {
 //	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 //	bitboard_t attackSet;
 //	bitboard_t pinned = b->pinned(kSq, b->side);
@@ -587,7 +587,7 @@
 //	}
 //}
 //
-//void _addBishopMoves(Board* b, moveList_t* move_s) {
+//void _addBishopMoves(board_t* b, moveList_t* move_s) {
 //	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 //	bitboard_t pinned = b->pinned(kSq, b->side);
 //
@@ -617,7 +617,7 @@
 //	}
 //}
 //
-//void _addRookCaptures(Board* b, moveList_t* move_s) {
+//void _addRookCaptures(board_t* b, moveList_t* move_s) {
 //	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 //	bitboard_t attackSet;
 //	bitboard_t pinned = b->pinned(kSq, b->side);
@@ -648,7 +648,7 @@
 //	}
 //}
 //
-//void _addBishopCaptures(Board* b, moveList_t* move_s) {
+//void _addBishopCaptures(board_t* b, moveList_t* move_s) {
 //	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 //	bitboard_t attackSet;
 //	bitboard_t pinned = b->pinned(kSq, b->side);
@@ -678,7 +678,7 @@
 //	}
 //}
 //
-//void _addQueenMoves(Board* b, moveList_t* move_s) {
+//void _addQueenMoves(board_t* b, moveList_t* move_s) {
 //	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 //	bitboard_t attackSet;
 //	bitboard_t pinned = b->pinned(kSq, b->side);
@@ -708,7 +708,7 @@
 //	}
 //}
 //
-//void _addQueenCaptures(Board* b, moveList_t* move_s) {
+//void _addQueenCaptures(board_t* b, moveList_t* move_s) {
 //	int sq, atk_sq, kSq = b->getKingSquare(b->side);
 //	bitboard_t attackSet;
 //	bitboard_t pinned = b->pinned(kSq, b->side);

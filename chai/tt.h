@@ -39,7 +39,7 @@ void clearTT(ttable_t* pvTable_s);
  *
  * @param  key The zobrist hash of current board.
  */
-void prefetchTTEntry(Board* b);
+void prefetchTTEntry(board_t* b);
 
 /**
  * Store a transposition entry containing score, score flag, move and depth in in transposition
@@ -52,16 +52,16 @@ void prefetchTTEntry(Board* b);
  * @param  flag  Flag for score type.
  * @param  depth Depth used in search for move and score.
  */
-void storeTT(Board* b, move_t move, int score, int flag, int depth);
+void storeTT(board_t* b, move_t move, int score, int flag, int depth);
 
 /**
  * Probe PV move from ttable.
  *
- * @param  b A Board to process.
+ * @param  b A board_t to process.
  *
  * @returns The hash move if found, else NO_MOVE.
  */
-move_t probePV(Board* b);
+move_t probePV(board_t* b);
 
 /**
  * Checks if score from ttable is mate score. Update score according with ply to
@@ -70,7 +70,7 @@ move_t probePV(Board* b);
  * @param  b	 The current board.
  * @param  score The score to check.
  */
-void hashToSearch(Board* b, int* score);
+void hashToSearch(board_t* b, int* score);
 
 /**
  * Checks if score from search is mate score. Update score according with ply to
@@ -79,7 +79,7 @@ void hashToSearch(Board* b, int* score);
  * @param  b	 The current board.
  * @param  score The score to check.
  */
-void searchToHash(Board* b, int* score);
+void searchToHash(board_t* b, int* score);
 
 /**
  * Probe the transposition table. If a hash entry with equal zobristKey is found, all
@@ -94,7 +94,7 @@ void searchToHash(Board* b, int* score);
  *
  * @returns True if hash entry was found, else false.
  */
-bool probeTT(Board* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* hashDepth);
+bool probeTT(board_t* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* hashDepth);
 
 /**
  * Walk through best move stored in transposition table to collect principal variation line.
@@ -104,7 +104,7 @@ bool probeTT(Board* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* has
  *
  * @returns Length of principal variation found in ttable.
  */
-int getPVLine(Board* b, const int maxDepth);
+int getPVLine(board_t* b, const int maxDepth);
 
 /**
  * Initialize pawn table. Re-allocate memory.
@@ -126,14 +126,14 @@ void clearPawnTable(pawntable_t* pawnTable);
  * @param  b    Current board.
  * @param  eval Score for pawn structure.
  */
-void storePawnEntry(Board* b, const int eval);
+void storePawnEntry(board_t* b, const int eval);
 
 /**
  * Prefetch pawn entry in cache line using assembly instruction.
  *
  * @param  b The current board.
  */
-void prefetchPawnEntry(Board* b);
+void prefetchPawnEntry(board_t* b);
 
 /**
  * Probe pawn table and return score if found.
@@ -143,14 +143,14 @@ void prefetchPawnEntry(Board* b);
  *
  * @returns True if hash was found and score is assigned.
  */
-bool probePawnEntry(Board* b, int* hashScore);
+bool probePawnEntry(board_t* b, int* hashScore);
 
 /**
  * Free memory allocated for ttable and ptable.
  *
  * @param  b The board with both hash tables.
  */
-void destroyTranspositionTables(Board* b);
+void destroyTranspositionTables(board_t* b);
 
 
-void printTTStatus(Board* b);
+void printTTStatus(board_t* b);

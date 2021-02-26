@@ -1,14 +1,14 @@
 #include "moveGenerator.h"
 
-void generateMoves(Board* b, moveList_t* moveList, bool inCheck) {
+void generateMoves(board_t* b, moveList_t* moveList, bool inCheck) {
 	moveList->cnt = 0;
-	moveList->attackedSquares = b->attackerSet(b->side ^ 1);
+	moveList->attackedSquares = attackerSet(b, b->side ^ 1);
 
 	if (inCheck) {
 		generateCheckEvasions(b, moveList);
 		return;
 	}
-	Assert(!b->isCheck(b->side));
+	Assert(!isCheck(b, b->side));
 
 
 	if (b->side == WHITE) {
@@ -39,15 +39,15 @@ void generateMoves(Board* b, moveList_t* moveList, bool inCheck) {
 	addQueenCaptures(b, moveList);
 }
 
-void generateQuiescence(Board* b, moveList_t* moveList, bool inCheck) {
+void generateQuiescence(board_t* b, moveList_t* moveList, bool inCheck) {
 	moveList->cnt = 0;
-	moveList->attackedSquares = b->attackerSet(b->side ^ 1);
+	moveList->attackedSquares = attackerSet(b, b->side ^ 1);
 
 	if (inCheck) {
 		generateCheckEvasions(b, moveList);
 		return;
 	}
-	Assert(!b->isCheck(b->side));
+	Assert(!isCheck(b, b->side));
 
 	if (b->side == WHITE) {
 		whitePawnPushProm(b, moveList);
@@ -65,18 +65,18 @@ void generateQuiescence(Board* b, moveList_t* moveList, bool inCheck) {
 	addKingCaptures(b, moveList);
 }
 
-void generateCheckEvasions(Board* b, moveList_t* moveList) {
-	int kSq = b->getKingSquare(b->side);
+void generateCheckEvasions(board_t* b, moveList_t* moveList) {
+	int kSq = getKingSquare(b, b->side);
 	int blockerSq;
-	bitboard_t attacker = b->squareAttackedBy(kSq, b->side ^ 1);
+	bitboard_t attacker = squareAttackedBy(b, kSq, b->side ^ 1);
 
-	Assert(b->isCheck(b->side));
+	Assert(isCheck(b, b->side));
 	Assert(countBits(attacker) > 0);
 
 	// Single Check: blocks or captures by non-pinned pieces are possible
 	if (countBits(attacker) < 2) {
 		int attackerSq = bitscanForward(attacker);
-		int attackerPiece = b->pieceAt(attackerSq);
+		int attackerPiece = pieceAt(b, attackerSq);
 
 		// If sliding piece: Get attacking line -> check if a pieceType atkMask can block
 		if (pieceRook[attackerPiece] || pieceBishopQueen[attackerPiece]) {
@@ -90,7 +90,7 @@ void generateCheckEvasions(Board* b, moveList_t* moveList) {
 		}
 
 		// Always: squareAttackedBy -> calculate attacks to piece that delivers check
-		bitboard_t defender = b->squareAttackedBy(attackerSq, b->side);
+		bitboard_t defender = squareAttackedBy(b, attackerSq, b->side);
 		bitboard_t promDefends = 0ULL;
 
 		// defenders that promote with capture
@@ -119,17 +119,17 @@ void generateCheckEvasions(Board* b, moveList_t* moveList) {
 		// if pawn is threatening check but can be captured en passant
 		if (b->enPas) {
 			if (b->side == WHITE) {
-				if (b->enPas == attackerSq + 8 && b->pieceAt(attackerSq - 1) == P) {
+				if (b->enPas == attackerSq + 8 && pieceAt(b, attackerSq - 1) == P) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq - 1, b->enPas, EMPTY, EMPTY, MFLAG_EP);
 				}
-				if (b->enPas == attackerSq + 8 && b->pieceAt(attackerSq + 1) == P) {
+				if (b->enPas == attackerSq + 8 && pieceAt(b, attackerSq + 1) == P) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq + 1, b->enPas, EMPTY, EMPTY, MFLAG_EP);
 				}
 			} else {
-				if (b->enPas == attackerSq - 8 && b->pieceAt(attackerSq - 1) == p) {
+				if (b->enPas == attackerSq - 8 && pieceAt(b, attackerSq - 1) == p) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq - 1, b->enPas, EMPTY, EMPTY, MFLAG_EP);
 				}
-				if (b->enPas == attackerSq - 8 && b->pieceAt(attackerSq + 1) == p) {
+				if (b->enPas == attackerSq - 8 && pieceAt(b, attackerSq + 1) == p) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq + 1, b->enPas, EMPTY, EMPTY, MFLAG_EP);
 				}
 			}
@@ -140,19 +140,19 @@ void generateCheckEvasions(Board* b, moveList_t* moveList) {
 	addKingCheckEvasions(b, moveList);
 }
 
-void generateQuietCheckers(Board* b, moveList_t* moveList) {
-	Assert(!b->isCheck(b->side));
+void generateQuietCheckers(board_t* b, moveList_t* moveList) {
+	Assert(!isCheck(b, b->side));
 
 	int sq, atk_sq;
-	int oppkSq = b->getKingSquare(b->side ^ 1);
-	int ownkSq = b->getKingSquare(b->side);
+	int oppkSq = getKingSquare(b, b->side ^ 1);
+	int ownkSq = getKingSquare(b, b->side);
 	bitboard_t pieces;
 	bitboard_t kingBoard = setMask[oppkSq];
 
 	// Pawn pushes that check the king
 	bitboard_t pawns;
 	if (b->side == WHITE) {
-		pawns = (b->getPieces(PAWN, WHITE) << 8) & ~b->occupied;
+		pawns = (getPieces(b, PAWN, WHITE) << 8) & ~b->occupied;
 
 		pieces = pawns;
 		while (pieces) {
@@ -170,7 +170,7 @@ void generateQuietCheckers(Board* b, moveList_t* moveList) {
 			}
 		}
 	} else {
-		pawns = (b->getPieces(PAWN, BLACK) >> 8) & ~b->occupied;
+		pawns = (getPieces(b, PAWN, BLACK) >> 8) & ~b->occupied;
 
 		pieces = pawns;
 		while (pieces) {
@@ -191,7 +191,7 @@ void generateQuietCheckers(Board* b, moveList_t* moveList) {
 
 	// Sliders that attack king: check if a piece can slide to kingAtkLines -> found quiet check
 	bitboard_t kingAtkLines = lookUpBishopMoves(oppkSq, b->occupied);
-	pieces = b->getPieces(BISHOP, b->side) | b->getPieces(QUEEN, b->side);
+	pieces = getPieces(b, BISHOP, b->side) | getPieces(b, QUEEN, b->side);
 
 	bitboard_t diagMoves;
 	while (pieces) {
@@ -207,7 +207,7 @@ void generateQuietCheckers(Board* b, moveList_t* moveList) {
 
 	kingAtkLines = lookUpRookMoves(oppkSq, b->occupied);
 	bitboard_t vertHoriMoves;
-	pieces = b->getPieces(ROOK, b->side) | b->getPieces(QUEEN, b->side);
+	pieces = getPieces(b, ROOK, b->side) | getPieces(b, QUEEN, b->side);
 	while (pieces) {
 		sq = popBit(&pieces);
 		vertHoriMoves = lookUpRookMoves(sq, b->occupied) & ~b->occupied;
@@ -222,7 +222,7 @@ void generateQuietCheckers(Board* b, moveList_t* moveList) {
 	// Knight moves that check king
 	bitboard_t knightChecks;
 	bitboard_t kingKnightPattern = knightAtkMask[oppkSq];
-	pieces = b->getPieces(KNIGHT, b->side);
+	pieces = getPieces(b, KNIGHT, b->side);
 	while (pieces) {
 		sq = popBit(&pieces);
 		knightChecks = knightAtkMask[sq] & kingKnightPattern & ~b->occupied;
@@ -234,8 +234,8 @@ void generateQuietCheckers(Board* b, moveList_t* moveList) {
 	}
 }
 
-void addBlockersForSq(Board* b, moveList_t* moveList, int blockingSq) {
-	bitboard_t blocker = b->blockerSet(b->side, blockingSq);
+void addBlockersForSq(board_t* b, moveList_t* moveList, int blockingSq) {
+	bitboard_t blocker = blockerSet(b, b->side, blockingSq);
 
 	int piece, sq;
 	int flag;
@@ -244,9 +244,9 @@ void addBlockersForSq(Board* b, moveList_t* moveList, int blockingSq) {
 
 		flag = 0;
 		sq = popBit(&blocker);
-		piece = b->pieceAt(sq);
+		piece = pieceAt(b, sq);
 		Assert(piece != k && piece != K);
-		Assert(pieceValid(b->pieceAt(sq)));
+		Assert(pieceValid(pieceAt(b, sq)));
 
 		if ((piece == P || piece == p) && abs(sq - blockingSq) == 16) {
 			flag |= MFLAG_PS;
@@ -258,8 +258,8 @@ void addBlockersForSq(Board* b, moveList_t* moveList, int blockingSq) {
 }
 
 // to validate hash move
-bool isLegal(Board* b, const move_t move) {
-	bool inCheck = b->isCheck(b->side);
+bool isLegal(board_t* b, const move_t move) {
+	bool inCheck = isCheck(b, b->side);
 	moveList_t moveList[1];
 	generateMoves(b, moveList, inCheck);
 
@@ -272,10 +272,10 @@ bool isLegal(Board* b, const move_t move) {
 	return false;
 }
 
-bitboard_t hasSafePawnPush(Board* b, int side) {
+bitboard_t hasSafePawnPush(board_t* b, int side) {
 	bitboard_t safeSquares = 0ULL;
-	bitboard_t pawns = b->getPieces(PAWN, side);
-	bitboard_t oppPawns = b->getPieces(PAWN, side ^ 1);
+	bitboard_t pawns = getPieces(b, PAWN, side);
+	bitboard_t oppPawns = getPieces(b, PAWN, side ^ 1);
 
 	int sq;
 	bitboard_t defendedSquares = 0ULL;
@@ -300,9 +300,9 @@ bitboard_t hasSafePawnPush(Board* b, int side) {
 	return safeSquares;
 }
 
-void whiteSinglePawnPush(Board* board, moveList_t* moveList) {
+void whiteSinglePawnPush(board_t* board, moveList_t* moveList) {
 	int sq;
-	bitboard_t pushedPawns = (board->getPieces(PAWN, WHITE) << 8) & ~board->occupied;
+	bitboard_t pushedPawns = (getPieces(board, PAWN, WHITE) << 8) & ~board->occupied;
 
 	// divide proms and normal pushes
 	bitboard_t promPawns = pushedPawns & RANK_8_HEX;
@@ -316,9 +316,9 @@ void whiteSinglePawnPush(Board* board, moveList_t* moveList) {
 	}
 }
 
-void blackSinglePawnPush(Board* board, moveList_t* moveList) {
+void blackSinglePawnPush(board_t* board, moveList_t* moveList) {
 	int sq;
-	bitboard_t pushedPawns = (board->getPieces(PAWN, BLACK) >> 8) & ~board->occupied;
+	bitboard_t pushedPawns = (getPieces(board, PAWN, BLACK) >> 8) & ~board->occupied;
 
 
 	// divide proms and normal pushes
@@ -332,8 +332,8 @@ void blackSinglePawnPush(Board* board, moveList_t* moveList) {
 	}
 }
 
-void whitePawnPushProm(Board* b, moveList_t* moveList) {
-	bitboard_t pawns = b->getPieces(PAWN, WHITE);
+void whitePawnPushProm(board_t* b, moveList_t* moveList) {
+	bitboard_t pawns = getPieces(b, PAWN, WHITE);
 	pawns = ((pawns & RANK_7_HEX) << 8) & ~b->occupied;
 
 	int sq;
@@ -346,8 +346,8 @@ void whitePawnPushProm(Board* b, moveList_t* moveList) {
 	}
 }
 
-void blackPawnPushProm(Board* board, moveList_t* moveList) {
-	bitboard_t pawns = board->getPieces(PAWN, BLACK);
+void blackPawnPushProm(board_t* board, moveList_t* moveList) {
+	bitboard_t pawns = getPieces(board, PAWN, BLACK);
 	pawns = ((pawns & RANK_2_HEX) >> 8) & ~board->occupied;
 
 	int sq;
@@ -360,9 +360,9 @@ void blackPawnPushProm(Board* board, moveList_t* moveList) {
 	}
 }
 
-void whiteDoublePawnPush(Board* board, moveList_t* moveList) {
+void whiteDoublePawnPush(board_t* board, moveList_t* moveList) {
 	int sq;
-	bitboard_t pushedPawns = (board->getPieces(PAWN, WHITE) << 8) & ~board->occupied;
+	bitboard_t pushedPawns = (getPieces(board, PAWN, WHITE) << 8) & ~board->occupied;
 	pushedPawns = (pushedPawns << 8) & ~board->occupied & RANK_4_HEX;
 
 	while (pushedPawns) {
@@ -371,9 +371,9 @@ void whiteDoublePawnPush(Board* board, moveList_t* moveList) {
 	}
 }
 
-void blackDoublePawnPush(Board* board, moveList_t* moveList) {
+void blackDoublePawnPush(board_t* board, moveList_t* moveList) {
 	int sq;
-	bitboard_t pushedPawns = (board->getPieces(PAWN, BLACK) >> 8) & ~board->occupied;
+	bitboard_t pushedPawns = (getPieces(board, PAWN, BLACK) >> 8) & ~board->occupied;
 	pushedPawns = (pushedPawns >> 8) & ~board->occupied & RANK_5_HEX;
 
 	while (pushedPawns) {
@@ -382,12 +382,12 @@ void blackDoublePawnPush(Board* board, moveList_t* moveList) {
 	}
 }
 
-void whitePawnCaptures(Board* board, moveList_t* moveList) {
+void whitePawnCaptures(board_t* board, moveList_t* moveList) {
 	int sq, atk_sq;
 	bitboard_t atks;
 
 	//divide in prom and non prom attacks
-	bitboard_t whitePawns = board->getPieces(PAWN, WHITE);
+	bitboard_t whitePawns = getPieces(board, PAWN, WHITE);
 	bitboard_t whitePawnProm = whitePawns & RANK_7_HEX;
 	whitePawns &= ~RANK_7_HEX;
 
@@ -404,7 +404,7 @@ void whitePawnCaptures(Board* board, moveList_t* moveList) {
 		atks = pawnAtkMask[WHITE][sq] & board->color[BLACK];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), EMPTY, EMPTY);
 		}
 	}
 
@@ -414,20 +414,20 @@ void whitePawnCaptures(Board* board, moveList_t* moveList) {
 		atks = pawnAtkMask[WHITE][sq] & board->color[BLACK];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), Q, EMPTY);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), R, EMPTY);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), B, EMPTY);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), N, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), Q, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), R, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), B, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), N, EMPTY);
 		}
 	}
 }
 
-void blackPawnCaptures(Board* board, moveList_t* moveList) {
+void blackPawnCaptures(board_t* board, moveList_t* moveList) {
 	int sq, atk_sq;
 	bitboard_t atks;
 
 	//divide in prom and non prom attacks
-	bitboard_t blackPawns = board->getPieces(PAWN, BLACK);
+	bitboard_t blackPawns = getPieces(board, PAWN, BLACK);
 	bitboard_t blackPawnProm = blackPawns & RANK_2_HEX;
 	blackPawns &= ~RANK_2_HEX;
 
@@ -444,7 +444,7 @@ void blackPawnCaptures(Board* board, moveList_t* moveList) {
 		atks = pawnAtkMask[BLACK][sq] & board->color[WHITE];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), EMPTY, EMPTY);
 		}
 	}
 
@@ -454,18 +454,18 @@ void blackPawnCaptures(Board* board, moveList_t* moveList) {
 		atks = pawnAtkMask[BLACK][sq] & board->color[WHITE];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), q, EMPTY);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), r, EMPTY);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), b, EMPTY);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), n, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), q, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), r, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), b, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), n, EMPTY);
 		}
 	}
 }
 
-void addKnightMoves(Board* b, moveList_t* moveList) {
+void addKnightMoves(board_t* b, moveList_t* moveList) {
 	int sq, atk_sq;
 	int piece = (b->side == color_t::WHITE) ? N : n;
-	bitboard_t knights = b->getPieces(KNIGHT, b->side);
+	bitboard_t knights = getPieces(b, KNIGHT, b->side);
 	bitboard_t atks;
 
 	while (knights) {
@@ -478,10 +478,10 @@ void addKnightMoves(Board* b, moveList_t* moveList) {
 	}
 }
 
-void addKnightCaptures(Board* b, moveList_t* moveList) {
+void addKnightCaptures(board_t* b, moveList_t* moveList) {
 	int sq, atk_sq;
 	int piece = (b->side == color_t::WHITE) ? N : n;
-	bitboard_t knights = b->getPieces(KNIGHT, b->side);
+	bitboard_t knights = getPieces(b, KNIGHT, b->side);
 	bitboard_t atks;
 
 	while (knights) {
@@ -489,13 +489,13 @@ void addKnightCaptures(Board* b, moveList_t* moveList) {
 		atks = knightAtkMask[sq] & b->color[b->side ^ 1];
 		while (atks) {
 			atk_sq = popBit(&atks);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(b, atk_sq), EMPTY, EMPTY);
 		}
 	}
 }
 
-void addKingMoves(Board* b, moveList_t* moveList) {
-	int sq, kSq = b->getKingSquare(b->side);
+void addKingMoves(board_t* b, moveList_t* moveList) {
+	int sq, kSq = getKingSquare(b, b->side);
 	int piece = (b->side == WHITE) ? K : k;
 	bitboard_t kingMoves = kingAtkMask[kSq] & ~moveList->attackedSquares & ~b->occupied;
 
@@ -506,22 +506,22 @@ void addKingMoves(Board* b, moveList_t* moveList) {
 
 	switch (b->side) {
 		case WHITE:
-			if (b->castleValid(K_CASTLE, &moveList->attackedSquares)) {
+			if (castleValid(b, K_CASTLE, &moveList->attackedSquares)) {
 				Assert(kSq == E1);
 				moveList->moves[moveList->cnt++] = serializeMove(kSq, G1, EMPTY, EMPTY, MFLAG_CAS);
 			}
-			if (b->castleValid(Q_CASTLE, &moveList->attackedSquares)) {
+			if (castleValid(b, Q_CASTLE, &moveList->attackedSquares)) {
 				Assert(kSq == E1);
 				moveList->moves[moveList->cnt++] = serializeMove(kSq, C1, EMPTY, EMPTY, MFLAG_CAS);
 			}
 			break;
 		case BLACK:
-			if (b->castleValid(k_CASTLE, &moveList->attackedSquares)) {
+			if (castleValid(b, k_CASTLE, &moveList->attackedSquares)) {
 				Assert(kSq == E8);
 				moveList->moves[moveList->cnt++] = serializeMove(kSq, G8, EMPTY, EMPTY, MFLAG_CAS);
 			}
 
-			if (b->castleValid(q_CASTLE, &moveList->attackedSquares)) {
+			if (castleValid(b, q_CASTLE, &moveList->attackedSquares)) {
 				Assert(kSq == E8);
 				moveList->moves[moveList->cnt++] = serializeMove(kSq, C8, EMPTY, EMPTY, MFLAG_CAS);
 			}
@@ -530,23 +530,23 @@ void addKingMoves(Board* b, moveList_t* moveList) {
 	}
 }
 
-void addKingCaptures(Board* b, moveList_t* moveList) {
+void addKingCaptures(board_t* b, moveList_t* moveList) {
 	int piece = (b->side == WHITE) ? K : k;
-	int atk_sq, kSq = b->getKingSquare(b->side);
+	int atk_sq, kSq = getKingSquare(b, b->side);
 	bitboard_t whiteKingAttacks = kingAtkMask[kSq] & ~moveList->attackedSquares & b->color[b->side ^ 1];
 
 	while (whiteKingAttacks) {
 		atk_sq = popBit(&whiteKingAttacks);
-		moveList->moves[moveList->cnt++] = serializeMove(kSq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
+		moveList->moves[moveList->cnt++] = serializeMove(kSq, atk_sq, pieceAt(b, atk_sq), EMPTY, EMPTY);
 	}
 }
 
-void addRookMoves(Board* b, moveList_t* moveList) {
+void addRookMoves(board_t* b, moveList_t* moveList) {
 	int sq, atk_sq;
 	int piece = (b->side == WHITE) ? R : r;
 
 	bitboard_t attackSet;
-	bitboard_t rooks = b->getPieces(ROOK, b->side);
+	bitboard_t rooks = getPieces(b, ROOK, b->side);
 	while (rooks) {
 		sq = popBit(&rooks);
 		attackSet = lookUpRookMoves(sq, b->occupied);
@@ -559,11 +559,11 @@ void addRookMoves(Board* b, moveList_t* moveList) {
 	}
 }
 
-void addBishopMoves(Board* b, moveList_t* moveList) {
+void addBishopMoves(board_t* b, moveList_t* moveList) {
 	int sq, atk_sq;
 	int piece = (b->side == WHITE) ? B : piece_t::b;
 
-	bitboard_t bishops = b->getPieces(BISHOP, b->side);
+	bitboard_t bishops = getPieces(b, BISHOP, b->side);
 	bitboard_t attackSet;
 	while (bishops) {
 		sq = popBit(&bishops);
@@ -577,11 +577,11 @@ void addBishopMoves(Board* b, moveList_t* moveList) {
 	}
 }
 
-void addRookCaptures(Board* b, moveList_t* moveList) {
+void addRookCaptures(board_t* b, moveList_t* moveList) {
 	int piece = (b->side == WHITE) ? R : r;
 	int sq, atk_sq;
 	bitboard_t captureSet;
-	bitboard_t rooks = b->getPieces(ROOK, b->side);
+	bitboard_t rooks = getPieces(b, ROOK, b->side);
 	while (rooks) {
 		sq = popBit(&rooks);
 		captureSet = lookUpRookMoves(sq, b->occupied);
@@ -589,16 +589,16 @@ void addRookCaptures(Board* b, moveList_t* moveList) {
 
 		while (captureSet) {
 			atk_sq = popBit(&captureSet);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(b, atk_sq), EMPTY, EMPTY);
 		}
 	}
 }
 
-void addBishopCaptures(Board* board, moveList_t* moveList) {
+void addBishopCaptures(board_t* board, moveList_t* moveList) {
 	int piece = (board->side == WHITE) ? B : b;
 	int sq, atk_sq;
 	bitboard_t captureSet;
-	bitboard_t bishops = board->getPieces(BISHOP, board->side);
+	bitboard_t bishops = getPieces(board, BISHOP, board->side);
 	while (bishops) {
 		sq = popBit(&bishops);
 		captureSet = lookUpBishopMoves(sq, board->occupied);
@@ -606,18 +606,18 @@ void addBishopCaptures(Board* board, moveList_t* moveList) {
 
 		while (captureSet) {
 			atk_sq = popBit(&captureSet);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, board->pieceAt(atk_sq), EMPTY, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(board, atk_sq), EMPTY, EMPTY);
 		}
 	}
 
 }
 
-void addQueenMoves(Board* b, moveList_t* moveList) {
+void addQueenMoves(board_t* b, moveList_t* moveList) {
 	int sq, atk_sq;
 	int piece = (b->side == WHITE) ? Q : q;
 
 	bitboard_t attackSet;
-	bitboard_t queen = b->getPieces(QUEEN, b->side);
+	bitboard_t queen = getPieces(b, QUEEN, b->side);
 	while (queen) {
 		sq = popBit(&queen);
 		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
@@ -630,11 +630,11 @@ void addQueenMoves(Board* b, moveList_t* moveList) {
 	}
 }
 
-void addQueenCaptures(Board* b, moveList_t* moveList) {
+void addQueenCaptures(board_t* b, moveList_t* moveList) {
 	int piece = (b->side == WHITE) ? Q : q;
 	int sq, atk_sq;
 	bitboard_t attackSet;
-	bitboard_t queen = b->getPieces(QUEEN, b->side);
+	bitboard_t queen = getPieces(b, QUEEN, b->side);
 	while (queen) {
 		sq = popBit(&queen);
 		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
@@ -642,7 +642,7 @@ void addQueenCaptures(Board* b, moveList_t* moveList) {
 
 		while (attackSet) {
 			atk_sq = popBit(&attackSet);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, b->pieceAt(atk_sq), EMPTY, EMPTY);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atk_sq, pieceAt(b, atk_sq), EMPTY, EMPTY);
 		}
 	}
 }
@@ -656,15 +656,15 @@ void printGeneratedMoves(moveList_t* moveList) {
 	}
 }
 
-void addKingCheckEvasions(Board* b, moveList_t* moveList) {
-	Assert(moveList->attackedSquares == b->attackerSet(b->side ^ 1));
+void addKingCheckEvasions(board_t* b, moveList_t* moveList) {
+	Assert(moveList->attackedSquares == attackerSet(b, b->side ^ 1));
 	int piece = (b->side) == WHITE ? K : k;
-	int kSq = b->getKingSquare(b->side);
+	int kSq = getKingSquare(b, b->side);
 	int to;
 
-	b->clearPiece(piece, kSq, b->side);
-	bitboard_t atkSquares = b->attackerSet(b->side ^ 1);
-	b->setPiece(piece, kSq, b->side);
+	clearPiece(b, piece, kSq, b->side);
+	bitboard_t atkSquares = attackerSet(b, b->side ^ 1);
+	setPiece(b, piece, kSq, b->side);
 
 	bitboard_t quietSquares = kingAtkMask[kSq] & ~atkSquares & ~b->occupied;
 	bitboard_t capSquares = kingAtkMask[kSq] & ~atkSquares & b->color[b->side ^ 1];
@@ -678,6 +678,6 @@ void addKingCheckEvasions(Board* b, moveList_t* moveList) {
 	// generate capturing check evasions
 	while (capSquares) {
 		to = popBit(&capSquares);
-		moveList->moves[moveList->cnt++] = serializeMove(kSq, to, b->pieceAt(to), EMPTY, EMPTY);
+		moveList->moves[moveList->cnt++] = serializeMove(kSq, to, pieceAt(b, to), EMPTY, EMPTY);
 	}
 }

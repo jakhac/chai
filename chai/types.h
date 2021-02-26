@@ -3,6 +3,9 @@
 #include <cstdint>
 #include "stdlib.h"
 
+#define MAX_DEPTH 64
+#define MAX_GAME_MOVES 512
+
 /**
  * Unsigned 64-Bit integer represents bitboard isntance.
  */
@@ -92,6 +95,62 @@ struct pawntable_t {
 	// measure successful probes
 	int probed;
 	int hit;
+};
+
+struct board_t {
+	// Current side, 0 for black and 1 for white. Use enums for debug purpose.
+	int side;
+
+	// Current en passant square. 0, if not set.
+	int enPas;
+
+	// Ply Counter.
+	int ply;
+
+	// Ply Counter for undoHistory array.
+	int undoPly;
+
+	// Fifty-move rule counter. Resets after captures.
+	int fiftyMove;
+
+	// Count half moves. Increment when push or pushNull, decrement when pop.
+	int halfMoves;
+
+	// CastlePermission stored as number between 0 and 15 (4 bits for each side and color).
+	int castlePermission;
+
+	// Unique zobrist key.
+	key_t zobristKey;
+
+	// Unique zobrist pawn key.
+	key_t zobristPawnKey;
+
+	// Store pieces for given color.
+	bitboard_t color[2];
+
+	// Store pieces for given type.
+	bitboard_t pieces[7];
+
+	// Store occupied squares.
+	bitboard_t occupied;
+
+	// Stores the currently attacked squares by side.
+	bitboard_t attackedSquares[2];
+
+	// Castle keys. // TODO use fixed keys
+	key_t castleKeys[16];
+
+	// Stack stores pushed moves as Undo objects.
+	undo_t undoHistory[MAX_GAME_MOVES];
+
+	// Transposition table.
+	ttable_t tt[1];
+
+	// Pawn hash table.
+	pawntable_t pawnTable[1];
+
+	// Stores the pv line.
+	move_t pvArray[MAX_DEPTH];
 };
 
 /**

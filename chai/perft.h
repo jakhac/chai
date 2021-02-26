@@ -18,32 +18,32 @@ public:
 	/**
 	 * Standard perft root call.
 	 *
-	 * @param  b	 The Board reference.
+	 * @param  b	 The board_t reference.
 	 * @param  depth Perft depth.
 	 *
 	 * @returns The number of leaf nodes counted at given depth.
 	 */
-	long long perftRoot(Board* b, int depth);
+	long long perftRoot(board_t* b, int depth);
 
 	/**
-	 * Recursive call for perft using {@link #isLegal(Board, move_t)} isLegal function.
+	 * Recursive call for perft using {@link #isLegal(board_t, move_t)} isLegal function.
 	 *
 	 * @param  b	 The board reference.
 	 * @param  depth Depth remaining.
 	 */
-	void perft(Board* b, int depth);
+	void perft(board_t* b, int depth);
 
-	long long perftLegalRoot(Board* b, int depth);
+	long long perftLegalRoot(board_t* b, int depth);
 
 	/**
-	 * Recursive call for perft function using {@link #isLegal(Board, move_t)} isLegal function.
+	 * Recursive call for perft function using {@link #isLegal(board_t, move_t)} isLegal function.
 	 *
 	 * @param  b	 The board reference.
 	 * @param  depth Depth remaining.
 	 */
-	void perftLegal(Board* b, int depth);
+	void perftLegal(board_t* b, int depth);
 
-	//long long perftBulkRoot(Board* b, int depth);
-	//long long perftBulk(Board* b, int depth);
+	//long long perftBulkRoot(board_t* b, int depth);
+	//long long perftBulk(board_t* b, int depth);
 
 };

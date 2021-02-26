@@ -1,6 +1,6 @@
 #include "uci.h"
 
-void uciMode(Board* b, search_t* s) {
+void uciMode(board_t* b, search_t* s) {
 	string cmd;
 
 	cout << "id name chai Chess Engine\n";
@@ -32,15 +32,15 @@ void uciMode(Board* b, search_t* s) {
 	cout << "Error: left uci loop" << endl;
 }
 
-void uciParsePosition(Board* b, string cmd) {
+void uciParsePosition(board_t* b, string cmd) {
 	// parse fen
 	if (!cmd.substr(0, 12).compare("position fen")) {
 		string fen = cmd.substr(13, cmd.size());
-		b->parseFen(fen);
+		parseFen(b, fen);
 
 	} else if (!cmd.substr(0, 23).compare("position startpos moves")) {
 		/*position startpos moves b2b4 a7a5 b4a5 b7b6 a5b6 h7h6 b6c7 g7g6 c7b8q d8c7*/
-		b->parseFen(STARTING_FEN);
+		parseFen(b, STARTING_FEN);
 		int cnt = 24;
 		string move;
 
@@ -50,15 +50,15 @@ void uciParsePosition(Board* b, string cmd) {
 
 		int parsedMove;
 		for (string move : tokens) {
-			parsedMove = b->parseMove(move);
-			b->push(parsedMove);
+			parsedMove = parseMove(b, move);
+			push(b, parsedMove);
 		}
 
 		// reset ply to 0 (incremented for each push call) for search
 		b->ply = 0;
 
 	} else if (!cmd.compare("position startpos")) {
-		b->parseFen(STARTING_FEN);
+		parseFen(b, STARTING_FEN);
 	} else {
 		cout << "uciParsePosition failed\n";
 	}
@@ -68,7 +68,7 @@ void uciParsePosition(Board* b, string cmd) {
 	fflush(stdout);
 }
 
-void uciParseGo(Board* b, search_t* s, string cmd) {
+void uciParseGo(board_t* b, search_t* s, string cmd) {
 	int depth = -1, movesLeft = 30, moveTime = -1;
 	int time = -1, inc = 0;
 	s->timeSet = false;
@@ -126,7 +126,7 @@ void uciParseGo(Board* b, search_t* s, string cmd) {
 	search(b, s);
 }
 
-void init(Board* b) {
+void init(board_t* b) {
 	cout << "Initialize chai. " << VERSION << endl;
 
 #ifdef ASSERT
@@ -139,7 +139,7 @@ void init(Board* b) {
 	auto start = std::chrono::high_resolution_clock::now();
 	initClearSetMask();
 	initSquareToRankFile();
-	b->initHashKeys();
+	initHashKeys(b);
 	initAttackerMasks();
 	initMVV_LVA();
 	initEvalMasks();

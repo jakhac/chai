@@ -61,7 +61,7 @@ static int quiescenceChecks[MAX_DEPTH];
  *
  * @returns Best score found in search.
  */
-int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine);
+int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine);
 
 /**
  * Quiescence search pushes all captures to evaluate a stable and quiet position. AlphaBeta
@@ -74,7 +74,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
  *
  * @returns Best score found in quiescences search.
  */
-int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t* pvLine);
+int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s, pv_line_t* pvLine);
 
 /**
  * Root function that starts alphaBeta search in iterative deepening framework.
@@ -84,7 +84,7 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
  *
  * @returns move_t Best move found search.
  */
-int search(Board* b, search_t* s);
+int search(board_t* b, search_t* s);
 
 /**
  * Apply offset of aspiration windows in alphaBeta call and try to score inside alpha and beta.
@@ -97,7 +97,7 @@ int search(Board* b, search_t* s);
  *
  * @returns Best score found in alphaBeta search.
  */
-int search_aspiration(Board* b, search_t* s, int depth, int bestScore);
+int search_aspiration(board_t* b, search_t* s, int depth, int bestScore);
 
 /**
  * Tries to find a single(!) repetition in undoPly array. Used in search to find upcoming draws.
@@ -106,7 +106,7 @@ int search_aspiration(Board* b, search_t* s, int depth, int bestScore);
  *
  * @returns True if repetition is found in undoPly array, else false.
  */
-bool isRepetition(Board* b);
+bool isRepetition(board_t* b);
 
 /**
  * Searches the complete undoPly array for a position (including current position)
@@ -116,7 +116,7 @@ bool isRepetition(Board* b);
  *
  * @returns True if three fold repetition is found, else false.
  */
-bool isThreeFoldRepetition(Board* b);
+bool isThreeFoldRepetition(board_t* b);
 
 /**
  * Checks if current position might be a zugzwang. Considers endgame
@@ -125,7 +125,7 @@ bool isThreeFoldRepetition(Board* b);
  *
  * @returns True if current position is probably azugzwang, else false.
  */
-bool zugzwang(Board* b);
+bool zugzwang(board_t* b);
 
 /**
  * Swaps the best move found in moveList with move at current index.
@@ -134,7 +134,7 @@ bool zugzwang(Board* b);
  * @param  move_s Move struct with all moves and scores.
  * @param  curIdx Current index in moveList.
  */
-void getNextMove(Board* b, moveList_t* move_s, int curIdx);
+void getNextMove(board_t* b, moveList_t* move_s, int curIdx);
 
 /**
  * Swap to moves and their score in given MOVE_S struct. Returns if id1 is equal to id2.
@@ -151,5 +151,5 @@ void swapMove(moveList_t* move_s, int id1, int id2);
  * @param  b Current board.
  * @param  s This search info printed to console.
  */
-void printSearchInfo(Board* b, search_t* s);
+void printSearchInfo(board_t* b, search_t* s);
 

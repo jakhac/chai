@@ -15,9 +15,7 @@
 #include "uci.h"
 #include "search.h"
 
-#include "wrapper.h"
-
-static Board board;
+static board_t board;
 
 static Perft perft;
 
@@ -35,18 +33,18 @@ int main();
 /**
  * Start a game in console.
  *
- * @param  b Board instance.
+ * @param  b board_t instance.
  * @param  p MoveGenrator instance.
  * @param  s A search_t to process.
  */
-void play(Board* b, Perft* p, search_t* s);
+void play(board_t* b, Perft* p, search_t* s);
 
 /**
  * Function to divide with cmd-line move after each perft.
  *
- * @param  b	 Board reference.
+ * @param  b	 board_t reference.
  * @param  fen   The fen.
  * @param  depth The initial depth.
  */
-void dividePerft(Board* b, string fen, int depth);
+void dividePerft(board_t* b, string fen, int depth);
 

@@ -23,7 +23,7 @@ void clearTT(ttable_t* tt) {
 	memset(tt->table, 0, (tt->buckets * sizeof(ttable_entry_t) * BUCKETS));
 }
 
-void storeTT(Board* b, move_t move, int score, int flag, int depth) {
+void storeTT(board_t* b, move_t move, int score, int flag, int depth) {
 	int index = (b->zobristKey % b->tt->buckets) * BUCKETS;
 
 	Assert(move != NO_MOVE);
@@ -69,7 +69,7 @@ void storeTT(Board* b, move_t move, int score, int flag, int depth) {
 	(bucket + offset)->depth = depth;
 }
 
-bool probeTT(Board* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* hashDepth) {
+bool probeTT(board_t* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* hashDepth) {
 	int index = (b->zobristKey % b->tt->buckets) * BUCKETS;
 
 	Assert(index >= 0 && index <= (b->tt->buckets * BUCKETS) - 1);
@@ -96,14 +96,14 @@ bool probeTT(Board* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* has
 	return false;
 }
 
-void prefetchTTEntry(Board* b) {
+void prefetchTTEntry(board_t* b) {
 	int index = b->zobristKey % b->tt->buckets;
 	int entry = index * BUCKETS;
 
 	_m_prefetch(&b->tt->table[entry]);
 }
 
-void hashToSearch(Board* b, int* score) {
+void hashToSearch(board_t* b, int* score) {
 	if (*score > ISMATE) {
 		*score -= b->ply;
 	} else if (*score < -ISMATE) {
@@ -111,7 +111,7 @@ void hashToSearch(Board* b, int* score) {
 	}
 }
 
-void searchToHash(Board* b, int* score) {
+void searchToHash(board_t* b, int* score) {
 	if (*score > ISMATE) {
 		score += b->ply;
 	} else if (*score < -ISMATE) {
@@ -119,7 +119,7 @@ void searchToHash(Board* b, int* score) {
 	}
 }
 
-move_t probePV(Board* b) {
+move_t probePV(board_t* b) {
 	int index = b->zobristKey % b->tt->buckets;
 	int entry = index * BUCKETS;
 	Assert(index >= 0 && index <= b->tt->buckets - 1);
@@ -138,18 +138,18 @@ move_t probePV(Board* b) {
 	return NO_MOVE;
 }
 
-int getPVLine(Board* b, const int maxDepth) {
+int getPVLine(board_t* b, const int maxDepth) {
 	int move = probePV(b);
 	int count = 0;
 
 	while (move != NO_MOVE && count < maxDepth && isLegal(b, move)) {
-		b->push(move);
+		push(b, move);
 		b->pvArray[count++] = move;
 		move = probePV(b);
 	}
 
 	while (b->ply > 0) {
-		b->pop();
+		pop(b);
 	}
 
 	return count;
@@ -182,7 +182,7 @@ void clearPawnTable(pawntable_t* pawnTable) {
 	pawnTable->collided = 0;
 }
 
-void storePawnEntry(Board* b, const int eval) {
+void storePawnEntry(board_t* b, const int eval) {
 	int index = b->zobristPawnKey % b->pawnTable->entries;
 	Assert(index >= 0 && index <= b->pawnTable->entries - 1);
 
@@ -197,12 +197,12 @@ void storePawnEntry(Board* b, const int eval) {
 	b->pawnTable->table[index].zobristPawnKey = b->zobristPawnKey;
 }
 
-void prefetchPawnEntry(Board* b) {
+void prefetchPawnEntry(board_t* b) {
 	int index = b->zobristPawnKey % b->pawnTable->entries;
 	_m_prefetch(&b->pawnTable->table[index]);
 }
 
-bool probePawnEntry(Board* b, int* hashScore) {
+bool probePawnEntry(board_t* b, int* hashScore) {
 	int index = b->zobristPawnKey % b->pawnTable->entries;
 	Assert(index >= 0 && index <= b->pawnTable->entries - 1);
 
@@ -214,7 +214,7 @@ bool probePawnEntry(Board* b, int* hashScore) {
 	return false;
 }
 
-void destroyTranspositionTables(Board* b) {
+void destroyTranspositionTables(board_t* b) {
 	if (b->tt->table != NULL) {
 		free(b->tt->table);
 	}
@@ -223,7 +223,7 @@ void destroyTranspositionTables(Board* b) {
 	}
 }
 
-void printTTStatus(Board* b) {
+void printTTStatus(board_t* b) {
 
 	cout << "Buckets: " << b->tt->buckets << endl;
 	cout << "Entries: " << (b->tt->buckets * BUCKETS) << endl;

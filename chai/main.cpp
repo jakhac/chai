@@ -3,10 +3,10 @@
 
 int main() {
 	init(&board);
-	board.parseFen(STARTING_FEN);
+	parseFen(&board, STARTING_FEN);
 	//board.parseFen(BUG_FEN);
 	//board.parseFen("3r1k2/1q1P4/5b2/p3p2p/1p6/1B3P2/PPPQ4/1K1R4 w - - 1 0");
-	board.printBoard();
+	printBoard(&board);
 
 	//moveList_t moveList[1];
 	//generateMoves(&board, moveList, board.isCheck(board.side));
@@ -20,7 +20,7 @@ int main() {
 	return 0;
 }
 
-void play(Board* b, Perft* p, search_t* s) {
+void play(board_t* b, Perft* p, search_t* s) {
 	string m;
 
 	while (true) {
@@ -29,9 +29,9 @@ void play(Board* b, Perft* p, search_t* s) {
 
 		// POP MOVE FROM BOARD
 		if (m == "pop") {
-			undo_t pop = b->pop();
-			cout << "Popped " << getStringMove(pop.move) << " from stack." << endl;
-			b->printBoard();
+			undo_t undoPop = pop(b);
+			cout << "Popped " << getStringMove(undoPop.move) << " from stack." << endl;
+			printBoard(b);
 			continue;
 		}
 
@@ -48,10 +48,10 @@ void play(Board* b, Perft* p, search_t* s) {
 				getPVLine(b, s->depth);
 
 				moveList_t move_s[1];
-				generateMoves(b, move_s, b->isCheck(b->side));
-				b->push(move_s->moves[move_s->cnt / 3]);
+				generateMoves(b, move_s, isCheck(b, b->side));
+				push(b, move_s->moves[move_s->cnt / 3]);
 				cout << "Push move " << b->halfMoves << ". " << getStringMove(move_s->moves[move_s->cnt / 2]) << endl;
-				b->printBoard();
+				printBoard(b);
 				cout << "###############" << endl;
 			}
 		}
@@ -96,42 +96,42 @@ void play(Board* b, Perft* p, search_t* s) {
 			cin.ignore();
 			getline(cin, m);
 			cout << "Parsed FEN \"" << m << "\" into board." << endl;
-			b->parseFen(m);
-			b->printBoard();
+			parseFen(b, m);
+			printBoard(b);
 			continue;
 		}
 
 		if (m == "reps") {
-			cout << "Board is three fold repetition " << isThreeFoldRepetition(b) << endl;
-			cout << "Board is repetition " << isRepetition(b) << endl;
+			cout << "board_t is three fold repetition " << isThreeFoldRepetition(b) << endl;
+			cout << "board_t is repetition " << isRepetition(b) << endl;
 		}
 
 		if (m == "0000") {
-			b->pushNull();
+			pushNull(b);
 
-			cout << "Pushed " << getStringMove(b->parseMove(m)) << " on board." << endl;
-			b->printBoard();
+			cout << "Pushed " << getStringMove(parseMove(b, m)) << " on board." << endl;
+			printBoard(b);
 
 			continue;
 		}
 
 		if (m == "p") {
-			b->printBoard();
+			printBoard(b);
 			continue;
 		}
 
 		// PUSH MOVE IN ALGEBRAIC NOTATION
 		moveList_t _move_s[1];
-		generateMoves(b, _move_s, b->isCheck(b->side));
+		generateMoves(b, _move_s, isCheck(b, b->side));
 
-		int parsedMove = b->parseMove(m);
+		int parsedMove = parseMove(b, m);
 		bool flag_found = false;
 		for (int i = 0; i < _move_s->cnt; i++) {
 			if (parsedMove == _move_s->moves[i]) {
 				flag_found = true;
 				//storeTT(b, parsedMove);
 
-				if (!b->push(parsedMove)) {
+				if (!push(b, parsedMove)) {
 					cout << "Move " << getStringMove(parsedMove) << " remains check or is no valid move. Try again." << endl;
 					continue;
 				}
@@ -141,7 +141,7 @@ void play(Board* b, Perft* p, search_t* s) {
 				}
 
 				cout << "Pushed " << getStringMove(parsedMove) << " on board." << endl;
-				b->printBoard();
+				printBoard(b);
 				break;
 			}
 		}
@@ -150,21 +150,21 @@ void play(Board* b, Perft* p, search_t* s) {
 	}
 }
 
-void dividePerft(Board* b, string fen, int depth) {
+void dividePerft(board_t* b, string fen, int depth) {
 
 	string move = "";
 	Perft p;
 
 	// parse fen if valid
 	if (fen != "-1") {
-		b->parseFen(fen);
+		parseFen(b, fen);
 	}
 
 	while (depth) {
 
 		if (move != "") {
-			int parsedMove = b->parseMove(move);
-			b->push(parsedMove);
+			int parsedMove = parseMove(b, move);
+			push(b, parsedMove);
 			depth--;
 		}
 

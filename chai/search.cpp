@@ -16,7 +16,7 @@ void checkSearchInfo(search_t* s) {
 
 }
 
-bool isRepetition(Board* b) {
+bool isRepetition(board_t* b) {
 	for (int index = b->undoPly - b->fiftyMove; index < b->undoPly - 1; ++index) {
 		Assert(index >= 0 && index < MAX_GAME_MOVES);
 		if (b->zobristKey == b->undoHistory[index].zobKey) {
@@ -27,7 +27,7 @@ bool isRepetition(Board* b) {
 	return false;
 }
 
-bool isThreeFoldRepetition(Board* b) {
+bool isThreeFoldRepetition(board_t* b) {
 	int reps = 0;
 
 	for (int i = 0; i < b->halfMoves; i++) {
@@ -41,7 +41,7 @@ bool isThreeFoldRepetition(Board* b) {
 	return false;
 }
 
-void getNextMove(Board* b, moveList_t* move_s, int curIdx) {
+void getNextMove(board_t* b, moveList_t* move_s, int curIdx) {
 	int bestScore = 0;
 	int bestIdx = curIdx;
 
@@ -67,7 +67,7 @@ void swapMove(moveList_t* move_s, int id1, int id2) {
 	move_s->scores[id2] = tempScore;
 }
 
-bool zugzwang(Board* b) {
+bool zugzwang(board_t* b) {
 	bitboard_t bb;
 
 	// Less than 5 pieces on the board is obvious endgame
@@ -101,8 +101,8 @@ bool zugzwang(Board* b) {
 	return false;
 }
 
-int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine) {
-	Assert(b->checkBoard());
+int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine) {
+	Assert(checkBoard(b));
 	Assert(beta > alpha);
 
 	/*
@@ -187,7 +187,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	s->nodes++;
 
 	// variables relevant for mulitple pruning techniques
-	bool inCheck = b->isCheck(b->side);
+	bool inCheck = isCheck(b, b->side);
 	bool mateThreat = false;
 	int lazyEval = lazyEvalulation(b);
 	//int staticEval = eval(b);
@@ -220,9 +220,9 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		int reduction = (depth > 6) ? R_3 : R_2;
 		int nullScore = 0;
 
-		b->pushNull();
+		pushNull(b);
 		nullScore = -alphaBeta(-beta, -beta + 1, depth - 1 - reduction, b, s, NO_NULL, NO_PV, localPV);
-		b->pop();
+		pop(b);
 
 		if (s->stopped) {
 			return 0;
@@ -273,7 +273,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	// Futility Pruning flag determines if f-pruning can be applied to this position.
 	// TODO: skip pv nodes
 	bool doFutility = !inCheck
-		&& depth == 1
+		&& depth <= 2
 		&& searchExt == 0
 		&& !mateThreat
 		&& abs(alpha) <= 10000
@@ -288,7 +288,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 		currentMove = moveList->moves[i];
 		Assert(currentMove != NO_MOVE);
 
-		if (!b->push(currentMove)) continue;
+		if (!push(b, currentMove)) continue;
 
 		/**
 		 * Futility Pruning: TODO doc
@@ -305,33 +305,28 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			&& legalMoves
 			&& !(MCHECK_PROM & currentMove)
 			&& !(MCHECK_EP & currentMove)
-			&& !b->isCheck(b->side)
+			&& !isCheck(b, b->side)
 			) {
 
 			int capPieceValue = (MCHECK_CAP & currentMove) ? pieceScores[capPiece(currentMove)] : 200;
 
-			if (depth == 1 && lazyEval + capPieceValue + F1_MARGIN < alpha) {
-				s->futileCnt++;
-				b->pop();
-				continue;
-				//score = -alphaBeta(-(alpha + 1), -alpha, depth, b, s, DO_NULL, NO_PV, localPV);
+			if (depth == 2 && lazyEval + capPieceValue + F2_MARGIN < alpha) {
+				searchExt--;
 			}
 
-			// Research, if futile move turns out to improve alpha.
-			//if (!(score > alpha && score < beta)) {
-				//b->pop();
-				//continue;
-			//}
+			if (depth == 1 && lazyEval + capPieceValue + F1_MARGIN < alpha) {
+				s->futileCnt++;
+				pop(b);
+				continue;
+			}
 
-			//s->futileFH++;
-			//score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, NO_PV, localPV);
 		}
 
 		legalMoves++;
 
 		score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
 
-		b->pop();
+		pop(b);
 
 		if (s->stopped) {
 			return 0;
@@ -362,11 +357,11 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			if (!(currentMove & MCHECK_CAP)
 				&& !inCheck
 				&& !(currentMove & MCHECK_PROM)
-				&& b->killer[0][b->ply] != currentMove) {
+				&& killer[0][b->ply] != currentMove) {
 
-				b->killer[1][b->ply] = b->killer[0][b->ply];
-				b->killer[0][b->ply] = currentMove;
-				Assert(b->killer[1][b->ply] != b->killer[0][b->ply]);
+				killer[1][b->ply] = killer[0][b->ply];
+				killer[0][b->ply] = currentMove;
+				Assert(killer[1][b->ply] != killer[0][b->ply]);
 			}
 
 			/*
@@ -374,7 +369,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			* If a move scores near checkmate, order it above standard killers.
 			*/
 			if (bestScore >= (MATE - 1000) && currentMove > 1) {
-				b->mateKiller[b->ply] = currentMove;
+				mateKiller[b->ply] = currentMove;
 			}
 
 			/*
@@ -384,19 +379,19 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 			* rescale if needed to prevent overflow.
 			*/
 			if (!inCheck && !(currentMove & MCHECK_PROM_OR_CAP)) {
-				int piece = b->pieceAt(fromSq(currentMove));
+				int piece = pieceAt(b, fromSq(currentMove));
 				int to = toSq(currentMove);
 
-				b->histHeuristic[piece][to] += depth * depth;
-				b->histMax = max(b->histHeuristic[piece][to], b->histMax);
+				histHeuristic[piece][to] += depth * depth;
+				histMax = max(histHeuristic[piece][to], histMax);
 
-				if (b->histMax > HISTORY_MAX) {
+				if (histMax > HISTORY_MAX) {
 					for (piece = P; piece <= k; piece++) {
 						for (int sq = 0; sq < NUM_SQUARES; sq++) {
-							b->histHeuristic[piece][sq] /= 2;
+							histHeuristic[piece][sq] /= 2;
 						}
 					}
-					b->histMax /= 2;
+					histMax /= 2;
 				}
 			}
 
@@ -414,7 +409,7 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 
 				move_t prevMove = b->undoHistory[b->ply - 1].move;
 				if (pseudoValidBitMove(prevMove)) {
-					b->counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side] = currentMove;
+					counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side] = currentMove;
 				}
 			}
 
@@ -482,8 +477,8 @@ int alphaBeta(int alpha, int beta, int depth, Board* b, search_t* s, bool nullOk
 	return alpha;
 }
 
-int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t* pvLine) {
-	Assert(b->checkBoard());
+int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s, pv_line_t* pvLine) {
+	Assert(checkBoard(b));
 	selDepth = max(selDepth, b->ply);
 
 	// check for time and depth
@@ -500,7 +495,7 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 	if (b->ply > MAX_DEPTH - 1) return eval(b);
 
 	int standPat = eval(b);
-	bool inCheck = b->isCheck(b->side);
+	bool inCheck = isCheck(b, b->side);
 	quiescenceChecks[abs(depth)] = inCheck;
 
 	/*
@@ -579,11 +574,11 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 			continue;
 		}
 
-		if (!b->push(currentMove)) continue;
+		if (!push(b, currentMove)) continue;
 
 		legalMoves++;
 		score = -quiescence(-beta, -alpha, depth - 1, b, s, localPV);
-		b->pop();
+		pop(b);
 
 		if (s->stopped) {
 			return 0;
@@ -617,7 +612,7 @@ int quiescence(int alpha, int beta, int depth, Board* b, search_t* s, pv_line_t*
 	return alpha;
 }
 
-void clearForSearch(Board* b, search_t* s) {
+void clearForSearch(board_t* b, search_t* s) {
 	b->ply = 0;
 
 	// reset stats
@@ -629,28 +624,30 @@ void clearForSearch(Board* b, search_t* s) {
 	b->tt->collided = 0;
 	b->tt->stored = 0;
 
-	// TODO reset mate killer
-
+	// reset mate killer
+	for (int i = 0; i < MAX_GAME_MOVES; i++) {
+		mateKiller[i] = NO_MOVE;
+	}
 	// reset killers
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < MAX_DEPTH; j++) {
-			b->killer[i][j] = 0;
+			killer[i][j] = 0;
 		}
 	}
 
 	// reset history heuristic
 	for (int i = P; i < k; i++) {
 		for (int j = 0; j < NUM_SQUARES; j++) {
-			b->histHeuristic[i][j] = 0;
+			histHeuristic[i][j] = 0;
 		}
 	}
-	b->histMax = 0;
+	histMax = 0;
 
 	// reset counter move history
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < NUM_SQUARES; j++) {
 			for (int k = 0; k < NUM_SQUARES; k++) {
-				b->counterHeuristic[j][k][i] = NO_MOVE;
+				counterHeuristic[j][k][i] = NO_MOVE;
 			}
 		}
 	}
@@ -669,7 +666,7 @@ void clearForSearch(Board* b, search_t* s) {
 	s->futileCnt = 0;
 }
 
-int search_aspiration(Board* b, search_t* s, int depth, int bestScore) {
+int search_aspiration(board_t* b, search_t* s, int depth, int bestScore) {
 	int temp = bestScore;
 	int alpha = bestScore - 75;
 	int beta = bestScore + 75;
@@ -684,7 +681,7 @@ int search_aspiration(Board* b, search_t* s, int depth, int bestScore) {
 	return temp;
 }
 
-int search(Board* b, search_t* s) {
+int search(board_t* b, search_t* s) {
 	int bestMove = 0;
 	int pvMoves = 0;
 	int pvNum = 0;
@@ -740,7 +737,7 @@ int search(Board* b, search_t* s) {
 	return score;
 }
 
-void printSearchInfo(Board* b, search_t* s) {
+void printSearchInfo(board_t* b, search_t* s) {
 	cout << "\n";
 	//cout << "AlphaBeta-Nodes: " << s->nodes << " Q-Nodes: " << s->qnodes << endl;
 	cout << "Ordering percentage: \t\t" << setprecision(4) << fixed << (float)(s->fhf / s->fh) << endl;

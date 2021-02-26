@@ -5,13 +5,13 @@ namespace {
 	class PerftTest : public ::testing::Test {
 
 	protected:
-		Board* pBoard;
+		board_t* pBoard;
 		Perft* pPerft;
 
 		virtual void SetUp() {
-			pBoard = new Board();
+			pBoard = new board_t();
 			pPerft = new Perft();
-			pBoard->initHashKeys();
+			initHashKeys(pBoard);
 
 			initClearSetMask();
 			initSquareToRankFile();
@@ -34,42 +34,42 @@ namespace {
 	};
 
 	TEST_F(PerftTest, START_POS) {
-		pBoard->parseFen(STARTING_FEN);
+		parseFen(pBoard, STARTING_FEN);
 		EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 197281);
 	}
 
 	TEST_F(PerftTest, MID_FEN) {
-		pBoard->parseFen(MID_FEN);
+		parseFen(pBoard, MID_FEN);
 		EXPECT_EQ(pPerft->perftRoot(pBoard, 3), 97862);
 	}
 
 	TEST_F(PerftTest, END_FEN_1) {
-		pBoard->parseFen(END_FEN_1);
+		parseFen(pBoard, END_FEN_1);
 		EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 89363);
 	}
 
 	TEST_F(PerftTest, END_FEN_2) {
-		pBoard->parseFen(END_FEN_2);
+		parseFen(pBoard, END_FEN_2);
 		EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 54703);
 	}
 
 	TEST_F(PerftTest, END_FEN_3) {
-		pBoard->parseFen(END_FEN_3);
+		parseFen(pBoard, END_FEN_3);
 		EXPECT_EQ(pPerft->perftRoot(pBoard, 4), 67197);
 	}
 
 	//TEST_F(PerftTest, START_POS_EGAL) {
-	//	pBoard->parseFen(STARTING_FEN);
+	//	parseFen(pBoard, STARTING_FEN);
 	//	EXPECT_EQ(pPerft->perftLegalRoot(pBoard, 4), 197281);
 	//}
 
 	//TEST_F(PerftTest, MID_FEN_LEGAL) {
-	//	pBoard->parseFen(MID_FEN);
+	//	parseFen(pBoard, MID_FEN);
 	//	EXPECT_EQ(pPerft->perftLegalRoot(pBoard, 3), 97862);
 	//}
 
 	//TEST_F(PerftTest, END_POS_3_LEGAL) {
-	//	pBoard->parseFen(END_FEN_3);
+	//	parseFen(pBoard, END_FEN_3);
 	//	EXPECT_EQ(pPerft->perftLegalRoot(pBoard, 4), 67197);
 	//}
 
