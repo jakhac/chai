@@ -191,13 +191,16 @@ struct pv_line_t {
 	move_t line[64 * 64]; // MAX DEPTH
 };
 
-typedef enum PIECE_VALUES {
-	EMPTY, P, N, B, R, Q, K, p, n, b, r, q, k
-} piece_t;
+namespace Piece {
 
-enum PIECES_TYPES {
-	NO_PIECE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
-};
+	enum PIECE_VALUES {
+		EMPTY, P, N, B, R, Q, K, p, n, b, r, q, k
+	};
+
+	enum PIECES_TYPES {
+		NO_PIECE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
+	};
+}
 
 enum FILES {
 	FILE_A, FILE_B, FILE_C, FILE_D,

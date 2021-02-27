@@ -136,6 +136,7 @@
   - [ ] Namespaces for piece-types
 - Bugfixes:
   - [x] kingSafetyArray not enough values (8 atk sq possible)
+  - [ ] `ISMATE` considers forced mate in quiescence search (lower `ISMATE` score)
 
 # Todo
 

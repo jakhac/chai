@@ -9,7 +9,7 @@
 //
 //void _generateMoves(board_t* b, moveList_t* move_s);
 //
-///* PAWN */
+///* Piece::PAWN */
 //void _whiteSinglePawnPush(board_t* b, moveList_t* move_s);
 //void _blackSinglePawnPush(board_t* b, moveList_t* move_s);
 //void _whiteDoublePawnPush(board_t* b, moveList_t* move_s);
@@ -18,7 +18,7 @@
 //void _whitePawnCaptures(board_t* b, moveList_t* move_s);
 //void _blackPawnCaptures(board_t* b, moveList_t* move_s);
 //
-///* KNIGHT */
+///* Piece::KNIGHT */
 ///// <summary>
 ///// Generate all possible knight moves and add to quietMoveList.
 ///// </summary>
@@ -34,7 +34,7 @@
 ///// <param name="side">Side to move</param>
 //void _addKnightCaptures(board_t* b, moveList_t* move_s);
 //
-///* KING */
+///* Piece::KING */
 ///// <summary>
 ///// Generate all king moves for given side and add to quietMoveList.
 ///// </summary>

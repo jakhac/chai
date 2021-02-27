@@ -139,7 +139,6 @@ void init(board_t* b) {
 	auto start = std::chrono::high_resolution_clock::now();
 	initClearSetMask();
 	initSquareToRankFile();
-	initHashKeys(b);
 	initAttackerMasks();
 	initMVV_LVA();
 	initEvalMasks();
@@ -157,6 +156,7 @@ void init(board_t* b) {
 	cout << "Init keys and masks ... " << duration.count() << "ms\n";
 
 	start = std::chrono::high_resolution_clock::now();
+	cout << "here ready" << endl;
 	initRookMasks();
 	initRookMagicTable();
 	initBishopMasks();

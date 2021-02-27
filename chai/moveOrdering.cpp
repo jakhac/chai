@@ -3,8 +3,8 @@
 void initMVV_LVA() {
 	int attacker;
 	int victim;
-	for (attacker = P; attacker <= k; attacker++) {
-		for (victim = P; victim <= k; victim++) {
+	for (attacker = Piece::P; attacker <= Piece::k; attacker++) {
+		for (victim = Piece::P; victim <= Piece::k; victim++) {
 			MVV_LVA[victim][attacker] = victimScore[victim] + 6 - (victimScore[attacker] / 100);
 		}
 	}
@@ -17,7 +17,7 @@ bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkDef, int side, int at
 	}
 
 	bitboard_t lva;
-	for (int i = PAWN; i <= KING; i++) {
+	for (int i = Piece::PAWN; i <= Piece::KING; i++) {
 		lva = atkDef & b->pieces[i];
 		if (lva) {
 			return setMask[bitscanForward(lva)];
@@ -36,7 +36,7 @@ int see(board_t* b, const int move) {
 	int gain[32]{}, d = 0, side = b->side;
 
 	bitboard_t occ = b->occupied;
-	bitboard_t mayXray = b->pieces[PAWN] | b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
+	bitboard_t mayXray = b->pieces[Piece::PAWN] | b->pieces[Piece::BISHOP] | b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
 	bitboard_t attadef = squareAtkDef(b, to);
 	bitboard_t from = setMask[fromSq(move)];
 	bitboard_t used = 0ULL, discovered = 0ULL;
@@ -55,8 +55,8 @@ int see(board_t* b, const int move) {
 
 		if (from & mayXray) {
 			discovered = 0ULL;
-			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, QUEEN, side) | getPieces(b, BISHOP, side));
-			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, QUEEN, side) | getPieces(b, ROOK, side));
+			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, Piece::QUEEN, side) | getPieces(b, Piece::BISHOP, side));
+			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, Piece::QUEEN, side) | getPieces(b, Piece::ROOK, side));
 			attadef |= discovered & ~used;
 		}
 
@@ -82,7 +82,7 @@ int lazySee(board_t* b, const int move) {
 	int gain[32]{}, d = 0, side = b->side;
 
 	bitboard_t occ = b->occupied;
-	bitboard_t mayXray = b->pieces[PAWN] | b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
+	bitboard_t mayXray = b->pieces[Piece::PAWN] | b->pieces[Piece::BISHOP] | b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
 	bitboard_t attadef = squareAtkDef(b, to);
 	bitboard_t from = setMask[fromSq(move)];
 	bitboard_t used = 0ULL, discovered = 0ULL;
@@ -108,8 +108,8 @@ int lazySee(board_t* b, const int move) {
 
 		if (from & mayXray) {
 			discovered = 0ULL;
-			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, QUEEN, side) | getPieces(b, BISHOP, side));
-			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, QUEEN, side) | getPieces(b, ROOK, side));
+			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, Piece::QUEEN, side) | getPieces(b, Piece::BISHOP, side));
+			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, Piece::QUEEN, side) | getPieces(b, Piece::ROOK, side));
 			attadef |= discovered & ~used;
 		}
 

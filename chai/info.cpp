@@ -31,11 +31,11 @@ void printMove(const int move) {
 
 	if (promoted) {
 		promChar = 'q';
-		if (promoted == n || promoted == N) {
+		if (promoted == Piece::n || promoted == Piece::N) {
 			promChar = 'n';
-		} else if (promoted == r || promoted == R) {
+		} else if (promoted == Piece::r || promoted == Piece::R) {
 			promChar = 'r';
-		} else if (promoted == b || promoted == B) {
+		} else if (promoted == Piece::b || promoted == Piece::B) {
 			promChar = 'b';
 		}
 	}
@@ -58,12 +58,12 @@ string getStringMove(const int move) {
 	string promChar = " ";
 
 	if (promoted) {
-		promChar = "q ";
-		if (promoted == n || promoted == N) {
-			promChar = "n ";
-		} else if (promoted == r || promoted == R) {
-			promChar = "r ";
-		} else if (promoted == b || promoted == B) {
+		promChar = "Piece::q ";
+		if (promoted == Piece::n || promoted == Piece::N) {
+			promChar = "Piece::n ";
+		} else if (promoted == Piece::r || promoted == Piece::R) {
+			promChar = "Piece::r ";
+		} else if (promoted == Piece::b || promoted == Piece::B) {
 			promChar = "b ";
 		}
 	}

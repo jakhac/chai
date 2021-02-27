@@ -13,11 +13,6 @@
 
 
 /**
-* Castle keys. // TODO use fixed keys
-*/
-extern key_t castleKeys[16];
-
-/**
 * Stores up to 2 killer moves for each ply.
 */
 extern move_t killer[2][MAX_GAME_MOVES];
@@ -43,7 +38,7 @@ extern int histMax;
 extern move_t counterHeuristic[64][64][2];
 
 /**
- * Count major pieces (n, b, r, q, k) on current board
+ * Count major pieces (Piece::n, b, Piece::r, Piece::q, Piece::k) on current board
  *
  * @param  b board_t to call function.
  * @param  side Side of pieces.

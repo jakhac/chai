@@ -76,19 +76,19 @@ bool zugzwang(board_t* b) {
 	}
 
 	// Pawn endgame, no pieces left
-	bb = b->pieces[KNIGHT] | b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
+	bb = b->pieces[Piece::KNIGHT] | b->pieces[Piece::BISHOP] | b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
 	if (!bb) {
 		return true;
 	}
 
 	// No pawns left on the board
-	bb = b->pieces[PAWN];
+	bb = b->pieces[Piece::PAWN];
 	if (!bb) {
 		return true;
 	}
 
 	// Knight endgame (only pieces are knight, cannot lose tempo)
-	bb = b->pieces[BISHOP] | b->pieces[ROOK] | b->pieces[QUEEN];
+	bb = b->pieces[Piece::BISHOP] | b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
 	if (!bb) {
 		return true;
 	}
@@ -243,6 +243,25 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 		}
 	}
 
+	// Razoring
+	int razorValue = lazyEval + 125;
+	if (!inCheck
+		&& abs(beta) < abs(ISMATE)
+		&& razorValue < beta) {
+
+		if (depth == 1) {
+			int qScore = quiescence(alpha, beta, 0, b, s, localPV);
+			return max(qScore, razorValue);
+		}
+
+		if (razorValue < beta && depth <= 3) {
+			int qScore = quiescence(alpha, beta, 0, b, s, localPV);
+			if (qScore < beta) {
+				return max(qScore, razorValue);
+			}
+		}
+	}
+
 	/*
 	* Internal Iterative Deepening:
 	* If ttable probing does not find a hash move, there is no good move to start searching this
@@ -311,7 +330,9 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 			int capPieceValue = (MCHECK_CAP & currentMove) ? pieceScores[capPiece(currentMove)] : 200;
 
 			if (depth == 2 && lazyEval + capPieceValue + F2_MARGIN < alpha) {
-				searchExt--;
+				s->futileCnt++;
+				pop(b);
+				continue;
 			}
 
 			if (depth == 1 && lazyEval + capPieceValue + F1_MARGIN < alpha) {
@@ -386,7 +407,7 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 				histMax = max(histHeuristic[piece][to], histMax);
 
 				if (histMax > HISTORY_MAX) {
-					for (piece = P; piece <= k; piece++) {
+					for (piece = Piece::P; piece <= Piece::k; piece++) {
 						for (int sq = 0; sq < NUM_SQUARES; sq++) {
 							histHeuristic[piece][sq] /= 2;
 						}
@@ -636,7 +657,7 @@ void clearForSearch(board_t* b, search_t* s) {
 	}
 
 	// reset history heuristic
-	for (int i = P; i < k; i++) {
+	for (int i = Piece::P; i < Piece::k; i++) {
 		for (int j = 0; j < NUM_SQUARES; j++) {
 			histHeuristic[i][j] = 0;
 		}
@@ -647,7 +668,7 @@ void clearForSearch(board_t* b, search_t* s) {
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < NUM_SQUARES; j++) {
 			for (int k = 0; k < NUM_SQUARES; k++) {
-				counterHeuristic[j][k][i] = NO_MOVE;
+				counterHeuristic[j][Piece::k][i] = NO_MOVE;
 			}
 		}
 	}
@@ -739,7 +760,7 @@ int search(board_t* b, search_t* s) {
 
 void printSearchInfo(board_t* b, search_t* s) {
 	cout << "\n";
-	//cout << "AlphaBeta-Nodes: " << s->nodes << " Q-Nodes: " << s->qnodes << endl;
+	//cout << "AlphaBeta-Nodes: " << s->nodes << " Piece::Q-Nodes: " << s->qnodes << endl;
 	cout << "Ordering percentage: \t\t" << setprecision(4) << fixed << (float)(s->fhf / s->fh) << endl;
 	cout << "TTable hits/probed: \t\t" << setprecision(4) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
 	cout << "TTable valueHits/hits: \t\t" << setprecision(4) << fixed << (float)(b->tt->valueHit) / (b->tt->hit) << endl;

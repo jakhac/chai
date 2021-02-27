@@ -18,16 +18,16 @@ namespace {
 	};
 
 	TEST_F(MoveTest, CaptureFlag) {
-		m = serializeMove(0, 0, N, 0, 0);
+		m = serializeMove(0, 0, Piece::N, 0, 0);
 		EXPECT_EQ((MCHECK_CAP & m) > 0, 1);
 
-		m = serializeMove(0, 0, q, 0, 0);
+		m = serializeMove(0, 0, Piece::q, 0, 0);
 		EXPECT_EQ((MCHECK_CAP & m) > 0, 1);
 
 		m = serializeMove(0, 0, 0, 0, MFLAG_EP);
 		EXPECT_EQ((MCHECK_CAP & m) > 0, 0);
 
-		m = serializeMove(0, 0, b, 0, 0);
+		m = serializeMove(0, 0, Piece::b, 0, 0);
 		EXPECT_EQ((MCHECK_CAP & m) > 0, 1);
 	}
 
@@ -43,10 +43,10 @@ namespace {
 	}
 
 	TEST_F(MoveTest, PromFlag) {
-		m = serializeMove(0, 5, 0, N, 0);
+		m = serializeMove(0, 5, 0, Piece::N, 0);
 		EXPECT_EQ((MCHECK_PROM & m) > 0, 1);
 
-		m = serializeMove(0, 5, 0, q, 0);
+		m = serializeMove(0, 5, 0, Piece::q, 0);
 		EXPECT_EQ((MCHECK_PROM & m) > 0, 1);
 
 		m = serializeMove(0, 5, 0, 0, 0);
