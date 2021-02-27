@@ -243,7 +243,7 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 		}
 	}
 
-	// Razoring
+	// Razoring http://talkchess.com/forum3/viewtopic.php?t=43165
 	int razorValue = lazyEval + 125;
 	if (!inCheck
 		&& abs(beta) < abs(ISMATE)
@@ -729,7 +729,7 @@ int search(board_t* b, search_t* s) {
 		score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, NO_PV, pvLine);
 		//score = search_aspiration(b, s, currentDepth, score);
 
-		Assert(abs(score) < INF);
+		Assert(abs(score) < INF); // TODO
 
 		// forced stop, break and use pv line of previous iteration
 		if (s->stopped) break;

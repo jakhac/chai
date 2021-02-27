@@ -120,7 +120,7 @@
   - Enabled beta-cutoff store
     - chai_v2.4 - chai_v2.3.2 &rarr; 65%: 268-116-116 (+108)
     - chai - Bubble &rarr; 41%: 163-258-79 (-63)
-  - Reset MateKillers, F-Pruning pre-frontier nodes (reduced vs skipped)
+  - Reset MateKillers, F-Pruning pre-frontier nodes, Razoring
 - AlphaBeta
   - [ ] Futility Pruning
   - [ ] Mate Distance Pruning
@@ -130,10 +130,10 @@
 - Project
   - [x] Update typedefs: `key_t`
   - [x] Rename executables according to version
-  - [ ] Refactor `Board`-Class
+  - [x] Refactor `Board`-Class
     - Convert `Board` to `struct board_t`
     - Reduce `board_t` size and share huge arrays between instances if possible
-  - [ ] Namespaces for piece-types
+  - [x] Namespace `Piece::` for piece enums
 - Bugfixes:
   - [x] kingSafetyArray not enough values (8 atk sq possible)
   - [ ] `ISMATE` considers forced mate in quiescence search (lower `ISMATE` score)
