@@ -120,21 +120,21 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	 * If alpha or beta are already mate scores, bounds can be adjusted to prune irrelevant subtrees.
 	 * Mates are delivered faster, but does not speed are search.
 	 */
-	 //if (beta > (MATE - depth - 1)) {
-	 //	beta = MATE - depth - 1;
-	 //}
-	 //if (alpha < (-MATE + depth)) {
-	 //	alpha = -MATE + depth;
-	 //}
-	 //if (alpha >= beta) {
-	 //	return alpha;
-	 //}
+	if (beta > (MATE - depth - 1)) {
+		beta = MATE - depth - 1;
+	}
+	if (alpha < (-MATE + depth)) {
+		alpha = -MATE + depth;
+	}
+	if (alpha >= beta) {
+		return alpha;
+	}
 
-	 /*
-	 * Transposition Table Probing:
-	 * Probe the TTable and look for useful information from previous transpositions. Return hashScore if hash table
-	 * stored a better score at same or greater depth. Do not return if close to 50-move draw.
-	 */
+	/*
+	* Transposition Table Probing:
+	* Probe the TTable and look for useful information from previous transpositions. Return hashScore if hash table
+	* stored a better score at same or greater depth. Do not return if close to 50-move draw.
+	*/
 	int hashScore = -INF;
 	int hashDepth = -1;
 	uint8_t hashFlag = TT_NONE;
@@ -244,23 +244,24 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	}
 
 	// Razoring http://talkchess.com/forum3/viewtopic.php?t=43165
-	int razorValue = lazyEval + 125;
-	if (!inCheck
-		&& abs(beta) < abs(ISMATE)
-		&& razorValue < beta) {
+	bool doRazoring = !inCheck
+		&& !mateThreat
+		&& abs(beta) < ISMATE
+		&& depth <= RAZOR_DEPTH;
 
-		if (depth == 1) {
-			int qScore = quiescence(alpha, beta, 0, b, s, localPV);
-			return max(qScore, razorValue);
-		}
+	//if (doRazoring) {
+	//	// TODO: use dynamic pawn eval
+	//	int pawnValue = pieceScores[Piece::PAWN];
+	//	int razorMargin = 2 * pieceScores[Piece::PAWN] + (depth - 1 * pawnValue) / 4;
 
-		if (razorValue < beta && depth <= 3) {
-			int qScore = quiescence(alpha, beta, 0, b, s, localPV);
-			if (qScore < beta) {
-				return max(qScore, razorValue);
-			}
-		}
-	}
+	//	if (lazyEval + razorMargin <= alpha) {
+	//		int qScore = quiescence(alpha, beta, 0, b, s, localPV);
+
+	//		if (qScore + razorMargin <= alpha) {
+	//			return alpha;
+	//		}
+	//	}
+	//}
 
 	/*
 	* Internal Iterative Deepening:

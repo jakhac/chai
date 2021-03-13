@@ -22,6 +22,8 @@
 #define F1_MARGIN 125
 #define F2_MARGIN 550
 
+#define RAZOR_DEPTH 3
+
 /**
  * Maximum ply reached in alphaBeta and quiescence search.
  */

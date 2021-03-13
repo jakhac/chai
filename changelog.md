@@ -113,20 +113,40 @@
 **Changes in v2.4**
 
 - Elo
+
   - F-Pruning at frontier nodes
+
     - chai_v2.4 - chai_v2.3.2 &rarr; 54%: 203-162-135 (+28)
     - chai - TSCP181 &rarr; 64%: 284-143-73 (+100)
     - chai - Bubble &rarr; 30%: 115-311-74 (-147)
+
   - Enabled beta-cutoff store
+
     - chai_v2.4 - chai_v2.3.2 &rarr; 65%: 268-116-116 (+108)
     - chai - Bubble &rarr; 41%: 163-258-79 (-63)
-  - Reset MateKillers, F-Pruning pre-frontier nodes, Razoring
-- AlphaBeta
-  - [ ] Futility Pruning
+
+  - Reset MateKillers, F-Pruning pre-frontier nodes, Strelka-Razoring, Beta-Cutoff
+
+    - chai_strelka - Bubble &rarr; 37%: 127-236-67 (-92)
+    - chai_strelka - chai_v.2.4_fp_cont &rarr; 43%: 139-203-88 (-49)
+
+  - Replaced Strelka-Razoring with conservative margin, Beta-Cutoff
+
+    - chai_v2.4_razor_std - Bubble &rarr; 40%: 307-517-176 (-70)
+    - chai_v2.4_razor_std - chai_v.2.4_fp_cont &rarr; 49%: 355-378-267 (-7)
+
+  - F-Pruning frontier and pre frontier nodes, Reset MateKillers, Beta-Cutoff
+
+    - chai_v2.4 - Bubble &rarr; 43%: 342-482-176 (-49)
+    - chai_strelka - Bubble &rarr; 34%: 268-586-146 (-115)
+
+  - AlphaBeta
+  - [x] Futility Pruning
+  - [x] Razoring (implemented but was losing elo, retry with )
   - [ ] Mate Distance Pruning
-  - [ ] Razoring
   - [x] ContemptFactor considers drawn piece-combinations
   - [x] Reset MateKillers between search
+
 - Project
   - [x] Update typedefs: `key_t`
   - [x] Rename executables according to version
@@ -136,7 +156,7 @@
   - [x] Namespace `Piece::` for piece enums
 - Bugfixes:
   - [x] kingSafetyArray not enough values (8 atk sq possible)
-  - [ ] `ISMATE` considers forced mate in quiescence search (lower `ISMATE` score)
+  - [x] `ISMATE` considers forced mate in quiescence search (lower `ISMATE` score)
 
 # Todo
 
