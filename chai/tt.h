@@ -20,11 +20,6 @@ const int ttSize = 0x100000 * 256;
  */
 const int pawnTableSize = 0x100000 * 8;
 
-/*
-* Determines the number of buckets used in ttable.
-*/
-const int BUCKETS = 3;
-
 /**
  * Initialize transposition table: Clear used or allocated memory and re-allocate.
  *
