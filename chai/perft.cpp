@@ -1,12 +1,12 @@
 #include "perft.h"
 
-long long Perft::perftRoot(Board* b, int depth) {
-	Assert(b->checkBoard());
+long long Perft::perftRoot(board_t* b, int depth) {
+	Assert(checkBoard(b));
 	printf("\nPerft to depth %d\n", depth);
 	auto start = std::chrono::high_resolution_clock::now();
 
 	leafNodes = 0;
-	bool inCheck = b->isCheck(b->side);
+	bool inCheck = isCheck(b, b->side);
 	moveList_t _moveList[1];
 	generateMoves(b, _moveList, inCheck);
 
@@ -16,11 +16,11 @@ long long Perft::perftRoot(Board* b, int depth) {
 		move = _moveList->moves[i];
 
 		//skip illegal moves
-		if (!b->push(move)) continue;
+		if (!push(b, move)) continue;
 
 		long long cumnodes = leafNodes;
 		perft(b, depth - 1);
-		b->pop();
+		pop(b);
 		long long oldnodes = leafNodes - cumnodes;
 
 		cout << getStringMove(move) << " : " << oldnodes << endl;
@@ -33,15 +33,15 @@ long long Perft::perftRoot(Board* b, int depth) {
 	return leafNodes;
 }
 
-void Perft::perft(Board* b, int depth) {
-	Assert(b->checkBoard());
+void Perft::perft(board_t* b, int depth) {
+	Assert(checkBoard(b));
 
 	if (depth == 0) {
 		leafNodes++;
 		return;
 	}
 
-	bool inCheck = b->isCheck(b->side);
+	bool inCheck = isCheck(b, b->side);
 	moveList_t _moveList[1];
 	generateMoves(b, _moveList, inCheck);
 
@@ -53,7 +53,7 @@ void Perft::perft(Board* b, int depth) {
 		for (int i = 0; i < checkers->cnt; i++) {
 			if (!b->push(checkers->moves[i])) continue;
 
-			if (!b->isCheck(b->side)) {
+			if (!isCheck(b, b->side)) {
 				b->printBoard();
 				cout << "Move " << getStringMove(checkers->moves[i]) << " does not check opp king" << endl;
 				exit(0);
@@ -64,30 +64,30 @@ void Perft::perft(Board* b, int depth) {
 	}*/
 
 
-	Assert(b->attackerSet(b->side ^ 1) == _moveList->attackedSquares);
+	Assert(attackerSet(b, b->side ^ 1) == _moveList->attackedSquares);
 
 	int move;
 	for (int i = 0; i < _moveList->cnt; i++) {
 		move = _moveList->moves[i];
 
 		// skip illegal moves
-		if (!b->push(move)) continue;
+		if (!push(b, move)) continue;
 
 		perft(b, depth - 1);
-		b->pop();
+		pop(b);
 	}
 }
 
-//long long Perft::perftLegalRoot(Board* b, int depth) {
-//	Assert(b->checkBoard());
+//long long Perft::perftLegalRoot(board_t* b, int depth) {
+//	Assert(checkBoard(b));
 //	printf("\nPerft to depth %d\n", depth);
 //	auto start = std::chrono::high_resolution_clock::now();
 //
 //	leafNodes = 0;
 //	moveList_t _moveList[1];
-//	generateMoves(b, _moveList, b->isCheck(b->side));
+//	generateMoves(b, _moveList, isCheck(b, b->side));
 //
-//	bool inCheck = b->isCheck(b->side);
+//	bool inCheck = isCheck(b, b->side);
 //	int move;
 //	int moveNum = 0;
 //	for (int i = 0; i < _moveList->cnt; i++) {
@@ -115,9 +115,9 @@ void Perft::perft(Board* b, int depth) {
 //	return leafNodes;
 //}
 //
-//void Perft::perftLegal(Board* b, int depth) {
+//void Perft::perftLegal(board_t* b, int depth) {
 //
-//	Assert(b->checkBoard());
+//	Assert(checkBoard(b));
 //
 //	if (depth == 0) {
 //		leafNodes++;
@@ -125,9 +125,9 @@ void Perft::perft(Board* b, int depth) {
 //	}
 //
 //	moveList_t _moveList[1];
-//	generateMoves(b, _moveList, b->isCheck(b->side));
+//	generateMoves(b, _moveList, isCheck(b, b->side));
 //
-//	bool inCheck = b->isCheck(b->side);
+//	bool inCheck = isCheck(b, b->side);
 //	Assert(b->attackerSet(b->side ^ 1) == _moveList->attackedSquares);
 //
 //	int move;
@@ -137,7 +137,7 @@ void Perft::perft(Board* b, int depth) {
 //		//skip illegal moves
 //		if (isLegal(b, move, inCheck)) {
 //			b->push(move);
-//			Assert(!b->isCheck(b->side ^ 1));
+//			Assert(!isCheck(b, b->side ^ 1));
 //
 //			perftLegal(b, depth - 1);
 //
@@ -147,8 +147,8 @@ void Perft::perft(Board* b, int depth) {
 //	}
 //}
 
-//long long Perft::perftBulkRoot(Board* b, int depth) {
-//	ASSERT(b->checkBoard());
+//long long Perft::perftBulkRoot(board_t* b, int depth) {
+//	ASSERT(checkBoard(b));
 //	printf("\nPerft to depth %d\n", depth);
 //	auto start = std::chrono::high_resolution_clock::now();
 //
@@ -179,7 +179,7 @@ void Perft::perft(Board* b, int depth) {
 //}
 //
 //
-//long long Perft::perftBulk(Board* b, int depth) {
+//long long Perft::perftBulk(board_t* b, int depth) {
 //
 //	long long nodes = 0;
 //

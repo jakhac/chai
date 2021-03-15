@@ -52,14 +52,14 @@ void initMVV_LVA();
 /**
  * Gets least valuable piece
  *
- * @param  b	    Board to find least valuable piece on.
+ * @param  b	    board_t to find least valuable piece on.
  * @param  atkSet   Bitboard with all attackers and defenders.
  * @param  side	    The attacking side.
  * @param  atkPiece The initial attacking piece.
  *
  * @returns The bitboard with least valuable piece.
  */
-bitboard_t getLeastValuablePiece(Board* b, bitboard_t atkSet, int side, int atkPiece);
+bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkSet, int side, int atkPiece);
 
 /**
  * Calculates static exchange evaluation starting with given move. Fully calculates all
@@ -70,7 +70,7 @@ bitboard_t getLeastValuablePiece(Board* b, bitboard_t atkSet, int side, int atkP
  *
  * @returns Final score in centipawns after all exchanges have been made.
  */
-int see(Board* b, const int move);
+int see(board_t* b, const int move);
 
 /**
  * Calculates static exchange evalution starting with given move. Includes early exit with
@@ -84,7 +84,7 @@ int see(Board* b, const int move);
  * @returns Final score in centipawns after all exchanges have been made or estimated score
  * 			for winning capture.
  */
-int lazySee(Board* b, const int move);
+int lazySee(board_t* b, const int move);
 
 /**
  * Score moves according to moveOrdering.h rules. After scoring every move, best move is swapped
@@ -94,7 +94,7 @@ int lazySee(Board* b, const int move);
  * @param  moveList Reference to moveList to score moves in.
  * @param  hashMove Hash move found in pvLine or ttable.
  */
-void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove);
+void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove);
 
 /**
  * Score moves quiescence
@@ -102,7 +102,7 @@ void scoreMoves(Board* b, moveList_t* moveList, move_t hashMove);
  * @param  b	    Reference to board.
  * @param  moveList Reference to moveList to score moves in.
  */
-void scoreMovesQuiescence(Board* b, moveList_t* moveList);
+void scoreMovesQuiescence(board_t* b, moveList_t* moveList);
 
 /**
  * Update the index of the move with highest score yet. Used to swap best move to the end after

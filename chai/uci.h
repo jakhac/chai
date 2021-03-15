@@ -11,34 +11,38 @@
 #include "board.h"
 #include "search.h"
 
+#ifndef VERSION
+#define VERSION "v3.x"
+#endif // !VERSION
+
 /**
  * Enters UCI mode. Described in http://wbec-ridderkerk.nl/html/UCIProtocol.html
  *
- * @param  b A Board to process.
+ * @param  b A board_t to process.
  * @param  s A search_t to process.
  */
-void uciMode(Board* b, search_t* s);
+void uciMode(board_t* b, search_t* s);
 
 /**
  * Parse a position from UCI command.
  *
- * @param  b   A Board to process.
+ * @param  b   A board_t to process.
  * @param  cmd The command.
  */
-void uciParsePosition(Board* b, string cmd);
+void uciParsePosition(board_t* b, string cmd);
 
 /**
  * Parse search information from UCI go command.
  *
- * @param  b   A Board to process.
+ * @param  b   A board_t to process.
  * @param  s   A search_t to process.
  * @param  cmd The command.
  */
-void uciParseGo(Board* b, search_t* s, string cmd);
+void uciParseGo(board_t* b, search_t* s, string cmd);
 
 /**
  * Complete initialization for chess engine. Called once at startup.
  *
- * @param  b Board.
+ * @param  b board_t.
  */
-void init(Board* b);
+void init(board_t* b);

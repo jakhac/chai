@@ -3,10 +3,27 @@
 #include <cstdint>
 #include "stdlib.h"
 
+#define MAX_DEPTH 64
+#define MAX_GAME_MOVES 512
+
+/**
+ * Unsigned 64-Bit integer represents bitboard isntance.
+ */
 typedef unsigned long long bitboard_t;
 
-typedef int move_t;
+/**
+ * Unsigned 64-Bit integer Hash-Keys both hashtables.
+ */
+typedef unsigned long long key_t;
 
+/**
+ * Move type. All moves are unsigned.
+ */
+typedef uint32_t move_t;
+
+/**
+ * Store moves, scores and number entries in moveList. Used in move generation.
+ */
 struct moveList_t {
 	int cnt = 0;
 	int moves[256]; // MAX POSITION MOVES
@@ -15,23 +32,32 @@ struct moveList_t {
 	bitboard_t attackedSquares = 0ULL;
 };
 
+/**
+ * Stores board state to reverse pushed moves.
+ */
 struct undo_t {
 	move_t move;
 	int castle;
 	int enPas;
-	int fiftyMove;
-	bitboard_t zobKey;
-	bitboard_t pawnKey;
+	uint8_t fiftyMove;
+	key_t zobKey;
+	key_t pawnKey;
 };
 
+/**
+ * Transposition table entry.
+ */
 struct ttable_entry_t {
 	uint8_t flag = 0;
 	uint8_t depth = 0;
-	bitboard_t zobKey = 0x0;
 	int16_t score = 0;
 	move_t move = 0;
+	key_t zobKey = 0x0;
 };
 
+/**
+ * Transposition table instance. Contains stat-variables and pointer to entries.
+ */
 struct ttable_t {
 	ttable_entry_t* table = NULL;
 	int buckets = 0;
@@ -47,11 +73,17 @@ struct ttable_t {
 	int stored;
 };
 
+/**
+ * Pawn Table entry.
+ */
 struct pawntable_entry_t {
-	bitboard_t zobristPawnKey;
+	key_t zobristPawnKey;
 	int16_t eval;
 };
 
+/**
+ * Pawn table instance. Contains stat-variables and pointer to entry.
+ */
 struct pawntable_t {
 	pawntable_entry_t* table = NULL;
 	int entries;
@@ -65,6 +97,65 @@ struct pawntable_t {
 	int hit;
 };
 
+struct board_t {
+	// Current side, 0 for black and 1 for white. Use enums for debug purpose.
+	int side;
+
+	// Current en passant square. 0, if not set.
+	int enPas;
+
+	// Ply Counter.
+	int ply;
+
+	// Ply Counter for undoHistory array.
+	int undoPly;
+
+	// Fifty-move rule counter. Resets after captures.
+	int fiftyMove;
+
+	// Count half moves. Increment when push or pushNull, decrement when pop.
+	int halfMoves;
+
+	// CastlePermission stored as number between 0 and 15 (4 bits for each side and color).
+	int castlePermission;
+
+	// Unique zobrist key.
+	key_t zobristKey;
+
+	// Unique zobrist pawn key.
+	key_t zobristPawnKey;
+
+	// Store pieces for given color.
+	bitboard_t color[2];
+
+	// Store pieces for given type.
+	bitboard_t pieces[7];
+
+	// Store occupied squares.
+	bitboard_t occupied;
+
+	// Stores the currently attacked squares by side.
+	bitboard_t attackedSquares[2];
+
+	// Castle keys. // TODO use fixed keys
+	key_t castleKeys[16];
+
+	// Stack stores pushed moves as Undo objects.
+	undo_t undoHistory[MAX_GAME_MOVES];
+
+	// Transposition table.
+	ttable_t tt[1];
+
+	// Pawn hash table.
+	pawntable_t pawnTable[1];
+
+	// Stores the pv line.
+	move_t pvArray[MAX_DEPTH];
+};
+
+/**
+ * Store search parameters set by UCI commands.
+ */
 struct search_t {
 	int startTime;
 	int stopTime;
@@ -81,6 +172,9 @@ struct search_t {
 	bool quit = false;
 	bool stopped = false;
 
+	int futileCnt;
+	int futileFH;
+
 	// fail high heuristics
 	float fh;
 	float fhf;
@@ -89,22 +183,46 @@ struct search_t {
 	int pvHits = 0;
 };
 
+/**
+ * Store PV-Line.
+ */
 struct pv_line_t {
 	uint8_t len;
 	move_t line[64 * 64]; // MAX DEPTH
 };
 
-// TODO use typedefs?
-typedef enum PIECE_VALUES { EMPTY, P, N, B, R, Q, K, p, n, b, r, q, k } piece_t;
-enum PIECES_TYPES { NO_PIECE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
-enum FILES { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
-enum RANKS { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
-typedef enum COLORS { BLACK, WHITE, BOTH } color_t;
+namespace Piece {
 
-enum CASTLING_RIGHTS { K_CASTLE = 1, Q_CASTLE = 2, k_CASTLE = 4, q_CASTLE = 8 };
-enum GAME_STATE { START, MID, END };
+	enum PIECE_VALUES {
+		EMPTY, P, N, B, R, Q, K, p, n, b, r, q, k
+	};
 
-enum { TT_NONE, TT_ALPHA, TT_BETA, TT_SCORE };
+	enum PIECES_TYPES {
+		NO_PIECE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
+	};
+}
+
+enum FILES {
+	FILE_A, FILE_B, FILE_C, FILE_D,
+	FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE
+};
+
+enum RANKS {
+	RANK_1, RANK_2, RANK_3, RANK_4,
+	RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE
+};
+
+typedef enum COLORS {
+	BLACK, WHITE, BOTH
+} color_t;
+
+enum CASTLING_RIGHTS {
+	K_CASTLE = 1, Q_CASTLE = 2, k_CASTLE = 4, q_CASTLE = 8
+};
+
+enum TT_FLAG {
+	TT_NONE, TT_ALPHA, TT_BETA, TT_SCORE
+};
 
 enum SQUARES {
 	A8 = 56, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD,

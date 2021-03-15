@@ -8,9 +8,9 @@
 #include "mask.h"
 
 /**
- * Bit scan forward and return index. If Board is 0 return -1. Uses compiler bitscan.
+ * Bit scan forward and return index. If board_t is 0 return -1. Uses compiler bitscan.
  *
- * @param  board Board.
+ * @param  board board_t.
  *
  * @returns Index of first found bit.
  */
@@ -23,9 +23,9 @@ inline int bitscanForward(bitboard_t board) {
 }
 
 /**
- * Reversed bit scan forward and return index. If Board is 0 return -1.
+ * Reversed bit scan forward and return index. If board_t is 0 return -1.
  *
- * @param  board Board.
+ * @param  board board_t.
  *
  * @returns Index of first found bit.
  */

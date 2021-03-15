@@ -15,12 +15,12 @@ float interpolate(int a, int b, float t) {
 	return (float)a + t * ((float)b - (float)a);
 }
 
-int evalPST(Board* b, int side, float* t) {
+int evalPST(board_t* b, int side, float* t) {
 	bitboard_t pieces;
-	int score = 0, kSq = b->getKingSquare(side), sq;
+	int score = 0, kSq = getKingSquare(b, side), sq;
 
 	// PAWNS
-	pieces = b->getPieces(PAWN, side);
+	pieces = getPieces(b, Piece::PAWN, side);
 	int kingPawnDistance = 0, pawnSum = countBits(pieces);
 	while (pieces) {
 		sq = popBit(&pieces);
@@ -35,28 +35,28 @@ int evalPST(Board* b, int side, float* t) {
 	score += (int)interpolate(kingPawnDistance, kingPawnDistance * 2, *t);
 
 	// KNIGHTS
-	pieces = b->getPieces(KNIGHT, side);
+	pieces = getPieces(b, Piece::KNIGHT, side);
 	while (pieces) {
 		sq = popBit(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(KNIGHT_OPEN[sq], KNIGHT_ENDGAME[sq], *t);
 	}
 
-	pieces = b->getPieces(BISHOP, side);
+	pieces = getPieces(b, Piece::BISHOP, side);
 	while (pieces) {
 		sq = popBit(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(BISHOP_OPEN[sq], BISHOP_ENDGAME[sq], *t);
 	}
 
-	pieces = b->getPieces(ROOK, side);
+	pieces = getPieces(b, Piece::ROOK, side);
 	while (pieces) {
 		sq = popBit(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(ROOK_OPEN[sq], ROOK_ENDGAME[sq], *t);
 	}
 
-	pieces = b->getPieces(QUEEN, side);
+	pieces = getPieces(b, Piece::QUEEN, side);
 	while (pieces) {
 		sq = popBit(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
@@ -69,19 +69,19 @@ int evalPST(Board* b, int side, float* t) {
 	return score;
 }
 
-int materialScore(Board* b, int side) {
+int materialScore(board_t* b, int side) {
 	int score = 0;
 	for (int i = 1; i < 7; i++) {
-		score += countBits(b->getPieces(i, side)) * pieceScores[i];
+		score += countBits(getPieces(b, i, side)) * pieceScores[i];
 	}
 
 	return score;
 }
 
 // number of isolated pawns
-int isolatedPawns(Board* b, int side) {
+int isolatedPawns(board_t* b, int side) {
 	int isolated = 0, sq;
-	bitboard_t pawns = b->getPieces(PAWN, side);
+	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
 	bitboard_t refPawns = pawns;
 
 	while (pawns) {
@@ -95,10 +95,10 @@ int isolatedPawns(Board* b, int side) {
 }
 
 // number of passed pawns
-int passedPawns(Board* b, int side) {
+int passedPawns(board_t* b, int side) {
 	int passedScore = 0, sq;
-	bitboard_t pawns = b->getPieces(PAWN, side);
-	bitboard_t oppPawns = b->getPieces(PAWN, side ^ 1);
+	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
+	bitboard_t oppPawns = getPieces(b, Piece::PAWN, side ^ 1);
 	while (pawns) {
 		sq = popBit(&pawns);
 		if (!(pawnPassedMask[side][sq] & oppPawns)) {
@@ -110,10 +110,10 @@ int passedPawns(Board* b, int side) {
 	return (int)interpolate(passedScore, scale(4, passedScore), (float)b->halfMoves);
 }
 
-int stackedPawn(Board* b, int side) {
+int stackedPawn(board_t* b, int side) {
 	int stackedPenalty = 0;
 
-	bitboard_t pawns = b->getPieces(PAWN, side);
+	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
 	for (int i = 0; i < 8; i++) {
 		if (countBits(FILE_LIST[i] & pawns) > 1) {
 			stackedPenalty -= 4;
@@ -123,9 +123,9 @@ int stackedPawn(Board* b, int side) {
 	return stackedPenalty;
 }
 
-int pawnChain(Board* b, int side) {
+int pawnChain(board_t* b, int side) {
 	int result = 0;
-	bitboard_t pawns = b->getPieces(PAWN, side);
+	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
 	bitboard_t tPawns = pawns;
 
 	// use xMask to reward protected pawns
@@ -138,13 +138,13 @@ int pawnChain(Board* b, int side) {
 	return result;
 }
 
-int openFilesRQ(Board* b, int side) {
+int openFilesRQ(board_t* b, int side) {
 	int sq, score = 0;
-	bitboard_t pawns = b->pieces[PAWN];
+	bitboard_t pawns = b->pieces[Piece::PAWN];
 
 	// openFileBonus for rooks
-	bitboard_t rooks = b->getPieces(ROOK, side);
-	bitboard_t oppKing = b->getKingSquare(side ^ 1);
+	bitboard_t rooks = getPieces(b, Piece::ROOK, side);
+	bitboard_t oppKing = getKingSquare(b, side ^ 1);
 	while (rooks) {
 		sq = popBit(&rooks);
 		if (!(setMask[squareToFile[sq]] & pawns)) {
@@ -158,7 +158,7 @@ int openFilesRQ(Board* b, int side) {
 	}
 
 	// openFileBonus for queens
-	bitboard_t queens = b->getPieces(QUEEN, side);
+	bitboard_t queens = getPieces(b, Piece::QUEEN, side);
 	while (queens) {
 		sq = popBit(&queens);
 		if (!(setMask[squareToFile[sq]] & pawns)) {
@@ -169,15 +169,15 @@ int openFilesRQ(Board* b, int side) {
 	return score;
 }
 
-int bishopPair(Board* b, int side) {
-	Assert(((bool)(countBits(b->getPieces(BISHOP, side)) >= 2)) * 30 <= 30);
-	return ((bool)(countBits(b->getPieces(BISHOP, side)) >= 2)) * 30;
+int bishopPair(board_t* b, int side) {
+	Assert(((bool)(countBits(getPieces(b, Piece::BISHOP, side)) >= 2)) * 30 <= 30);
+	return ((bool)(countBits(getPieces(b, Piece::BISHOP, side)) >= 2)) * 30;
 }
 
-int kingSafety(Board* b, int side, float* t) {
+int kingSafety(board_t* b, int side, float* t) {
 	int result = 0;
-	int kSq = b->getKingSquare(side);
-	bitboard_t pawns = b->getPieces(PAWN, side);
+	int kSq = getKingSquare(b, side);
+	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
 
 	// count pawn shielder
 	result += countBits(pawnShield[side][kSq] & pawns) * 3;
@@ -187,7 +187,7 @@ int kingSafety(Board* b, int side, float* t) {
 
 	int openFilePenalty = 0;
 	// if not endgame
-	if (!(countBits(b->occupied) <= 7 || b->countMajorPieces(side) <= 6)) {
+	if (!(countBits(b->occupied) <= 7 || countMajorPieces(b, side) <= 6)) {
 		int file;
 		// punish open king file
 		if (!(FILE_LIST[squareToFile[kSq]] & pawns)) {
@@ -206,18 +206,21 @@ int kingSafety(Board* b, int side, float* t) {
 	}
 
 	// punish pinned pieces (excluding pawns) to kSq
-	result -= countBits(b->pinned(kSq, side) & ~pawns);
+	result -= countBits(getPinned(b, kSq, side) & ~pawns);
 
 	//scale depending on gamestate
 	result = (int)interpolate(result * 2, result, *t);
 
 	int attackedKingSquares = countBits(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
+	Assert(attackedKingSquares <= 8);
+
 	result -= kingZoneTropism[attackedKingSquares];
 
+	Assert(abs(result) < ISMATE);
 	return result;
 }
 
-int mobility(Board* b, int side, float* t) {
+int mobility(board_t* b, int side, float* t) {
 	int mobility = 0;
 	int restoreSide = b->side;
 	int interpolFactor =
@@ -277,12 +280,12 @@ int scale(int scaler, int pressure) {
 	return scaledPressure;
 }
 
-int evaluatePawns(Board* b, float* t) {
+int evaluatePawns(board_t* b, float* t) {
 	int score = 0;
 
 	// lack of pawns penalty
-	if (!b->getPieces(PAWN, WHITE)) score -= 16;
-	if (!b->getPieces(PAWN, WHITE)) score += 16;
+	if (!getPieces(b, Piece::PAWN, WHITE)) score -= 16;
+	if (!getPieces(b, Piece::PAWN, WHITE)) score += 16;
 
 	// isolani
 	score += -10 * (isolatedPawns(b, WHITE) - isolatedPawns(b, BLACK));
@@ -302,12 +305,12 @@ int evaluatePawns(Board* b, float* t) {
 
 	// reward defended pawns
 
-	Assert(score < ISMATE);
+	Assert(abs(score) < ISMATE);
 	return score;
 }
 
 
-int eval(Board* b) {
+int eval(board_t* b) {
 	int eval = 0;
 	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
@@ -319,8 +322,8 @@ int eval(Board* b) {
 	}
 
 	// calculate reused bitboards once and share between functions
-	b->attackedSquares[WHITE] = b->attackerSet(WHITE);
-	b->attackedSquares[BLACK] = b->attackerSet(BLACK);
+	b->attackedSquares[WHITE] = attackerSet(b, WHITE);
+	b->attackedSquares[BLACK] = attackerSet(b, BLACK);
 
 	b->pawnTable->probed++;
 	int pawnEval = 0;
@@ -337,11 +340,10 @@ int eval(Board* b) {
 		countBits(b->attackedSquares[BLACK] & CENTER_SQUARES));
 	int surroundingSquares = countBits(b->attackedSquares[WHITE] & ~CENTER_SQUARES) -
 		countBits(b->attackedSquares[BLACK] & ~CENTER_SQUARES);
-	int kingSquares = countBits(b->attackedSquares[WHITE] & kingAtkMask[b->getKingSquare(WHITE)]) -
-		countBits(b->attackedSquares[BLACK] & kingAtkMask[b->getKingSquare(BLACK)]);
+	int kingSquares = countBits(b->attackedSquares[WHITE] & kingAtkMask[getKingSquare(b, WHITE)]) -
+		countBits(b->attackedSquares[BLACK] & kingAtkMask[getKingSquare(b, BLACK)]);
 
 	eval += surroundingSquares + 2 * centerSquares + 3 * kingSquares;
-
 	eval += pawnEval;
 	eval += evalPST(b, WHITE, &interpolFactor) - evalPST(b, BLACK, &interpolFactor);
 	eval += materialScore(b, WHITE) - materialScore(b, BLACK);
@@ -357,7 +359,7 @@ int eval(Board* b) {
 	return eval * sign;
 }
 
-int lazyEval(Board* b) {
+int lazyEvalulation(board_t* b) {
 	int eval = 0;
 	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
@@ -379,8 +381,12 @@ int lazyEval(Board* b) {
 	return eval * sign;
 }
 
-int contemptFactor(Board* b) {
-	int contempt = lazyEval(b);
+int contemptFactor(board_t* b) {
+	if (insufficientMaterial(b)) {
+		return 0;
+	}
+
+	int contempt = lazyEvalulation(b);
 
 	switch (b->side) {
 		case WHITE:
@@ -393,7 +399,7 @@ int contemptFactor(Board* b) {
 	}
 }
 
-bool insufficientMaterial(Board* b) {
+bool insufficientMaterial(board_t* b) {
 
 	// King vs King
 	if (countBits(b->occupied) == 2) {
@@ -403,20 +409,20 @@ bool insufficientMaterial(Board* b) {
 	// 3 pieces on board:
 	if (countBits(b->occupied) == 3) {
 		// King Knight vs King
-		if (b->pieces[KNIGHT]) {
+		if (b->pieces[Piece::KNIGHT]) {
 			return true;
 		}
 
 		// King Bishop vs King
-		if (b->pieces[BISHOP]) {
+		if (b->pieces[Piece::BISHOP]) {
 			return true;
 		}
 	}
 
 	if (countBits(b->occupied) == 4) {
 		// King Bishop vs King Bishop (all same color)
-		if (countBits(b->pieces[BISHOP] & WHITE_SQUARES) == 2 &&
-			countBits(b->pieces[BISHOP] & BLACK_SQUARES) == 2) {
+		if (countBits(b->pieces[Piece::BISHOP] & WHITE_SQUARES) == 2 &&
+			countBits(b->pieces[Piece::BISHOP] & BLACK_SQUARES) == 2) {
 			return true;
 		}
 
@@ -424,8 +430,8 @@ bool insufficientMaterial(Board* b) {
 
 	if (countBits(b->occupied) == 5) {
 		// King Bishop Bishop vs King Bishop (all same color)
-		if (countBits(b->pieces[BISHOP] & WHITE_SQUARES) == 3 &&
-			countBits(b->pieces[BISHOP] & BLACK_SQUARES) == 3) {
+		if (countBits(b->pieces[Piece::BISHOP] & WHITE_SQUARES) == 3 &&
+			countBits(b->pieces[Piece::BISHOP] & BLACK_SQUARES) == 3) {
 			return true;
 		}
 

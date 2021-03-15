@@ -10,7 +10,7 @@
  *
  * @returns Score in centipawns.
  */
-int eval(Board* b);
+int eval(board_t* b);
 
 /**
  * Lazy evaluation function calculates static board evaulation. Considers piece values and
@@ -20,39 +20,39 @@ int eval(Board* b);
  *
  * @returns Score in centipawns.
  */
-int lazyEval(Board* b);
+int lazyEvalulation(board_t* b);
 
-bool insufficientMaterial(Board* b);
+bool insufficientMaterial(board_t* b);
 
 /**
  * Evaulate all pieces of given side regarding piece square tables. Opening and endgame tables
  * are interpolated based on halfMoves and material.
  *
- * @param  b    Board reference.
+ * @param  b    board_t reference.
  * @param  side Current side to score.
  * @param  t    Interpolation factor.
  *
  * @returns An int.
  */
-int evalPST(Board* b, int side, float* t);
+int evalPST(board_t* b, int side, float* t);
 
-int materialScore(Board* b, int side);
+int materialScore(board_t* b, int side);
 
-int isolatedPawns(Board* b, int side);
+int isolatedPawns(board_t* b, int side);
 
-int passedPawns(Board* b, int side);
+int passedPawns(board_t* b, int side);
 
-int stackedPawn(Board* b, int side);
+int stackedPawn(board_t* b, int side);
 
-int evaluatePawns(Board* b, float* t);
+int evaluatePawns(board_t* b, float* t);
 
-int openFilesRQ(Board* b, int side);
+int openFilesRQ(board_t* b, int side);
 
-int bishopPair(Board* b, int side);
+int bishopPair(board_t* b, int side);
 
-int kingSafety(Board* b, int side, float* t);
+int kingSafety(board_t* b, int side, float* t);
 
-int mobility(Board* b, int side, float* t);
+int mobility(board_t* b, int side, float* t);
 
 float interpolate(int a, int b, float t);
 
@@ -61,11 +61,11 @@ int scale(int scaler, int pressure);
 /**
  * Return superiority/inferiority based on material on board.
  *
- * @param  b Board.
+ * @param  b board_t.
  *
  * @returns Superiority/inferiority score viewed as player to move (signed)
  */
-int contemptFactor(Board* b);
+int contemptFactor(board_t* b);
 
 const int PAWN_OPEN[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0,
@@ -223,7 +223,7 @@ const int passedBonus[2][8] = {
 	{ 0, 5, 10, 20, 35, 60, 100, 200 }
 };
 
-const int kingZoneTropism[7] = { 0, 40, 60, 77, 87, 92, 95 };
+const int kingZoneTropism[9] = { 0, 40, 60, 77, 87, 92, 95, 97, 100 };
 
 const int openFileBonusR = 10;
 const int openFileBonusQ = 5;

@@ -7,12 +7,10 @@
 #include <fstream>
 #include <ctime>
 
-using namespace std;
-
 #include "move.h"
 #include "types.h"
 
-#define VERSION "v2.3.2"
+using namespace std;
 
 //#define TESTING
 //#define ASSERT
@@ -68,16 +66,14 @@ exit(1); \
 #endif // ASSERT
 
 const int NUM_SQUARES = 64;
-const int MAX_GAME_MOVES = 2048;
 const int MAX_POSITION_MOVES = 256;
-const int MAX_DEPTH = 64;
 const int NO_SCORE = 10000000;
 const int NO_MOVE = 0;
 const int NULL_MOVE = 129; // B1-B1 used as nullmove (impossible move, never generated)
 
 const int INF = 30000;
 const int MATE = 29000;
-const int ISMATE = MATE - MAX_DEPTH;
+const int ISMATE = MATE - (MAX_DEPTH * 2);
 
 const bitboard_t RANK_1_HEX = 0xFF;
 const bitboard_t RANK_2_HEX = 0xFF00;
