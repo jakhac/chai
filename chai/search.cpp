@@ -744,11 +744,11 @@ int search(board_t* b, search_t* s) {
 
 		//printSearchInfo(b, s);
 
-		//if (abs(score) > ISMATE) {
-		//	cout << "\n";
-		//	cout << "bestmove " << getStringMove(bestMove) << "\n";
-		//	return score;
-		//}
+		if (abs(score) > ISMATE) {
+			cout << "\n";
+			cout << "bestmove " << getStringMove(bestMove) << "\n";
+			return score;
+		}
 
 		cout << endl;
 		//cout << "Futile moves pruned: \t\t" << s->futileCnt << endl;

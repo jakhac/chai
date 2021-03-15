@@ -140,10 +140,14 @@
     - chai_v2.4 - Bubble &rarr; 43%: 342-482-176 (-49)
     - chai_strelka - Bubble &rarr; 34%: 268-586-146 (-115)
 
+  - Added Mate Distance Pruning
+
+    - chai_v2.4 - Bubble &rarr; 44%: 180-242-78 (-42)
+
   - AlphaBeta
   - [x] Futility Pruning
   - [x] Razoring (implemented but was losing elo, retry with )
-  - [ ] Mate Distance Pruning
+  - [x] Mate Distance Pruning
   - [x] ContemptFactor considers drawn piece-combinations
   - [x] Reset MateKillers between search
 
