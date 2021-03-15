@@ -162,6 +162,10 @@
   - [x] kingSafetyArray not enough values (8 atk sq possible)
   - [x] `ISMATE` considers forced mate in quiescence search (lower `ISMATE` score)
 
+**Changes in v2.5**
+
+- Elo
+
 # Todo
 
 - ~~Compiler optimizations~~
