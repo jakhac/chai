@@ -4,8 +4,8 @@
 int main() {
 	init(&board);
 	//parseFen(&board, STARTING_FEN);
-	//parseFen(&board, BUG_FEN);
-	parseFen(&board, "3r1k2/1q1P4/5b2/p3p2p/1p6/1B3P2/PPPQ4/1K1R4 w - - 1 0");
+	parseFen(&board, BUG_FEN);
+	//parseFen(&board, "3r1k2/1q1P4/5b2/p3p2p/1p6/1B3P2/PPPQ4/1K1R4 w - - 1 0");
 	printBoard(&board);
 
 	//moveList_t moveList[1];

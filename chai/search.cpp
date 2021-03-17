@@ -153,7 +153,7 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 			// Convert mate scores
 			hashToSearch(b, &hashScore);
 
-			if (hashFlag == TT_SCORE && !pvNode) {
+			if (hashFlag == TT_SCORE) {
 				b->tt->valueHit++;
 				return hashScore;
 			}
@@ -206,10 +206,10 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	* Give opposite side a free move and use nullScore as lower bound (alpha).
 	* If this position is still winning, e.g. fails high, it will never be reached.
 	* Restrict NMP to reasonable positions (zugzwang, depth, checks).
-	* TODO: skip pv nodes?
 	*/
 	bool doNull = nullOk
 		&& !inCheck
+		&& !pvNode
 		&& depth > 2
 		&& lazyEval > beta
 		&& abs(beta) < abs(ISMATE)
@@ -267,7 +267,7 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	* Internal Iterative Deepening:
 	* If ttable probing does not find a hash move, there is no good move to start searching this
 	* position. IID searches with reduced depth and fills ttable entries to ensure hash move.
-	* TODO: only use IID in PV nodes?
+	* TODO: only use IID in PV nodes? -> http://talkchess.com/forum3/viewtopic.php?t=40484
 	*/
 	if (hashMove == NO_MOVE && depth > 4) {
 		int depthIID = (depth / 2) + 1;
@@ -291,8 +291,8 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 
 
 	// Futility Pruning flag determines if f-pruning can be applied to this position.
-	// TODO: skip pv nodes
 	bool doFutility = !inCheck
+		&& !pvNode
 		&& depth <= 2
 		&& searchExt == 0
 		&& !mateThreat
@@ -311,9 +311,9 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 		if (!push(b, currentMove)) continue;
 
 		/**
-		 * Futility Pruning: TODO doc
-		 * Try to prove that moves in a poor position cannot improve alpha and are futile. Either skip
-		 * moves at frontier nodes or do a search to see if position does fails high.
+		 * Futility Pruning:
+		 * Try to prove that moves in a bad position cannot improve alpha and are futile.
+		 * If the move + (margin or capPiece) fails low, do not search any further.
 		 *
 		 * Restrictions:
 		 * - No promotions or ep moves
@@ -346,7 +346,27 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 
 		legalMoves++;
 
-		score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
+		// Always assume, that the first move is part of the principal variation.
+		if (legalMoves == 1) {
+			score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, pvNode, localPV);
+		} else {
+			//// Late Move Reductions
+			//if (legalMoves > 4) {
+			//	// do redcued zero window search
+			//} else {
+			//	score = alpha + 1;
+			//}
+
+			//if (score > alpha) {
+			score = -alphaBeta(-alpha - 1, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
+
+			if (score > alpha && score < beta) {
+				score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
+			}
+			//}
+		}
+
+		//score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
 
 		pop(b);
 
@@ -730,7 +750,7 @@ int search(board_t* b, search_t* s) {
 		score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, NO_PV, pvLine);
 		//score = search_aspiration(b, s, currentDepth, score);
 
-		Assert(abs(score) < INF); // TODO
+		Assert(abs(score) < INF);
 
 		// forced stop, break and use pv line of previous iteration
 		if (s->stopped) break;

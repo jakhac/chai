@@ -144,7 +144,8 @@
 
     - chai_v2.4 - Bubble &rarr; 44%: 180-242-78 (-42)
 
-  - AlphaBeta
+- AlphaBeta
+
   - [x] Futility Pruning
   - [x] Razoring (implemented but was losing elo, retry with )
   - [x] Mate Distance Pruning
@@ -165,6 +166,9 @@
 **Changes in v2.5**
 
 - Elo
+- AlphaBeta
+  - [ ] Principal Variation Search
+  - [ ] Consider `IS_PV` and `NO_PV` in pruning decisions
 
 # Todo
 
