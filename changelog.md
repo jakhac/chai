@@ -166,9 +166,16 @@
 **Changes in v2.5**
 
 - Elo
+
+  - Plain PVS, consider PV nodes in NMP and Futility Pruning
+    - chai_v2.5 - chai_v2.4 &rarr; 55%: 211-164-125 (+35)
+  - Late Move Reductions
+    - chai_v2.5 - chai_v2.4 &rarr; 74%: 307-70-123 (+182)
+
 - AlphaBeta
   - [ ] Principal Variation Search
-  - [ ] Consider `IS_PV` and `NO_PV` in pruning decisions
+  - [x] Consider `IS_PV` and `NO_PV` in pruning decisions
+  - [ ] Late Move Reductions
 
 # Todo
 

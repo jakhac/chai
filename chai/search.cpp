@@ -299,6 +299,12 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 		&& abs(alpha) <= 10000
 		&& abs(beta) <= 10000;
 
+	// LMR flag determines, if this position is a candidate for late move reductions.
+	bool lmrCandidate = !mateThreat
+		&& !inCheck
+		&& !searchExt
+		&& depth >= 3;
+
 	/**
 	 * This position could not be refuted yet. Therefore, moves are generated
 	 * and searching continues.
@@ -346,24 +352,31 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 
 		legalMoves++;
 
+		// TODO doc
 		// Always assume, that the first move is part of the principal variation.
 		if (legalMoves == 1) {
 			score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, pvNode, localPV);
 		} else {
-			//// Late Move Reductions
-			//if (legalMoves > 4) {
-			//	// do redcued zero window search
-			//} else {
-			//	score = alpha + 1;
-			//}
+			// Late Move Reductions, do reduced zero window search
+			if (legalMoves > 3
+				&& lmrCandidate
+				&& !(MCHECK_PROM_OR_CAP & currentMove)) {
 
-			//if (score > alpha) {
-			score = -alphaBeta(-alpha - 1, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
-
-			if (score > alpha && score < beta) {
-				score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
+				int lmrDepth = (legalMoves > 6) ? 3 : 2;
+				score = -alphaBeta(-alpha - 1, -alpha, depth - lmrDepth, b, s, DO_NULL, NO_PV, localPV);
+			} else {
+				// Ensure, that PVS is always exexcuted if LMR is not applicable
+				score = alpha + 1;
 			}
-			//}
+
+			// Principal Variation Search
+			if (score > alpha) {
+				score = -alphaBeta(-alpha - 1, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
+
+				if (score > alpha && score < beta) {
+					score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
+				}
+			}
 		}
 
 		//score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, localPV);
@@ -747,7 +760,7 @@ int search(board_t* b, search_t* s) {
 		selDepth = 0;
 		b->ply = 0;
 
-		score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, NO_PV, pvLine);
+		score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV, pvLine);
 		//score = search_aspiration(b, s, currentDepth, score);
 
 		Assert(abs(score) < INF);

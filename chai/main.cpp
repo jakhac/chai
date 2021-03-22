@@ -3,9 +3,9 @@
 
 int main() {
 	init(&board);
-	//parseFen(&board, STARTING_FEN);
-	parseFen(&board, BUG_FEN);
-	//parseFen(&board, "3r1k2/1q1P4/5b2/p3p2p/1p6/1B3P2/PPPQ4/1K1R4 w - - 1 0");
+	parseFen(&board, STARTING_FEN);
+	//parseFen(&board, BUG_FEN);
+	//parseFen(&board, "1r4r1/q2b1p1k/p4P1p/1pn1P1p1/3N4/5B2/PPP2R1Q/4R1K1 w - - 1 0");
 	printBoard(&board);
 
 	//moveList_t moveList[1];
@@ -58,7 +58,7 @@ void play(board_t* b, Perft* p, search_t* s) {
 
 		// SEARCH POSITION
 		if (m == "s") {
-			s->depth = 12;
+			s->depth = 15;
 			s->startTime = getTimeMs();
 			s->stopTime = getTimeMs() + 5000;
 

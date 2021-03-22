@@ -72,7 +72,7 @@ namespace {
 
 	TEST_F(SearchTest, Fisher_3) {
 		parseFen(pBoard, "3r1k2/1q1P4/5b2/p3p2p/1p6/1B3P2/PPPQ4/1K1R4 w - - 1 0");
-		pSearch->depth = 3;
+		pSearch->depth = 6;
 		pSearch->depthSet = true;
 		pSearch->timeSet = false;
 
@@ -81,7 +81,7 @@ namespace {
 
 	TEST_F(SearchTest, Fisher_5) {
 		parseFen(pBoard, "1r4r1/q2b1p1k/p4P1p/1pn1P1p1/3N4/5B2/PPP2R1Q/4R1K1 w - - 1 0");
-		pSearch->depth = 5;
+		pSearch->depth = 9;
 		pSearch->depthSet = true;
 		pSearch->timeSet = false;
 

@@ -13,7 +13,7 @@
 using namespace std;
 
 //#define TESTING
-//#define ASSERT
+#define ASSERT
 
 /**
  * Write logging information into log.txt file.
