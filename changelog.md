@@ -168,9 +168,11 @@
 - Elo
 
   - Plain PVS, consider PV nodes in NMP and Futility Pruning
-    - chai_v2.5 - chai_v2.4 &rarr; 55%: 211-164-125 (+35)
+    - chai_v2.5_std - chai_v2.4 &rarr; 55%: 211-164-125 (+35)
   - Late Move Reductions
-    - chai_v2.5 - chai_v2.4 &rarr; 74%: 307-70-123 (+182)
+    - chai_v2.5_std - chai_v2.4 &rarr; 74%: 307-70-123 (+182)
+  - Forfeit on Time Bugfix, forced checkmate in quiescence fix
+    - chai_v2.5.2 - chai_v2.5_std &rarr; 63%: 251-96-243 (+92)
 
 - AlphaBeta
   - [x] Principal Variation Search
@@ -188,6 +190,7 @@
   - [x] Disabled `pvLine_t` structs on stack due to overflow issues
   - [x] Swapped beta cutoff order in standPat (resolves INF returns from quiescence)
   - [x] `parseFen()` now assigns halfMoves to `fiftyMove`, `isRepetition()` was adapted to this change
+  - [ ] Not finding mates: Unforced Draw in winning endgame
 
 # Todo
 
