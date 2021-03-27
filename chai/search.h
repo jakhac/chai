@@ -36,8 +36,8 @@ const int HISTORY_MAX = 0x4000;
 
 /**
   Principal variation line used for root alphaBeta call. Contains main line after search finished.
- */
-static pv_line_t pvLine[1];
+*/
+//static pv_line_t pvLine[1];
 
 /**
  * Remember checks given in quiescence to detect checkmates. Quiescence depths are stored
@@ -132,7 +132,7 @@ bool zugzwang(board_t* b);
  * @param  move_s Move struct with all moves and scores.
  * @param  curIdx Current index in moveList.
  */
-void getNextMove(board_t* b, moveList_t* move_s, int curIdx);
+void getNextMove(moveList_t* move_s, int curIdx);
 
 /**
  * Swap to moves and their score in given MOVE_S struct. Returns if id1 is equal to id2.

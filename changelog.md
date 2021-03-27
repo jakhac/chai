@@ -173,9 +173,21 @@
     - chai_v2.5 - chai_v2.4 &rarr; 74%: 307-70-123 (+182)
 
 - AlphaBeta
-  - [ ] Principal Variation Search
+  - [x] Principal Variation Search
   - [x] Consider `IS_PV` and `NO_PV` in pruning decisions
-  - [ ] Late Move Reductions
+  - [x] Late Move Reductions
+  - [ ] Interal Iterative Deepening considers node type
+- Project
+  - [x] Replaced `pvLine_t` with `printTTablePV()`
+- Eval
+  - [ ] Check: insufficient material cannot be influenced by contempt factor
+- Bugfixes
+  - [x] Removed Mate Distance Pruning (no noticable gain, but drawed king rook vs king)
+  - [x] Forced Quiescence checkmates used `moveList->cnt` instead of `legalMoves`
+  - [x] Quiescence check up used `nodes` instead of `qnodes`
+  - [x] Disabled `pvLine_t` structs on stack due to overflow issues
+  - [x] Swapped beta cutoff order in standPat (resolves INF returns from quiescence)
+  - [x] `parseFen()` now assigns halfMoves to `fiftyMove`, `isRepetition()` was adapted to this change
 
 # Todo
 

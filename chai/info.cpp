@@ -58,11 +58,11 @@ string getStringMove(const int move) {
 	string promChar = " ";
 
 	if (promoted) {
-		promChar = "Piece::q ";
+		promChar = "q ";
 		if (promoted == Piece::n || promoted == Piece::N) {
-			promChar = "Piece::n ";
+			promChar = "n ";
 		} else if (promoted == Piece::r || promoted == Piece::R) {
-			promChar = "Piece::r ";
+			promChar = "r ";
 		} else if (promoted == Piece::b || promoted == Piece::B) {
 			promChar = "b ";
 		}
@@ -133,7 +133,7 @@ void printUCI(search_t* s, int d, int selDpt, int score) {
 
 	if (abs(score) >= ISMATE) {
 		string sign = (score > 0) ? "" : "-";
-		scoreStr += "mate " + sign + to_string(MATE - abs(score));
+		scoreStr += "mate " + sign + to_string(MATE_VALUE - abs(score));
 	} else {
 		scoreStr += "cp " + to_string(score);
 	}
@@ -162,6 +162,27 @@ void printPV(move_t* moves, int len) {
 	//		cout << getStringMove(b->pvArray[i]);
 	//	}
 	//#endif // STRUCT_PV
+}
+
+void printTTablePV(board_t* b, int depth) {
+	int cnt = 0;
+	cout << " pv ";
+
+	for (int i = 0; i <= depth; i++) {
+		move_t pvMove = probePV(b);
+
+		if (pvMove != NO_MOVE && isLegal(b, pvMove)) {
+			cout << getStringMove(pvMove);
+			push(b, pvMove);
+			cnt++;
+		} else {
+			// Ttable entry was overwritten or no further entries
+			break;
+		}
+	}
+
+	while (cnt--) pop(b);
+
 }
 
 string getTime() {

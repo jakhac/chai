@@ -94,6 +94,7 @@ void uciParseGo(board_t* b, search_t* s, string cmd) {
 		movesLeft = 1;
 	}
 
+
 	cout << "Parsed wbtime:" << time << " wbinc:" << inc << " movetime:" << moveTime << endl;
 
 	// if stop is set
@@ -156,7 +157,6 @@ void init(board_t* b) {
 	cout << "Init keys and masks ... " << duration.count() << "ms\n";
 
 	start = std::chrono::high_resolution_clock::now();
-	cout << "here ready" << endl;
 	initRookMasks();
 	initRookMagicTable();
 	initBishopMasks();

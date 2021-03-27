@@ -223,10 +223,10 @@ int kingSafety(board_t* b, int side, float* t) {
 int mobility(board_t* b, int side, float* t) {
 	int mobility = 0;
 	int restoreSide = b->side;
-	int interpolFactor =
+	//int interpolFactor = // TODO ?
 
-		// how many pieces are attacked by side
-		mobility += countBits(b->attackedSquares[side] & b->color[side ^ 1]) / 4;
+	// how many pieces are attacked by side
+	mobility += countBits(b->attackedSquares[side] & b->color[side ^ 1]) / 4;
 
 	// weighted sum of possible moves, reward knight, bishop and rook moves
 	moveList_t move_s[1];

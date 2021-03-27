@@ -13,7 +13,7 @@
 using namespace std;
 
 //#define TESTING
-#define ASSERT
+//#define ASSERT
 
 /**
  * Write logging information into log.txt file.
@@ -28,9 +28,10 @@ inline void logDebug(string logMsg, string file, string line) {
 	gmtime_s(gmtm, &now);
 	asctime_s(buffer, gmtm);
 
-	ofstream ofs("assertLog.txt", std::ios_base::app | std::ios_base::app);
+	ofstream ofs("./assertLog.txt", std::ios_base::app);
 
 	string streamMsg = "At " + string(buffer) + " Error in:" + file + " at line " + line + "\n\n";
+	cout << streamMsg;
 	ofs << streamMsg;
 	ofs.close();
 }
@@ -72,8 +73,8 @@ const int NO_MOVE = 0;
 const int NULL_MOVE = 129; // B1-B1 used as nullmove (impossible move, never generated)
 
 const int INF = 30000;
-const int MATE = 29000;
-const int ISMATE = MATE - (MAX_DEPTH * 2);
+const int MATE_VALUE = 29000;
+const int ISMATE = MATE_VALUE - (MAX_DEPTH * 2);
 
 const bitboard_t RANK_1_HEX = 0xFF;
 const bitboard_t RANK_2_HEX = 0xFF00;

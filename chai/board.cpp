@@ -197,7 +197,9 @@ void printBoard(board_t* b) {
 	printf("Zobrist key: %llX\n", b->zobristKey);
 	printf("Pawn key: %llX\n", b->zobristPawnKey);
 	cout << "En passant square: " << b->enPas << endl;
-	cout << "Halfmoves " << b->halfMoves << ", undoPly " << b->undoPly << ", ply " << b->ply << endl;
+	cout << "Halfmoves " << b->halfMoves << ", undoPly " << b->undoPly
+		<< ", ply " << b->ply << ", fiftyMoves " << b->fiftyMove << endl;
+
 	printf("Castle permission: %c%c%c%c\n",
 		b->castlePermission & K_CASTLE ? 'K' : ' ',
 		b->castlePermission & Q_CASTLE ? 'Q' : ' ',
@@ -305,7 +307,8 @@ bool parseFen(board_t* board, string fen) {
 		index += 2;
 	}
 
-	board->halfMoves += atoi(&fen[index]);
+	board->fiftyMove += atoi(&fen[index]);
+
 	index += 2;
 
 	string fullMoveStr = "";

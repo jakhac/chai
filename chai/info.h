@@ -12,6 +12,7 @@
 #include "defs.h"
 #include "mask.h"
 #include "board.h"
+#include "tt.h"
 
 using namespace std;
 
@@ -70,6 +71,7 @@ void printUCI(search_t* s, int d, int selDpt, int score);
  */
 void printPV(move_t* moves, int len);
 
+void printTTablePV(board_t* b, int depth);
 /**
  * Write logging information into log.txt file.
  *

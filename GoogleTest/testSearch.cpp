@@ -54,7 +54,7 @@ namespace {
 
 	TEST_F(SearchTest, MateIn7) {
 		parseFen(pBoard, "2rnqb2/1b1n1Nk1/p2PB1Pp/1p6/4Q3/8/PP4PP/R4RK1 w - - 1 0");
-		pSearch->depth = 5; // forced mate found in quiescence
+		pSearch->depth = 7;
 		pSearch->depthSet = true;
 		pSearch->timeSet = false;
 
