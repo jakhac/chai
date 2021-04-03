@@ -74,7 +74,7 @@ const int NULL_MOVE = 129; // B1-B1 used as nullmove (impossible move, never gen
 
 const int INF = 30000;
 const int MATE_VALUE = 29000;
-const int ISMATE = MATE_VALUE - (MAX_DEPTH * 2);
+const int ISMATE = MATE_VALUE - 1000;
 
 const bitboard_t RANK_1_HEX = 0xFF;
 const bitboard_t RANK_2_HEX = 0xFF00;

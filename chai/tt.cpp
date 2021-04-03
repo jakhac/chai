@@ -61,6 +61,9 @@ void storeTT(board_t* b, move_t move, int score, int flag, int depth) {
 		b->tt->collided++;
 	}
 
+	if (score > ISMATE) score += b->ply;
+	else if (score < -ISMATE) score -= b->ply;
+
 	// Replace entry has been determined: Store information 
 	(bucket + offset)->zobKey = b->zobristKey;
 	(bucket + offset)->move = move;
@@ -84,10 +87,16 @@ bool probeTT(board_t* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* h
 			Assert((bucket + i)->move != NO_MOVE);
 			Assert((bucket + i)->score >= -INF && (bucket + i)->score <= INF);
 
+			int newScore = (bucket + i)->score;
+
+			*hashScore = newScore;
+			if (*hashScore > ISMATE) *hashScore -= b->ply;
+			else if (*hashScore < -ISMATE) *hashScore += b->ply;
+
 			*hashDepth = (bucket + i)->depth;
 			*move = (bucket + i)->move;
 			*hashFlag = (bucket + i)->flag;
-			*hashScore = (bucket + i)->score;
+			//*hashScore = (bucket + i)->score;
 
 			return true;
 		}
@@ -104,6 +113,8 @@ void prefetchTTEntry(board_t* b) {
 }
 
 void hashToSearch(board_t* b, int* score) {
+	return;
+
 	if (*score > ISMATE) {
 		*score -= b->ply;
 	} else if (*score < -ISMATE) {
@@ -112,6 +123,8 @@ void hashToSearch(board_t* b, int* score) {
 }
 
 void searchToHash(board_t* b, int* score) {
+	return;
+
 	if (*score > ISMATE) {
 		score += b->ply;
 	} else if (*score < -ISMATE) {

@@ -1,5 +1,6 @@
 #include "search.h"
 
+
 int selDepth = 0;
 int deltaPruning = 0;
 
@@ -18,8 +19,6 @@ void checkSearchInfo(search_t* s) {
 }
 
 bool isRepetition(board_t* b) {
-
-	// TODO verify max() condition
 	for (int index = max(0, b->undoPly - b->fiftyMove); index < b->undoPly - 1; ++index) {
 		Assert(index >= 0 && index < MAX_GAME_MOVES);
 
@@ -105,7 +104,122 @@ bool zugzwang(board_t* b) {
 	return false;
 }
 
-int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine) {
+int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move) {
+	Assert(checkBoard(b));
+
+	// Scoring variables
+	int score = -INF;
+	int bestScore = score;
+	int bestMove = NO_MOVE;
+
+	// Local variables to run alphaBeta Search
+	bool inCheck = isCheck(b, b->side);
+	bool moveGivesCheck = false;
+	int legalMoves = 0;
+	int alpha = -INF;
+	int beta = INF;
+
+	// Generate moves and score them
+	move_t hashMove = probePV(b);
+	moveList_t moveList[1];
+	generateMoves(b, moveList, inCheck);
+	scoreMoves(b, moveList, hashMove);
+
+	// Loop through all root moves
+	for (int i = 0; i < moveList->cnt; i++) {
+		getNextMove(moveList, i);
+		move_t currentMove = moveList->moves[i];
+		Assert(currentMove != NO_MOVE);
+
+		if (!push(b, currentMove)) continue;
+
+		legalMoves++;
+
+		// TODO uci curr move
+
+		// Principal Variation Search
+		if (legalMoves == 1) {
+			score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, IS_PV);
+		} else {
+			// Late Move Reductions, do reduced zero window search
+			if (legalMoves > 3
+				&& !inCheck
+				&& depth >= 3
+				&& !(MCHECK_PROM_OR_CAP & currentMove)
+				&& !isCheck(b, b->side)) {
+
+				int lmrDepth = (legalMoves > 6) ? 3 : 2;
+				score = -alphaBeta(-alpha - 1, -alpha, depth - lmrDepth, b, s, DO_NULL, NO_PV);
+			} else {
+				// Ensure, that PVS is always exexcuted if LMR is not applicable
+				score = alpha + 1;
+			}
+
+			// Principal Variation Search
+			if (score > alpha) {
+				score = -alphaBeta(-alpha - 1, -alpha, depth - 1, b, s, DO_NULL, NO_PV);
+
+				if (score > alpha && score < beta) {
+					score = -alphaBeta(-beta, -alpha, depth - 1, b, s, DO_NULL, NO_PV);
+				}
+			}
+		}
+
+		pop(b);
+
+		if ((s->nodes & 2047) == 0) {
+			checkSearchInfo(s);
+		}
+
+		s->nodes++;
+
+		// Keep track of best move and best score so far
+		if (score > bestScore) {
+			bestScore = score;
+			bestMove = currentMove;
+
+			if (bestScore > alpha) {
+				alpha = bestScore;
+			}
+		}
+
+		// Useful for aspiration window around previous score
+		if (alpha >= beta) {
+			if (legalMoves == 1) {
+				s->fhf++;
+			}
+			s->fh++;
+
+			Assert(currentMove != NO_MOVE);
+			Assert(abs(beta) <= INF);
+
+			// Store position with bestMove and beta flag
+			storeTT(b, currentMove, beta, TT_BETA, depth);
+
+			*move = bestMove;
+			return beta;
+		}
+
+	}
+
+	// If no moves were possible in this node, position is either a checkmate or stalemate.
+	if (legalMoves == 0) {
+		if (inCheck) {
+			// Checkmate
+			return -MATE_VALUE;
+		} else {
+			// Stalemate
+			return 0;
+		}
+	}
+
+	storeTT(b, bestMove, bestScore, TT_SCORE, depth);
+
+	*move = bestMove;
+	return bestScore;
+}
+
+int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool nullOk, bool pvNode) {
 	Assert(checkBoard(b));
 	Assert(beta > alpha);
 
@@ -113,32 +227,37 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	* In case of draw (3-fold-rep or 50-move rule) decide wether current position is winnable and
 	* either score draw as 0 or penalize draw.
 	*/
-	if ((isRepetition(b) || b->fiftyMove >= 100) && b->ply > 0) {
+	if (b->fiftyMove >= 100 || isRepetition(b) || insufficientMaterial(b)) {
 		return contemptFactor(b);
 	}
+
+	// Drop into quiescence if maximum depth is reached.
+	if (depth <= 0 || b->ply > MAX_DEPTH) {
+		int quietScore = quiescence(alpha, beta, 0, b, s);
+		Assert(abs(quietScore) < INF);
+
+		return quietScore;
+	}
+
+	// check for time and depth
+	if ((s->nodes & 2047) == 0) {
+		checkSearchInfo(s);
+	}
+
+	s->nodes++;
 
 	/**
 	 * Mate Distance Pruning:
 	 * If alpha or beta are already mate scores, bounds can be adjusted to prune irrelevant subtrees.
 	 * Mates are delivered faster, but does not speed are search.
-	 */
-	if (beta > (MATE_VALUE - depth - 1)) {
-		beta = MATE_VALUE - depth - 1;
-	}
-	if (alpha < (-MATE_VALUE + depth)) {
-		alpha = -MATE_VALUE + depth;
-	}
-	if (alpha >= beta) {
+	*/
+	alpha = max(alpha, -MATE_VALUE + b->ply);
+	beta = min(beta, MATE_VALUE - b->ply - 1);
+	if (alpha >= beta)
 		return alpha;
-	}
-
-	/* mate-distance pruning */
-	//alpha = max(alpha, -MATE_VALUE + b->ply);
-	//beta = min(beta, MATE_VALUE - b->ply - 1);
-	//if (alpha >= beta)
-	//	return alpha;
 
 	prefetchTTEntry(b);
+
 
 	/*
 	* Transposition Table Probing:
@@ -180,35 +299,15 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 		}
 	}
 
-	//pv_line_t localPV[1]{};
-	//localPV->len = 0;
-
-	// Drop into quiescence if maximum depth is reached.
-	if (depth <= 0 || b->ply > MAX_DEPTH) {
-		//pvLine->len = 0;
-
-		int quietScore = quiescence(alpha, beta, 0, b, s, nullptr);
-		Assert(abs(quietScore) < INF);
-
-		return quietScore;
-	}
-
-	// check for time and depth
-	if ((s->nodes & 2047) == 0) {
-		checkSearchInfo(s);
-	}
-
-	s->nodes++;
-
 	// variables relevant for mulitple pruning techniques
-	bool inCheck = isCheck(b, b->side);
 	bool mateThreat = false;
 	int lazyEval = lazyEvalulation(b);
-	//int staticEval = eval(b);
-	int searchExt = 0;
 
 	int alphaIID = alpha;
 	int betaIID = beta;
+
+	bool inCheck = isCheck(b, b->side);
+	int searchExt = 0;
 
 	// no evaluation if side is in check, no performance loss due to lower branching factor
 	if (inCheck) {
@@ -235,18 +334,20 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 		int nullScore = 0;
 
 		pushNull(b);
-		nullScore = -alphaBeta(-beta, -beta + 1, depth - 1 - reduction, b, s, NO_NULL, NO_PV, nullptr);
+		nullScore = -alphaBeta(-beta, -beta + 1, depth - 1 - reduction, b, s, NO_NULL, NO_PV);
 		pop(b);
 
 		if (s->stopped) {
 			return 0;
 		}
 
+		// TODO verification search (Rubi)
+
 		// Even after giving opponent free move, position is winning..
 		if (nullScore >= beta && abs(nullScore) < ISMATE) {
 			//Beta cutoff->store in ttable
 			if (depth - 1 - reduction > 0) {
-				storeTT(b, NULL_MOVE, nullScore, TT_ALPHA, depth - 1 - reduction); // TODO might cause forfeit
+				storeTT(b, NULL_MOVE, nullScore, TT_ALPHA, depth - 1 - reduction);
 			}
 			return nullScore;
 		}
@@ -285,7 +386,9 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	*/
 	if (hashMove == NO_MOVE && depth > 4) {
 		int depthIID = (depth / 2) + 1;
-		alphaBeta(alphaIID, betaIID, depthIID, b, s, NO_NULL, NO_PV, nullptr);
+		int IIDScore = alphaBeta(alphaIID, betaIID, depthIID, b, s, NO_NULL, NO_PV);
+
+		// TODO use alphaBetaRoot with guaranteed rootMove
 		hashMove = probePV(b);
 	}
 
@@ -379,16 +482,16 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 		// TODO doc
 		// Always assume, that the first move is part of the principal variation.
 		if (legalMoves == 1) {
-			score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, pvNode, nullptr);
+			score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, pvNode);
 		} else {
 			// Late Move Reductions, do reduced zero window search
 			if (legalMoves > 3
-				//&& !moveGivesCheck
+				&& !moveGivesCheck
 				&& lmrCandidate
 				&& !(MCHECK_PROM_OR_CAP & currentMove)) {
 
 				int lmrDepth = (legalMoves > 6) ? 3 : 2;
-				score = -alphaBeta(-alpha - 1, -alpha, depth - lmrDepth, b, s, DO_NULL, NO_PV, nullptr);
+				score = -alphaBeta(-alpha - 1, -alpha, depth - lmrDepth, b, s, DO_NULL, NO_PV);
 			} else {
 				// Ensure, that PVS is always exexcuted if LMR is not applicable
 				score = alpha + 1;
@@ -396,10 +499,10 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 
 			// Principal Variation Search
 			if (score > alpha) {
-				score = -alphaBeta(-alpha - 1, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, nullptr);
+				score = -alphaBeta(-alpha - 1, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV);
 
 				if (score > alpha && score < beta) {
-					score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV, nullptr);
+					score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, NO_PV);
 				}
 			}
 		}
@@ -446,7 +549,7 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 			* Mate Killers:
 			* If a move scores near checkmate, order it above standard killers.
 			*/
-			if (bestScore >= (MATE_VALUE - 1000) && currentMove > 1) {
+			if (bestScore >= ISMATE && currentMove > 1) {
 				mateKiller[b->ply] = currentMove;
 			}
 
@@ -478,7 +581,7 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 			* If currentMove caused a beta cutoff, store previous move FROM and TO
 			* and assign currentMove as an intuitive counter move for consideration in
 			* move ordering. Counter moves are not stored if in check or currentMove is
-			* a capture or promotion (already considered in move ordering). Only possible if ply > 0;
+			* a capture or promotion (already considered in move ordering). Only possible if ply > 0.
 			*/
 			if (!inCheck
 				&& b->ply > 0
@@ -514,11 +617,6 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 			*/
 			if (score > alpha) {
 				alpha = score;
-
-				//pvLine->line[0] = currentMove;
-				//memcpy(pvLine->line + 1, localPV->line, localPV->len * sizeof(currentMove));
-				//pvLine->len = localPV->len + 1;
-				//Assert(pvLine->len <= MAX_DEPTH);
 			}
 		}
 	}
@@ -555,7 +653,7 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	return alpha;
 }
 
-int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s, pv_line_t* pvLine) {
+int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s) {
 	Assert(checkBoard(b));
 	selDepth = max(selDepth, b->ply);
 
@@ -575,27 +673,30 @@ int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s, pv_line_
 		return eval(b);
 	}
 
-	int score = eval(b);
-	int standPat = score;
-	Assert(abs(standPat) < INF);
+	int score, bestScore;
+	int staticEval = eval(b);
+	Assert(abs(staticEval) < INF);
 
 	bool inCheck = isCheck(b, b->side);
-	quiescenceChecks[abs(depth)] = inCheck;
+
 
 	/*
-	* Stand Pat Pruning:
+	* Stand Pat Pruning: TODO DOC
 	* If a position scores higher than alpha, update the value to keep a lower bound of the
 	* position. If the evaluation is already above beta, there is no point in searching all captures,
 	* because there is no need to recapture in a good position. Do not prune when in check: these positions
 	* may contain a non-tactical move that raises alpha or possibly no move due to serious mate threat.
 	*/
-	if (!inCheck) {
-		if (standPat > alpha) {
-			alpha = standPat;
+	if (inCheck) {
+		bestScore = -INF;
+	} else {
+		bestScore = staticEval;
+		if (bestScore >= beta) {
+			return bestScore;
 		}
 
-		if (standPat >= beta) {
-			return beta;
+		if (bestScore > alpha) {
+			alpha = bestScore;
 		}
 	}
 
@@ -612,10 +713,6 @@ int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s, pv_line_
 	}
 
 	scoreMoves(b, moveList, NO_MOVE);
-
-	//// Local PV line
-	//pv_line_t localPV[1]{};
-	//localPV->len = 0;
 
 	/*
 	* There are no cutoffs in this node yet. Generate all captures, promotions or check evasions
@@ -643,21 +740,20 @@ int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s, pv_line_
 		if (!push(b, currentMove)) continue;
 
 		legalMoves++;
-		score = -quiescence(-beta, -alpha, depth - 1, b, s, nullptr);
+		score = -quiescence(-beta, -alpha, depth - 1, b, s);
 		pop(b);
 
 		if (s->stopped) {
 			return 0;
 		}
 
-		if (score > alpha) {
-			alpha = score;
+		if (score > bestScore) {
+			bestScore = score;
 			bestMove = currentMove;
 
-			//pvLine->line[0] = currentMove;
-			//memcpy(pvLine->line + 1, localPV->line, localPV->len * sizeof(currentMove));
-			//pvLine->len = localPV->len + 1;
-			//Assert(pvLine->len <= MAX_DEPTH);
+			if (score > alpha) {
+				alpha = score;
+			}
 		}
 
 		/**
@@ -675,23 +771,22 @@ int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s, pv_line_
 	}
 
 	/*
-	 * Checkmate Detection:
+	 * Checkmate Detection: TODO DOC
 	 * If this position is checkmate and all positions leading up to this position are check evasions,
 	 * this mate is forced. Return standPat, if a non-checking position was found because quiescence
 	 * does not generate all moves, when not player is not checked.
 	*/
-	if (legalMoves == 0 && inCheck) {
-		for (int i = depth; i <= 0; i += 2) {
-			if (!quiescenceChecks[i]) {
-				return score;
-			}
+	if (legalMoves == 0) {
+		if (inCheck) {
+			// Checkmate
+			return -MATE_VALUE + b->ply;
 		}
-
-		return -MATE_VALUE + b->ply;
 	}
 
 	Assert(alpha >= oldAlpha);
-	return alpha;
+	Assert(abs(bestScore) < INF);
+
+	return bestScore;
 }
 
 void clearForSearch(board_t* b, search_t* s) {
@@ -764,6 +859,7 @@ int search_aspiration(board_t* b, search_t* s, int depth, int bestScore) {
 }
 
 int search(board_t* b, search_t* s) {
+	int score = -INF;
 	int bestMove = 0;
 	int pvMoves = 0;
 	int pvNum = 0;
@@ -774,24 +870,15 @@ int search(board_t* b, search_t* s) {
 	selDepth = 0;
 	b->ply = 0;
 
-	int score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, NO_PV, nullptr);
-	Assert(abs(score) < INF);
-
-	pvMoves = getPVLine(b, 1);
-	bestMove = b->pvArray[0];
-
-	printUCI(s, 1, selDepth, score);
-	//printPV(pvLine->line, pvLine->len);
-	printTTablePV(b, currentDepth);
-	fflush(stdout);
-	cout << endl;
-
-	for (currentDepth = 2; currentDepth <= s->depth; currentDepth++) {
+	for (currentDepth = 1; currentDepth <= s->depth; currentDepth++) {
 		selDepth = 0;
 		b->ply = 0;
 
-		score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV, nullptr);
-		//score = search_aspiration(b, s, currentDepth, score);
+		// standard internal iterative deepening:
+		score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV);
+
+		//move_t rootBestMove = NO_MOVE;
+		//score = alphaBetaRoot(b, s, currentDepth, &rootBestMove);
 
 		Assert(abs(score) < INF);
 
@@ -799,7 +886,9 @@ int search(board_t* b, search_t* s) {
 		if (s->stopped) break;
 
 		pvMoves = getPVLine(b, currentDepth);
+
 		bestMove = b->pvArray[0];
+		//bestMove = rootBestMove;
 
 		printUCI(s, currentDepth, selDepth, score);
 		//printPV(pvLine->line, pvLine->len);
@@ -815,7 +904,6 @@ int search(board_t* b, search_t* s) {
 		}
 
 		cout << endl;
-		//cout << "Futile moves pruned: \t\t" << s->futileCnt << endl;
 	}
 
 	cout << "\n";

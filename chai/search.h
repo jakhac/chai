@@ -45,6 +45,8 @@ const int HISTORY_MAX = 0x4000;
  */
 static int quiescenceChecks[MAX_DEPTH];
 
+int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move);
+
 /**
  * Alpha beta algorithm root. Searches current board for best move and score.
  *
@@ -59,7 +61,7 @@ static int quiescenceChecks[MAX_DEPTH];
  *
  * @returns Best score found in search.
  */
-int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine);
+int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool nullOk, bool pvNode);
 
 /**
  * Quiescence search pushes all captures to evaluate a stable and quiet position. AlphaBeta
@@ -72,7 +74,7 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
  *
  * @returns Best score found in quiescences search.
  */
-int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s, pv_line_t* pvLine);
+int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s);
 
 /**
  * Root function that starts alphaBeta search in iterative deepening framework.

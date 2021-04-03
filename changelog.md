@@ -168,29 +168,40 @@
 - Elo
 
   - Plain PVS, consider PV nodes in NMP and Futility Pruning
-    - chai_v2.5_std - chai_v2.4 &rarr; 55%: 211-164-125 (+35)
+    - chai_v2.5.0 - chai_v2.4 &rarr; 55%: 211-164-125 (+35)
   - Late Move Reductions
-    - chai_v2.5_std - chai_v2.4 &rarr; 74%: 307-70-123 (+182)
+    - chai_v2.5.1 - chai_v2.4 &rarr; 74%: 307-70-123 (+182)
   - Forfeit on Time Bugfix, forced checkmate in quiescence fix
     - chai_v2.5.2 - chai_v2.5_std &rarr; 63%: 251-96-243 (+92)
+  - LMR Reduction limits and
 
 - AlphaBeta
   - [x] Principal Variation Search
   - [x] Consider `IS_PV` and `NO_PV` in pruning decisions
   - [x] Late Move Reductions
+  - [x] Refactor quiescence: Checkmate detection and standPat pruning
   - [ ] Interal Iterative Deepening considers node type
+- Transposition Table
+  - [ ] Retry different bucket sizes and replacement schemes
 - Project
   - [x] Replaced `pvLine_t` with `printTTablePV()`
+  - [ ] Add `eval_t` for evaluations
+  - [ ] Remove `pvLine_t` lines from function signatures
+  - [ ] UCI currentMove and move number
+  - [ ] `alphaBetaRoot()` function for save mate/draw detection and bestMove
+  - [ ] Retrieve pv-line from pv-structs
+  - [ ] Templates for search-functions?
 - Eval
   - [ ] Check: insufficient material cannot be influenced by contempt factor
 - Bugfixes
-  - [x] Removed Mate Distance Pruning (no noticable gain, but drawed king rook vs king)
-  - [x] Forced Quiescence checkmates used `moveList->cnt` instead of `legalMoves`
+  - [x] Forced quiescence checkmates used `moveList->cnt` instead of `legalMoves`
+  - [x] standPat pruning considers check / not not-check and updates `score, bestScore, alpha` seperately
   - [x] Quiescence check up used `nodes` instead of `qnodes`
-  - [x] Disabled `pvLine_t` structs on stack due to overflow issues
-  - [x] Swapped beta cutoff order in standPat (resolves INF returns from quiescence)
+  - [x] Disabled `pvLine_t` structs on stack due to memory issues on call-stack
   - [x] `parseFen()` now assigns halfMoves to `fiftyMove`, `isRepetition()` was adapted to this change
-  - [ ] Not finding mates: Unforced Draw in winning endgame
+  - [x] Bigger margin for `ISMATE` to include long checking sequences from quiescence mate detection
+  - [x] Not finding mates: Unforced Draw in winning endgame (fixed with new quiescence mate detection und reordering alphaBeta)
+  - [x] Redordered alphaBeta functions till move loop
 
 # Todo
 
@@ -214,6 +225,7 @@
   - Timeman.c: dynamic time management
   - Error handler for invalid FEN
   - clean up utils, attacks, helper bitboards
+  - refactor checkup usage and function
 
 - Alpha Beta
 

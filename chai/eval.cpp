@@ -382,9 +382,6 @@ int lazyEvalulation(board_t* b) {
 }
 
 int contemptFactor(board_t* b) {
-	if (insufficientMaterial(b)) {
-		return 0;
-	}
 
 	int contempt = lazyEvalulation(b);
 
@@ -400,6 +397,11 @@ int contemptFactor(board_t* b) {
 }
 
 bool insufficientMaterial(board_t* b) {
+
+	// Trivial case, most likely to happen
+	if (countBits(b->occupied) > 5) {
+		return false;
+	}
 
 	// King vs King
 	if (countBits(b->occupied) == 2) {
