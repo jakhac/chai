@@ -173,7 +173,10 @@
     - chai_v2.5.1 - chai_v2.4 &rarr; 74%: 307-70-123 (+182)
   - Forfeit on Time Bugfix, forced checkmate in quiescence fix
     - chai_v2.5.2 - chai_v2.5_std &rarr; 63%: 251-96-243 (+92)
-  - LMR Reduction limits and
+  - Fix 3-fold-repetition with mate in x, alphaBetaRoot function vs root function
+    - chai_v2.5.2_root - chai_v2.5.2_basic &rarr; 50%: 93-93-105 (+-0)
+    - chai_v2.5.2 - Bubble &rarr; 73%: 305-93-65 (+173)
+    - chai_v2.5.2 - Bubble &rarr; 14%: 43-373-47 (-315)
 
 - AlphaBeta
   - [x] Principal Variation Search
@@ -181,6 +184,7 @@
   - [x] Late Move Reductions
   - [x] Refactor quiescence: Checkmate detection and standPat pruning
   - [ ] Interal Iterative Deepening considers node type
+  - [x] Check for repetition before probing ttable
 - Transposition Table
   - [ ] Retry different bucket sizes and replacement schemes
 - Project
@@ -188,11 +192,12 @@
   - [ ] Add `eval_t` for evaluations
   - [ ] Remove `pvLine_t` lines from function signatures
   - [ ] UCI currentMove and move number
-  - [ ] `alphaBetaRoot()` function for save mate/draw detection and bestMove
+  - [x] `alphaBetaRoot()` function for save mate/draw detection and bestMove
   - [ ] Retrieve pv-line from pv-structs
   - [ ] Templates for search-functions?
+  - [ ] Markdown table in changelog
 - Eval
-  - [ ] Check: insufficient material cannot be influenced by contempt factor
+  - [x] Check: insufficient material cannot be influenced by contempt factor
 - Bugfixes
   - [x] Forced quiescence checkmates used `moveList->cnt` instead of `legalMoves`
   - [x] standPat pruning considers check / not not-check and updates `score, bestScore, alpha` seperately

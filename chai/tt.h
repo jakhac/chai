@@ -5,15 +5,18 @@
 #include "board.h"
 #include "moveGenerator.h"
 
-/*
-* Determines the number of buckets used in ttable.
-*/
-#define BUCKETS 1
+
 
 /**
  * Size of the transposition table.
  */
 const int ttSize = 0x100000 * 256;
+
+const int mbSize = 256;
+
+static int indexMask = 0;
+
+static unsigned long long keyMask = 0;
 
 /**
  * Size of the pawn table.

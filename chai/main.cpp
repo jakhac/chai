@@ -3,11 +3,11 @@
 
 int main() {
 	init(&board);
-	parseFen(&board, STARTING_FEN);
-	//parseFen(&board, BUG_FEN);
+	//parseFen(&board, STARTING_FEN);
+	parseFen(&board, BUG_FEN);
 	//parseFen(&board, "8/8/1R3K2/8/3k4/8/8/8 w - - 0 1");
 	//parseFen(&board, "8/8/5r2/4k1K1/8/8/8/8 w - - 0 1");
-	//parseFen(&board, "8/8/8/8/5k2/2K3n1/4R3/8 w - - 0 1");
+	//parseFen(&board, "2rnqb2/1b1n1Nk1/p2PB1Pp/1p6/4Q3/8/PP4PP/R4RK1 w - - 1 0");
 
 	// mate in 1 quiescence test
 	//parseFen(&board, "7k/8/7K/8/8/8/8/R7 w - - 9 11");
@@ -15,7 +15,6 @@ int main() {
 	//cout << "qui = " << quiescence(-INF, INF, 0, &board, s, nullptr) << endl;
 
 	printBoard(&board);
-
 
 	//moveList_t moveList[1];
 	//generateMoves(&board, moveList, board.isCheck(board.side));
@@ -118,7 +117,7 @@ void play(board_t* b, Perft* p, search_t* s) {
 		}
 
 		if (m == "reps") {
-			cout << "board_t is three fold repetition " << isThreeFoldRepetition(b) << endl;
+			cout << "Number of repetitions " << getRepetitions(b) << endl;
 			cout << "board_t is repetition " << isRepetition(b) << endl;
 		}
 
@@ -150,10 +149,6 @@ void play(board_t* b, Perft* p, search_t* s) {
 				if (!push(b, parsedMove)) {
 					cout << "Move " << getStringMove(parsedMove) << " remains check or is no valid move. Try again." << endl;
 					continue;
-				}
-
-				if (isThreeFoldRepetition(b)) {
-					cout << "Position was repeated the third time. Both players can claim draw." << endl;
 				}
 
 				cout << "Pushed " << getStringMove(parsedMove) << " on board." << endl;

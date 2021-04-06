@@ -164,11 +164,11 @@ void printPV(move_t* moves, int len) {
 	//#endif // STRUCT_PV
 }
 
-void printTTablePV(board_t* b, int depth) {
+void printTTablePV(board_t* b, int depth, int selDepth) {
 	int cnt = 0;
 	cout << " pv ";
 
-	for (int i = 0; i <= depth; i++) {
+	for (int i = 0; i <= (depth + selDepth); i++) {
 		move_t pvMove = probePV(b);
 
 		if (pvMove != NO_MOVE && isLegal(b, pvMove)) {

@@ -5,6 +5,7 @@
 
 #define MAX_DEPTH 64
 #define MAX_GAME_MOVES 512
+#define BUCKETS 4
 
 /**
  * Unsigned 64-Bit integer represents bitboard isntance.
@@ -52,14 +53,24 @@ struct ttable_entry_t {
 	uint8_t depth = 0;
 	int16_t score = 0;
 	move_t move = 0;
-	key_t zobKey = 0x0;
+
+	//key_t zobKey = 0x0; // to be removed
+	int32_t key = 0; // upper 32bit to determine bucket
+};
+
+struct bucket_t {
+	ttable_entry_t bucketEntries[BUCKETS];
 };
 
 /**
  * Transposition table instance. Contains stat-variables and pointer to entries.
  */
 struct ttable_t {
-	ttable_entry_t* table = NULL;
+	//ttable_entry_t* table = NULL; // to be removed
+
+	bucket_t* bucketList;
+
+	// total number of buckets (entries-stacks)
 	int buckets = 0;
 
 	// measure successful probes
@@ -221,7 +232,10 @@ enum CASTLING_RIGHTS {
 };
 
 enum TT_FLAG {
-	TT_NONE, TT_ALPHA, TT_BETA, TT_SCORE
+	TT_NONE = 0,
+	TT_ALPHA = 1,
+	TT_BETA = 1 << 1,
+	TT_SCORE = 1 << 2
 };
 
 enum SQUARES {

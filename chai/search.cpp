@@ -30,18 +30,17 @@ bool isRepetition(board_t* b) {
 	return false;
 }
 
-bool isThreeFoldRepetition(board_t* b) {
+int getRepetitions(board_t* b) {
 	int reps = 0;
 
-	for (int i = 0; i < b->halfMoves; i++) {
+	// current position is not counted: 3fold repetition <=> return 2
+	for (int i = max(0, b->undoPly - b->fiftyMove); i < b->undoPly; ++i) {
 		if (b->zobristKey == b->undoHistory[i].zobKey) {
 			reps++;
-			if (reps >= 3) {
-				return true;
-			}
 		}
 	}
-	return false;
+
+	return reps;
 }
 
 void getNextMove(moveList_t* move_s, int curIdx) {
@@ -151,7 +150,7 @@ int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move) {
 				int lmrDepth = (legalMoves > 6) ? 3 : 2;
 				score = -alphaBeta(-alpha - 1, -alpha, depth - lmrDepth, b, s, DO_NULL, NO_PV);
 			} else {
-				// Ensure, that PVS is always exexcuted if LMR is not applicable
+				// Ensure, that PVS is always executed if LMR is not applicable
 				score = alpha + 1;
 			}
 
@@ -223,12 +222,19 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	Assert(checkBoard(b));
 	Assert(beta > alpha);
 
-	/*
+	/* TODO DOC
 	* In case of draw (3-fold-rep or 50-move rule) decide wether current position is winnable and
 	* either score draw as 0 or penalize draw.
 	*/
-	if (b->fiftyMove >= 100 || isRepetition(b) || insufficientMaterial(b)) {
+	if (b->fiftyMove >= 100 || insufficientMaterial(b)) {
+		// TODO special case mate
 		return contemptFactor(b);
+	}
+
+	// Return 3-fold-repetition
+	int reps = getRepetitions(b);
+	if (reps >= 2) {
+		return 0;
 	}
 
 	// Drop into quiescence if maximum depth is reached.
@@ -270,7 +276,8 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	move_t hashMove = NO_MOVE;
 
 	bool hashStored = probeTT(b, &hashMove, &hashScore, &hashFlag, &hashDepth);
-	if (hashStored) {
+	// Do not allow cutoffs in repetitions (cutoff might lead to unwanted 3-fold-repetition)
+	if (hashStored && !reps) {
 		b->tt->hit++;
 
 		// Look for valueHit: This position has already been searched before with greater depth.
@@ -282,17 +289,17 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 			// Convert mate scores
 			hashToSearch(b, &hashScore);
 
-			if (hashFlag == TT_SCORE) {
+			if (hashFlag & TT_SCORE) {
 				b->tt->valueHit++;
 				return hashScore;
 			}
 
-			if (hashFlag == TT_BETA && beta <= hashScore) {
+			if (hashFlag & TT_BETA && beta <= hashScore) {
 				b->tt->valueHit++;
 				return hashScore;
 			}
 
-			if (hashFlag == TT_ALPHA && alpha >= hashScore) {
+			if (hashFlag & TT_ALPHA && alpha >= hashScore) {
 				b->tt->valueHit++;
 				return hashScore;
 			}
@@ -384,22 +391,21 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	* position. IID searches with reduced depth and fills ttable entries to ensure hash move.
 	* TODO: only use IID in PV nodes? -> http://talkchess.com/forum3/viewtopic.php?t=40484
 	*/
-	if (hashMove == NO_MOVE && depth > 4) {
-		int depthIID = (depth / 2) + 1;
-		int IIDScore = alphaBeta(alphaIID, betaIID, depthIID, b, s, NO_NULL, NO_PV);
+	//if (hashMove == NO_MOVE && depth > 4) {
+	//	int depthIID = (depth / 2) + 1;
+	//	int IIDScore = alphaBeta(alphaIID, betaIID, depthIID, b, s, NO_NULL, NO_PV);
 
-		// TODO use alphaBetaRoot with guaranteed rootMove
-		hashMove = probePV(b);
-	}
-
-	//if (hashMove == NO_MOVE && depth > 3) {
-	//	if (pvNode) {
-	//		alphaBeta(alpha, beta, depth - 3, b, s, NO_NULL, NO_PV, localPV);
-	//	} else {
-	//		alphaBeta(alpha, beta, 1, b, s, NO_NULL, NO_PV, localPV);
-	//	}
+	//	// TODO use alphaBetaRoot with guaranteed rootMove
 	//	hashMove = probePV(b);
 	//}
+
+	if (hashMove == NO_MOVE && depth > 3) {
+		if (pvNode) {
+			alphaBetaRoot(b, s, depth - 3, &hashMove);
+		} else {
+			alphaBetaRoot(b, s, 1, &hashMove);
+		}
+	}
 
 	moveList_t moveList[1];
 	generateMoves(b, moveList, inCheck);
@@ -479,8 +485,13 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 
 		legalMoves++;
 
-		// TODO doc
-		// Always assume, that the first move is part of the principal variation.
+		/**
+		 * PVS / LMR:
+		 * Always assume that the first move is part of the principal variation and scores in
+		 * alpha - beta bounds. Late moves wont raise alpha in most cases, try to prove this
+		 * with reduced search around alpha. If the move fails high (improves alpha), a research
+		 * is required.
+		 */
 		if (legalMoves == 1) {
 			score = -alphaBeta(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL, pvNode);
 		} else {
@@ -673,23 +684,19 @@ int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s) {
 		return eval(b);
 	}
 
-	int score, bestScore;
+	bool inCheck = isCheck(b, b->side);
+	int score;
+	int bestScore = -INF;
 	int staticEval = eval(b);
 	Assert(abs(staticEval) < INF);
 
-	bool inCheck = isCheck(b, b->side);
-
-
 	/*
-	* Stand Pat Pruning: TODO DOC
-	* If a position scores higher than alpha, update the value to keep a lower bound of the
-	* position. If the evaluation is already above beta, there is no point in searching all captures,
-	* because there is no need to recapture in a good position. Do not prune when in check: these positions
-	* may contain a non-tactical move that raises alpha or possibly no move due to serious mate threat.
+	* Stand Pat Pruning:
+	* Side to move can reject a recapture, if static evaluation is already good enough.
+	* Stand pat is not valid when in check, because this could result in misleading
+	* evaluation in checkmate or stalemate position.
 	*/
-	if (inCheck) {
-		bestScore = -INF;
-	} else {
+	if (!inCheck) {
 		bestScore = staticEval;
 		if (bestScore >= beta) {
 			return bestScore;
@@ -771,16 +778,12 @@ int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s) {
 	}
 
 	/*
-	 * Checkmate Detection: TODO DOC
-	 * If this position is checkmate and all positions leading up to this position are check evasions,
-	 * this mate is forced. Return standPat, if a non-checking position was found because quiescence
-	 * does not generate all moves, when not player is not checked.
-	*/
-	if (legalMoves == 0) {
-		if (inCheck) {
-			// Checkmate
-			return -MATE_VALUE + b->ply;
-		}
+	 * Checkmate Detection:
+	 * Quiescence generates check evasions, if no legal moves were possible, this has to be checkmate.
+	 */
+	if (legalMoves == 0 && inCheck) {
+		// Checkmate
+		return -MATE_VALUE + b->ply;
 	}
 
 	Assert(alpha >= oldAlpha);
@@ -860,40 +863,26 @@ int search_aspiration(board_t* b, search_t* s, int depth, int bestScore) {
 
 int search(board_t* b, search_t* s) {
 	int score = -INF;
-	int bestMove = 0;
-	int pvMoves = 0;
-	int pvNum = 0;
-	int currentDepth = 1;
+	move_t bestMove = 0;
 
 	clearForSearch(b, s);
 
-	selDepth = 0;
-	b->ply = 0;
-
-	for (currentDepth = 1; currentDepth <= s->depth; currentDepth++) {
+	for (int currentDepth = 1; currentDepth <= s->depth; currentDepth++) {
 		selDepth = 0;
 		b->ply = 0;
 
-		// standard internal iterative deepening:
-		score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV);
-
-		//move_t rootBestMove = NO_MOVE;
-		//score = alphaBetaRoot(b, s, currentDepth, &rootBestMove);
-
+		score = alphaBetaRoot(b, s, currentDepth, &bestMove);
+		//score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV);
 		Assert(abs(score) < INF);
 
 		// forced stop, break and use pv line of previous iteration
 		if (s->stopped) break;
 
-		pvMoves = getPVLine(b, currentDepth);
-
-		bestMove = b->pvArray[0];
-		//bestMove = rootBestMove;
-
 		printUCI(s, currentDepth, selDepth, score);
-		//printPV(pvLine->line, pvLine->len);
-		printTTablePV(b, currentDepth);
+		printTTablePV(b, currentDepth, selDepth);
 		fflush(stdout);
+
+		bestMove = probePV(b);
 
 		//printSearchInfo(b, s);
 
@@ -913,7 +902,7 @@ int search(board_t* b, search_t* s) {
 
 void printSearchInfo(board_t* b, search_t* s) {
 	cout << "\n";
-	//cout << "AlphaBeta-Nodes: " << s->nodes << " Piece::Q-Nodes: " << s->qnodes << endl;
+	//cout << "AlphaBeta-Nodes: " << s->nodes << " Q-Nodes: " << s->qnodes << endl;
 	cout << "Ordering percentage: \t\t" << setprecision(4) << fixed << (float)(s->fhf / s->fh) << endl;
 	cout << "TTable hits/probed: \t\t" << setprecision(4) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
 	cout << "TTable valueHits/hits: \t\t" << setprecision(4) << fixed << (float)(b->tt->valueHit) / (b->tt->hit) << endl;

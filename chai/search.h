@@ -109,14 +109,14 @@ int search_aspiration(board_t* b, search_t* s, int depth, int bestScore);
 bool isRepetition(board_t* b);
 
 /**
- * Searches the complete undoPly array for a position (including current position)
- * that occurred three times.
+ * Counts repetitions of current board (excluding current position).
+ * Return value greater equal 2 means 3-fold-repetition.
  *
  * @param  b Current board.
  *
  * @returns True if three fold repetition is found, else false.
  */
-bool isThreeFoldRepetition(board_t* b);
+int getRepetitions(board_t* b);
 
 /**
  * Checks if current position might be a zugzwang. Considers endgame
