@@ -222,20 +222,20 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	Assert(checkBoard(b));
 	Assert(beta > alpha);
 
+	// Init node
+	bool rootNode = b->ply == 0;
+
 	/* TODO DOC
 	* In case of draw (3-fold-rep or 50-move rule) decide wether current position is winnable and
 	* either score draw as 0 or penalize draw.
 	*/
-	if (b->fiftyMove >= 100 || insufficientMaterial(b)) {
-		// TODO special case mate
+	if (!rootNode
+		&& (b->fiftyMove >= 100
+			|| isRepetition(b)
+			|| insufficientMaterial(b))) {
 		return contemptFactor(b);
 	}
 
-	// Return 3-fold-repetition
-	int reps = getRepetitions(b);
-	if (reps >= 2) {
-		return 0;
-	}
 
 	// Drop into quiescence if maximum depth is reached.
 	if (depth <= 0 || b->ply > MAX_DEPTH) {
@@ -276,8 +276,7 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
 	move_t hashMove = NO_MOVE;
 
 	bool hashStored = probeTT(b, &hashMove, &hashScore, &hashFlag, &hashDepth);
-	// Do not allow cutoffs in repetitions (cutoff might lead to unwanted 3-fold-repetition)
-	if (hashStored && !reps) {
+	if (hashStored && !pvNode) {
 		b->tt->hit++;
 
 		// Look for valueHit: This position has already been searched before with greater depth.
@@ -871,8 +870,8 @@ int search(board_t* b, search_t* s) {
 		selDepth = 0;
 		b->ply = 0;
 
-		score = alphaBetaRoot(b, s, currentDepth, &bestMove);
-		//score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV);
+		//score = alphaBetaRoot(b, s, currentDepth, &bestMove);
+		score = alphaBeta(-INF, INF, currentDepth, b, s, DO_NULL, IS_PV);
 		Assert(abs(score) < INF);
 
 		// forced stop, break and use pv line of previous iteration

@@ -165,6 +165,22 @@
 
 **Changes in v2.5**
 
+- Engines
+
+  - chai_v2.5.2_pv_iid:
+    - Root-Call, Old TT, Repetition-Returns, 1B
+    - Draws Mate!
+  - chai_v2.5.2_basic_rep-return_4b:
+    - Basic-Call, New TT, Repetition-Returns, 4B
+    - Draws Mate!
+  - chai_v2.5.2_root_rep-return_4b:
+    - Root-Call, New TT, Repetition-Returns, 4B
+    - Draws Mate!
+  - chai_v2.5.2_basic_rep-ret-no-root_tt-no_pv:
+    - Basic-Call, New TT, Repetition-Returns, 4B
+    - No Rep-Return at rootNode, No TT-Cut at pvNode
+    - Draw 1 mate in 100 games (might be tt collision or fpruning)
+
 - Elo
 
   - Plain PVS, consider PV nodes in NMP and Futility Pruning
@@ -174,19 +190,37 @@
   - Forfeit on Time Bugfix, forced checkmate in quiescence fix
     - chai_v2.5.2 - chai_v2.5_std &rarr; 63%: 251-96-243 (+92)
   - Fix 3-fold-repetition with mate in x, alphaBetaRoot function vs root function
+
     - chai_v2.5.2_root - chai_v2.5.2_basic &rarr; 50%: 93-93-105 (+-0)
     - chai_v2.5.2 - Bubble &rarr; 73%: 305-93-65 (+173)
-    - chai_v2.5.2 - Bubble &rarr; 14%: 43-373-47 (-315)
+    - chai_v2.5.2 - Bumblebee &rarr; 14%: 43-373-47 (-315)
+
+  - Test new TT, check for best function call (root vs basic), fix draw mate:
+    - _chai_v2.5.2_basic_rep-ret-no-root_tt-no_pv_ turns out to be best (drawed 1 mate)
+
+<center>
+
+|                  engine1                   |             engine2             |    score    | elo  |
+| :----------------------------------------: | :-----------------------------: | :---------: | :--: |
+|      chai_v2.5.2_basic_rep-return_4b       |       chai_v2.5.2_pv_iid        |  178-61-57  | +147 |
+|       chai_v2.5.2_root_rep-return_4b       |       chai_v2.5.2_pv_iid        |  41-115-32  |  -7  |
+|       chai_v2.5.2_root_rep-return_4b       | chai_v2.5.2_basic_rep-return_4b |   90-94-3   | -147 |
+| chai_v2.5.2_basic_rep-ret-no-root_tt-no_pv |       chai_v2.5.2_pv_iid        |  350-92-58  | +200 |
+| chai_v2.5.2_basic_rep-ret-no-root_tt-no_pv | chai_v2.5.2_basic_rep-return_4b | 155-141-204 |  +7  |
+
+</center>
+<br>
 
 - AlphaBeta
   - [x] Principal Variation Search
   - [x] Consider `IS_PV` and `NO_PV` in pruning decisions
   - [x] Late Move Reductions
   - [x] Refactor quiescence: Checkmate detection and standPat pruning
-  - [ ] Interal Iterative Deepening considers node type
+  - [x] Interal Iterative Deepening considers node type
   - [x] Check for repetition before probing ttable
 - Transposition Table
   - [ ] Retry different bucket sizes and replacement schemes
+  - [ ] Prefetch bucket instead of entry
 - Project
   - [x] Replaced `pvLine_t` with `printTTablePV()`
   - [ ] Add `eval_t` for evaluations
