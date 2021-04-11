@@ -60,13 +60,6 @@
 
 **Changes in v2.2**
 
-- Results
-  - Chai_2.2_1bucket - Chai_2.2_2bucket &rarr; 59%: 247-157-96 (+63)
-  - Chai_2.2_1bucket - Chai_2.2_4bucket &rarr; 75%: 335-86-79 (+191)
-  - Chai_2.2_1bucket - Chai_v2.1.2 &rarr; 62%: 252-132-116 (+85)
-  - Chai_2.2_1bucket - Tscp181 &rarr; 58%: 253-176-71 (+56)
-  - chai (1bucket) - TSCP181 &rarr; 52%: 232-212-56 (+14)
-  - chai (1bucket) - Bubble &rarr; 29%: 115-321-64 (-1561)
 - [x] Compiler Optimizations **DISABLED WHILE TESTING v2.2**
 - Quiescence
   - [x] Forced checkmates are detected in quiescence
@@ -83,7 +76,30 @@
 - [x] Fixed incorrect eval type (`uint_16`) in pawn entry
 - [x] Alpha cutoff stored NO_MOVE in TT
 
+- Results
+  - Chai_2.2_1bucket - Chai_2.2_2bucket &rarr; 59%: 247-157-96 (+63)
+  - Chai_2.2_1bucket - Chai_2.2_4bucket &rarr; 75%: 335-86-79 (+191)
+  - Chai_2.2_1bucket - Chai_v2.1.2 &rarr; 62%: 252-132-116 (+85)
+  - Chai_2.2_1bucket - Tscp181 &rarr; 58%: 253-176-71 (+56)
+  - chai (1bucket) - TSCP181 &rarr; 52%: 232-212-56 (+14)
+  - chai (1bucket) - Bubble &rarr; 29%: 115-321-64 (-1561)
+
 **Changes in v2.3**
+
+- Eval
+  - [x] detect endgames (knight, bishop endgame, light/dark squared bishop)
+  - [x] `lazyEval()` used in NMP and `contemptFactor()`
+- Transposition Table
+  - [x] ttSize=256MB
+- AlphaBeta
+  - [x] Adaptive Null Move Pruning
+  - [x] IID if no hash move
+  - [x] Reorder: Check for FiftyMove, Mate Distance Pruning (disabled) and TTable before dropping in quiescence
+- Project
+
+  - [x] UCI Mate in X option
+  - [x] Low time regulations in `uciParseGo()`
+  - [x] Removed `log()` in UCI calls
 
 - Elo
   - ttSize=128MB
@@ -96,21 +112,28 @@
   - NMP (At least 7 pieces, d>2), ttSize=256MB, no-logs, `lazyEval()`
     - chai - Chai_2.2_1bucket &rarr; 52%: 202-185-113 (+14)
     - chai - Bubble &rarr; 34%: 123-286-91 (-115)
-- Eval
-  - [x] detect endgames (knight, bishop endgame, light/dark squared bishop)
-  - [x] `lazyEval()` used in NMP and `contemptFactor()`
-- Transposition Table
-  - [x] ttSize=256MB
-- AlphaBeta
-  - [x] Adaptive Null Move Pruning
-  - [x] IID if no hash move
-  - [x] Reorder: Check for FiftyMove, Mate Distance Pruning (disabled) and TTable before dropping in quiescence
-- Project
-  - [x] UCI Mate in X option
-  - [x] Low time regulations in `uciParseGo()`
-  - [x] Removed `log()` in UCI calls
 
 **Changes in v2.4**
+
+- AlphaBeta
+
+  - [x] Futility Pruning
+  - [x] Razoring (implemented but was losing elo, retry with )
+  - [x] Mate Distance Pruning
+  - [x] ContemptFactor considers drawn piece-combinations
+  - [x] Reset MateKillers between search
+
+- Project
+  - [x] Update typedefs: `key_t`
+  - [x] Rename executables according to version
+  - [x] Refactor `Board`-Class
+    - Convert `Board` to `struct board_t`
+    - Reduce `board_t` size and share huge arrays between instances if possible
+  - [x] Namespace `Piece::` for piece enums
+- Bugfixes:
+
+  - [x] kingSafetyArray not enough values (8 atk sq possible)
+  - [x] `ISMATE` considers forced mate in quiescence search (lower `ISMATE` score)
 
 - Elo
 
@@ -144,72 +167,7 @@
 
     - chai_v2.4 - Bubble &rarr; 44%: 180-242-78 (-42)
 
-- AlphaBeta
-
-  - [x] Futility Pruning
-  - [x] Razoring (implemented but was losing elo, retry with )
-  - [x] Mate Distance Pruning
-  - [x] ContemptFactor considers drawn piece-combinations
-  - [x] Reset MateKillers between search
-
-- Project
-  - [x] Update typedefs: `key_t`
-  - [x] Rename executables according to version
-  - [x] Refactor `Board`-Class
-    - Convert `Board` to `struct board_t`
-    - Reduce `board_t` size and share huge arrays between instances if possible
-  - [x] Namespace `Piece::` for piece enums
-- Bugfixes:
-  - [x] kingSafetyArray not enough values (8 atk sq possible)
-  - [x] `ISMATE` considers forced mate in quiescence search (lower `ISMATE` score)
-
 **Changes in v2.5**
-
-- Engines
-
-  - chai_v2.5.2_pv_iid:
-    - Root-Call, Old TT, Repetition-Returns, 1B
-    - Draws Mate!
-  - chai_v2.5.2_basic_rep-return_4b:
-    - Basic-Call, New TT, Repetition-Returns, 4B
-    - Draws Mate!
-  - chai_v2.5.2_root_rep-return_4b:
-    - Root-Call, New TT, Repetition-Returns, 4B
-    - Draws Mate!
-  - chai_v2.5.2_basic_rep-ret-no-root_tt-no_pv:
-    - Basic-Call, New TT, Repetition-Returns, 4B
-    - No Rep-Return at rootNode, No TT-Cut at pvNode
-    - Draw 1 mate in 100 games (might be tt collision or fpruning)
-
-- Elo
-
-  - Plain PVS, consider PV nodes in NMP and Futility Pruning
-    - chai_v2.5.0 - chai_v2.4 &rarr; 55%: 211-164-125 (+35)
-  - Late Move Reductions
-    - chai_v2.5.1 - chai_v2.4 &rarr; 74%: 307-70-123 (+182)
-  - Forfeit on Time Bugfix, forced checkmate in quiescence fix
-    - chai_v2.5.2 - chai_v2.5_std &rarr; 63%: 251-96-243 (+92)
-  - Fix 3-fold-repetition with mate in x, alphaBetaRoot function vs root function
-
-    - chai_v2.5.2_root - chai_v2.5.2_basic &rarr; 50%: 93-93-105 (+-0)
-    - chai_v2.5.2 - Bubble &rarr; 73%: 305-93-65 (+173)
-    - chai_v2.5.2 - Bumblebee &rarr; 14%: 43-373-47 (-315)
-
-  - Test new TT, check for best function call (root vs basic), fix draw mate:
-    - _chai_v2.5.2_basic_rep-ret-no-root_tt-no_pv_ turns out to be best (drawed 1 mate)
-
-<center>
-
-|                  engine1                   |             engine2             |    score    | elo  |
-| :----------------------------------------: | :-----------------------------: | :---------: | :--: |
-|      chai_v2.5.2_basic_rep-return_4b       |       chai_v2.5.2_pv_iid        |  178-61-57  | +147 |
-|       chai_v2.5.2_root_rep-return_4b       |       chai_v2.5.2_pv_iid        |  41-115-32  |  -7  |
-|       chai_v2.5.2_root_rep-return_4b       | chai_v2.5.2_basic_rep-return_4b |   90-94-3   | -147 |
-| chai_v2.5.2_basic_rep-ret-no-root_tt-no_pv |       chai_v2.5.2_pv_iid        |  350-92-58  | +200 |
-| chai_v2.5.2_basic_rep-ret-no-root_tt-no_pv | chai_v2.5.2_basic_rep-return_4b | 155-141-204 |  +7  |
-
-</center>
-<br>
 
 - AlphaBeta
   - [x] Principal Variation Search
@@ -219,12 +177,12 @@
   - [x] Interal Iterative Deepening considers node type
   - [x] Check for repetition before probing ttable
 - Transposition Table
-  - [ ] Retry different bucket sizes and replacement schemes
+  - [x] Retry different bucket sizes and replacement schemes
   - [ ] Prefetch bucket instead of entry
 - Project
   - [x] Replaced `pvLine_t` with `printTTablePV()`
   - [ ] Add `eval_t` for evaluations
-  - [ ] Remove `pvLine_t` lines from function signatures
+  - [x] Remove `pvLine_t` lines from function signatures
   - [ ] UCI currentMove and move number
   - [x] `alphaBetaRoot()` function for save mate/draw detection and bestMove
   - [ ] Retrieve pv-line from pv-structs
@@ -241,6 +199,62 @@
   - [x] Bigger margin for `ISMATE` to include long checking sequences from quiescence mate detection
   - [x] Not finding mates: Unforced Draw in winning endgame (fixed with new quiescence mate detection und reordering alphaBeta)
   - [x] Redordered alphaBeta functions till move loop
+
+<!-- - Engines
+  - chai_v2.5.2_pv_iid:
+    - Root-Call, Old TT, Repetition-Returns, 1B
+    - Draws Mate!
+  - chai_v2.5.3_basic_rep-return_4b:
+    - Basic-Call, New TT, Repetition-Returns, 4B
+    - Draws Mate!
+  - chai_v2.5.3_root_rep-return_4b:
+    - Root-Call, New TT, Repetition-Returns, 4B
+    - Draws Mate!
+  - chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv:
+    - Basic-Call, New TT, Repetition-Returns, 4B
+    - No Rep-Return at rootNode, No TT-Cut at pvNode
+    - Draw 1 mate in 100 games (might be tt collision or fpruning) -->
+
+- Elo
+
+  - v2.5.0
+    - Plain PVS, consider PV nodes in NMP and Futility Pruning
+    - chai_v2.5.0 - chai_v2.4 &rarr; 55%: 211-164-125 (+35)
+  - v2.5.1
+    - Added Late Move Reductions
+    - chai_v2.5.1 - chai_v2.4 &rarr; 74%: 307-70-123 (+182)
+  - v2.5.2 (= v2.5.2_pv_iid)
+    - Final changes:
+      - Root-Call, Old TT, Repetition-Returns, 1 buckets
+      - Forfeit on Time Bugfix, forced checkmate in quiescence fix
+      - Fix 3-fold-repetition with mate in x, alphaBetaRoot function vs root function
+    - chai_v2.5.2 - chai_v2.5_std &rarr; 63%: 251-96-243 (+92)
+    - chai_v2.5.2_root - chai_v2.5.2_basic &rarr; 50%: 93-93-105 (+-0)
+    - chai_v2.5.2 - Bubble &rarr; 73%: 305-93-65 (+173)
+    - chai_v2.5.2 - Bumblebee &rarr; 14%: 43-373-47 (-315)
+  - v2.5.3 (= v2.5.3_basic_rep-ret-no-root_tt-no_pv)
+    - Final changes
+      - Basic call, new tt, no rep-return in rootNode, no tt-cutoff in pvNode, 4 buckets
+    - chai_v2.5.3_basic_rep-return_4b - chai_v2.5.2_pv_iid &rarr; 178-61-57 (+147)
+    - chai_v2.5.3_root_rep-return_4b - chai_v2.5.2_pv_iid &rarr; 41-115-32 (-7)
+    - chai_v2.5.3_root_rep-return_4b - chai_v2.5.3_basic_rep-return_4b &rarr; 90-94-3 (-147)
+    - chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv - chai_v2.5.2_pv_iid &rarr; 350-92-58 (+200)
+    - chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv - chai_v2.5.3_basic_rep-return_4b &rarr; 155-141-204 (+7)
+  - v2.5.4
+    - Final changes: TODO eval_t, pvline, curr move
+
+<!-- <center>
+
+|                  engine1                   |             engine2             |    score    | elo  |
+| :----------------------------------------: | :-----------------------------: | :---------: | :--: |
+|      chai_v2.5.3_basic_rep-return_4b       |       chai_v2.5.2_pv_iid        |  178-61-57  | +147 |
+|       chai_v2.5.3_root_rep-return_4b       |       chai_v2.5.2_pv_iid        |  41-115-32  |  -7  |
+|       chai_v2.5.3_root_rep-return_4b       | chai_v2.5.3_basic_rep-return_4b |   90-94-3   | -147 |
+| chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv |       chai_v2.5.2_pv_iid        |  350-92-58  | +200 |
+| chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv | chai_v2.5.3_basic_rep-return_4b | 155-141-204 |  +7  |
+
+</center>
+<br> -->
 
 # Todo
 
