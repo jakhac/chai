@@ -242,6 +242,8 @@
     - chai_v2.5.3_root_rep-return_4b - chai_v2.5.3_basic_rep-return_4b &rarr; 90-94-3 (-147)
     - chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv - chai_v2.5.2_pv_iid &rarr; 350-92-58 (+200)
     - chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv - chai_v2.5.3_basic_rep-return_4b &rarr; 155-141-204 (+7)
+    - chai_v2.5.3 - Bubble &rarr; 73%: 312-97-91 (+164)
+    - chai_v2.5.3 - Bumblebee &rarr; 14%: 46-395-59 (-301)
   - v2.5.4
     - Final changes:
       - No mate distance pruning in rootNodes, IID extends when check, template functions, first move is always PV
