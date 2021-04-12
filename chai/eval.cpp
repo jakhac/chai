@@ -15,7 +15,7 @@ float interpolate(int a, int b, float t) {
 	return (float)a + t * ((float)b - (float)a);
 }
 
-int evalPST(board_t* b, int side, float* t) {
+value_t evalPST(board_t* b, int side, float* t) {
 	bitboard_t pieces;
 	int score = 0, kSq = getKingSquare(b, side), sq;
 
@@ -69,7 +69,7 @@ int evalPST(board_t* b, int side, float* t) {
 	return score;
 }
 
-int materialScore(board_t* b, int side) {
+value_t materialScore(board_t* b, int side) {
 	int score = 0;
 	for (int i = 1; i < 7; i++) {
 		score += countBits(getPieces(b, i, side)) * pieceScores[i];
@@ -79,7 +79,7 @@ int materialScore(board_t* b, int side) {
 }
 
 // number of isolated pawns
-int isolatedPawns(board_t* b, int side) {
+value_t isolatedPawns(board_t* b, int side) {
 	int isolated = 0, sq;
 	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
 	bitboard_t refPawns = pawns;
@@ -95,7 +95,7 @@ int isolatedPawns(board_t* b, int side) {
 }
 
 // number of passed pawns
-int passedPawns(board_t* b, int side) {
+value_t passedPawns(board_t* b, int side) {
 	int passedScore = 0, sq;
 	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
 	bitboard_t oppPawns = getPieces(b, Piece::PAWN, side ^ 1);
@@ -110,7 +110,7 @@ int passedPawns(board_t* b, int side) {
 	return (int)interpolate(passedScore, scale(4, passedScore), (float)b->halfMoves);
 }
 
-int stackedPawn(board_t* b, int side) {
+value_t stackedPawn(board_t* b, int side) {
 	int stackedPenalty = 0;
 
 	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
@@ -123,7 +123,7 @@ int stackedPawn(board_t* b, int side) {
 	return stackedPenalty;
 }
 
-int pawnChain(board_t* b, int side) {
+value_t pawnChain(board_t* b, int side) {
 	int result = 0;
 	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
 	bitboard_t tPawns = pawns;
@@ -138,7 +138,7 @@ int pawnChain(board_t* b, int side) {
 	return result;
 }
 
-int openFilesRQ(board_t* b, int side) {
+value_t openFilesRQ(board_t* b, int side) {
 	int sq, score = 0;
 	bitboard_t pawns = b->pieces[Piece::PAWN];
 
@@ -169,12 +169,12 @@ int openFilesRQ(board_t* b, int side) {
 	return score;
 }
 
-int bishopPair(board_t* b, int side) {
+value_t bishopPair(board_t* b, int side) {
 	Assert(((bool)(countBits(getPieces(b, Piece::BISHOP, side)) >= 2)) * 30 <= 30);
 	return ((bool)(countBits(getPieces(b, Piece::BISHOP, side)) >= 2)) * 30;
 }
 
-int kingSafety(board_t* b, int side, float* t) {
+value_t kingSafety(board_t* b, int side, float* t) {
 	int result = 0;
 	int kSq = getKingSquare(b, side);
 	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
@@ -220,7 +220,7 @@ int kingSafety(board_t* b, int side, float* t) {
 	return result;
 }
 
-int mobility(board_t* b, int side, float* t) {
+value_t mobility(board_t* b, int side, float* t) {
 	int mobility = 0;
 	int restoreSide = b->side;
 	//int interpolFactor = // TODO ?
@@ -280,8 +280,8 @@ int scale(int scaler, int pressure) {
 	return scaledPressure;
 }
 
-int evaluatePawns(board_t* b, float* t) {
-	int score = 0;
+value_t evaluatePawns(board_t* b, float* t) {
+	value_t score = 0;
 
 	// lack of pawns penalty
 	if (!getPieces(b, Piece::PAWN, WHITE)) score -= 16;
@@ -310,8 +310,8 @@ int evaluatePawns(board_t* b, float* t) {
 }
 
 
-int eval(board_t* b) {
-	int eval = 0;
+value_t eval(board_t* b) {
+	value_t eval = 0;
 	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
 	prefetchPawnEntry(b);
@@ -326,7 +326,7 @@ int eval(board_t* b) {
 	b->attackedSquares[BLACK] = attackerSet(b, BLACK);
 
 	b->pawnTable->probed++;
-	int pawnEval = 0;
+	value_t pawnEval = 0;
 	bool foundHash = probePawnEntry(b, &pawnEval);
 	if (foundHash) {
 		b->pawnTable->hit++;
@@ -359,8 +359,8 @@ int eval(board_t* b) {
 	return eval * sign;
 }
 
-int lazyEvalulation(board_t* b) {
-	int eval = 0;
+value_t lazyEvalulation(board_t* b) {
+	value_t eval = 0;
 	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
 	b->pawnTable->probed++;
@@ -381,9 +381,9 @@ int lazyEvalulation(board_t* b) {
 	return eval * sign;
 }
 
-int contemptFactor(board_t* b) {
+value_t contemptFactor(board_t* b) {
 
-	int contempt = lazyEvalulation(b);
+	value_t contempt = lazyEvalulation(b);
 
 	switch (b->side) {
 		case WHITE:

@@ -1,7 +1,4 @@
 #pragma once
-#pragma warning(push)
-#pragma warning(disable:6386)
-#pragma warning(disable:6385)
 
 #include <chrono>
 #include <iomanip>
@@ -45,7 +42,11 @@ const int HISTORY_MAX = 0x4000;
  */
 static int quiescenceChecks[MAX_DEPTH];
 
-int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move);
+//int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move);
+
+typedef enum NodeType {
+	PV, NoPV
+} NodeType;
 
 /**
  * Alpha beta algorithm root. Searches current board for best move and score.
@@ -61,7 +62,8 @@ int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move);
  *
  * @returns Best score found in search.
  */
-int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool nullOk, bool pvNode);
+template<NodeType nodeType>
+value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s, bool nullOk);
 
 /**
  * Quiescence search pushes all captures to evaluate a stable and quiet position. AlphaBeta
@@ -74,7 +76,8 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
  *
  * @returns Best score found in quiescences search.
  */
-int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s);
+template<NodeType nodeType>
+value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t* s);
 
 /**
  * Root function that starts alphaBeta search in iterative deepening framework.
@@ -82,9 +85,9 @@ int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s);
  * @param  b Reference to current board.
  * @param  s Search info containing search parameters.
  *
- * @returns move_t Best move found search.
+ * @returns value_t Best value found search.
  */
-int search(board_t* b, search_t* s);
+value_t search(board_t* b, search_t* s);
 
 /**
  * Apply offset of aspiration windows in alphaBeta call and try to score inside alpha and beta.
@@ -152,4 +155,3 @@ void swapMove(moveList_t* move_s, int id1, int id2);
  * @param  s This search info printed to console.
  */
 void printSearchInfo(board_t* b, search_t* s);
-

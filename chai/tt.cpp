@@ -24,8 +24,8 @@ void initTT(ttable_t* tt) {
 		free(tt->bucketList);
 	}
 
-	unsigned long long totalBytes = (unsigned long long)mbSize << 20;
-	unsigned long long numBucketsPossible = totalBytes / sizeof(bucket_t);
+	key_t totalBytes = (key_t)mbSize << 20;
+	key_t numBucketsPossible = totalBytes / sizeof(bucket_t);
 
 	// most significant bit is maximum power of 2 and still smaller than number of buckets
 	int msb = bitscanReverse(numBucketsPossible);
@@ -54,7 +54,7 @@ void clearTT(ttable_t* tt) {
 	memset(tt->bucketList, 0, (tt->buckets * sizeof(bucket_t)));
 }
 
-void storeTT(board_t* b, move_t move, int score, int flag, int depth) {
+void storeTT(board_t* b, move_t move, value_t value, int flag, int depth) {
 	// index is the lower n-bits
 	int32_t index = int32_t(b->zobristKey & indexMask);
 	int32_t key = int32_t(b->zobristKey >> 32);
@@ -63,10 +63,10 @@ void storeTT(board_t* b, move_t move, int score, int flag, int depth) {
 	Assert(index >= 0 && index <= (b->tt->buckets - 1));
 	Assert(depth >= 1 && depth <= MAX_DEPTH);
 	Assert(flag >= TT_ALPHA && flag <= TT_SCORE);
-	Assert(score >= -INF && score <= INF);
+	Assert(value >= -INF && value <= INF);
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
-	searchToHash(b, &score);
+	searchToHash(b, &value);
 
 	// Stats
 	b->tt->stored++;
@@ -110,15 +110,15 @@ void storeTT(board_t* b, move_t move, int score, int flag, int depth) {
 		b->tt->collided++;
 	}
 
-	if (score > ISMATE) score += b->ply;
-	else if (score < -ISMATE) score -= b->ply;
+	if (value > ISMATE) value += b->ply;
+	else if (value < -ISMATE) value -= b->ply;
 
 	// Replace entry has been determined: Store information 
 	//leastValuable->zobKey = b->zobristKey;
 	leastValuable->key = (int32_t)(b->zobristKey >> 32);
 	leastValuable->move = move;
 	leastValuable->flag = flag;
-	leastValuable->score = score;
+	leastValuable->score = value;
 	leastValuable->depth = depth;
 }
 
@@ -178,7 +178,7 @@ void storeTT(board_t* b, move_t move, int score, int flag, int depth) {
 //	(bucket + offset)->depth = depth;
 //}
 
-bool probeTT(board_t* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* hashDepth) {
+bool probeTT(board_t* b, move_t* move, value_t* hashValue, uint8_t* hashFlag, int* hashDepth) {
 	// index is the lower n-bits
 	int32_t index = int32_t(b->zobristKey & indexMask);
 	int32_t key = int32_t(b->zobristKey >> 32);
@@ -201,14 +201,14 @@ bool probeTT(board_t* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* h
 
 			int newScore = e->score;
 
-			*hashScore = newScore;
-			if (*hashScore > ISMATE) *hashScore -= b->ply;
-			else if (*hashScore < -ISMATE) *hashScore += b->ply;
+			*hashValue = newScore;
+			if (*hashValue > ISMATE) *hashValue -= b->ply;
+			else if (*hashValue < -ISMATE) *hashValue += b->ply;
 
 			*hashDepth = e->depth;
 			*move = e->move;
 			*hashFlag = e->flag;
-			//*hashScore = (bucket + i)->score;
+			//*hashValue = (bucket + i)->score;
 
 			return true;
 
@@ -256,11 +256,13 @@ void prefetchTTEntry(board_t* b) {
 	// TODO
 	//int index = b->zobristKey % b->tt->buckets;
 	//int entry = index * BUCKETS;
-
 	//_m_prefetch(&b->tt->table[entry]);
+
+	key_t index = b->zobristKey & indexMask;
+	_m_prefetch((bucket_t*)&b->tt->bucketList);
 }
 
-void hashToSearch(board_t* b, int* score) {
+void hashToSearch(board_t* b, value_t* score) {
 	return;
 
 	if (*score > ISMATE) {
@@ -270,7 +272,7 @@ void hashToSearch(board_t* b, int* score) {
 	}
 }
 
-void searchToHash(board_t* b, int* score) {
+void searchToHash(board_t* b, value_t* score) {
 	return;
 
 	if (*score > ISMATE) {

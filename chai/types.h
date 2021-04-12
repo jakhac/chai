@@ -23,6 +23,11 @@ typedef unsigned long long key_t;
 typedef uint32_t move_t;
 
 /**
+ * Value type. Used for all evalutions.
+ */
+typedef int32_t value_t;
+
+/**
  * Store moves, scores and number entries in moveList. Used in move generation.
  */
 struct moveList_t {
@@ -66,8 +71,6 @@ struct bucket_t {
  * Transposition table instance. Contains stat-variables and pointer to entries.
  */
 struct ttable_t {
-	//ttable_entry_t* table = NULL; // to be removed
-
 	bucket_t* bucketList;
 
 	// total number of buckets (entries-stacks)
@@ -194,9 +197,7 @@ struct search_t {
 	int pvHits = 0;
 };
 
-/**
- * Store PV-Line.
- */
+// Store PV-Line
 struct pv_line_t {
 	uint8_t len;
 	move_t line[64 * 64]; // MAX DEPTH

@@ -6,7 +6,6 @@
 #include "moveGenerator.h"
 
 
-
 /**
  * Size of the transposition table.
  */
@@ -15,8 +14,6 @@ const int ttSize = 0x100000 * 256;
 const int mbSize = 256;
 
 static int indexMask = 0;
-
-static unsigned long long keyMask = 0;
 
 /**
  * Size of the pawn table.
@@ -55,7 +52,7 @@ void prefetchTTEntry(board_t* b);
  * @param  flag  Flag for score type.
  * @param  depth Depth used in search for move and score.
  */
-void storeTT(board_t* b, move_t move, int score, int flag, int depth);
+void storeTT(board_t* b, move_t move, value_t value, int flag, int depth);
 
 /**
  * Probe PV move from ttable.
@@ -73,7 +70,7 @@ move_t probePV(board_t* b);
  * @param  b	 The current board.
  * @param  score The score to check.
  */
-void hashToSearch(board_t* b, int* score);
+void hashToSearch(board_t* b, value_t* value);
 
 /**
  * Checks if score from search is mate score. Update score according with ply to
@@ -82,7 +79,7 @@ void hashToSearch(board_t* b, int* score);
  * @param  b	 The current board.
  * @param  score The score to check.
  */
-void searchToHash(board_t* b, int* score);
+void searchToHash(board_t* b, value_t* value);
 
 /**
  * Probe the transposition table. If a hash entry with equal zobristKey is found, all
@@ -97,7 +94,7 @@ void searchToHash(board_t* b, int* score);
  *
  * @returns True if hash entry was found, else false.
  */
-bool probeTT(board_t* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* hashDepth);
+bool probeTT(board_t* b, move_t* move, value_t* hashScore, uint8_t* hashFlag, int* hashDepth);
 
 /**
  * Walk through best move stored in transposition table to collect principal variation line.

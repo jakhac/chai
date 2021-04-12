@@ -2,6 +2,8 @@
 
 
 int main() {
+	//uciMode(&board, s);
+
 	init(&board);
 	parseFen(&board, STARTING_FEN);
 	//parseFen(&board, BUG_FEN);

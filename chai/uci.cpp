@@ -3,9 +3,9 @@
 void uciMode(board_t* b, search_t* s) {
 	string cmd;
 
-	cout << "id name chai Chess Engine\n";
-	cout << "id author chai\n";
-	cout << "uciok\n";
+	//cout << "id name chai Chess Engine\n";
+	//cout << "id author chai\n";
+	//cout << "uciok\n";
 
 	while (true) {
 		getline(cin, cmd);
@@ -14,8 +14,13 @@ void uciMode(board_t* b, search_t* s) {
 		if (!cmd.compare("quit")) {
 			cout << "quit game\n";
 			exit(0);
+		} else if (!cmd.compare("uci")) {
+			cout << "id name chai" << VERSION << "\n";
+			cout << "id author chai\n";
+			cout << "uciok\n";
 		} else if (!cmd.compare("isready")) {
 			init(b);
+			uciParsePosition(b, "position startpos");
 			cout << "isreadyok\n";
 		} else if (!cmd.compare("ucinewgame")) {
 			// start new game with standard position

@@ -14,6 +14,7 @@ using namespace std;
 
 //#define TESTING
 //#define ASSERT
+#define UCI
 
 /**
  * Write logging information into log.txt file.

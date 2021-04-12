@@ -2,6 +2,8 @@
 
 #include "board.h"
 #include "tt.h"
+#include "types.h"
+
 
 /**
  * Main evaluation function calculates static board evaulation.
@@ -10,7 +12,7 @@
  *
  * @returns Score in centipawns.
  */
-int eval(board_t* b);
+value_t eval(board_t* b);
 
 /**
  * Lazy evaluation function calculates static board evaulation. Considers piece values and
@@ -20,7 +22,7 @@ int eval(board_t* b);
  *
  * @returns Score in centipawns.
  */
-int lazyEvalulation(board_t* b);
+value_t lazyEvalulation(board_t* b);
 
 bool insufficientMaterial(board_t* b);
 
@@ -34,25 +36,25 @@ bool insufficientMaterial(board_t* b);
  *
  * @returns An int.
  */
-int evalPST(board_t* b, int side, float* t);
+value_t evalPST(board_t* b, int side, float* t);
 
-int materialScore(board_t* b, int side);
+value_t materialScore(board_t* b, int side);
 
-int isolatedPawns(board_t* b, int side);
+value_t isolatedPawns(board_t* b, int side);
 
-int passedPawns(board_t* b, int side);
+value_t passedPawns(board_t* b, int side);
 
-int stackedPawn(board_t* b, int side);
+value_t stackedPawn(board_t* b, int side);
 
-int evaluatePawns(board_t* b, float* t);
+value_t evaluatePawns(board_t* b, float* t);
 
-int openFilesRQ(board_t* b, int side);
+value_t openFilesRQ(board_t* b, int side);
 
-int bishopPair(board_t* b, int side);
+value_t bishopPair(board_t* b, int side);
 
-int kingSafety(board_t* b, int side, float* t);
+value_t kingSafety(board_t* b, int side, float* t);
 
-int mobility(board_t* b, int side, float* t);
+value_t mobility(board_t* b, int side, float* t);
 
 float interpolate(int a, int b, float t);
 
@@ -67,7 +69,7 @@ int scale(int scaler, int pressure);
  */
 int contemptFactor(board_t* b);
 
-const int PAWN_OPEN[64] = {
+const value_t PAWN_OPEN[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0,
 	5, 10, 10,-20,-20, 10, 10,  5,
 	5, -5,-10,  0,  0,-10, -5,  5,
@@ -78,7 +80,7 @@ const int PAWN_OPEN[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0,
 };
 
-const int PAWN_ENDGAME[64] = {
+const value_t PAWN_ENDGAME[64] = {
 	  0,  0,  0,  0,  0,  0,  0,  0
 	- 20,-20,-20,-20,-20,-20,-20,-20,
 	  0,  0,  0,  0,  0,  0,  0,  0,
@@ -89,7 +91,7 @@ const int PAWN_ENDGAME[64] = {
 	  0,  0,  0,  0,  0,  0,  0,  0,
 };
 
-const int KNIGHT_OPEN[64] = {
+const value_t KNIGHT_OPEN[64] = {
 	-50,-40,-30,-30,-30,-30,-40,-50,
 	-40,-20,  0,  5,  5,  0,-20,-40,
 	-30,  5, 10, 15, 15, 10,  5,-30,
@@ -100,7 +102,7 @@ const int KNIGHT_OPEN[64] = {
 	-50,-40,-30,-30,-30,-30,-40,-50
 };
 
-const int KNIGHT_ENDGAME[64] = {
+const value_t KNIGHT_ENDGAME[64] = {
 	-50,-40,-30,-30,-30,-30,-40,-50
 	- 40,-20,  0,  5,  5,  0,-20,-40,
 	-30,  5, 10, 15, 15, 10,  5,-30,
@@ -111,7 +113,7 @@ const int KNIGHT_ENDGAME[64] = {
 	-50,-40,-30,-30,-30,-30,-40,-50,
 };
 
-const int BISHOP_OPEN[64] = {
+const value_t BISHOP_OPEN[64] = {
 	-20,-10,-10,-10,-10,-10,-10,-20,
 	-10,  5,  0,  0,  0,  0,  5,-10,
 	-10, 10, 10, 10, 10, 10, 10,-10,
@@ -122,7 +124,7 @@ const int BISHOP_OPEN[64] = {
 	-20,-10,-10,-10,-10,-10,-10,-20
 };
 
-const int BISHOP_ENDGAME[64] = {
+const value_t BISHOP_ENDGAME[64] = {
 	-20,-10,-10,-10,-10,-10,-10,-20
 	- 10,  5,  0,  0,  0,  0,  5,-10,
 	-10, 10, 10, 10, 10, 10, 10,-10,
@@ -133,7 +135,7 @@ const int BISHOP_ENDGAME[64] = {
 	-20,-10,-10,-10,-10,-10,-10,-20,
 };
 
-const int ROOK_OPEN[64] = {
+const value_t ROOK_OPEN[64] = {
 	0,  0, 20,  5,  5, 20,  0,  0,
 	5,  0,  0,  0,  0,  0,  0,  5,
    -5,  0,  0,  0,  0,  0,  0, -5,
@@ -144,7 +146,7 @@ const int ROOK_OPEN[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0
 };
 
-const int ROOK_ENDGAME[64] = {
+const value_t ROOK_ENDGAME[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0,
    -5,  0,  0,  0,  0,  0,  0, -5,
    -5,  0,  0,  0,  0,  0,  0, -5,
@@ -155,7 +157,7 @@ const int ROOK_ENDGAME[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0
 };
 
-const int QUEEN_OPEN[64] = {
+const value_t QUEEN_OPEN[64] = {
 	-20,-10,-10, -5, -5,-10,-10,-20
 	- 10,  0,  5,  0,  0,  0,  0,-10,
 	-10,  5,  5,  5,  5,  5,  0,-10,
@@ -166,7 +168,7 @@ const int QUEEN_OPEN[64] = {
 	-20,-10,-10, -5, -5,-10,-10,-20,
 };
 
-const int QUEEN_ENDGAME[64] = {
+const value_t QUEEN_ENDGAME[64] = {
 	-20,-10,-10, -5, -5,-10,-10,-20
 	- 10,  0,  5,  0,  0,  0,  0,-10,
 	-10,  5,  5,  5,  5,  5,  0,-10,
@@ -177,7 +179,7 @@ const int QUEEN_ENDGAME[64] = {
 	-20,-10,-10, -5, -5,-10,-10,-20,
 };
 
-const int KING_OPENING[64] = {
+const value_t KING_OPENING[64] = {
 	 30, 30, 40, 20, 20, 30, 40, 30,
 	 20, 20,  0,  0,  0,  0, 20, 20,
 	-10,-20,-20,-20,-20,-20,-20,-10,
@@ -188,7 +190,7 @@ const int KING_OPENING[64] = {
 	-30,-40,-40,-50,-50,-40,-40,-30
 };
 
-const int KING_ENDGAME[64] = {
+const value_t KING_ENDGAME[64] = {
 	-50,-30,-30,-30,-30,-30,-30,-50
 	- 30,-30,  0,  0,  0,  0,-30,-30,
 	-30,-10, 20, 30, 30, 20,-10,-30,
@@ -199,7 +201,7 @@ const int KING_ENDGAME[64] = {
 	-50,-40,-30,-20,-20,-30,-40,-50,
 };
 
-const int mirror64[64] = {
+const value_t mirror64[64] = {
 	56	,	57	,	58	,	59	,	60	,	61	,	62	,	63	,
 	48	,	49	,	50	,	51	,	52	,	53	,	54	,	55	,
 	40	,	41	,	42	,	43	,	44	,	45	,	46	,	47	,

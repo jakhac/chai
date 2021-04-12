@@ -177,19 +177,21 @@
   - [x] Interal Iterative Deepening considers node type
   - [x] Check for repetition before probing ttable
 - Transposition Table
+  - [x] TT probing with index (lower bits) and key (upper bits)
   - [x] Retry different bucket sizes and replacement schemes
   - [ ] Prefetch bucket instead of entry
 - Project
   - [x] Replaced `pvLine_t` with `printTTablePV()`
-  - [ ] Add `eval_t` for evaluations
   - [x] Remove `pvLine_t` lines from function signatures
-  - [ ] UCI currentMove and move number
+  - [x] UCI currentMove and move number
+  - [ ] UCI refactor uci calls (to be executed without order) and cli
   - [x] `alphaBetaRoot()` function for save mate/draw detection and bestMove
+  - [x] Templates for `alphaBeta()` and `quiescence()`
   - [ ] Retrieve pv-line from pv-structs
-  - [ ] Templates for search-functions?
   - [ ] Markdown table in changelog
 - Eval
   - [x] Check: insufficient material cannot be influenced by contempt factor
+  - [ ] Add `eval_t` for evaluations
 - Bugfixes
   - [x] Forced quiescence checkmates used `moveList->cnt` instead of `legalMoves`
   - [x] standPat pruning considers check / not not-check and updates `score, bestScore, alpha` seperately
@@ -241,20 +243,12 @@
     - chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv - chai_v2.5.2_pv_iid &rarr; 350-92-58 (+200)
     - chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv - chai_v2.5.3_basic_rep-return_4b &rarr; 155-141-204 (+7)
   - v2.5.4
-    - Final changes: TODO eval_t, pvline, curr move
-
-<!-- <center>
-
-|                  engine1                   |             engine2             |    score    | elo  |
-| :----------------------------------------: | :-----------------------------: | :---------: | :--: |
-|      chai_v2.5.3_basic_rep-return_4b       |       chai_v2.5.2_pv_iid        |  178-61-57  | +147 |
-|       chai_v2.5.3_root_rep-return_4b       |       chai_v2.5.2_pv_iid        |  41-115-32  |  -7  |
-|       chai_v2.5.3_root_rep-return_4b       | chai_v2.5.3_basic_rep-return_4b |   90-94-3   | -147 |
-| chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv |       chai_v2.5.2_pv_iid        |  350-92-58  | +200 |
-| chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv | chai_v2.5.3_basic_rep-return_4b | 155-141-204 |  +7  |
-
-</center>
-<br> -->
+    - Final changes:
+      - No mate distance pruning in rootNodes, IID extends when check, template functions, first move is always PV
+      - currmove UCI info, value_t
+      - bucket prefetch (cachelines?)
+    - TODO:
+      - pvline struct, uci cli (debug lichess-bot)
 
 # Todo
 
@@ -292,6 +286,7 @@
   - late move reductions
   - see reductions
   - try hash move before generating moves
+  - npm verification
   - ~~reorder fiftyMove, mate distance pruning before quiescence~~
   - ~~killer moves~~
   - ~~matekiller moves~~
