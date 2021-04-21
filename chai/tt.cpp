@@ -253,11 +253,6 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, uint8_t* hashFlag, in
 //}
 
 void prefetchTTEntry(board_t* b) {
-	// TODO
-	//int index = b->zobristKey % b->tt->buckets;
-	//int entry = index * BUCKETS;
-	//_m_prefetch(&b->tt->table[entry]);
-
 	key_t index = b->zobristKey & indexMask;
 	_m_prefetch((bucket_t*)&b->tt->bucketList);
 }

@@ -44,9 +44,9 @@ static int quiescenceChecks[MAX_DEPTH];
 
 //int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move);
 
-typedef enum NodeType {
+typedef enum nodeType_t {
 	PV, NoPV
-} NodeType;
+} nodeType_t;
 
 /**
  * Alpha beta algorithm root. Searches current board for best move and score.
@@ -62,7 +62,7 @@ typedef enum NodeType {
  *
  * @returns Best score found in search.
  */
-template<NodeType nodeType>
+template<nodeType_t nodeType>
 value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s, bool nullOk);
 
 /**
@@ -76,7 +76,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
  *
  * @returns Best score found in quiescences search.
  */
-template<NodeType nodeType>
+template<nodeType_t nodeType>
 value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t* s);
 
 /**

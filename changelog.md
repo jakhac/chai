@@ -245,12 +245,19 @@
     - chai_v2.5.3 - Bubble &rarr; 73%: 312-97-91 (+164)
     - chai_v2.5.3 - Bumblebee &rarr; 14%: 46-395-59 (-301)
   - v2.5.4
+
     - Final changes:
-      - No mate distance pruning in rootNodes, IID extends when check, template functions, first move is always PV
-      - currmove UCI info, value_t
-      - bucket prefetch (cachelines?)
+      - (Elo) No mate distance pruning in rootNodes, IID extends when check, first move is always PV, bucket prefetch (cachelines?)
+      - (Code) Template functions, currmove UCI info, value_t
     - TODO:
+      - uci setoptions
       - pvline struct, uci cli (debug lichess-bot)
+    - chai_v2.5.4 - chai_v2.5.3 &rarr; 38%: 93-210-197 (-85)
+    - chai_v2.5.4_no_prefetch - chai_v2.5.3 &rarr; 40%: 111-214-175 (-70)
+    - chai_v2.5.4_pv_var - chai_v2.5.3 &rarr; 49%: 143-158-199 (-7)
+
+    - chai_v2.5.4_lmr2 - chai_v2.5.3 &rarr; 41%: 107-200-193 (-63)
+    - chai_v2.5.4_pv_var_lmr2 - chai_v2.5.3 &rarr; 52%: 163-145-192 (+14)
 
 # Todo
 

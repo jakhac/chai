@@ -217,7 +217,7 @@ bool zugzwang(board_t* b) {
 	return bestScore;
 }*/
 
-template<NodeType nodeType>
+template<nodeType_t nodeType>
 value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s, bool nullOk) {
 	Assert(checkBoard(b));
 	Assert(beta > alpha);
@@ -440,10 +440,10 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		bool moveGivesCheck = isCheck(b, b->side);
 
 #ifdef UCI
-		if (rootNode && getTimeMs() > s->startTime + 3000) {
+		if (rootNode && getTimeMs() > s->startTime + 750) {
 			cout << "info depth " << depth
 				<< " currmove " << getStringMove(currentMove)
-				<< " currmovenumber " << i << endl;
+				<< " currmovenumber " << legalMoves << endl;
 		}
 #endif // UCI
 
@@ -491,10 +491,20 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		 * is required.
 		 */
 		if (legalMoves == 1) {
+
+			// standard in 2.5.4
 			value = -alphaBeta<PV>(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL);
+
+			// PV VARiable
+			//if (pvNode) {
+			//	value = -alphaBeta<PV>(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL);
+			//} else {
+			//	value = -alphaBeta<NoPV>(-beta, -alpha, depth - 1 + searchExt, b, s, DO_NULL);
+			//}
+
 		} else {
 			// Late Move Reductions, do reduced zero window search
-			if (legalMoves > 3
+			if (legalMoves > 2
 				&& !moveGivesCheck
 				&& lmrCandidate
 				&& !(MCHECK_PROM_OR_CAP & currentMove)) {
@@ -662,7 +672,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	return alpha;
 }
 
-template<NodeType nodeType>
+template<nodeType_t nodeType>
 value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t* s) {
 	Assert(checkBoard(b));
 	selDepth = max(selDepth, b->ply);
