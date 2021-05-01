@@ -62,7 +62,7 @@ void storeTT(board_t* b, move_t move, value_t value, int flag, int depth) {
 	Assert(move != NO_MOVE);
 	Assert(index >= 0 && index <= (b->tt->buckets - 1));
 	Assert(depth >= 1 && depth <= MAX_DEPTH);
-	Assert(flag >= TT_ALPHA && flag <= TT_SCORE);
+	Assert(flag >= TT_ALPHA && flag <= TT_VALUE);
 	Assert(value >= -INF && value <= INF);
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
@@ -195,7 +195,7 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, uint8_t* hashFlag, in
 		if (bucket->bucketEntries[i].key == key) {
 
 			e = &bucket->bucketEntries[i];
-			Assert(e->flag >= TT_ALPHA && e->flag <= TT_SCORE);
+			Assert(e->flag >= TT_ALPHA && e->flag <= TT_VALUE);
 			Assert(e->move != NO_MOVE);
 			Assert(e->score >= -INF && e->score <= INF);
 
@@ -292,7 +292,7 @@ move_t probePV(board_t* b) {
 
 		if (bucket->bucketEntries[i].key == key) {
 			e = &bucket->bucketEntries[i];
-			Assert(e->flag >= TT_ALPHA && e->flag <= TT_SCORE);
+			Assert(e->flag >= TT_ALPHA && e->flag <= TT_VALUE);
 			Assert(e->move != NO_MOVE);
 			Assert(e->score >= -INF && e->score <= INF);
 

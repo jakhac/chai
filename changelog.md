@@ -259,6 +259,9 @@
     - chai_v2.5.4_lmr2 - chai_v2.5.3 &rarr; 41%: 107-200-193 (-63)
     - chai_v2.5.4_pv_var_lmr2 - chai_v2.5.3 &rarr; 52%: 163-145-192 (+14)
 
+    - chai_2.5.4_calc_lmr - chai_v2.5.3 &rarr; 37%: 91-225-184 (-92)
+    <!-- - chai_2.5.4_tt_cutoffOk - chai_v2.5.3 &rarr; 37%: 91-225-184 (-92) -->
+
 # Todo
 
 - ~~Compiler optimizations~~

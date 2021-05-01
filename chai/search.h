@@ -18,6 +18,7 @@
 
 #define F1_MARGIN 125
 #define F2_MARGIN 550
+#define F3_MARGIN 800
 
 #define RAZOR_DEPTH 3
 
@@ -45,7 +46,7 @@ static int quiescenceChecks[MAX_DEPTH];
 //int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move);
 
 typedef enum nodeType_t {
-	PV, NoPV
+	PV, NoPV, AllNode
 } nodeType_t;
 
 /**

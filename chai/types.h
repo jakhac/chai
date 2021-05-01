@@ -236,7 +236,7 @@ enum TT_FLAG {
 	TT_NONE = 0,
 	TT_ALPHA = 1,
 	TT_BETA = 1 << 1,
-	TT_SCORE = 1 << 2
+	TT_VALUE = 1 << 2
 };
 
 enum SQUARES {
