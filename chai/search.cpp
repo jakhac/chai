@@ -317,26 +317,27 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		newDepth++;
 	}
 
-	// Static evalutation of the position
-	if (hashStored && hashDepth >= depth) {
-		// use value stored in tt as staticEval
-		staticEval = hashValue;
+	//// Static evalutation of the position
+	//if (hashStored && hashDepth >= depth && abs(hashValue) < ISMATE) {
+	//	// use value stored in tt as staticEval
+	//	staticEval = hashValue;
 
-	} else {
-		// last resort is to evaluate by hand
-		staticEval = lazyEvalulation(b);
+	//} else {
+	//	// last resort is to evaluate by hand
+	//	staticEval = lazyEvalulation(b);
 
-	}
+	//}
+	staticEval = lazyEvalulation(b);
 	Assert(abs(staticEval) < INF);
 
 	// Reverse futility pruning
 	if (!pvNode
-		&& depth < 8
+		&& depth < 5
 		&& nullOk
 		&& !inCheck
 		&& abs(beta) <= ISMATE) {
 
-		int margin = depth * 324;
+		int margin = depth * (pieceScores[Piece::BISHOP] + 25);
 		if (staticEval - margin >= beta) {
 			return beta;
 		}
@@ -352,19 +353,18 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	* If this position is still winning, e.g. fails high, it will never be reached.
 	* Restrict NMP to reasonable positions (zugzwang, depth, checks).
 	*/
-
 	if (nullOk
 		&& !inCheck
 		&& !pvNode
 		&& depth > 2
 		&& staticEval > beta
 		&& abs(beta) < ISMATE
-		//&& !zugzwang(b)
+		&& !zugzwang(b)
 		&& countBits(b->occupied) > 7) {
 		int reduction = (depth > 6) ? R_3 : R_2;
 
 		pushNull(b);
-		value_t nullScore = -alphaBeta<NoPV>(-beta, -beta + 1, depth - 1 - reduction, b, s, NO_NULL);
+		value_t nullValue = -alphaBeta<NoPV>(-beta, -beta + 1, depth - 1 - reduction, b, s, NO_NULL);
 		pop(b);
 
 		if (s->stopped) {
@@ -372,17 +372,17 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		}
 
 		// Even after giving opponent free move, position is winning..
-		if (nullScore >= beta && abs(nullScore) < ISMATE) {
+		if (nullValue >= beta && abs(nullValue) < ISMATE) {
 
 			// nullScore acts as lower bound to this position
 			if (depth - 1 - reduction > 0) {
-				storeTT(b, NULL_MOVE, nullScore, TT_ALPHA, depth - 1 - reduction);
+				storeTT(b, NULL_MOVE, nullValue, TT_ALPHA, depth - 1 - reduction);
 			}
-			return nullScore;
+			return nullValue;
 		}
 
 		// Mate threat detection
-		if (abs(beta) > ISMATE && depth <= 5) {
+		if (abs(nullValue) > ISMATE) {
 			mateThreat = true;
 		}
 	}
@@ -410,13 +410,8 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	* If ttable probing does not find a hash move, there is no good move to start searching this
 	* position. IID searches with reduced depth and fills ttable entries to ensure hash move.
 	*/
-	if (hashMove == NO_MOVE && depth > 3) {
-		if (pvNode) {
-			alphaBeta<PV>(alpha, beta, depth - 3, b, s, NO_NULL);
-		}
-		//else {
-			//alphaBeta<PV>(alpha, beta, 1, b, s, NO_NULL);
-		//}
+	if (pvNode && hashMove == NO_MOVE && depth > 3) {
+		alphaBeta<PV>(alpha, beta, depth - 3, b, s, NO_NULL);
 	}
 
 	moveList_t moveList[1];
@@ -430,7 +425,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	int oldAlpha = alpha;
 	value_t bestValue = -INF;
 	value_t value = -INF;
-	bool skipSearch = false;
 
 	// Futility Pruning flag determines if f-pruning can be applied to this position.
 	bool doFutility = !inCheck
@@ -439,13 +433,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		&& !mateThreat
 		&& abs(alpha) <= 1000
 		&& abs(beta) <= 1000;
-
-	// decrease depth if pv but not tt
-	if (pvNode
-		&& depth >= 5
-		&& !hashStored) {
-		newDepth--;
-	}
 
 	/**
 	 * This position could not be refuted yet. Therefore, moves are generated
@@ -472,9 +459,11 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 		// Early pruning before making the move
 		if ((currentMove & MCHECK_CAP)
-			&& legalMoves >= 3
+			&& legalMoves >= 6
 			&& !moveGivesCheck
 			&& !inCheck
+			&& !mateThreat
+			&& depth <= 3
 			&& moveList->scores[i] < MVV_LVA_UBOUND) {
 			pop(b);
 			continue;
@@ -490,7 +479,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		 * - At least one legal move found
 		 * - Move does not give check (!)
 		 */
-		skipSearch = false;
 		if (doFutility
 			&& legalMoves
 			&& !(MCHECK_PROM & currentMove)
@@ -544,28 +532,32 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 		} else {
 			// Late Move Reductions, do reduced zero window search
-			if (legalMoves > 2
+			if (legalMoves >= 3
 				//&& !moveGivesCheck
 				&& !inCheck
 				&& depth >= 3
 				&& !(MCHECK_PROM_OR_CAP & currentMove)
 				) {
 
-				int reduction = 2;
+				int lmrDepth = newDepth - 2;
 				//reduction = (legalMoves > 6) ? 3 : 2;
 
 				// Increase reduction for late moves
 				if (legalMoves > 6)
-					reduction++;
+					lmrDepth--;
 
 				// Decrease reduction for mate threats
 				if (mateThreat)
-					reduction--;
+					lmrDepth++;
+
+				if (moveGivesCheck)
+					lmrDepth += 2;
 
 				//if (!pvNode && legalMoves > 4)
 				//	reduction++;
 
-				value = -alphaBeta<NoPV>(-(alpha + 1), -alpha, newDepth - reduction, b, s, DO_NULL);
+				lmrDepth = min(newDepth, lmrDepth);
+				value = -alphaBeta<NoPV>(-(alpha + 1), -alpha, lmrDepth, b, s, DO_NULL);
 			} else {
 				// Ensure, that PVS is always exexcuted if LMR is not applicable
 				value = alpha + 1;

@@ -7,9 +7,7 @@ int main() {
 	init(&board);
 	parseFen(&board, STARTING_FEN);
 	//parseFen(&board, BUG_FEN);
-	//parseFen(&board, "8/8/1R3K2/8/3k4/8/8/8 w - - 0 1");
-	//parseFen(&board, "8/8/5r2/4k1K1/8/8/8/8 w - - 0 1");
-	//parseFen(&board, "2rnqb2/1b1n1Nk1/p2PB1Pp/1p6/4Q3/8/PP4PP/R4RK1 w - - 1 0");
+	//parseFen(&board, "1r4r1/q2b1p1k/p4P1p/1pn1P1p1/3N4/5B2/PPP2R1Q/4R1K1 w - - 1 0");
 
 	// mate in 1 quiescence test
 	//parseFen(&board, "7k/8/7K/8/8/8/8/R7 w - - 9 11");
