@@ -337,7 +337,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		&& !inCheck
 		&& abs(beta) <= ISMATE) {
 
-		int margin = depth * (pieceScores[Piece::BISHOP] + 25);
+		int margin = depth * (pieceScores[Piece::BISHOP] - 13);
 		if (staticEval - margin >= beta) {
 			return beta;
 		}
@@ -457,16 +457,44 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		// function that checks if move gives check, do early pruning without making the move
 		bool moveGivesCheck = isCheck(b, b->side);
 
-		// Early pruning before making the move
-		if ((currentMove & MCHECK_CAP)
-			&& legalMoves >= 6
-			&& !moveGivesCheck
-			&& !inCheck
-			&& !mateThreat
-			&& depth <= 3
-			&& moveList->scores[i] < MVV_LVA_UBOUND) {
-			pop(b);
-			continue;
+		//// Early pruning before making the move
+		//if ((currentMove & MCHECK_CAP)
+		//	&& !pvNode
+		//	&& legalMoves >= 4
+		//	&& !moveGivesCheck
+		//	&& !inCheck
+		//	&& !mateThreat
+		//	&& depth <= 3
+		//	&& moveList->scores[i] < MVV_LVA_UBOUND) {
+		//	pop(b);
+		//	continue;
+		//}
+
+		if (!rootNode
+			&& legalMoves
+			&& !zugzwang(b)
+			&& bestValue > -ISMATE) {
+
+			if ((currentMove & MCHECK_CAP) || moveGivesCheck) {
+				// SEE pruning
+				if (moveList->scores[i] < -depth * (pieceScores[Piece::BISHOP] + 25)) {
+					pop(b);
+					continue;
+				}
+
+			} else if (!inCheck
+					   && !mateThreat
+					   && newDepth < 4
+					   && !(currentMove & (MCHECK_PROM | MCHECK_CAS))) {
+
+				// Futility pruning
+				if (!pvNode
+					&& staticEval + (depth * (pieceScores[Piece::BISHOP] + 25)) < alpha) {
+					pop(b);
+					return alpha;
+				}
+
+			}
 		}
 
 		/**
@@ -479,35 +507,31 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		 * - At least one legal move found
 		 * - Move does not give check (!)
 		 */
-		if (doFutility
-			&& legalMoves
-			&& !(MCHECK_PROM & currentMove)
-			&& !(MCHECK_EP & currentMove)
-			&& !moveGivesCheck
-			) {
-
-			Assert(abs(staticEval) < INF);
-			int capPieceValue = (MCHECK_CAP & currentMove) ? pieceScores[capPiece(currentMove)] : 200;
-
-			if (depth == 3 && staticEval + capPieceValue + F3_MARGIN < alpha) {
-				s->futileCnt++;
-				pop(b);
-				continue;
-			}
-
-			if (depth == 2 && staticEval + capPieceValue + F2_MARGIN < alpha) {
-				s->futileCnt++;
-				pop(b);
-				continue;
-			}
-
-			if (depth == 1 && staticEval + capPieceValue + F1_MARGIN < alpha) {
-				s->futileCnt++;
-				pop(b);
-				continue;
-			}
-
-		}
+		 //if (doFutility
+		 //	&& legalMoves
+		 //	&& !(MCHECK_PROM & currentMove)
+		 //	&& !(MCHECK_EP & currentMove)
+		 //	&& !moveGivesCheck
+		 //	) {
+		 //	// TODO all depths and maybe only captures?
+		 //	Assert(abs(staticEval) < INF);
+		 //	int capPieceValue = (MCHECK_CAP & currentMove) ? pieceScores[capPiece(currentMove)] : 200;
+		 //	if (depth == 3 && staticEval + capPieceValue + F3_MARGIN < alpha) {
+		 //		s->futileCnt++;
+		 //		pop(b);
+		 //		continue;
+		 //	}
+		 //	if (depth == 2 && staticEval + capPieceValue + F2_MARGIN < alpha) {
+		 //		s->futileCnt++;
+		 //		pop(b);
+		 //		continue;
+		 //	}
+		 //	if (depth == 1 && staticEval + capPieceValue + F1_MARGIN < alpha) {
+		 //		s->futileCnt++;
+		 //		pop(b);
+		 //		continue;
+		 //	}
+		 //}
 
 		legalMoves++;
 

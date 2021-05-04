@@ -33,8 +33,8 @@ const int KILLER_SCORE_1 = 8000;
 const int KILLER_SCORE_2 = 7000;
 const int COUNTER_SCORE = 6000;
 const int QUIET_SCORE = 5000;
+const int CASTLE_SCORE = QUIET_SCORE + 500;
 
-const int CASTLE_SCORE = 500;
 
 /*
 * No MVV-LVA score is greater than this upper bound.

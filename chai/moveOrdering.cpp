@@ -240,7 +240,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 
 		// castle move
 		if (currentMove & MCHECK_CAS) {
-			moveList->scores[i] = QUIET_SCORE + CASTLE_SCORE;
+			moveList->scores[i] = CASTLE_SCORE;
 
 			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;

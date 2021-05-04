@@ -9,16 +9,10 @@ int main() {
 	//parseFen(&board, BUG_FEN);
 	//parseFen(&board, "1r4r1/q2b1p1k/p4P1p/1pn1P1p1/3N4/5B2/PPP2R1Q/4R1K1 w - - 1 0");
 
-	// mate in 1 quiescence test
-	//parseFen(&board, "7k/8/7K/8/8/8/8/R7 w - - 9 11");
-	//cout << "in check " << isCheck(&board, board.side) << endl;
-	//cout << "qui = " << quiescence(-INF, INF, 0, &board, s, nullptr) << endl;
-
 	printBoard(&board);
 
 	//moveList_t moveList[1];
-	//generateMoves(&board, moveList, board.isCheck(board.side));
-	//addKingCheckEvasions(&board, moveList);
+	//generateMoves(&board, moveList, isCheck(&board, board.side));
 	//printGeneratedMoves(moveList);
 	//return 0;
 
