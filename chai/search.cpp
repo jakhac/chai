@@ -434,6 +434,12 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		&& abs(alpha) <= 1000
 		&& abs(beta) <= 1000;
 
+	if (pvNode
+		&& depth >= 9
+		&& !hashStored) {
+		newDepth--;
+	}
+
 	/**
 	 * This position could not be refuted yet. Therefore, moves are generated
 	 * and searching continues.
@@ -473,19 +479,20 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		if (!rootNode
 			&& legalMoves
 			&& !zugzwang(b)
-			&& bestValue > -ISMATE) {
+			&& bestValue > -ISMATE
+			&& !(currentMove & MCHECK_PROM)) {
 
 			if ((currentMove & MCHECK_CAP) || moveGivesCheck) {
 				// SEE pruning
-				if (moveList->scores[i] < -depth * (pieceScores[Piece::BISHOP] + 25)) {
+				if (moveList->scores[i] < -depth * (pieceScores[Piece::BISHOP])) {
 					pop(b);
 					continue;
 				}
 
 			} else if (!inCheck
 					   && !mateThreat
-					   && newDepth < 4
-					   && !(currentMove & (MCHECK_PROM | MCHECK_CAS))) {
+					   && depth < 4
+					   && !(currentMove & MCHECK_CAS)) {
 
 				// Futility pruning
 				if (!pvNode
@@ -536,6 +543,16 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		legalMoves++;
 
 		/**
+		 * Bad pv node if node was searched previously and current lower bound alpha is
+		 * far below
+		 *
+		 */
+		bool badPv = pvNode
+			&& (hashFlag & TT_BETA)
+			&& hashDepth >= depth
+			&& alpha + 200 + 100 * depth > hashValue;
+
+		/**
 		 * PVS / LMR:
 		 * Always assume that the first move is part of the principal variation and scores in
 		 * alpha - beta bounds. Late moves wont raise alpha in most cases, try to prove this
@@ -574,11 +591,11 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				if (mateThreat)
 					lmrDepth++;
 
+				if (hashStored && !badPv)
+					lmrDepth++;
+
 				if (moveGivesCheck)
 					lmrDepth += 2;
-
-				//if (!pvNode && legalMoves > 4)
-				//	reduction++;
 
 				lmrDepth = min(newDepth, lmrDepth);
 				value = -alphaBeta<NoPV>(-(alpha + 1), -alpha, lmrDepth, b, s, DO_NULL);
