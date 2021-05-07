@@ -47,7 +47,8 @@ int see(board_t* b, const int move) {
 		d++; // next depth and side
 		gain[d] = -gain[d - 1] + pieceScores[attackerPiece]; // speculative store, if defended
 
-		if (max(-gain[d - 1], gain[d]) < 0) break; // pruning does not influence the result
+		if (max(-gain[d - 1], gain[d]) < 0)
+			break; // pruning does not influence the result
 
 		attadef ^= from; // reset bit in set to traverse
 		occ ^= from; // reset bit in temporary occupancy (for magic move generation)
@@ -69,7 +70,8 @@ int see(board_t* b, const int move) {
 		gain[d - 1] = -max(-gain[d - 1], gain[d]);
 	}
 
-	if (MFLAG_EP & move) gain[0] += 100;
+	if (MFLAG_EP & move)
+		gain[0] += 100;
 
 	return gain[0];
 }
@@ -100,7 +102,8 @@ int lazySee(board_t* b, const int move) {
 		d++; // next depth and side
 		gain[d] = -gain[d - 1] + pieceScores[attackerPiece]; // speculative store, if defended
 
-		if (max(-gain[d - 1], gain[d]) < 0) break; // pruning does not influence the result
+		if (max(-gain[d - 1], gain[d]) < 0)
+			break; // pruning does not influence the result
 
 		attadef ^= from; // reset bit in set to traverse
 		occ ^= from; // reset bit in temporary occupancy (for magic move generation)
@@ -122,7 +125,8 @@ int lazySee(board_t* b, const int move) {
 		gain[d - 1] = -max(-gain[d - 1], gain[d]);
 	}
 
-	if (MFLAG_EP & move) gain[0] += 100;
+	if (MFLAG_EP & move)
+		gain[0] += 100;
 
 	return gain[0];
 }
@@ -140,7 +144,8 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 	int bestIdx = 0;
 
 	// set all scores to 0
-	for (int i = 0; i < moveList->cnt; i++) moveList->scores[i] = 0;
+	for (int i = 0; i < moveList->cnt; i++)
+		moveList->scores[i] = 0;
 
 	for (int i = 0; i < moveList->cnt; i++) {
 		currentMove = moveList->moves[i];
@@ -181,7 +186,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 				} else if (seeScore == 0) {
 					moveList->scores[i] = EQUAL_CAPTURE + mvvLvaScore;
 				} else {
-					moveList->scores[i] = BAD_CAPTURE + mvvLvaScore;
+					moveList->scores[i] = BAD_CAPTURE + seeScore;
 				}
 			}
 
@@ -247,8 +252,10 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		}
 
 		// last resort: history heuristic
-		int histScore = histHeuristic[pieceAt(b, fromSq(currentMove))][toSq(currentMove)];
-		moveList->scores[i] = QUIET_SCORE + (histScore / 250);
+		int histScore = histHeuristic[b->side][fromSq(currentMove)][toSq(currentMove)];
+		moveList->scores[i] = QUIET_SCORE + (histScore);
+		Assert(moveList->scores[i] < COUNTER_SCORE);
+
 		updateBestMove(moveList->scores, &bestIdx, i);
 	}
 
@@ -258,5 +265,4 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 	//	moveList->moves[0] = moveList->moves[bestIdx];
 	//	moveList->moves[0] = temp;
 	//}
-
 }

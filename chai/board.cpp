@@ -3,7 +3,8 @@
 // Include extern vars declared in board.h
 move_t killer[2][MAX_GAME_MOVES];
 move_t mateKiller[MAX_GAME_MOVES];
-int histHeuristic[13][64];
+//int histHeuristic[13][64];
+int histHeuristic[2][64][64];
 int histMax = 0;
 move_t counterHeuristic[64][64][2];
 
@@ -64,9 +65,12 @@ void reset(board_t* b) {
 		}
 	}
 
-	for (int i = 0; i < 13; i++) {
-		for (int j = 0; j < 64; j++) {
-			histHeuristic[i][j] = 0;
+	// reset history heuristic
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < NUM_SQUARES; j++) {
+			for (int k = 0; k < NUM_SQUARES; k++) {
+				histHeuristic[i][j][k] = 0;
+			}
 		}
 	}
 	histMax = 0;
@@ -201,10 +205,10 @@ void printBoard(board_t* b) {
 		<< ", ply " << b->ply << ", fiftyMoves " << b->fiftyMove << endl;
 
 	printf("Castle permission: %c%c%c%c\n",
-		b->castlePermission & K_CASTLE ? 'K' : ' ',
-		b->castlePermission & Q_CASTLE ? 'Q' : ' ',
-		b->castlePermission & k_CASTLE ? 'k' : ' ',
-		b->castlePermission & q_CASTLE ? 'q' : ' '
+		   b->castlePermission & K_CASTLE ? 'K' : ' ',
+		   b->castlePermission & Q_CASTLE ? 'Q' : ' ',
+		   b->castlePermission & k_CASTLE ? 'k' : ' ',
+		   b->castlePermission & q_CASTLE ? 'q' : ' '
 	);
 
 	cout << endl;

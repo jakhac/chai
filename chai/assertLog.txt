@@ -1,6 +1,24 @@
-At Thu Apr 29 09:13:18 2021
- Error in:F:\SmartGit-Repositories\chai\chai\search.cpp at line 232
+At Thu May  6 13:21:28 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\search.cpp at line 462
 
-At Fri Apr 30 20:55:03 2021
- Error in:F:\SmartGit-Repositories\chai\chai\search.cpp at line 338
+At Thu May  6 13:22:12 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\search.cpp at line 468
+
+At Thu May  6 13:34:15 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\search.cpp at line 469
+
+At Thu May  6 14:03:48 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\perft.cpp at line 78
+
+At Thu May  6 14:04:10 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\perft.cpp at line 78
+
+At Thu May  6 14:05:12 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\perft.cpp at line 84
+
+At Thu May  6 14:05:41 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\perft.cpp at line 85
+
+At Thu May  6 23:53:59 2021
+ Error in:F:\SmartGit-Repositories\chai\chai\search.cpp at line 356
 

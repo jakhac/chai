@@ -35,14 +35,10 @@ const int COUNTER_SCORE = 6000;
 const int QUIET_SCORE = 5000;
 const int CASTLE_SCORE = QUIET_SCORE + 500;
 
-
-/*
-* No MVV-LVA score is greater than this upper bound.
-*/
+// No MVV-LVA score is greater than this upper bound.
 const int MVV_LVA_UBOUND = 1000;
 
 static int MVV_LVA[13][13];
-
 
 /**
  * Initialize mvv-lva array. Only used once in start.
@@ -97,14 +93,6 @@ int lazySee(board_t* b, const int move);
 void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove);
 
 /**
- * Score moves quiescence
- *
- * @param  b	    Reference to board.
- * @param  moveList Reference to moveList to score moves in.
- */
-void scoreMovesQuiescence(board_t* b, moveList_t* moveList);
-
-/**
  * Update the index of the move with highest score yet. Used to swap best move to the end after
  * all moves are scored.
  *
@@ -113,4 +101,3 @@ void scoreMovesQuiescence(board_t* b, moveList_t* moveList);
  * @param  curIdx  Current index of loop.
  */
 static void updateBestMove(int* scores, int* bestIdx, int curIdx);
-

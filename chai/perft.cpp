@@ -16,7 +16,18 @@ long long Perft::perftRoot(board_t* b, int depth) {
 		move = _moveList->moves[i];
 
 		//skip illegal moves
-		if (!push(b, move)) continue;
+		if (!push(b, move)) {
+
+			//if (inCheck) {
+			//	cout << getFEN(b) << endl;
+			//	cout << "Move " << getStringMove(move) << endl;
+			//	printBoard(b);
+			//	exit(0);
+			//}
+
+			Assert(!inCheck);
+			continue;
+		}
 
 		long long cumnodes = leafNodes;
 		perft(b, depth - 1);
@@ -71,7 +82,18 @@ void Perft::perft(board_t* b, int depth) {
 		move = _moveList->moves[i];
 
 		// skip illegal moves
-		if (!push(b, move)) continue;
+		if (!push(b, move)) {
+
+			//if (inCheck) {
+			//	cout << getFEN(b) << endl;
+			//	cout << "Move " << getStringMove(move) << endl;
+			//	printBoard(b);
+			//	exit(0);
+			//}
+
+			Assert(!inCheck);
+			continue;
+		}
 
 		perft(b, depth - 1);
 		pop(b);

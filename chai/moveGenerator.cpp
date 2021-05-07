@@ -68,12 +68,13 @@ void generateQuiescence(board_t* b, moveList_t* moveList, bool inCheck) {
 void generateCheckEvasions(board_t* b, moveList_t* moveList) {
 	int kSq = getKingSquare(b, b->side);
 	int blockerSq;
+	bitboard_t pinnedDefender = getPinned(b, kSq, b->side);
 	bitboard_t attacker = squareAttackedBy(b, kSq, b->side ^ 1);
 
 	Assert(isCheck(b, b->side));
 	Assert(countBits(attacker) > 0);
 
-	// Single Check: blocks or captures by non-pinned pieces are possible
+	// Step 1. If single check, blocks or captures by non-pinned pieces are possible
 	if (countBits(attacker) < 2) {
 		int attackerSq = bitscanForward(attacker);
 		int attackerPiece = pieceAt(b, attackerSq);
@@ -83,17 +84,16 @@ void generateCheckEvasions(board_t* b, moveList_t* moveList) {
 			bitboard_t attackingLine = obstructed(kSq, attackerSq) & ~b->occupied;
 
 			while (attackingLine) {
-
 				blockerSq = popBit(&attackingLine);
-				addBlockersForSq(b, moveList, blockerSq);
+				addBlockersForSq(b, moveList, blockerSq, &pinnedDefender);
 			}
 		}
 
-		// Always: squareAttackedBy -> calculate attacks to piece that delivers check
-		bitboard_t defender = squareAttackedBy(b, attackerSq, b->side);
+		// Always: calculate attacks to square that delivers check by non-pinned pieces
+		bitboard_t defender = squareAttackedBy(b, attackerSq, b->side) & ~pinnedDefender;
 		bitboard_t promDefends = 0ULL;
 
-		// defenders that promote with capture
+		// defenders that defend while promoting with capture
 		if (attacker & (RANK_1_HEX | RANK_8_HEX)) {
 			promDefends = defender & b->pieces[Piece::PAWN] & (RANK_2_HEX | RANK_7_HEX);
 		}
@@ -119,24 +119,32 @@ void generateCheckEvasions(board_t* b, moveList_t* moveList) {
 		// if pawn is threatening check but can be captured en passant
 		if (b->enPas) {
 			if (b->side == WHITE) {
-				if (b->enPas == attackerSq + 8 && pieceAt(b, attackerSq - 1) == Piece::P) {
+				if (b->enPas == attackerSq + 8
+					&& pieceAt(b, attackerSq - 1) == Piece::P
+					&& (setMask[attackerSq - 1] & ~pinnedDefender)) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq - 1, b->enPas, Piece::EMPTY, Piece::EMPTY, MFLAG_EP);
 				}
-				if (b->enPas == attackerSq + 8 && pieceAt(b, attackerSq + 1) == Piece::P) {
+				if (b->enPas == attackerSq + 8
+					&& pieceAt(b, attackerSq + 1) == Piece::P
+					&& (setMask[attackerSq + 1] & ~pinnedDefender)) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq + 1, b->enPas, Piece::EMPTY, Piece::EMPTY, MFLAG_EP);
 				}
 			} else {
-				if (b->enPas == attackerSq - 8 && pieceAt(b, attackerSq - 1) == Piece::p) {
+				if (b->enPas == attackerSq - 8
+					&& pieceAt(b, attackerSq - 1) == Piece::p
+					&& (setMask[attackerSq - 1] & ~pinnedDefender)) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq - 1, b->enPas, Piece::EMPTY, Piece::EMPTY, MFLAG_EP);
 				}
-				if (b->enPas == attackerSq - 8 && pieceAt(b, attackerSq + 1) == Piece::p) {
+				if (b->enPas == attackerSq - 8
+					&& pieceAt(b, attackerSq + 1) == Piece::p
+					&& (setMask[attackerSq + 1] & ~pinnedDefender)) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq + 1, b->enPas, Piece::EMPTY, Piece::EMPTY, MFLAG_EP);
 				}
 			}
 		}
 	}
 
-	// Always add king evasions to non-attacked squares
+	// Step 2. Always add king evasions to non-attacked squares
 	addKingCheckEvasions(b, moveList);
 }
 
@@ -234,14 +242,12 @@ void generateQuietCheckers(board_t* b, moveList_t* moveList) {
 	}
 }
 
-void addBlockersForSq(board_t* b, moveList_t* moveList, int blockingSq) {
-	bitboard_t blocker = blockerSet(b, b->side, blockingSq);
+void addBlockersForSq(board_t* b, moveList_t* moveList, int blockingSq, bitboard_t* pinnedDefenders) {
+	bitboard_t blocker = blockerSet(b, b->side, blockingSq) & ~(*pinnedDefenders);
 
 	int piece, sq;
 	int flag;
 	while (blocker) {
-
-
 		flag = 0;
 		sq = popBit(&blocker);
 		piece = pieceAt(b, sq);
@@ -298,6 +304,25 @@ bitboard_t hasSafePawnPush(board_t* b, int side) {
 	}
 
 	return safeSquares;
+}
+
+bool hasEvadingMove(board_t* b) {
+	Assert(isCheck(b, b->side));
+
+	moveList_t moveList;
+	generateCheckEvasions(b, &moveList);
+	return moveList.cnt > 0;
+
+	//moveList_t moveList;
+	//generateCheckEvasions(b, &moveList);
+	//for (int i = 0; i < moveList.cnt; i++) {
+	//	if (push(b, moveList.moves[i])) {
+	//		pop(b);
+	//		return true;
+	//	}
+	//	pop(b);
+	//}
+	//return false;
 }
 
 void whiteSinglePawnPush(board_t* board, moveList_t* moveList) {

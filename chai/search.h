@@ -3,9 +3,9 @@
 #include <chrono>
 #include <iomanip>
 
-#include "tt.h"
 #include "eval.h"
 #include "moveOrdering.h"
+#include "tt.h"
 
 #define DO_NULL true
 #define NO_NULL false
@@ -28,14 +28,19 @@
 extern int selDepth;
 
 /**
- * Maximum score before rescale in history heuristic.
+ * Maximum score before rescale in history heuristic. Max history score needs to be less than 10000
+ * because move ordering scores "QUIET_SCORES=5000 + hist/10" before COUNTER_SCORE=6000.
  */
-const int HISTORY_MAX = 0x4000;
+const int HISTORY_MAX = 1000 - 1;
 
 /**
   Principal variation line used for root alphaBeta call. Contains main line after search finished.
 */
 //static pv_line_t pvLine[1];
+
+static const int moveCountPruningDepth = 5;
+
+static int moveCountPruning[moveCountPruningDepth];
 
 /**
  * Remember checks given in quiescence to detect checkmates. Quiescence depths are stored
@@ -46,7 +51,9 @@ static int quiescenceChecks[MAX_DEPTH];
 //int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move);
 
 typedef enum nodeType_t {
-	PV, NoPV, AllNode
+	PV,
+	NoPV,
+	AllNode
 } nodeType_t;
 
 /**
@@ -63,7 +70,7 @@ typedef enum nodeType_t {
  *
  * @returns Best score found in search.
  */
-template<nodeType_t nodeType>
+template <nodeType_t nodeType>
 value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s, bool nullOk);
 
 /**
@@ -77,7 +84,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
  *
  * @returns Best score found in quiescences search.
  */
-template<nodeType_t nodeType>
+template <nodeType_t nodeType>
 value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t* s);
 
 /**

@@ -25,7 +25,7 @@ extern move_t mateKiller[MAX_GAME_MOVES];
 /**
 * Stores history heuristic for both sides with [PIECE][TO] indices.
 */
-extern int histHeuristic[13][64];
+extern int histHeuristic[2][64][64];
 
 /**
 * Stores maximum history score.

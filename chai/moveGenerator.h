@@ -9,6 +9,7 @@ void generateMoves(board_t* b, moveList_t* moveList, bool inCheck);
 
 void generateQuiescence(board_t* b, moveList_t* moveList, bool inCheck);
 
+// generates only legal moves!
 void generateCheckEvasions(board_t* b, moveList_t* moveList);
 
 void generateQuietCheckers(board_t* b, moveList_t* moveList);
@@ -16,6 +17,8 @@ void generateQuietCheckers(board_t* b, moveList_t* moveList);
 bool isLegal(board_t* b, const move_t move);
 
 bitboard_t hasSafePawnPush(board_t* b, int side);
+
+bool hasEvadingMove(board_t* b);
 
 /**
  * Generate all blockers for the blocking square and add them to the moveList. Kings cannot
@@ -25,7 +28,7 @@ bitboard_t hasSafePawnPush(board_t* b, int side);
  * @param  moveList   Blocking moves are added to this moveList.
  * @param  blockingSq Square to be blocked.
  */
-void addBlockersForSq(board_t* b, moveList_t* moveList, int blockingSq);
+void addBlockersForSq(board_t* b, moveList_t* moveList, int blockingSq, bitboard_t* pinnedDefenders);
 
 /**
  * Generate all possible single white pawn pushes and add to moveList. Does not include
