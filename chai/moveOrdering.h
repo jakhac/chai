@@ -24,7 +24,7 @@ const int HASH_MOVE = 20000;
 const int PROMOTING_CAPTURE = 16000;
 const int GOOD_CAPTURE = 15000;
 const int PROMOTION = 12000;
-const int EQUAL_CAPTURE = 10000;
+//const int EQUAL_CAPTURE = 10000;
 const int BAD_CAPTURE = 0;
 
 // quiet moves
@@ -39,6 +39,13 @@ const int CASTLE_SCORE = QUIET_SCORE + 500;
 const int MVV_LVA_UBOUND = 1000;
 
 static int MVV_LVA[13][13];
+
+static const int SEEPieceValues[13] = {
+	0, 100, 325, 325, 550, 1000, 0, 100, 325, 325, 550, 1000, 0 // pieceScores
+	//0,
+	//100,  450,  450,  675, 1300, 0,
+	//100,  450,  450,  675, 1300, 0
+};
 
 /**
  * Initialize mvv-lva array. Only used once in start.
@@ -81,6 +88,8 @@ int see(board_t* b, const int move);
  * 			for winning capture.
  */
 int lazySee(board_t* b, const int move);
+
+bool see_ge(board_t* b, move_t move, int threshHold);
 
 /**
  * Score moves according to moveOrdering.h rules. After scoring every move, best move is swapped

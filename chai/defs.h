@@ -68,14 +68,14 @@ exit(1); \
 
 const int NUM_SQUARES = 64;
 const int MAX_POSITION_MOVES = 256;
-const int NO_SCORE = 10000000;
-const int NO_MOVE = 0;
-const int NULL_MOVE = 129; // B1-B1 used as nullmove (impossible move, never generated)
+const int DEFAULT_EP_SQ = 65;
+const move_t NO_MOVE = 0;
+const move_t NULL_MOVE = 4095; // C1-C1 used as nullmove (impossible move, never generated)
 
-const int INF = 30000;
-const int MATE_VALUE = 29000;
-const int ISMATE = MATE_VALUE - 1000;
-const int NO_VALUE = 40000;
+const value_t INF = 32000;
+const value_t MATE_VALUE = 31000;
+const value_t ISMATE = MATE_VALUE - 1000;
+const value_t NO_VALUE = INF + 1;
 
 const bitboard_t RANK_1_HEX = 0xFF;
 const bitboard_t RANK_2_HEX = 0xFF00;
@@ -134,7 +134,7 @@ const int pieceBishopQueen[13] = { 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0 };
 const int victimScore[13] = { 0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 };
 
 // index true if piece is big / maj / min /wb and value
-const int pieceScores[13] = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
+const int pieceScores[13] = { 0, 100, 325, 325, 550, 1000, 0, 100, 325, 325, 550, 1000, 0 };
 const int piecePawn[13] = { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
 
 // color for given index

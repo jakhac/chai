@@ -15,26 +15,26 @@ long long Perft::perftRoot(board_t* b, int depth) {
 	for (int i = 0; i < _moveList->cnt; i++) {
 		move = _moveList->moves[i];
 
+		bool moveGivesCheck = checkingMove(b, move);
+
 		//skip illegal moves
 		if (!push(b, move)) {
-
-			//if (inCheck) {
-			//	cout << getFEN(b) << endl;
-			//	cout << "Move " << getStringMove(move) << endl;
-			//	printBoard(b);
-			//	exit(0);
-			//}
-
 			Assert(!inCheck);
 			continue;
 		}
+
+		if (isCheck(b, b->side) != moveGivesCheck) {
+			cout << "error in moveGivesCheck" << endl;
+			exit(1);
+		}
+		Assert(isCheck(b, b->side) == moveGivesCheck);
 
 		long long cumnodes = leafNodes;
 		perft(b, depth - 1);
 		pop(b);
 		long long oldnodes = leafNodes - cumnodes;
 
-		cout << getStringMove(move) << " : " << oldnodes << endl;
+		cout << getStringMove(b, move) << " : " << oldnodes << endl;
 	}
 
 	cout << "\nTest Complete : " << leafNodes << " nodes visited" << endl;
@@ -56,44 +56,30 @@ void Perft::perft(board_t* b, int depth) {
 	moveList_t _moveList[1];
 	generateMoves(b, _moveList, inCheck);
 
-	// check if quiet checkers all deliver check
-	/*if (!inCheck) {
-		moveList_t checkers[1];
-		generateQuietCheckers(b, checkers);
-
-		for (int i = 0; i < checkers->cnt; i++) {
-			if (!b->push(checkers->moves[i])) continue;
-
-			if (!isCheck(b, b->side)) {
-				b->printBoard();
-				cout << "Move " << getStringMove(checkers->moves[i]) << " does not check opp king" << endl;
-				exit(0);
-			}
-
-			b->pop();
-		}
-	}*/
-
-
 	Assert(attackerSet(b, b->side ^ 1) == _moveList->attackedSquares);
 
 	int move;
 	for (int i = 0; i < _moveList->cnt; i++) {
 		move = _moveList->moves[i];
 
-		// skip illegal moves
+		bool moveGivesCheck = checkingMove(b, move);
+
+		//skip illegal moves
 		if (!push(b, move)) {
-
-			//if (inCheck) {
-			//	cout << getFEN(b) << endl;
-			//	cout << "Move " << getStringMove(move) << endl;
-			//	printBoard(b);
-			//	exit(0);
-			//}
-
 			Assert(!inCheck);
 			continue;
 		}
+
+		if (isCheck(b, b->side) != moveGivesCheck) {
+			cout << "error in moveGivesCheck" << endl;
+			pop(b);
+			printBoard(b);
+			cout << "moveGivesCheck " << moveGivesCheck << endl;
+			cout << "move " << getStringMove(b, move) << endl;
+			cout << "fen " << getFEN(b) << endl;
+			exit(1);
+		}
+		Assert(isCheck(b, b->side) == moveGivesCheck);
 
 		perft(b, depth - 1);
 		pop(b);

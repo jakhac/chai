@@ -196,7 +196,7 @@ void addQueenCaptures(board_t* b, moveList_t* moveList);
  *
  * @param  moveList moveList struct with moves.
  */
-void printGeneratedMoves(moveList_t* moveList);
+void printGeneratedMoves(board_t* b, moveList_t* moveList);
 
 
 

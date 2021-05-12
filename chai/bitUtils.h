@@ -63,6 +63,20 @@ inline int popBit(bitboard_t* bb) {
 }
 
 /**
+ * Pops least significant bit from bitboard and returns index.
+ *
+ * @param  bb Bitboard to pop lsb on.
+ *
+ * @returns Index of popped bit.
+ */
+inline int popBit(bitboard_t bb) {
+	unsigned long ret;
+	_BitScanForward64(&ret, bb);
+	bb &= (bb - 1);
+	return (int)ret;
+}
+
+/**
  * Set bit at given bitboard.
  *
  * @param  bb Bitboard to set bit on.

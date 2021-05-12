@@ -10,6 +10,7 @@
 #include "attacks.h"
 #include "move.h"
 #include "pieceKeys.h"
+#include "validate.h"
 
 
 /**
@@ -207,7 +208,7 @@ bool checkBoard(board_t* b);
  *
  * @returns Returns true if move was valid and does not leave king in check, else false.
  */
-bool push(board_t* b, int move);
+bool push(board_t* b, move_t move);
 
 /**
  * Push rooks with castle move on board. Small checks for valid init positions of king and rook.
@@ -283,6 +284,18 @@ bitboard_t squareAttackedBy(board_t* b, int square, int side);
 bitboard_t squareAtkDef(board_t* b, int square);
 
 /**
+ * Get all pieces attacking the given square, independet of side.
+ * Extra parameter to pass the occupied squares needed or slider generation.
+ *
+ * @param  b board_t to call function.
+ * @param occupied Bitboard of currently occupied squares
+ * @param  square Square to check.
+ *
+ * @returns Bitboard with attackers / defenders.
+ */
+bitboard_t squareAtkDefOcc(board_t* b, bitboard_t occupied, int square);
+
+/**
  * Check if given side is currently in check.
  *
  * @param  b board_t to call function.
@@ -291,11 +304,6 @@ bitboard_t squareAtkDef(board_t* b, int square);
  * @returns Returns the mask of pieces giving check.
  */
 bool isCheck(board_t* b, int side);
-
-/**
- * Deprecated, do not use.
- */
-bool leavesKingInCheck(board_t* b, const move_t move, const bool inCheck);
 
 /**
  * Check if castle move is valid: castle permission, current check, empty squares between rook
@@ -308,3 +316,163 @@ bool leavesKingInCheck(board_t* b, const move_t move, const bool inCheck);
  * @returns True if castling move is valid, else false.
  */
 bool castleValid(board_t* b, int castle, bitboard_t* attackerSet);
+
+/**
+ * Check if potBlockerSq is blocking an attack to kSq by the discoverSide.
+ *
+ * @param  b board_t to call function.
+ * @param  kSq king getting checked by discovered attack
+ * @param  discoverSide Side to move, moves own piece with pot discovered check
+ * @param  potBlockerSq sq that potentially discovers a check when piece moves.
+ *
+ * @returns True if moving potBlockerSq results in a discovered check to KSq.
+ */
+bool sqIsBlockerForKing(board_t* b, int kSq, int discoverSide, int potBlockerSq);
+
+/**
+ * Check before making the move if move gives check.
+ * @param  b board_t to call function.
+ * @param  move
+ */
+bool checkingMove(board_t* b, move_t move);
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////
+
+/*
+Move format is bits in hex
+0000 0000 0000 0000 0000 0000 0001 -> 0x1
+0000 0000 0000 0000 0000 0000 1111 -> 0xF
+
+0000 0000 0000 0000 0000 0111 1111 -> From square bits
+0000 0000 0000 0011 1111 1000 0000 -> To square bits >> 7
+0000 0000 0011 1100 0000 0000 0000 -> captured piece >> 14
+0000 0000 0100 0000 0000 0000 0000 -> ep bool
+0000 0000 1000 0000 0000 0000 0000 -> pawn start
+0000 1111 0000 0000 0000 0000 0000 -> Promoted piece >> 20
+0001 0000 0000 0000 0000 0000 0000 -> castling bool 0x1000000
+0010 0000 0000 0000 0000 0000 0000 -> prom flag 0x2000000
+*/
+
+/*
+16 Bit encoding:
+0000 0000 0011 1111 from square
+0000 1111 1100 1111 to square
+0001 0000 0000 0000 n prom
+0010 0000 0000 0000 b prom
+0100 0000 0000 0000 r prom
+1000 0000 0000 0000 q prom
+*/
+
+/**
+ * Serialize a move into bit move.
+ *
+ * @param  from	    From square.
+ * @param  to	    To square.
+ * @param  captured Captured piece, 0 if none.
+ * @param  promoted Promoting piece, 0 if none.
+ * @param  flag	    EP, PS, CA flag (OR them together if necessary)
+ *
+ * @returns A move_t.
+ */
+ //inline move_t serializeMove(int from, int to, int captured, int promoted, int flag) {
+ //	move_t move = 0;
+ //	move |= from;
+ //	move |= (to << 7);
+ //	move |= (captured << 14);
+ //	move |= (promoted << 20);
+ //	move |= flag;
+ //
+ //	return move;
+ //}
+
+
+const int sqBitMask = 0x3F;
+
+const int promPieceIndex[7] = { 0, 0, 1, 2, 4, 8, 0 };
+const int piecePromIndex[9] = { 0, Piece::KNIGHT, Piece::BISHOP, 0, Piece::ROOK, 0, 0, 0, Piece::QUEEN };
+
+// new move, promPiece
+inline move_t serializeMove(int from, int to, int promoteTo) {
+	Assert(promoteTo == 0 || (2 <= promoteTo && promoteTo <= 5));
+
+	// Prom: 2=n, 3=b, 4=r, 5=q
+	return from
+		| to << 6
+		| promPieceIndex[promoteTo] << 12;
+}
+
+/**
+ * Get the fromSq of a serialized move.
+ *
+ * @param  move Serialized move.
+ *
+ * @returns From square.
+ */
+inline int fromSq(move_t move) {
+	return move & sqBitMask;
+}
+
+/**
+ * Get the toSq of a serialized move.
+ *
+ * @param  move Serialized move.
+ *
+ * @returns To square.
+ */
+inline int toSq(move_t move) {
+	return (move >> 6) & sqBitMask;
+}
+
+inline int capPiece(board_t* b, move_t move) {
+	return pieceAt(b, toSq(move));
+}
+
+inline bool isCapture(board_t* b, move_t move) {
+	return pieceAt(b, toSq(move));
+}
+
+inline bool isPromotion(move_t move) {
+	return (move >> 12);
+}
+
+inline bool isCaptureOrPromotion(board_t* b, move_t move) {
+	return isCapture(b, move) || isPromotion(move);
+}
+
+inline int promPiece(board_t* b, move_t move) {
+	return (isPromotion(move)) ?
+		piecePromIndex[(move >> 12)] + (b->side == BLACK ? 6 : 0)
+		: Piece::NO_PIECE;
+}
+
+inline bool isPawnStart(board_t* b, move_t move, int movingPiece) {
+	return piecePawn[movingPiece] && abs(fromSq(move) - toSq(move)) == 16;
+}
+
+inline bool isEnPassant(board_t* b, move_t move, int movingPiece) {
+	return piecePawn[movingPiece] && b->enPas == toSq(move) && validEnPasSq(b->enPas);
+}
+
+inline bool isEnPassant(board_t* b, move_t move) {
+	return b->enPas == toSq(move) && validEnPasSq(b->enPas);
+}
+
+inline bool kingIsCastling(board_t* b, move_t move) {
+	if (b->side == WHITE) {
+		return (fromSq(move) == E1 && toSq(move) == G1)
+			|| (fromSq(move) == E1 && toSq(move) == C1);
+	} else {
+		return (fromSq(move) == E8 && toSq(move) == G8)
+			|| (fromSq(move) == E8 && toSq(move) == C8);
+	}
+}
+
+inline bool isCastling(board_t* b, move_t move) {
+	return (pieceKing[pieceAt(b, fromSq(move))]) && kingIsCastling(b, move);
+}

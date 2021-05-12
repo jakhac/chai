@@ -12,7 +12,7 @@
  *
  * @returns Score in centipawns.
  */
-value_t eval(board_t* b);
+value_t evaluation(board_t* b);
 
 /**
  * Lazy evaluation function calculates static board evaulation. Considers piece values and
@@ -22,7 +22,7 @@ value_t eval(board_t* b);
  *
  * @returns Score in centipawns.
  */
-value_t lazyEvalulation(board_t* b);
+value_t lazyEvaluation(board_t* b);
 
 bool insufficientMaterial(board_t* b);
 
@@ -67,7 +67,7 @@ int scale(int scaler, int pressure);
  *
  * @returns Superiority/inferiority score viewed as player to move (signed)
  */
-int contemptFactor(board_t* b);
+value_t contemptFactor(board_t* b);
 
 const value_t PAWN_OPEN[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0,

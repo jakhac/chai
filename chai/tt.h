@@ -52,7 +52,7 @@ void prefetchTTEntry(board_t* b);
  * @param  flag  Flag for score type.
  * @param  depth Depth used in search for move and score.
  */
-void storeTT(board_t* b, move_t move, value_t value, int flag, int depth);
+void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int flag, int depth);
 
 /**
  * Probe PV move from ttable.
@@ -70,7 +70,7 @@ move_t probePV(board_t* b);
  * @param  b	 The current board.
  * @param  score The score to check.
  */
-void hashToSearch(board_t* b, value_t* value);
+int hashToSearch(board_t* b, value_t score);
 
 /**
  * Checks if score from search is mate score. Update score according with ply to
@@ -79,7 +79,7 @@ void hashToSearch(board_t* b, value_t* value);
  * @param  b	 The current board.
  * @param  score The score to check.
  */
-void searchToHash(board_t* b, value_t* value);
+int searchToHash(board_t* b, value_t score);
 
 /**
  * Probe the transposition table. If a hash entry with equal zobristKey is found, all
@@ -94,7 +94,7 @@ void searchToHash(board_t* b, value_t* value);
  *
  * @returns True if hash entry was found, else false.
  */
-bool probeTT(board_t* b, move_t* move, value_t* hashScore, uint8_t* hashFlag, int* hashDepth);
+bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int* hashDepth);
 
 /**
  * Walk through best move stored in transposition table to collect principal variation line.
@@ -126,7 +126,7 @@ void clearPawnTable(pawntable_t* pawnTable);
  * @param  b    Current board.
  * @param  eval Score for pawn structure.
  */
-void storePawnEntry(board_t* b, const int eval);
+void storePawnEntry(board_t* b, const value_t eval);
 
 /**
  * Prefetch pawn entry in cache line using assembly instruction.
@@ -143,7 +143,7 @@ void prefetchPawnEntry(board_t* b);
  *
  * @returns True if hash was found and score is assigned.
  */
-bool probePawnEntry(board_t* b, int* hashScore);
+bool probePawnEntry(board_t* b, value_t* hashScore);
 
 /**
  * Free memory allocated for ttable and ptable.

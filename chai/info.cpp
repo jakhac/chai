@@ -19,14 +19,14 @@ void printBitBoard(bitboard_t* bb) {
 	}
 }
 
-void printMove(const int move) {
+void printMove(board_t* b, const move_t move) {
 
 	if (move == NULL_MOVE) {
 		cout << "0000" << endl;
 		return;
 	}
 
-	int promoted = promPiece(move);
+	int promoted = promPiece(b, move);
 	char promChar = ' ';
 
 	if (promoted) {
@@ -49,12 +49,12 @@ void printMove(const int move) {
 	cout << ret << promChar << endl;
 }
 
-string getStringMove(const int move) {
+string getStringMove(board_t* b, const int move) {
 	if (move == NULL_MOVE) {
 		return "0000";
 	}
 
-	int promoted = promPiece(move);
+	int promoted = promPiece(b, move);
 	string promChar = " ";
 
 	if (promoted) {
@@ -78,15 +78,15 @@ string getStringMove(const int move) {
 	return ret;
 }
 
-void printMoveStatus(int move) {
-	cout << "\n#### - Move Status: " << getStringMove(move) << endl;
+void printMoveStatus(board_t* b, move_t move) {
+	cout << "\n#### - Move Status: " << getStringMove(b, move) << endl;
+	printBinary(move);
 	cout << "From " << fromSq(move) << " to " << toSq(move) << endl;
-	cout << "Pawn start " << (move & MFLAG_PS) << endl;
-	cout << "EP capture " << (move & MFLAG_EP) << endl;
-	cout << "Castle move " << (move & MFLAG_CAS) << endl;
-	cout << "Promoted " << (move & MCHECK_PROM) << endl;
-	cout << "Promoted piece " << (promPiece(move)) << endl;
-	cout << "Capture " << (move & MCHECK_CAP) << " with captured piece " << capPiece(move) << endl;
+	cout << "Pawn start " << isPawnStart(b, move, pieceAt(b, fromSq(move))) << endl;
+	cout << "EP capture " << isEnPassant(b, move, pieceAt(b, fromSq(move))) << endl;
+	cout << "Castle move " << isCastling(b, move) << endl;
+	cout << "Promoted piece " << promPiece(b, move) << endl;
+	cout << "Captured piece " << capPiece(b, move) << endl;
 	cout << "####\n" << endl;
 }
 
@@ -145,11 +145,11 @@ void printUCI(search_t* s, int d, int selDpt, int score) {
 		<< " time " << (getTimeMs() - s->startTime);
 }
 
-void printPV(move_t* moves, int len) {
+void printPV(board_t* b, move_t* moves, int len) {
 	cout << " pv ";
 
 	for (int i = 0; i < len; i++) {
-		cout << getStringMove(moves[i]);
+		cout << getStringMove(b, moves[i]);
 	}
 
 	//#define STRUCT_PV
@@ -172,7 +172,7 @@ void printTTablePV(board_t* b, int depth, int selDepth) {
 		move_t pvMove = probePV(b);
 
 		if (pvMove != NO_MOVE && isLegal(b, pvMove)) {
-			cout << getStringMove(pvMove);
+			cout << getStringMove(b, pvMove);
 			push(b, pvMove);
 			cnt++;
 		} else {

@@ -1,24 +1,5 @@
 #include "tt.h"
 
-//void initTT(ttable_t* tt) {
-//	tt->buckets = ttSize / (sizeof(ttable_entry_t) * BUCKETS);
-//	tt->buckets -= 2;
-//	tt->stored = 0;
-//
-//	if (tt->table != NULL) {
-//		free(tt->table);
-//	}
-//
-//	// dynamically allocate memory hash table
-//	tt->table = (ttable_entry_t*)malloc(tt->buckets * (sizeof(ttable_entry_t) * BUCKETS));
-//	clearTT(tt);
-//
-//	cout << "Buckets: " << BUCKETS << endl;
-//	cout << "Transposition table initialized with " << tt->buckets
-//		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl;
-//
-//}
-
 void initTT(ttable_t* tt) {
 	if (tt->bucketList != NULL) {
 		free(tt->bucketList);
@@ -54,19 +35,20 @@ void clearTT(ttable_t* tt) {
 	memset(tt->bucketList, 0, (tt->buckets * sizeof(bucket_t)));
 }
 
-void storeTT(board_t* b, move_t move, value_t value, int flag, int depth) {
+void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int flag, int depth) {
 	// index is the lower n-bits
 	int32_t index = int32_t(b->zobristKey & indexMask);
 	int32_t key = int32_t(b->zobristKey >> 32);
 
 	Assert(move != NO_MOVE);
 	Assert(index >= 0 && index <= (b->tt->buckets - 1));
-	Assert(depth >= 1 && depth <= MAX_DEPTH);
-	Assert(flag >= TT_ALPHA && flag <= TT_VALUE);
-	Assert(value >= -INF && value <= INF);
+	Assert((depth >= 1 || TT_EVAL) && depth <= MAX_DEPTH);
+	Assert(flag >= TT_ALPHA && flag <= TT_EVAL);
+	Assert(abs(value) < INF || value == NO_VALUE);
+	Assert(abs(staticEval) < INF);
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
-	searchToHash(b, &value);
+	//searchToHash(b, &value);
 
 	// Stats
 	b->tt->stored++;
@@ -110,75 +92,19 @@ void storeTT(board_t* b, move_t move, value_t value, int flag, int depth) {
 		b->tt->collided++;
 	}
 
-	if (value > ISMATE) value += b->ply;
-	else if (value < -ISMATE) value -= b->ply;
+	//if (value > ISMATE) value += b->ply;
+	//else if (value < -ISMATE) value -= b->ply;
 
 	// Replace entry has been determined: Store information 
-	//leastValuable->zobKey = b->zobristKey;
 	leastValuable->key = (int32_t)(b->zobristKey >> 32);
 	leastValuable->move = move;
 	leastValuable->flag = flag;
-	leastValuable->score = value;
+	leastValuable->value = value;
+	leastValuable->staticEval = staticEval;
 	leastValuable->depth = depth;
 }
 
-
-//void storeTT(board_t* b, move_t move, int score, int flag, int depth) {
-//	int index = (b->zobristKey % b->tt->buckets) * BUCKETS;
-//
-//	Assert(move != NO_MOVE);
-//	Assert(index >= 0 && index <= (b->tt->buckets * BUCKETS) - 1);
-//	Assert(depth >= 1 && depth <= MAX_DEPTH);
-//	Assert(flag >= TT_ALPHA && flag <= TT_SCORE);
-//	Assert(score >= -INF && score <= INF);
-//	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
-//
-//	searchToHash(b, &score);
-//
-//	// Stats
-//	b->tt->stored++;
-//
-//	// compute pointer to current bucket: pTable + (index * buckets)
-//	ttable_entry_t* bucket = b->tt->table + index;
-//	int offset = -1;
-//
-//	// Replacement strategy: new entry overwrites entry with lowest depth
-//	int minDepth = MAX_DEPTH + 1;
-//	for (int i = 0; i < BUCKETS; i++) {
-//		Assert((bucket + i)->depth >= 0 && (bucket + i)->depth <= MAX_DEPTH + 1);
-//
-//		// Same position is least valuable
-//		if ((bucket + i)->zobKey == b->zobristKey) {
-//			offset = i;
-//			break;
-//		}
-//
-//		// Search for lowest depth => longest distance to root and least savings during search
-//		if ((bucket + i)->depth < minDepth) {
-//			minDepth = (bucket + i)->depth;
-//			offset = i;
-//		}
-//
-//	}
-//
-//	Assert(offset >= 0 && offset <= BUCKETS);
-//
-//	if ((bucket + offset)->flag != TT_NONE) {
-//		b->tt->collided++;
-//	}
-//
-//	if (score > ISMATE) score += b->ply;
-//	else if (score < -ISMATE) score -= b->ply;
-//
-//	// Replace entry has been determined: Store information 
-//	(bucket + offset)->zobKey = b->zobristKey;
-//	(bucket + offset)->move = move;
-//	(bucket + offset)->flag = flag;
-//	(bucket + offset)->score = score;
-//	(bucket + offset)->depth = depth;
-//}
-
-bool probeTT(board_t* b, move_t* move, value_t* hashValue, uint8_t* hashFlag, int* hashDepth) {
+bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int* hashDepth) {
 	// index is the lower n-bits
 	int32_t index = int32_t(b->zobristKey & indexMask);
 	int32_t key = int32_t(b->zobristKey >> 32);
@@ -195,19 +121,21 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, uint8_t* hashFlag, in
 		if (bucket->bucketEntries[i].key == key) {
 
 			e = &bucket->bucketEntries[i];
-			Assert(e->flag >= TT_ALPHA && e->flag <= TT_VALUE);
+			Assert(e->flag >= TT_ALPHA && e->flag <= TT_EVAL);
 			Assert(e->move != NO_MOVE);
-			Assert(e->score >= -INF && e->score <= INF);
+			Assert(abs(e->value) < INF || e->value == NO_VALUE);
+			Assert(abs(e->staticEval) < ISMATE);
 
-			int newScore = e->score;
+			int newScore = e->value;
 
 			*hashValue = newScore;
-			if (*hashValue > ISMATE) *hashValue -= b->ply;
-			else if (*hashValue < -ISMATE) *hashValue += b->ply;
+			//if (*hashValue > ISMATE) *hashValue -= b->ply;
+			//else if (*hashValue < -ISMATE) *hashValue += b->ply;
 
 			*hashDepth = e->depth;
 			*move = e->move;
 			*hashFlag = e->flag;
+			*hashEval = e->staticEval;
 			//*hashValue = (bucket + i)->score;
 
 			return true;
@@ -218,63 +146,27 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, uint8_t* hashFlag, in
 	return false;
 }
 
-
-//bool probeTT(board_t* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* hashDepth) {
-//	int index = (b->zobristKey % b->tt->buckets) * BUCKETS;
-//
-//	Assert(index >= 0 && index <= (b->tt->buckets * BUCKETS) - 1);
-//	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
-//
-//	ttable_entry_t* bucket = b->tt->table + index;
-//	for (int i = 0; i < BUCKETS; i++) {
-//		b->tt->probed++;
-//
-//		if (bucket->zobKey == b->zobristKey) {
-//			Assert((bucket + i)->flag >= TT_ALPHA && (bucket + i)->flag <= TT_SCORE);
-//			Assert((bucket + i)->move != NO_MOVE);
-//			Assert((bucket + i)->score >= -INF && (bucket + i)->score <= INF);
-//
-//			int newScore = (bucket + i)->score;
-//
-//			*hashScore = newScore;
-//			if (*hashScore > ISMATE) *hashScore -= b->ply;
-//			else if (*hashScore < -ISMATE) *hashScore += b->ply;
-//
-//			*hashDepth = (bucket + i)->depth;
-//			*move = (bucket + i)->move;
-//			*hashFlag = (bucket + i)->flag;
-//			//*hashScore = (bucket + i)->score;
-//
-//			return true;
-//		}
-//	}
-//
-//	return false;
-//}
-
 void prefetchTTEntry(board_t* b) {
 	key_t index = b->zobristKey & indexMask;
 	_m_prefetch((bucket_t*)&b->tt->bucketList);
 }
 
-void hashToSearch(board_t* b, value_t* score) {
-	return;
-
-	if (*score > ISMATE) {
-		*score -= b->ply;
-	} else if (*score < -ISMATE) {
-		*score += b->ply;
+int hashToSearch(board_t* b, value_t score) {
+	if (score > ISMATE) {
+		return score - b->ply;
+	} else if (score < -ISMATE) {
+		return score + b->ply;
 	}
+	return score;
 }
 
-void searchToHash(board_t* b, value_t* score) {
-	return;
-
-	if (*score > ISMATE) {
-		score += b->ply;
-	} else if (*score < -ISMATE) {
-		score -= b->ply;
+int searchToHash(board_t* b, value_t score) {
+	if (score > ISMATE) {
+		return score + b->ply;
+	} else if (score < -ISMATE) {
+		return score - b->ply;
 	}
+	return score;
 }
 
 move_t probePV(board_t* b) {
@@ -292,9 +184,9 @@ move_t probePV(board_t* b) {
 
 		if (bucket->bucketEntries[i].key == key) {
 			e = &bucket->bucketEntries[i];
-			Assert(e->flag >= TT_ALPHA && e->flag <= TT_VALUE);
+			Assert(e->flag >= TT_ALPHA && e->flag <= TT_EVAL);
 			Assert(e->move != NO_MOVE);
-			Assert(e->score >= -INF && e->score <= INF);
+			Assert(e->value >= -INF && e->value <= INF);
 
 			return e->move;
 
@@ -369,7 +261,7 @@ void clearPawnTable(pawntable_t* pawnTable) {
 	pawnTable->collided = 0;
 }
 
-void storePawnEntry(board_t* b, const int eval) {
+void storePawnEntry(board_t* b, const value_t eval) {
 	int index = b->zobristPawnKey % b->pawnTable->entries;
 	Assert(index >= 0 && index <= b->pawnTable->entries - 1);
 
@@ -389,7 +281,7 @@ void prefetchPawnEntry(board_t* b) {
 	_m_prefetch(&b->pawnTable->table[index]);
 }
 
-bool probePawnEntry(board_t* b, int* hashScore) {
+bool probePawnEntry(board_t* b, value_t* hashScore) {
 	int index = b->zobristPawnKey % b->pawnTable->entries;
 	Assert(index >= 0 && index <= b->pawnTable->entries - 1);
 

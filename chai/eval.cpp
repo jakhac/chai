@@ -310,7 +310,7 @@ value_t evaluatePawns(board_t* b, float* t) {
 }
 
 
-value_t eval(board_t* b) {
+value_t evaluation(board_t* b) {
 	value_t eval = 0;
 	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
@@ -337,7 +337,7 @@ value_t eval(board_t* b) {
 
 	// squares controlled
 	int centerSquares = (countBits(b->attackedSquares[WHITE] & CENTER_SQUARES) -
-		countBits(b->attackedSquares[BLACK] & CENTER_SQUARES));
+						 countBits(b->attackedSquares[BLACK] & CENTER_SQUARES));
 	int surroundingSquares = countBits(b->attackedSquares[WHITE] & ~CENTER_SQUARES) -
 		countBits(b->attackedSquares[BLACK] & ~CENTER_SQUARES);
 	int kingSquares = countBits(b->attackedSquares[WHITE] & kingAtkMask[getKingSquare(b, WHITE)]) -
@@ -359,12 +359,12 @@ value_t eval(board_t* b) {
 	return eval * sign;
 }
 
-value_t lazyEvalulation(board_t* b) {
+value_t lazyEvaluation(board_t* b) {
 	value_t eval = 0;
 	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
 	b->pawnTable->probed++;
-	int pawnEval = 0;
+	value_t pawnEval = 0;
 	bool foundHash = probePawnEntry(b, &pawnEval);
 	if (foundHash) {
 		b->pawnTable->hit++;
@@ -383,7 +383,7 @@ value_t lazyEvalulation(board_t* b) {
 
 value_t contemptFactor(board_t* b) {
 
-	value_t contempt = lazyEvalulation(b);
+	value_t contempt = lazyEvaluation(b);
 
 	switch (b->side) {
 		case WHITE:

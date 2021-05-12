@@ -20,12 +20,12 @@ typedef unsigned long long key_t;
 /**
  * Move type. All moves are unsigned.
  */
-typedef uint32_t move_t;
+typedef uint16_t move_t;
 
 /**
  * Value type. Used for all evalutions.
  */
-typedef int32_t value_t;
+typedef int16_t value_t;
 
 /**
  * Store moves, scores and number entries in moveList. Used in move generation.
@@ -45,7 +45,9 @@ struct undo_t {
 	move_t move;
 	int castle;
 	int enPas;
+	bool castleMove;
 	uint8_t fiftyMove;
+	uint8_t cap;
 	key_t zobKey;
 	key_t pawnKey;
 };
@@ -56,10 +58,10 @@ struct undo_t {
 struct ttable_entry_t {
 	uint8_t flag = 0;
 	uint8_t depth = 0;
-	int16_t score = 0;
+	value_t value = 0;
+	value_t staticEval = 0;
 	move_t move = 0;
 
-	//key_t zobKey = 0x0; // to be removed
 	int32_t key = 0; // upper 32bit to determine bucket
 };
 
@@ -113,7 +115,7 @@ struct pawntable_t {
 
 struct board_t {
 	// Current side, 0 for black and 1 for white. Use enums for debug purpose.
-	int side;
+	bool side;
 
 	// Current en passant square. 0, if not set.
 	int enPas;
@@ -232,12 +234,13 @@ enum CASTLING_RIGHTS {
 	K_CASTLE = 1, Q_CASTLE = 2, k_CASTLE = 4, q_CASTLE = 8
 };
 
-enum TT_FLAG {
+typedef enum TT_FLAG {
 	TT_NONE = 0,
 	TT_ALPHA = 1,
 	TT_BETA = 1 << 1,
-	TT_VALUE = 1 << 2
-};
+	TT_VALUE = 1 << 2,
+	TT_EVAL = 1 << 3
+} tt_flag_t;
 
 enum SQUARES {
 	A8 = 56, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD,

@@ -28,7 +28,7 @@ void printBitBoard(bitboard_t* bb);
  *
  * @param  move Move.
  */
-void printMove(const int move);
+void printMoveStatus(board_t* b, move_t move);
 
 /**
  * Returns the algebraic notation of given move.
@@ -37,14 +37,14 @@ void printMove(const int move);
  *
  * @returns The move in algebraic notation.
  */
-string getStringMove(const int move);
+string getStringMove(board_t* b, const int move);
 
-/**
- * Print all flags and attributes of given move.
- *
- * @param  move Move.
- */
-void printMoveStatus(int move);
+///**
+// * Print all flags and attributes of given move.
+// *
+// * @param  move Move.
+// */
+//void printMoveStatus(int move);
 
 /**
  * Print binary format of given integer.
@@ -69,7 +69,7 @@ void printUCI(search_t* s, int d, int selDpt, int score);
  * @param b The current board.
  * @param pvLine pvLine struct filled by alphaBeta search.
  */
-void printPV(move_t* moves, int len);
+void printPV(board_t* b, move_t* moves, int len);
 
 void printTTablePV(board_t* b, int depth, int selDepth);
 /**

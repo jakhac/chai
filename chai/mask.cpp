@@ -212,7 +212,7 @@ bitboard_t line_bb(int s1, int s2) {
 }
 
 bool aligned(int s1, int s2, int s3) {
-	return line_bb(s1, s2) & s3;
+	return line_bb(s1, s2) & setMask[s3];
 }
 
 bitboard_t obstructed(int sq1, int sq2) {
