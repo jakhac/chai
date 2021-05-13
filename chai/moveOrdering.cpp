@@ -69,7 +69,7 @@ int see(board_t* b, const int move) {
 		gain[d - 1] = -max(-gain[d - 1], gain[d]);
 	}
 
-	if (isEnPassant(b, move, movingPiece))
+	if (isEnPassant(move))
 		gain[0] += 100;
 
 	return gain[0];
@@ -126,7 +126,7 @@ int lazySee(board_t* b, const int move) {
 		gain[d - 1] = -max(-gain[d - 1], gain[d]);
 	}
 
-	if (isEnPassant(b, move, movingPiece))
+	if (isEnPassant(move))
 		gain[0] += 100;
 
 	return gain[0];
@@ -139,19 +139,16 @@ bool see_ge(board_t* b, move_t move, int threshHold) {
 	int nextVictim = pieceAt(b, from);
 	int balance = SEEPieceValues[pieceAt(b, to)];
 
-	if (isCastling(b, move)) {
+	if (isCastling(move)) {
 		return false;
 	}
 
-	//Assert(isCapture(b, move) || isEnPassant(b, move, pieceAt(b, from)));
-
 	if (isPromotion(move)) {
-
 		nextVictim = promPiece(b, move);
 		balance += (SEEPieceValues[nextVictim] - SEEPieceValues[Piece::PAWN]);
 	}
 
-	if (isEnPassant(b, move, nextVictim)) {
+	if (isEnPassant(move)) {
 		balance = SEEPieceValues[Piece::PAWN];
 	}
 
@@ -168,7 +165,7 @@ bool see_ge(board_t* b, move_t move, int threshHold) {
 	// copy occupied to simulate captures on bitboard
 	bitboard_t occ = b->occupied;
 	occ = (occ ^ (1ULL << from)) | (1ULL << to);
-	if (isEnPassant(b, move, nextVictim)) {
+	if (isEnPassant(move)) {
 		occ ^= (1ULL << b->enPas);
 	}
 
@@ -234,9 +231,9 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 	int bestIdx = 0;
 	int capturedPiece = 0;
 
-	// set all scores to 0
-	for (int i = 0; i < moveList->cnt; i++)
-		moveList->scores[i] = 0;
+	//// set all scores to 0
+	//for (int i = 0; i < moveList->cnt; i++)
+	//	moveList->scores[i] = 0;
 
 	for (int i = 0; i < moveList->cnt; i++) {
 		currentMove = moveList->moves[i];
@@ -252,11 +249,11 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		}
 
 		// enpas move
-		//if (isEnPassant(b, currentMove, pieceAt(b, fromSq(currentMove)))) {
-		//	moveList->scores[i] = GOOD_CAPTURE + 105;
-		//	updateBestMove(moveList->scores, &bestIdx, i);
-		//	continue;
-		//}
+		if (isEnPassant(currentMove)) {
+			moveList->scores[i] = GOOD_CAPTURE + 105;
+			updateBestMove(moveList->scores, &bestIdx, i);
+			continue;
+		}
 
 		// capture moves
 		if (capturedPiece = capPiece(b, currentMove)) {
@@ -326,14 +323,14 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 
 			if (currentMove == counterMove) {
 				moveList->scores[i] = COUNTER_SCORE;
+				updateBestMove(moveList->scores, &bestIdx, i);
+				continue;
 			}
 
-			updateBestMove(moveList->scores, &bestIdx, i);
-			continue;
 		}
 
 		// castle move
-		if (isCastling(b, currentMove)) {
+		if (isCastling(currentMove)) {
 			moveList->scores[i] = CASTLE_SCORE;
 
 			updateBestMove(moveList->scores, &bestIdx, i);
@@ -342,6 +339,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 
 		// last resort: history heuristic
 		int histScore = histHeuristic[b->side][fromSq(currentMove)][toSq(currentMove)];
+		Assert(histScore >= 0);
 		moveList->scores[i] = QUIET_SCORE + (histScore);
 		Assert(moveList->scores[i] < COUNTER_SCORE);
 

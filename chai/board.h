@@ -367,44 +367,30 @@ Move format is bits in hex
 0010 0000 0000 0000 b prom
 0100 0000 0000 0000 r prom
 1000 0000 0000 0000 q prom
+
+--00 Normal
+--01 Castle
+--10 EnPas
+--11 Promotion
+00-- N
+01-- B
+10-- R
+11-- Q
 */
-
-/**
- * Serialize a move into bit move.
- *
- * @param  from	    From square.
- * @param  to	    To square.
- * @param  captured Captured piece, 0 if none.
- * @param  promoted Promoting piece, 0 if none.
- * @param  flag	    EP, PS, CA flag (OR them together if necessary)
- *
- * @returns A move_t.
- */
- //inline move_t serializeMove(int from, int to, int captured, int promoted, int flag) {
- //	move_t move = 0;
- //	move |= from;
- //	move |= (to << 7);
- //	move |= (captured << 14);
- //	move |= (promoted << 20);
- //	move |= flag;
- //
- //	return move;
- //}
-
 
 const int sqBitMask = 0x3F;
 
-const int promPieceIndex[7] = { 0, 0, 1, 2, 4, 8, 0 };
-const int piecePromIndex[9] = { 0, Piece::KNIGHT, Piece::BISHOP, 0, Piece::ROOK, 0, 0, 0, Piece::QUEEN };
+const int promPieceIndex[] = { Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN };
+const int piecePromIndex[] = { 0, 0, PROM_TO_KNIGHT, PROM_TO_BISHOP, PROM_TO_ROOK, PROM_TO_QUEEN, 0 };
 
 // new move, promPiece
-inline move_t serializeMove(int from, int to, int promoteTo) {
-	Assert(promoteTo == 0 || (2 <= promoteTo && promoteTo <= 5));
+inline move_t serializeMove(int from, int to, int flag, int promoteTo) {
+	Assert(promoteTo == 0 || (PROM_TO_KNIGHT <= promoteTo && promoteTo <= PROM_TO_QUEEN));
 
-	// Prom: 2=n, 3=b, 4=r, 5=q
-	return from
-		| to << 6
-		| promPieceIndex[promoteTo] << 12;
+	return (from)
+		| (to << 6)
+		| (flag)
+		| (promoteTo);
 }
 
 /**
@@ -438,7 +424,7 @@ inline bool isCapture(board_t* b, move_t move) {
 }
 
 inline bool isPromotion(move_t move) {
-	return (move >> 12);
+	return (move & (3 << 12)) == PROM_MOVE;
 }
 
 inline bool isCaptureOrPromotion(board_t* b, move_t move) {
@@ -446,33 +432,19 @@ inline bool isCaptureOrPromotion(board_t* b, move_t move) {
 }
 
 inline int promPiece(board_t* b, move_t move) {
-	return (isPromotion(move)) ?
-		piecePromIndex[(move >> 12)] + (b->side == BLACK ? 6 : 0)
+	return isPromotion(move) ?
+		(move >> 14) + 2 + (b->side == BLACK ? 6 : 0)
 		: Piece::NO_PIECE;
 }
 
-inline bool isPawnStart(board_t* b, move_t move, int movingPiece) {
+inline bool isPawnStart(move_t move, int movingPiece) {
 	return piecePawn[movingPiece] && abs(fromSq(move) - toSq(move)) == 16;
 }
 
-inline bool isEnPassant(board_t* b, move_t move, int movingPiece) {
-	return piecePawn[movingPiece] && b->enPas == toSq(move) && validEnPasSq(b->enPas);
+inline bool isEnPassant(move_t move) {
+	return (move & (3 << 12)) == EP_MOVE;
 }
 
-inline bool isEnPassant(board_t* b, move_t move) {
-	return b->enPas == toSq(move) && validEnPasSq(b->enPas);
-}
-
-inline bool kingIsCastling(board_t* b, move_t move) {
-	if (b->side == WHITE) {
-		return (fromSq(move) == E1 && toSq(move) == G1)
-			|| (fromSq(move) == E1 && toSq(move) == C1);
-	} else {
-		return (fromSq(move) == E8 && toSq(move) == G8)
-			|| (fromSq(move) == E8 && toSq(move) == C8);
-	}
-}
-
-inline bool isCastling(board_t* b, move_t move) {
-	return (pieceKing[pieceAt(b, fromSq(move))]) && kingIsCastling(b, move);
+inline bool isCastling(move_t move) {
+	return (move & (3 << 12)) == CASTLE_MOVE;
 }

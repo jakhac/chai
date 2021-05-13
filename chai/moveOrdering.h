@@ -41,7 +41,7 @@ const int MVV_LVA_UBOUND = 1000;
 static int MVV_LVA[13][13];
 
 static const int SEEPieceValues[13] = {
-	0, 100, 325, 325, 550, 1000, 0, 100, 325, 325, 550, 1000, 0 // pieceScores
+	0, 100, 325, 325, 550, 1100, 0, 100, 325, 325, 550, 1100, 0 // pieceScores
 	//0,
 	//100,  450,  450,  675, 1300, 0,
 	//100,  450,  450,  675, 1300, 0

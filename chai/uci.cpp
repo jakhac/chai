@@ -129,6 +129,8 @@ void uciParseGo(board_t* b, search_t* s, string cmd) {
 	cout << "time " << time << ", start " << s->startTime << ", stop " << s->stopTime
 		<< ", depth " << s->depth << ", timeset " << s->timeSet << endl;
 
+	printBoard(b);
+
 	search(b, s);
 }
 

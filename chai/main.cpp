@@ -8,13 +8,10 @@ int main() {
 	init(&board);
 	parseFen(&board, STARTING_FEN);
 	//parseFen(&board, BUG_FEN);
-	//parseFen(&board, "8/2p5/3p4/1P6/K3Pp1r/6k1/6P1/1R6 b - e3 5 7");
+	//parseFen(&board, "8/1p1q3k/p2Pr1pp/p1B3p1/1p3QP1/5R2/5K2/8 b - - 0 1");
 	printBoard(&board);
 
-	//moveList_t moveList[1];
-	//generateMoves(&board, moveList, isCheck(&board, board.side));
-	//printGeneratedMoves(b, moveList);
-	//return 0;
+	//position startpos moves e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 c1e3 e7e6 f1e2 d8c7 a2a4 f8e7 e1g1 e8g8 g2g4 h7h6 f2f4 e6e5 d4f5 c8f5 e4f5 e5f4 f1f4 b8c6 e2c4 d6d5 c3d5 f6d5 c4d5 e7d6 f4e4 d6h2 g1f1 a8d8 e3c5 h2d6 c5e3 d6h2 c2c4 c6b4 a1a3 b4d5 c4d5 c7d6 a3d3 d8e8 d1f3 h2g3 b2b4 e8e4 f3e4 d6d7 a4a5 d7b5 e3c5 f8e8 e4f3 g3f4 f1f2 g7g5 f5g6 f7g6 d5d6 b5d7 f3d5 g8h7 d3f3 e8e5 d5c4 e5e6 c4f4
 
 	//cout << "Is checking move " << checkingMove(b, serializeMove(F4, E3, 0)) << endl;
 

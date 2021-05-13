@@ -82,9 +82,9 @@ void printMoveStatus(board_t* b, move_t move) {
 	cout << "\n#### - Move Status: " << getStringMove(b, move) << endl;
 	printBinary(move);
 	cout << "From " << fromSq(move) << " to " << toSq(move) << endl;
-	cout << "Pawn start " << isPawnStart(b, move, pieceAt(b, fromSq(move))) << endl;
-	cout << "EP capture " << isEnPassant(b, move, pieceAt(b, fromSq(move))) << endl;
-	cout << "Castle move " << isCastling(b, move) << endl;
+	cout << "Pawn start " << isPawnStart(move, pieceAt(b, fromSq(move))) << endl;
+	cout << "EP capture " << isEnPassant(move) << endl;
+	cout << "Castle move " << isCastling(move) << endl;
 	cout << "Promoted piece " << promPiece(b, move) << endl;
 	cout << "Captured piece " << capPiece(b, move) << endl;
 	cout << "####\n" << endl;

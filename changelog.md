@@ -169,6 +169,20 @@
 
 **Changes in v2.5**
 
+- TODO move encoding in 16bit
+- trans store/probe with staticEval
+- refactor futile pruning: caps, quiets, hopeless
+- moveIsCheck detection before push
+- see_ge algorithm
+
+TODO 2.5.5
+
+- cli for UCI etc.. (lichess-bot)?
+- opening book?
+- queen prom only in qui
+- search stack?
+- futile tuning
+
 - AlphaBeta
   - [x] Principal Variation Search
   - [x] Consider `IS_PV` and `NO_PV` in pruning decisions
@@ -194,7 +208,7 @@
   - [ ] Add `eval_t` for evaluations
 - Bugfixes
   - [x] Forced quiescence checkmates used `moveList->cnt` instead of `legalMoves`
-  - [x] standPat pruning considers check / not not-check and updates `score, bestScore, alpha` seperately
+  - [x] standPat pruning considers check / not in-check and updates `score, bestScore, alpha` seperately
   - [x] Quiescence check up used `nodes` instead of `qnodes`
   - [x] Disabled `pvLine_t` structs on stack due to memory issues on call-stack
   - [x] `parseFen()` now assigns halfMoves to `fiftyMove`, `isRepetition()` was adapted to this change

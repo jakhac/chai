@@ -45,7 +45,6 @@ struct undo_t {
 	move_t move;
 	int castle;
 	int enPas;
-	bool castleMove;
 	uint8_t fiftyMove;
 	uint8_t cap;
 	key_t zobKey;
@@ -241,6 +240,19 @@ typedef enum TT_FLAG {
 	TT_VALUE = 1 << 2,
 	TT_EVAL = 1 << 3
 } tt_flag_t;
+
+enum moveFlag {
+	NORMAL_MOVE = 0 << 12,
+	CASTLE_MOVE = 1 << 12,
+	EP_MOVE = 2 << 12,
+	PROM_MOVE = 3 << 12,
+
+	//PROM_NONE = 0,
+	PROM_TO_KNIGHT = 0 << 14,
+	PROM_TO_BISHOP = 1 << 14,
+	PROM_TO_ROOK = 2 << 14,
+	PROM_TO_QUEEN = 3 << 14,
+};
 
 enum SQUARES {
 	A8 = 56, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD,

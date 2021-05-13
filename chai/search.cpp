@@ -111,16 +111,12 @@ int nonPawnPieces(board_t* b, int side) {
 	return countBits(pieces);
 }
 
-//// following moves are tactical: caps, proms, eps
-//bool moveIsTactical(board_t* b, move_t move) {
-//	//return (move & MCHECK_CAP)
-//	//	|| (move & MCHECK_CAS)
-//	//	|| (move & MCHECK_PROM)
-//	//	|| (move & MCHECK_EP);
-//	return capPiece(b, move)
-//		|| isPromotion(move);
-//	//|| isEnPassant(b, move);
-//}
+// following moves are tactical: caps, proms, eps
+bool moveIsTactical(board_t* b, move_t move) {
+	return isCapture(b, move)
+		|| isPromotion(move)
+		|| isEnPassant(move);
+}
 
 bool promotablePawns(board_t* b) {
 	if (b->side == WHITE) {
@@ -250,15 +246,11 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	Assert(checkBoard(b));
 	Assert(alpha < beta);
 
-	// TODO 2bishop king vs king test
-	// does move generator prevent king from moving into check? disable that
-	// clear move order heuristics before search?
+	// TODO
+	// 2bishop king vs king test
 	// only queen promotions in quiesence
-	// sf see algorithm / see_ge
-	// make all king moves pseudo legal?
 	// searchstack for checks, moves, evals
-	// clean push / pop refactoring
-	// TODO SEE-algorithm with threshold
+	// d-- when no tt in pv
 
 	// Initialize node
 	bool rootNode = b->ply == 0;
@@ -371,7 +363,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		staticEval = evaluation(b);
 		//storeTT(b, NULL_MOVE, NO_VALUE, staticEval, TT_EVAL, 0);
 	}
-	//staticEval = lazyEvaluation(b);
 	Assert(staticEval != NO_VALUE && abs(staticEval) < ISMATE);
 
 	// Reverse futility pruning
@@ -405,7 +396,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		&& nonPawnPieces(b, b->side)
 		&& countBits(b->occupied) > 7) {
 
-		int reduction = (depth > 7) ? R_3 : R_2;
+		int reduction = (depth > 6) ? R_3 : R_2;
 
 		pushNull(b);
 		value_t nullValue = -alphaBeta<NoPV>(-beta, -beta + 1, depth - 1 - reduction, b, s, NO_NULL);
@@ -454,9 +445,14 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	* If ttable probing does not find a hash move, there is no good move to start searching this
 	* position. IID searches with reduced depth and fills ttable entries to ensure hash move.
 	*/
-	if (pvNode && hashMove == NO_MOVE && depth > 3) {
-		alphaBeta<PV>(alpha, beta, depth - 3, b, s, NO_NULL);
-		hashMove = probePV(b);
+	//if (pvNode && hashMove == NO_MOVE && depth > 3) {
+	//	alphaBeta<PV>(alpha, beta, depth - 3, b, s, NO_NULL);
+	//	hashMove = probePV(b);
+	//}
+	if (pvNode
+		&& depth >= 6
+		&& hashMove == NO_MOVE) {
+		newDepth--;
 	}
 
 	moveList_t moveList[1];
@@ -490,13 +486,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		bool lmrSameDepth = false;
 
 		bool moveGivesCheck = checkingMove(b, currentMove);
-		bool moveIsCapture = isCapture(b, currentMove);
-		bool moveIsPromo = isPromotion(currentMove);
-		bool moveIsCapOrPromo = moveIsPromo || moveIsCapture;
-		bool moveIsQuiet = !moveIsCapture
-			&& !moveIsPromo
-			&& !isEnPassant(b, currentMove);
-
+		int moveCaptured = isCapture(b, currentMove);
 
 		// Futiilty Pruning
 		if (!rootNode
@@ -506,7 +496,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 			&& abs(beta) < ISMATE
 			&& bestValue > -ISMATE
 			&& nonPawnPieces(b, b->side)
-			&& !moveIsPromo) {
+			&& !isPromotion(currentMove)) {
 
 			// Move count based pruning
 			if (!pvNode
@@ -514,12 +504,12 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				&& !moveGivesCheck
 				&& depth < moveCountPruningDepth
 				&& legalMoves > moveCountPruning[depth]
-				&& !moveIsCapture) {
+				&& !moveCaptured) {
 				continue;
 			}
 
 			// Futile captures / checks: bad SEE score
-			if (moveIsCapture || moveGivesCheck) {
+			if (moveCaptured || moveGivesCheck) {
 
 				if (!see_ge(b, currentMove, -depth * (SEEPieceValues[Piece::BISHOP]))) {
 					continue;
@@ -530,7 +520,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 			if (!inCheck
 				&& !mateThreat
 				&& !moveGivesCheck
-				&& moveIsQuiet) {
+				&& !moveIsTactical(b, currentMove)) {
 
 				if (staticEval + (depth * pieceScores[Piece::BISHOP] + 34) < alpha) {
 					continue;
@@ -579,34 +569,43 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		  */
 		if (legalMoves == 1) {
 
-			// standard in 2.5.4
 			value = -alphaBeta<PV>(-beta, -alpha, newDepth, b, s, DO_NULL);
 
 		} else {
 			// Late Move Reductions, do reduced zero window search
-			if (legalMoves > 3
+			if (legalMoves >= 3 + rootNode
 				//&& !moveGivesCheck
-				&& !inCheck
-				&& depth >= 3
-				&& !moveIsCapOrPromo) {
+				//&& !inCheck
+				&& depth > 3
+				//&& !moveIsCapOrPromo
+				) {
 
 				lmrDepth = newDepth - 2;
-				//reduction = (legalMoves > 6) ? 3 : 2;
 
 				// Increase reduction for late moves
 				if (legalMoves > 6)
 					lmrDepth--;
 
+				if (!moveGivesCheck
+					&& staticEval + pieceScores[moveCaptured] + depth * 243 < alpha)
+					lmrDepth--;
 
-				// Decrease reduction for mate threats
 				if (mateThreat)
 					lmrDepth++;
 
-				//if (hashStored && !badPv)
-				//lmrDepth++;
-
 				if (moveGivesCheck)
 					lmrDepth++;
+
+				if (inCheck)
+					lmrDepth++;
+
+				if (ttCapture)
+					lmrDepth--;
+
+				if (isPromotion(currentMove))
+					lmrDepth++;
+
+
 
 				lmrDepth = min(newDepth, lmrDepth);
 				lmrSameDepth = newDepth == lmrDepth;
@@ -649,6 +648,8 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 			}
 			s->fh++;
 
+			bool moveIsCapOrPromo = moveCaptured || isPromotion(currentMove);
+
 			/*
 			* Standard Killer Heuristic:
 			* Moves that caused a beta cutoff are likely to be good in other positions in the same ply.
@@ -684,7 +685,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 			*/
 			if (!inCheck
 				&& !moveIsCapOrPromo) {
-				//int piece = pieceAt(b, fromSq(currentMove));
 				int from = fromSq(currentMove);
 				int to = toSq(currentMove);
 
@@ -840,6 +840,15 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	moveList_t moveList[1];
 	generateQuiescence(b, moveList, inCheck);
 
+	/*
+	 * Checkmate Detection:
+	 * Quiescence generates check evasions. If in check and no evading moves possible, return this is mate.
+	 */
+	if (moveList->cnt == 0 && inCheck) {
+		// Checkmate
+		return -MATE_VALUE + b->ply;
+	}
+
 	// First ply of quiescence generates checkers, if there is no check at current position.
 	if (!inCheck && depth == 0) {
 		generateQuietCheckers(b, moveList);
@@ -902,15 +911,6 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 
 			return beta;
 		}
-	}
-
-	/*
-	 * Checkmate Detection:
-	 * Quiescence generates check evasions, if no legal moves were possible, this has to be checkmate.
-	 */
-	if (legalMoves == 0 && inCheck) {
-		// Checkmate
-		return -MATE_VALUE + b->ply;
 	}
 
 	//if (pvNode && alpha != oldAlpha) {

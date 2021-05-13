@@ -411,20 +411,34 @@ move_t parseMove(board_t* b, string move) {
 	int from = file_rank_2_sq(move[0] - 97, move[1] - 49);
 	int to = file_rank_2_sq(move[2] - 97, move[3] - 49);
 	int movingPiece = pieceAt(b, from);
-	int flag = 0, promPiece = 0;
+	int promPiece = 0;
+	int moveFlag = NORMAL_MOVE;
 
 	// set possible pawn flags
-	if (piecePawn[movingPiece]
-		&& (squareToRank[to] == RANK_1 || squareToRank[to] == RANK_8)) {
-		switch (move[4]) {
-			case 'n': promPiece = Piece::KNIGHT; break;
-			case 'b': promPiece = Piece::BISHOP; break;
-			case 'r': promPiece = Piece::ROOK; break;
-			default: promPiece = Piece::QUEEN; break;
+	if (piecePawn[movingPiece]) {
+		int moveDistance = abs(from - to);
+
+		// set ep flag if to square is en passant (ep capture)
+		if (to == b->enPas && (moveDistance == 7 || moveDistance == 9)) {
+			moveFlag = EP_MOVE;
+
+		} else if (squareToRank[to] == RANK_1 || squareToRank[to] == RANK_8) {
+			moveFlag = PROM_MOVE;
+			switch (move[4]) {
+				case 'n': promPiece = PROM_TO_KNIGHT; break;
+				case 'b': promPiece = PROM_TO_BISHOP; break;
+				case 'r': promPiece = PROM_TO_ROOK; break;
+				default: promPiece = PROM_TO_QUEEN; break;
+			}
 		}
 	}
 
-	return serializeMove(from, to, promPiece);
+	if (pieceKing[movingPiece] && abs(from - to) == 2) {
+		moveFlag = CASTLE_MOVE;
+	}
+	//position startpos moves g1f3 g8f6 g2g3 d7d5 f1g2 e7e6 e1g1
+
+	return serializeMove(from, to, moveFlag, promPiece);
 }
 
 bool push(board_t* b, move_t move) {
@@ -438,7 +452,6 @@ bool push(board_t* b, move_t move) {
 	undo_s->zobKey = b->zobristKey;
 	undo_s->pawnKey = b->zobristPawnKey;
 	undo_s->move = move;
-	undo_s->castleMove = false;
 	undo_s->cap = captured;
 	undo_s->fiftyMove = b->fiftyMove;
 
@@ -457,7 +470,7 @@ bool push(board_t* b, move_t move) {
 		b->zobristPawnKey ^= pieceKeys[movingPiece][from_square]; // clear piece
 		b->fiftyMove = 0;
 
-		if (isEnPassant(b, move, movingPiece)) {
+		if (isEnPassant(move)) {
 			int sq = (b->side == WHITE) ? -8 : 8;
 			sq += to_square;
 
@@ -468,7 +481,7 @@ bool push(board_t* b, move_t move) {
 	}
 
 	b->zobristKey ^= pieceKeys[Piece::EMPTY][b->enPas]; // ep out
-	if (isPawnStart(b, move, movingPiece)) {
+	if (isPawnStart(move, movingPiece)) {
 		if (b->side == WHITE) b->enPas = to_square - 8;
 		else b->enPas = to_square + 8;
 	} else {
@@ -510,10 +523,7 @@ bool push(board_t* b, move_t move) {
 
 	// handle castling and castle permission
 	b->zobristKey ^= castleKeys[b->castlePermission]; // hash CA out
-	if (pieceKing[movingPiece] && kingIsCastling(b, move)) {
-
-		undo_s->castleMove = true;
-
+	if (isCastling(move)) {
 		switch (to_square) {
 			case C1: pushCastle(b, A1, D1, b->side); break;
 			case G1: pushCastle(b, H1, F1, b->side); break;
@@ -577,7 +587,6 @@ void pushNull(board_t* b) {
 	undo_s.pawnKey = b->zobristPawnKey;
 	undo_s.move = NULL_MOVE;
 	undo_s.cap = Piece::NO_PIECE;
-	undo_s.castleMove = false;
 
 	b->zobristKey ^= pieceKeys[Piece::EMPTY][b->enPas]; // ep out
 	b->enPas = 0;
@@ -629,7 +638,6 @@ undo_t pop(board_t* b) {
 	b->zobristKey = undo.zobKey;
 	b->zobristPawnKey = undo.pawnKey;
 	b->enPas = undo.enPas;
-	bool castleMove = undo.castleMove;
 	int capturedPiece = undo.cap;
 
 	Assert((b->enPas == 0 || ((b->enPas <= H6) && (b->enPas >= A6)))
@@ -655,7 +663,7 @@ undo_t pop(board_t* b) {
 	}
 
 	// undo ep captures
-	if (isEnPassant(b, undo.move, movingPiece)) {
+	if (isEnPassant(undo.move)) {
 		if (b->side == WHITE) setPiece(b, Piece::PAWN, to_square - 8, b->side ^ 1);
 		else setPiece(b, Piece::PAWN, to_square + 8, b->side ^ 1);
 	}
@@ -667,7 +675,7 @@ undo_t pop(board_t* b) {
 	}
 
 	// undo castles
-	if (castleMove) {
+	if (isCastling(undo.move)) {
 		switch (to_square) {
 			case C1: popCastle(b, D1, A1, WHITE); break;
 			case G1: popCastle(b, F1, H1, WHITE); break;
@@ -972,7 +980,7 @@ bool checkingMove(board_t* b, move_t move) {
 		}
 
 		// 3.2 EnPassant check
-		if (isEnPassant(b, move)) {
+		if (isEnPassant(move)) {
 			int capSq = b->enPas + ((b->side == WHITE) ? -8 : 8);
 			b->occupied ^= (1ULL << capSq);
 			b->occupied ^= (1ULL << from);
@@ -987,7 +995,7 @@ bool checkingMove(board_t* b, move_t move) {
 	}
 
 	// 4. Castled rook gives check
-	if (isCastling(b, move)) {
+	if (isCastling(move)) {
 		switch (to) {
 			case G1: // => rook lands on F1
 				return lookUpRookMoves(F1, b->occupied) & kingMask;
