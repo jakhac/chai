@@ -250,7 +250,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	// 2bishop king vs king test
 	// only queen promotions in quiesence
 	// searchstack for checks, moves, evals
-	// d-- when no tt in pv
 
 	// Initialize node
 	bool rootNode = b->ply == 0;
@@ -422,33 +421,11 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		}
 	}
 
-	// Razoring http://talkchess.com/forum3/viewtopic.php?t=43165
-	bool doRazoring = !inCheck
-		&& !mateThreat
-		&& abs(beta) < ISMATE
-		&& depth <= RAZOR_DEPTH;
-
-	//if (doRazoring) {
-	//	// TODO: use dynamic pawn eval
-	//	int pawnValue = pieceScores[Piece::PAWN];
-	//	int razorMargin = 2 * pieceScores[Piece::PAWN] + (depth - 1 * pawnValue) / 4;
-	//	if (staticEval + razorMargin <= alpha) {
-	//		int qScore = quiescence(alpha, beta, 0, b, s, localPV);
-	//		if (qScore + razorMargin <= alpha) {
-	//			return alpha;
-	//		}
-	//	}
-	//}
-
 	/*
 	* Internal Iterative Deepening:
 	* If ttable probing does not find a hash move, there is no good move to start searching this
 	* position. IID searches with reduced depth and fills ttable entries to ensure hash move.
 	*/
-	//if (pvNode && hashMove == NO_MOVE && depth > 3) {
-	//	alphaBeta<PV>(alpha, beta, depth - 3, b, s, NO_NULL);
-	//	hashMove = probePV(b);
-	//}
 	if (pvNode
 		&& depth >= 6
 		&& hashMove == NO_MOVE) {

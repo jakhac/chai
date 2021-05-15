@@ -108,13 +108,16 @@ void uciParseGo(board_t* b, search_t* s, string cmd) {
 		if (movesLeft < 1 || movesLeft > 30) movesLeft = 30;
 		s->timeSet = true;
 
-		// catch low time
-		if (time <= 2000) {
-			s->stopTime = s->startTime + 300;
+		// catch low time (ok for tc 20/0.3)
+		if (time <= 3000) {
+			s->stopTime = s->startTime + (inc / 8);
+		} else if (time <= 4000) {
+			s->stopTime = s->startTime + (inc / 4);
 		} else {
 			time /= movesLeft;
 			time -= 50;
-			s->stopTime = s->startTime + time + inc;
+			//s->stopTime = s->startTime + time + inc;
+			s->stopTime = s->startTime + time;
 		}
 
 		Assert(s->startTime < s->stopTime);
