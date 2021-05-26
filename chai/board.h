@@ -336,7 +336,7 @@ bool sqIsBlockerForKing(board_t* b, int kSq, int discoverSide, int potBlockerSq)
  */
 bool checkingMove(board_t* b, move_t move);
 
-
+move_t getCurrentMove(board_t* b);
 
 
 

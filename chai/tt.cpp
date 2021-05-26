@@ -19,16 +19,17 @@ void initTT(ttable_t* tt) {
 	}
 
 	tt->buckets = 1 << msb;
-	cout << "powerOfTwoBuckets " << tt->buckets << endl;
 	tt->bucketList = (bucket_t*)malloc(sizeof(bucket_t) * tt->buckets);
 
 	for (int i = 0; i < msb; i++) indexMask |= (1 << i);
 
 	clearTT(tt);
 
+#ifdef INFO
 	cout << "Buckets: " << BUCKETS << endl
 		<< "Transposition table initialized with " << tt->buckets
 		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl;
+#endif // !LICHESS
 }
 
 void clearTT(ttable_t* tt) {
@@ -129,15 +130,10 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 			int newScore = e->value;
 
 			*hashValue = newScore;
-			//if (*hashValue > ISMATE) *hashValue -= b->ply;
-			//else if (*hashValue < -ISMATE) *hashValue += b->ply;
-
 			*hashDepth = e->depth;
 			*move = e->move;
 			*hashFlag = e->flag;
 			*hashEval = e->staticEval;
-			//*hashValue = (bucket + i)->score;
-
 			return true;
 
 		}
@@ -247,7 +243,10 @@ void initPawnTable(pawntable_t* pawnTable) {
 	pawnTable->table = (pawntable_entry_t*)malloc(pawnTable->entries * sizeof(pawntable_entry_t));
 	clearPawnTable(pawnTable);
 
+#ifdef INFO
 	cout << "Pawn table initialized with " << pawnTable->entries << " entries." << endl;
+#endif // !LICHESS
+
 }
 
 void clearPawnTable(pawntable_t* pawnTable) {

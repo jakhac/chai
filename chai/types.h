@@ -51,6 +51,12 @@ struct undo_t {
 	key_t pawnKey;
 };
 
+struct searchStack_t {
+	bool isCheck;
+
+	int staticEval;
+};
+
 /**
  * Transposition table entry.
  */

@@ -38,6 +38,9 @@ const int HISTORY_MAX = 1000 - 1;
 */
 //static pv_line_t pvLine[1];
 
+// Search stack used for all searches
+static searchStack_t sStack[MAX_GAME_MOVES];
+
 static const int moveCountPruningDepth = 5;
 
 static int moveCountPruning[moveCountPruningDepth];

@@ -5,7 +5,9 @@ int deltaPruning = 0;
 
 void checkSearchInfo(search_t* s) {
 	if (s->timeSet && getTimeMs() > s->stopTime) {
+#ifdef INFO
 		cout << "Forced search quit (set time is up)" << endl;
+#endif // !INFO
 		s->stopped = true;
 	}
 
@@ -118,6 +120,7 @@ bool moveIsTactical(board_t* b, move_t move) {
 		|| isEnPassant(move);
 }
 
+// return true if any pawns are on 2nd / 7th rank
 bool promotablePawns(board_t* b) {
 	if (b->side == WHITE) {
 		return getPieces(b, Piece::PAWN, WHITE) & RANK_7_HEX;
@@ -126,118 +129,17 @@ bool promotablePawns(board_t* b) {
 	}
 }
 
-/*int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move) {
-	Assert(checkBoard(b));
-
-	// Scoring variables
-	int score = -INF;
-	int bestScore = score;
-	int bestMove = NO_MOVE;
-
-	// Local variables to run alphaBeta Search
-	bool inCheck = isCheck(b, b->side);
-	bool moveGivesCheck = false;
-	int legalMoves = 0;
-	int alpha = -INF;
-	int beta = INF;
-
-	// Generate moves and score them
-	move_t hashMove = probePV(b);
-	moveList_t moveList[1];
-	generateMoves(b, moveList, inCheck);
-	scoreMoves(b, moveList, hashMove);
-
-	// Loop through all root moves
-	for (int i = 0; i < moveList->cnt; i++) {
-		getNextMove(moveList, i);
-		move_t currentMove = moveList->moves[i];
-		Assert(currentMove != NO_MOVE);
-
-		if (!push(b, currentMove)) continue;
-
-		legalMoves++;
-
-		// Principal Variation Search
-		if (legalMoves == 1) {
-			score = -alphaBeta(-beta, -alpha, depth - 1, b, s);
+// check if move pushes pawn on 2nd/7th rank (call before pushing the move!)
+bool dangerousPawnPush(board_t* b, move_t m) {
+	if (piecePawn[pieceAt(b, fromSq(m))]) {
+		if (b->side == WHITE) {
+			return squareToRank[toSq(m)] == RANK_7;
 		} else {
-			// Late Move Reductions, do reduced zero window search
-			if (legalMoves > 3
-				&& !inCheck
-				&& depth >= 3
-				&& !(MCHECK_PROM_OR_CAP & currentMove)
-				&& !isCheck(b, b->side)) {
-
-				int lmrDepth = (legalMoves > 6) ? 3 : 2;
-				score = -alphaBeta<NoPV>(-alpha - 1, -alpha, depth - lmrDepth, b, s);
-			} else {
-				// Ensure, that PVS is always executed if LMR is not applicable
-				score = alpha + 1;
-			}
-
-			// Principal Variation Search
-			if (score > alpha) {
-				score = -alphaBeta(-alpha - 1, -alpha, depth - 1, b, s);
-
-				if (score > alpha && score < beta) {
-					score = -alphaBeta(-beta, -alpha, depth - 1, b, s);
-				}
-			}
-		}
-
-		pop(b);
-
-		if ((s->nodes & 2047) == 0) {
-			checkSearchInfo(s);
-		}
-
-		s->nodes++;
-
-		// Keep track of best move and best score so far
-		if (score > bestScore) {
-			bestScore = score;
-			bestMove = currentMove;
-
-			if (bestScore > alpha) {
-				alpha = bestScore;
-			}
-		}
-
-		// Useful for aspiration window around previous score
-		if (alpha >= beta) {
-			if (legalMoves == 1) {
-				s->fhf++;
-			}
-			s->fh++;
-
-			Assert(currentMove != NO_MOVE);
-			Assert(abs(beta) <= INF);
-
-			// Store position with bestMove and beta flag
-			storeTT(b, currentMove, beta, TT_BETA, depth);
-
-			*move = bestMove;
-			return beta;
-		}
-
-	}
-
-	// If no moves were possible in this node, position is either a checkmate or stalemate.
-	if (legalMoves == 0) {
-		if (inCheck) {
-			// Checkmate
-			return -MATE_VALUE;
-		} else {
-			// Stalemate
-			return 0;
+			return squareToRank[toSq(m)] == RANK_2;
 		}
 	}
-
-	storeTT(b, bestMove, bestScore, TT_SCORE, depth);
-
-	*move = bestMove;
-	return bestScore;
-}*/
+	return false;
+}
 
 template <nodeType_t nodeType>
 value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s, bool nullOk) {
@@ -248,15 +150,23 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 	// TODO
 	// 2bishop king vs king test
-	// only queen promotions in quiesence
-	// searchstack for checks, moves, evals
+	// searchstack for checks, moves, evals (psqt on the fly!)
+	// warnings
+	// UCI options
+	// opening book
+	// time management (rapid, blitz, bullet mode for lichess)
+	// check tt size entries (didnt change)
+	// move code to move.h
+	// alloc hugepages
 
 	// Initialize node
 	bool rootNode = b->ply == 0;
 	bool pvNode = nodeType == PV;
 	bool mateThreat = false;
+	bool improving = false;
 	int searchExt = 0;
 	int newDepth = depth - 1;
+	searchStack_t* ss = &sStack[b->ply];
 
 	Assert(pvNode || (alpha == beta - 1));
 
@@ -344,7 +254,8 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		}
 	}
 
-	bool inCheck = isCheck(b, b->side);
+	bool inCheck = ss->isCheck;
+	Assert(inCheck == isCheck(b, b->side));
 	if (inCheck) {
 		newDepth++;
 	}
@@ -358,11 +269,23 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		Assert(abs(hashEval) < ISMATE);
 		staticEval = hashEval;
 
+		//} else if (getCurrentMove(b) == NULL_MOVE) {
+		//	staticEval = -(ss - 1)->staticEval;
+
 	} else {
 		staticEval = evaluation(b);
 		//storeTT(b, NULL_MOVE, NO_VALUE, staticEval, TT_EVAL, 0);
 	}
+	ss->staticEval = staticEval;
 	Assert(staticEval != NO_VALUE && abs(staticEval) < ISMATE);
+
+	if (b->ply > 2) {
+		improving = !(ss - 2)->isCheck ?
+			ss->staticEval > (ss - 2)->staticEval
+			: ((b->ply > 4) ?
+			   ss->staticEval > (ss - 4)->staticEval
+			   : false);
+	}
 
 	// Reverse futility pruning
 	if (!pvNode
@@ -371,9 +294,11 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		&& !inCheck
 		&& countBits(getPieces(b, Piece::PAWN, b->side)) > 0
 		&& !promotablePawns(b)
+		//&& nonPawnPieces(b, b->side) might lose elo
 		&& abs(beta) <= ISMATE
 		&& abs(alpha) <= ISMATE) {
 
+		//int margin = (depth - improving) * (pieceScores[Piece::BISHOP] + 13);
 		int margin = depth * (pieceScores[Piece::BISHOP] + 13);
 		if (staticEval - margin > beta) {
 			return beta;
@@ -397,6 +322,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 		int reduction = (depth > 6) ? R_3 : R_2;
 
+		(ss + 1)->isCheck = false;
 		pushNull(b);
 		value_t nullValue = -alphaBeta<NoPV>(-beta, -beta + 1, depth - 1 - reduction, b, s, NO_NULL);
 		pop(b);
@@ -509,18 +435,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				// The lower the histScore, the higher the scaled score
 				// => bad moves score near histmax and good moves score near 0
 				int scaledHistScore = histMax / (histScore ? histScore : 1);
-
-				//if (scaledHistScore > histThreshold) {
-				//	cout << "PRUNE histScore " << histScore
-				//		<< " scaled to " << scaledHistScore << " max = " << histMax << endl;
-				//} else {
-				//	cout << "KEEP  histScore " << histScore
-				//		<< " scaled to " << scaledHistScore << " max = " << histMax << endl;
-				//}
-
-				// Check if quiet move is ordered by any heuristic (castle moves not considered)
 				bool specialQuiet = moveList->scores[i] > COUNTER_SCORE;
-				//int histThreshold = 2 * histMax / 3; // TODO shift?
 
 				if (staticEval + (depth * 234) + (specialQuiet * 50) < alpha
 					&& scaledHistScore > 2 * histMax / 3) {
@@ -530,8 +445,9 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		}
 
 		// Push the move on the board
+		(ss + 1)->isCheck = moveGivesCheck;
 		if (!push(b, currentMove)) {
-			Assert(!inCheck); // Position cannot be check bevause all check evasions are legal
+			Assert(!inCheck); // Position cannot be check: all check evasions are legal
 			continue;
 		}
 
@@ -581,8 +497,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 				if (isPromotion(currentMove))
 					lmrDepth++;
-
-
 
 				lmrDepth = min(newDepth, lmrDepth);
 				lmrSameDepth = newDepth == lmrDepth;
@@ -668,7 +582,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				histHeuristic[b->side][from][to] += depth * depth;
 				histMax = max(histHeuristic[b->side][from][to], histMax);
 
-				// TODO shift instead of divide
+				// TODO shift?
 				if (histMax > HISTORY_MAX) {
 					for (int c = 0; c < 2; c++) {
 						for (int i = 0; i < NUM_SQUARES; i++) {
@@ -782,11 +696,17 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	}
 
 	if (b->ply > MAX_DEPTH - 1) {
+#ifdef INFO
 		cout << "Warning: MAX_DEPTH reached in quiescence." << endl;
+#endif // !LICHESS
 		return evaluation(b);
 	}
 
+	//searchStack_t* ss = &sStack[b->ply];
+	//bool inCheck = ss->isCheck;
+	//Assert(inCheck == isCheck(b, b->side));
 	bool inCheck = isCheck(b, b->side);
+
 	bool pvNode = nodeType == PV;
 	value_t value;
 	value_t bestValue = -INF;
@@ -854,6 +774,8 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 			continue;
 		}
 
+		//bool moveGivesCheck = checkingMove(b, currentMove);
+		//(ss + 1)->isCheck = moveGivesCheck;
 		if (!push(b, currentMove)) {
 			Assert(!inCheck); // Position cannot be check because all check evasions are legal
 			continue;
@@ -893,12 +815,10 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	//if (pvNode && alpha != oldAlpha) {
 	//	Assert(bestMove != NO_MOVE);
 	//	Assert(abs(bestValue) <= INF);
-
 	//	storeTT(b, bestMove, searchToHash(b, bestValue), staticEval, TT_VALUE, 0);
 	//} else if (bestMove) {
 	//	Assert(bestMove != NO_MOVE);
 	//	Assert(abs(alpha) <= INF);
-
 	//	storeTT(b, bestMove, searchToHash(b, alpha), staticEval, TT_ALPHA, 0);
 	//}
 
@@ -992,7 +912,9 @@ value_t search(board_t* b, search_t* s) {
 	move_t bestMove = 0;
 
 	clearForSearch(b, s);
-	bool inCheck = isCheck(b, b->side);
+
+	sStack[b->ply].isCheck = isCheck(b, b->side);
+	sStack[b->ply].staticEval = evaluation(b);
 
 	for (currentDepth; currentDepth <= s->depth; currentDepth++) {
 		selDepth = 0;

@@ -57,6 +57,7 @@ void blackSinglePawnPush(board_t* b, moveList_t* moveList);
  * @param  moveList moveList struct to add moves to.
  */
 void whitePawnPushProm(board_t* b, moveList_t* moveList);
+void whitePawnPushPromQ(board_t* b, moveList_t* moveList);
 
 /**
  * Generate all possible single push black pawn promotions and add to moveList.
@@ -67,6 +68,7 @@ void whitePawnPushProm(board_t* b, moveList_t* moveList);
  * @param  moveList moveList struct to add moves to.
  */
 void blackPawnPushProm(board_t* b, moveList_t* moveList);
+void blackPawnPushPromQ(board_t* b, moveList_t* moveList);
 
 /**
  * Generate all possible white double pawn pushes and add to moveList.

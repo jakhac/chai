@@ -50,11 +50,11 @@ void generateQuiescence(board_t* b, moveList_t* moveList, bool inCheck) {
 	Assert(!isCheck(b, b->side));
 
 	if (b->side == WHITE) {
-		whitePawnPushProm(b, moveList);
+		whitePawnPushPromQ(b, moveList);
 		whitePawnCaptures(b, moveList);
 
 	} else {
-		blackPawnPushProm(b, moveList);
+		blackPawnPushPromQ(b, moveList);
 		blackPawnCaptures(b, moveList);
 	}
 
@@ -312,17 +312,6 @@ bool hasEvadingMove(board_t* b) {
 	moveList_t moveList;
 	generateCheckEvasions(b, &moveList);
 	return moveList.cnt > 0;
-
-	//moveList_t moveList;
-	//generateCheckEvasions(b, &moveList);
-	//for (int i = 0; i < moveList.cnt; i++) {
-	//	if (push(b, moveList.moves[i])) {
-	//		pop(b);
-	//		return true;
-	//	}
-	//	pop(b);
-	//}
-	//return false;
 }
 
 void whiteSinglePawnPush(board_t* board, moveList_t* moveList) {
@@ -369,6 +358,17 @@ void whitePawnPushProm(board_t* b, moveList_t* moveList) {
 	}
 }
 
+void whitePawnPushPromQ(board_t* b, moveList_t* moveList) {
+	bitboard_t pawns = getPieces(b, Piece::PAWN, WHITE);
+	pawns = ((pawns & RANK_7_HEX) << 8) & ~b->occupied;
+
+	int sq;
+	while (pawns) {
+		sq = popBit(&pawns);
+		moveList->moves[moveList->cnt++] = serializeMove(sq - 8, sq, PROM_MOVE, PROM_TO_QUEEN);
+	}
+}
+
 void blackPawnPushProm(board_t* board, moveList_t* moveList) {
 	bitboard_t pawns = getPieces(board, Piece::PAWN, BLACK);
 	pawns = ((pawns & RANK_2_HEX) >> 8) & ~board->occupied;
@@ -380,6 +380,17 @@ void blackPawnPushProm(board_t* board, moveList_t* moveList) {
 		moveList->moves[moveList->cnt++] = serializeMove(sq + 8, sq, PROM_MOVE, PROM_TO_ROOK);
 		moveList->moves[moveList->cnt++] = serializeMove(sq + 8, sq, PROM_MOVE, PROM_TO_BISHOP);
 		moveList->moves[moveList->cnt++] = serializeMove(sq + 8, sq, PROM_MOVE, PROM_TO_KNIGHT);
+	}
+}
+
+void blackPawnPushPromQ(board_t* board, moveList_t* moveList) {
+	bitboard_t pawns = getPieces(board, Piece::PAWN, BLACK);
+	pawns = ((pawns & RANK_2_HEX) >> 8) & ~board->occupied;
+
+	int sq;
+	while (pawns) {
+		sq = popBit(&pawns);
+		moveList->moves[moveList->cnt++] = serializeMove(sq + 8, sq, PROM_MOVE, PROM_TO_QUEEN);
 	}
 }
 

@@ -23,6 +23,8 @@ static moveList_t move_s[1];
 
 static search_t s[1];
 
+static board_t* b = &board;
+
 /**
  * Main function to run chess in console.
  *
@@ -37,7 +39,7 @@ int main();
  * @param  p MoveGenrator instance.
  * @param  s A search_t to process.
  */
-void play(board_t* b, Perft* p, search_t* s);
+void cli(board_t* b, Perft* p, search_t* s);
 
 /**
  * Function to divide with cmd-line move after each perft.
@@ -46,5 +48,5 @@ void play(board_t* b, Perft* p, search_t* s);
  * @param  fen   The fen.
  * @param  depth The initial depth.
  */
-void dividePerft(board_t* b, string fen, int depth);
+void dividePerft(board_t* b, int depth);
 

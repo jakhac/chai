@@ -212,6 +212,7 @@ void printBoard(board_t* b) {
 		printf("%2c", 'a' + file);
 	}
 
+#ifdef INFO
 	cout << "\n\nPlayer to move: " << b->side << endl;
 	printf("Zobrist key: %llX\n", b->zobristKey);
 	printf("Pawn key: %llX\n", b->zobristPawnKey);
@@ -225,7 +226,29 @@ void printBoard(board_t* b) {
 		   b->castlePermission & k_CASTLE ? 'k' : ' ',
 		   b->castlePermission & q_CASTLE ? 'q' : ' '
 	);
+#endif // INFO
 
+	cout << endl;
+}
+
+void _printBoard(board_t* b) {
+	int sq, file, rank, piece;
+
+	// print board
+	for (rank = RANK_8; rank >= RANK_1; rank--) {
+		printf("%d  ", rank + 1);
+		for (file = FILE_A; file <= FILE_H; file++) {
+			sq = file_rank_2_sq(file, rank);
+			piece = pieceAt(b, sq);
+			printf("%2c", pieceChar[piece]);
+		}
+		printf("\n");
+	}
+
+	printf("\n   ");
+	for (file = FILE_A; file <= FILE_H; file++) {
+		printf("%2c", 'a' + file);
+	}
 	cout << endl;
 }
 
@@ -695,6 +718,10 @@ void popCastle(board_t* b, int clearRookSq, int setRookSq, int side) {
 	Assert(pieceAt(b, clearRookSq) == Piece::R || pieceAt(b, clearRookSq) == Piece::r);
 	clearPiece(b, Piece::ROOK, clearRookSq, side);
 	setPiece(b, Piece::ROOK, setRookSq, side);
+}
+
+move_t getCurrentMove(board_t* b) {
+	return b->undoHistory[b->undoPly - 1].move;
 }
 
 bitboard_t getPinner(board_t* b, int kSq, int kSide) {

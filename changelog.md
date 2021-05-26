@@ -202,7 +202,7 @@ TODO 2.5.5
   - [x] `alphaBetaRoot()` function for save mate/draw detection and bestMove
   - [x] Templates for `alphaBeta()` and `quiescence()`
   - [ ] Retrieve pv-line from pv-structs
-  - [ ] Markdown table in changelog
+  - [ ] Search Stack / Board Stack
 - Eval
   - [x] Check: insufficient material cannot be influenced by contempt factor
   - [ ] Add `eval_t` for evaluations

@@ -3,17 +3,18 @@
 void uciMode(board_t* b, search_t* s) {
 	string cmd;
 
-	//cout << "id name chai Chess Engine\n";
-	//cout << "id author chai\n";
-	//cout << "uciok\n";
+	cout << "id name jakhac\n";
+	cout << "id author chai\n";
+	cout << "uciok\n";
 
 	while (true) {
 		getline(cin, cmd);
 		fflush(stdout);
 
 		if (!cmd.compare("quit")) {
-			cout << "quit game\n";
+			//cout << "quit uci protocol" << endl;
 			exit(0);
+			return;
 		} else if (!cmd.compare("uci")) {
 			cout << "id name chai" << VERSION << "\n";
 			cout << "id author chai\n";
@@ -21,7 +22,7 @@ void uciMode(board_t* b, search_t* s) {
 		} else if (!cmd.compare("isready")) {
 			init(b);
 			uciParsePosition(b, "position startpos");
-			cout << "isreadyok\n";
+			cout << "readyok\n";
 		} else if (!cmd.compare("ucinewgame")) {
 			// start new game with standard position
 			uciParsePosition(b, "position startpos");
@@ -34,7 +35,7 @@ void uciMode(board_t* b, search_t* s) {
 
 		fflush(stdout);
 	}
-	cout << "Error: left uci loop" << endl;
+
 }
 
 void uciParsePosition(board_t* b, string cmd) {
@@ -99,8 +100,9 @@ void uciParseGo(board_t* b, search_t* s, string cmd) {
 		movesLeft = 1;
 	}
 
-
+#ifdef INFO
 	cout << "Parsed wbtime:" << time << " wbinc:" << inc << " movetime:" << moveTime << endl;
+#endif // !LICHESS
 
 	// if stop is set
 	s->startTime = getTimeMs();
@@ -129,24 +131,10 @@ void uciParseGo(board_t* b, search_t* s, string cmd) {
 		s->depth = depth;
 	}
 
-	cout << "time " << time << ", start " << s->startTime << ", stop " << s->stopTime
-		<< ", depth " << s->depth << ", timeset " << s->timeSet << endl;
-
-	printBoard(b);
-
 	search(b, s);
 }
 
 void init(board_t* b) {
-	cout << "Initialize chai. " << VERSION << endl;
-
-#ifdef ASSERT
-	cout << "Asserts: 1" << endl;
-#else
-	cout << "Asserts: 0" << endl;
-#endif // ASSERT
-
-
 	auto start = std::chrono::high_resolution_clock::now();
 	initClearSetMask();
 	initSquareToRankFile();
@@ -162,17 +150,21 @@ void init(board_t* b) {
 	initObstructed();
 	initLine();
 
+#ifdef INFO
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 	cout << "Init keys and masks ... " << duration.count() << "ms\n";
+#endif // !1
 
 	start = std::chrono::high_resolution_clock::now();
 	initRookMasks();
 	initRookMagicTable();
 	initBishopMasks();
 	initBishopMagicTable();
+#ifdef INFO
 	stop = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 	cout << "Init magic tables for bishop and rooks ... " << duration.count() << "ms\n" << endl;
+#endif // !LICHESS
 }
 
