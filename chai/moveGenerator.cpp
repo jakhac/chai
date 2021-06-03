@@ -560,7 +560,6 @@ void addKingMoves(board_t* b, moveList_t* moveList) {
 				moveList->moves[moveList->cnt++] = serializeMove(kSq, C8, CASTLE_MOVE, Piece::EMPTY);
 			}
 			break;
-		default: break;
 	}
 }
 

@@ -1,11 +1,16 @@
 #pragma once
 
+#if defined(_MSC_VER)
+/* Microsoft C/C++-compatible compiler */
 #include <intrin.h>
-#include <iostream>
-#include "windows.h"
+#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
+/* GCC-compatible compiler, targeting x86/x86-64 */
+#include <x86intrin.h>
+#endif
 
-#include "defs.h"
-#include "mask.h"
+#include "windows.h" // used for getTimeMs()
+
+#include "types.h"
 
 /**
  * Bit scan forward and return index. If board_t is 0 return -1. Uses compiler bitscan.
@@ -45,7 +50,11 @@ inline int bitscanReverse(bitboard_t board) {
  * @returns Amount of bits set to 1 in bb.
  */
 inline int countBits(bitboard_t bb) {
+#if defined(_MSC_VER)
 	return (int)__popcnt64(bb);
+#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
+	return (int)_popcnt64(bb);
+#endif
 }
 
 /**
@@ -83,7 +92,7 @@ inline int popBit(bitboard_t bb) {
  * @param  i  Index of bit that is set to 1.
  */
 inline void setBit(bitboard_t* bb, int i) {
-	*bb |= setMask[i];
+	*bb |= (1ULL << i);
 }
 
 /**
@@ -93,7 +102,7 @@ inline void setBit(bitboard_t* bb, int i) {
  * @param  i  Index of bit that is set to 0.
  */
 inline void clearBit(bitboard_t* bb, int i) {
-	*bb &= clearMask[i];
+	*bb &= ~(1ULL << i);
 }
 
 /**
@@ -102,5 +111,9 @@ inline void clearBit(bitboard_t* bb, int i) {
  * @returns The time in milliseconds.
  */
 inline int getTimeMs() {
+#ifdef __GNUG__
+	return (int)GetTickCount();
+#else
 	return (int)GetTickCount64();
+#endif
 }

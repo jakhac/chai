@@ -11,10 +11,24 @@ int main() {
 #endif // ASSERT
 		<< " buckets=" << BUCKETS << endl;
 
+	//#if defined(_MSC_VER)
+	//	cout << "MSCV is defined" << endl;
+	//#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
+	//	cout << "GNUC is defined" << endl;
+	//#endif
+
 	init(&board);
 	parseFen(&board, STARTING_FEN);
 	//parseFen(&board, BUG_FEN);
-	//parseFen(&board, "8/6k1/8/8/5K2/8/8/q5r1 w - - 0 1");
+	//parseFen(&board, "7k/2rR3p/1Pp1qp1B/p1p3p1/P3P3/7P/5PP1/6K1 w - - 1 0");
+
+	//while (1) {
+	//	int newMbSize;
+	//	cin >> newMbSize;
+	//	cout << "newMB " << newMbSize << endl;
+	//	resizeTT(b->tt, newMbSize);
+	//}
+
 
 #ifdef INFO
 	printBoard(&board);

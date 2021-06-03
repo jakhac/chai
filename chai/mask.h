@@ -1,8 +1,7 @@
 #pragma once
 
-#include <vector>
-
 #include "defs.h"
+#include <vector>
 
 // clear set bit masks
 extern bitboard_t setMask[64];

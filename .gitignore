@@ -3,7 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# log files from program
+# log files
+**.txt
+
+# custom build
+/build
 
 
 # User-specific files

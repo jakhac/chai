@@ -3,8 +3,9 @@
 void uciMode(board_t* b, search_t* s) {
 	string cmd;
 
-	cout << "id name jakhac\n";
-	cout << "id author chai\n";
+	cout << "id name chai_" << VERSION << "\n";
+	cout << "id author Jakob Hackstein\n";
+	cout << "option name Hash type spin default 256 min 2 max 8192" << endl;
 	cout << "uciok\n";
 
 	while (true) {
@@ -16,8 +17,9 @@ void uciMode(board_t* b, search_t* s) {
 			exit(0);
 			return;
 		} else if (!cmd.compare("uci")) {
-			cout << "id name chai" << VERSION << "\n";
-			cout << "id author chai\n";
+			cout << "id name chai_" << VERSION << "\n";
+			cout << "id author Jakob Hackstein\n";
+			cout << "option name Hash type spin default 256 min 2 max 8192" << endl;
 			cout << "uciok\n";
 		} else if (!cmd.compare("isready")) {
 			init(b);
@@ -31,9 +33,26 @@ void uciMode(board_t* b, search_t* s) {
 			uciParsePosition(b, cmd);
 		} else if (!cmd.substr(0, 2).compare("go")) {
 			uciParseGo(b, s, cmd);
+		} else if (!cmd.substr(0, strlen("setoption")).compare("setoption")) {
+			uciSetOption(b, cmd);
 		}
 
 		fflush(stdout);
+	}
+
+}
+
+int strStartsWith(char* str, char* key) {
+	return strstr(str, key) == str;
+}
+
+void uciSetOption(board_t* b, string cmd) {
+
+	if (cmd.rfind("setoption name Hash value ", 0) == 0) {
+		int newMbSize = stoi(cmd.substr(strlen("setoption name Hash value "), string::npos));
+		//TODO check for valid mb size
+		resizeTT(b->tt, newMbSize);
+		cout << "info string set Hash to " << newMbSize << "MB" << endl;
 	}
 
 }
@@ -143,7 +162,8 @@ void init(board_t* b) {
 	initEvalMasks();
 	initManhattenMask();
 
-	initTT(b->tt);
+	//initTT(b->tt);
+	resizeTT(b->tt, DEFAULT_TT_SIZE);
 	initPawnTable(b->pawnTable);
 
 	// TODO performance

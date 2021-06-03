@@ -1,16 +1,15 @@
 #pragma once
 
-#include <algorithm>
-#include <iostream>
-#include <bitset>
-#include <string>
-#include <chrono>
-#include <iostream>
+//#include <algorithm>
+//#include <iostream>
+//#include <bitset>
+//#include <string>
+//#include <chrono>
+//#include <iostream>
 
-#include "board.h"
-#include "defs.h"
-#include "moveGenerator.h"
-#include "legalMoveGenerator.h"
+//#include "board.h"
+//#include "defs.h"
+//#include "moveGenerator.h"
 #include "perft.h"
 #include "uci.h"
 #include "search.h"

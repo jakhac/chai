@@ -1,9 +1,9 @@
 #pragma once
 
 #include "moveGenerator.h"
-#include "legalMoveGenerator.h"
-#include "moveOrdering.h"
-#include <chrono>
+
+//#include "moveOrdering.h"
+//#include <chrono>
 
 
 class Perft {
@@ -32,18 +32,5 @@ public:
 	 * @param  depth Depth remaining.
 	 */
 	void perft(board_t* b, int depth);
-
-	long long perftLegalRoot(board_t* b, int depth);
-
-	/**
-	 * Recursive call for perft function using {@link #isLegal(board_t, move_t)} isLegal function.
-	 *
-	 * @param  b	 The board reference.
-	 * @param  depth Depth remaining.
-	 */
-	void perftLegal(board_t* b, int depth);
-
-	//long long perftBulkRoot(board_t* b, int depth);
-	//long long perftBulk(board_t* b, int depth);
 
 };

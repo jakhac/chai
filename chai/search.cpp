@@ -113,6 +113,11 @@ int nonPawnPieces(board_t* b, int side) {
 	return countBits(pieces);
 }
 
+// check if there are non-king non-pawn pieces on the board
+bool nonPawnPieces(board_t* b) {
+	return b->occupied & ~b->pieces[Piece::PAWN] & ~b->pieces[Piece::KING];
+}
+
 // following moves are tactical: caps, proms, eps
 bool moveIsTactical(board_t* b, move_t move) {
 	return isCapture(b, move)
@@ -120,18 +125,18 @@ bool moveIsTactical(board_t* b, move_t move) {
 		|| isEnPassant(move);
 }
 
-// return true if any pawns are on 2nd / 7th rank
-bool promotablePawns(board_t* b) {
-	if (b->side == WHITE) {
+// return true if any pawns are on 2nd, resp. 7th, rank
+bool promotablePawns(board_t* b, bool side) {
+	if (side == WHITE) {
 		return getPieces(b, Piece::PAWN, WHITE) & RANK_7_HEX;
 	} else {
 		return getPieces(b, Piece::PAWN, BLACK) & RANK_2_HEX;
 	}
 }
 
-// check if move pushes pawn on 2nd/7th rank (call before pushing the move!)
+// check if move pushes pawn on 2nd/7th rank (call AFTER! pushing the move)
 bool dangerousPawnPush(board_t* b, move_t m) {
-	if (piecePawn[pieceAt(b, fromSq(m))]) {
+	if (piecePawn[pieceAt(b, toSq(m))]) {
 		if (b->side == WHITE) {
 			return squareToRank[toSq(m)] == RANK_7;
 		} else {
@@ -142,22 +147,16 @@ bool dangerousPawnPush(board_t* b, move_t m) {
 }
 
 template <nodeType_t nodeType>
-value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s, bool nullOk) {
-	Assert((b->enPas == 0 || ((b->enPas <= H6) && (b->enPas >= A6)))
-		   || (b->enPas == 0 || ((b->enPas <= H3) && (b->enPas >= A3))));
+value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s) {
 	Assert(checkBoard(b));
 	Assert(alpha < beta);
 
-	// TODO
+	// TODO 2.5.5
 	// 2bishop king vs king test
-	// searchstack for checks, moves, evals (psqt on the fly!)
-	// warnings
-	// UCI options
-	// opening book
-	// time management (rapid, blitz, bullet mode for lichess)
-	// check tt size entries (didnt change)
-	// move code to move.h
-	// alloc hugepages
+	// pvline from search
+	// TT mem functions, use remaining mb for pawntable
+	// clean repo: googletest name, gitignore, ...
+	// test advantage of storing evals only in tt
 
 	// Initialize node
 	bool rootNode = b->ply == 0;
@@ -229,13 +228,13 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		b->tt->hit++;
 
 		// Look for valueHit: This position has already been searched before with greater depth.
-		if (hashDepth >= depth && b->fiftyMove < 85) {
+		if (hashDepth >= depth && b->fiftyMove < 90) {
 			Assert(hashDepth >= 1 && hashDepth <= MAX_DEPTH);
 			Assert(hashFlag >= TT_ALPHA && hashFlag <= TT_VALUE);
-			Assert(hashValue >= -INF && hashValue <= INF);
+			Assert(hashValue > -INF && hashValue < INF);
 
 			// Convert mate scores
-			hashValue = hashToSearch(b, hashValue);
+			//hashValue = hashToSearch(b, hashValue);
 
 			if (hashFlag & TT_VALUE) {
 				b->tt->valueHit++;
@@ -254,32 +253,38 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		}
 	}
 
+	// Static evaluation of position
+	value_t value = -INF;
+	value_t bestValue = -INF;
+	value_t posValue;
+
+	if (hashStored) {
+		Assert(abs(hashEval) < ISMATE);
+		ss->staticEval = posValue = hashEval;
+
+		if (hashFlag & TT_ALPHA && hashValue > ss->staticEval)
+			posValue = hashValue;
+
+		if (hashFlag & TT_BETA && hashValue <= ss->staticEval)
+			posValue = hashValue;
+
+	} else if (ss->currentMove == NULL_MOVE) {
+		ss->staticEval = posValue = -(ss - 1)->staticEval;
+
+	} else {
+		ss->staticEval = posValue = evaluation(b);
+		//storeTT(b, NULL_MOVE, NO_VALUE, ss->staticEval, TT_EVAL, 0);
+	}
+	Assert(ss->staticEval != NO_VALUE && abs(ss->staticEval) < ISMATE);
+	Assert(ss->currentMove == getCurrentMove(b));
+
 	bool inCheck = ss->isCheck;
 	Assert(inCheck == isCheck(b, b->side));
 	if (inCheck) {
 		newDepth++;
 	}
 
-	// Static evaluation of position
-	value_t value = -INF;
-	value_t bestValue = -INF;
-	value_t staticEval = NO_VALUE;
-
-	if (hashStored) {
-		Assert(abs(hashEval) < ISMATE);
-		staticEval = hashEval;
-
-		//} else if (getCurrentMove(b) == NULL_MOVE) {
-		//	staticEval = -(ss - 1)->staticEval;
-
-	} else {
-		staticEval = evaluation(b);
-		//storeTT(b, NULL_MOVE, NO_VALUE, staticEval, TT_EVAL, 0);
-	}
-	ss->staticEval = staticEval;
-	Assert(staticEval != NO_VALUE && abs(staticEval) < ISMATE);
-
-	if (b->ply > 2) {
+	if (!inCheck && b->ply > 2) {
 		improving = !(ss - 2)->isCheck ?
 			ss->staticEval > (ss - 2)->staticEval
 			: ((b->ply > 4) ?
@@ -287,20 +292,19 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 			   : false);
 	}
 
-	// Reverse futility pruning
+	/**
+	* Reverse Futility Pruning:
+	* Similar idea like NMP, but eval-margin is acting as the lower bound.
+	*/
 	if (!pvNode
-		&& depth < 5
-		&& nullOk
 		&& !inCheck
-		&& countBits(getPieces(b, Piece::PAWN, b->side)) > 0
-		&& !promotablePawns(b)
-		//&& nonPawnPieces(b, b->side) might lose elo
-		&& abs(beta) <= ISMATE
-		&& abs(alpha) <= ISMATE) {
+		&& depth < 5
+		&& nonPawnPieces(b)
+		//&& !promotablePawns(b, b->side ^ 1)
+		&& posValue <= 10000) {
 
-		//int margin = (depth - improving) * (pieceScores[Piece::BISHOP] + 13);
-		int margin = depth * (pieceScores[Piece::BISHOP] + 13);
-		if (staticEval - margin > beta) {
+		int margin = (depth - improving) * (pieceScores[Piece::BISHOP] - 38);
+		if (posValue - margin >= beta) {
 			return beta;
 		}
 	}
@@ -311,11 +315,11 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	* If this position is still winning, e.g. fails high, it will never be reached.
 	* Restrict NMP to reasonable positions (zugzwang, depth, checks).
 	*/
-	if (nullOk
+	if (ss->currentMove != NULL_MOVE
 		&& !inCheck
 		&& !pvNode
 		&& depth > 2
-		&& staticEval >= beta
+		&& ss->staticEval >= beta
 		&& abs(beta) < ISMATE
 		&& nonPawnPieces(b, b->side)
 		&& countBits(b->occupied) > 7) {
@@ -323,8 +327,9 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		int reduction = (depth > 6) ? R_3 : R_2;
 
 		(ss + 1)->isCheck = false;
+		(ss + 1)->currentMove = NULL_MOVE;
 		pushNull(b);
-		value_t nullValue = -alphaBeta<NoPV>(-beta, -beta + 1, depth - 1 - reduction, b, s, NO_NULL);
+		value_t nullValue = -alphaBeta<NoPV>(-beta, -beta + 1, depth - 1 - reduction, b, s);
 		pop(b);
 
 		if (s->stopped) {
@@ -336,7 +341,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 			// nullScore acts as lower bound to this position
 			if (depth - 1 - reduction > 0) {
-				storeTT(b, NULL_MOVE, searchToHash(b, nullValue), staticEval, TT_ALPHA, depth - 1 - reduction);
+				storeTT(b, NULL_MOVE, searchToHash(b, nullValue), ss->staticEval, TT_ALPHA, depth - 1 - reduction);
 			}
 			return nullValue;
 		}
@@ -348,7 +353,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	}
 
 	/*
-	* Internal Iterative Deepening:
+	* "Internal Iterative Deepening":
 	* If ttable probing does not find a hash move, there is no good move to start searching this
 	* position. IID searches with reduced depth and fills ttable entries to ensure hash move.
 	*/
@@ -380,7 +385,8 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		Assert(moveList->scores[i] >= 0);
 
 		if (rootNode && getTimeMs() > s->startTime + 750) {
-			cout << "info depth " << depth
+			cout << "info"
+				<< " depth " << depth
 				<< " currmove " << getStringMove(b, currentMove)
 				<< " currmovenumber " << legalMoves << endl;
 		}
@@ -425,7 +431,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				&& !moveGivesCheck
 				&& !moveIsTactical(b, currentMove)) {
 
-				if (staticEval + (depth * pieceScores[Piece::BISHOP] + 34) < alpha) {
+				if (ss->staticEval + (depth * pieceScores[Piece::BISHOP] + 34) < alpha) {
 					continue;
 				}
 
@@ -437,7 +443,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				int scaledHistScore = histMax / (histScore ? histScore : 1);
 				bool specialQuiet = moveList->scores[i] > COUNTER_SCORE;
 
-				if (staticEval + (depth * 234) + (specialQuiet * 50) < alpha
+				if (ss->staticEval + (depth * 234) + (specialQuiet * 50) < alpha
 					&& scaledHistScore > 2 * histMax / 3) {
 					continue;
 				}
@@ -446,6 +452,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 		// Push the move on the board
 		(ss + 1)->isCheck = moveGivesCheck;
+		(ss + 1)->currentMove = currentMove;
 		if (!push(b, currentMove)) {
 			Assert(!inCheck); // Position cannot be check: all check evasions are legal
 			continue;
@@ -462,14 +469,16 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		  */
 		if (legalMoves == 1) {
 
-			value = -alphaBeta<PV>(-beta, -alpha, newDepth, b, s, DO_NULL);
+			value = -alphaBeta<PV>(-beta, -alpha, newDepth, b, s);
 
 		} else {
 			// Late Move Reductions, do reduced zero window search
-			if (legalMoves >= 3 + rootNode
+			if (legalMoves > 2 + rootNode
 				//&& !moveGivesCheck
 				//&& !inCheck
 				&& depth > 3
+				&& !isPromotion(currentMove) // TODO find better promotion extension
+				//&& (!pvNode && moveList->scores[i] < KILLER_SCORE_2)
 				//&& !moveIsCapOrPromo
 				) {
 
@@ -480,7 +489,8 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 					lmrDepth--;
 
 				if (!moveGivesCheck
-					&& staticEval + pieceScores[moveCaptured] + depth * 243 < alpha)
+					&& ((ss->staticEval + pieceScores[moveCaptured] + depth * 243 < alpha)
+						|| (!pvNode && !improving)))
 					lmrDepth--;
 
 				if (mateThreat)
@@ -495,13 +505,23 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				if (ttCapture)
 					lmrDepth--;
 
-				if (isPromotion(currentMove))
-					lmrDepth++;
+				//if (isPromotion(currentMove))
+				//	lmrDepth++;
 
-				lmrDepth = min(newDepth, lmrDepth);
+				//if (inCheck && pieceKing[pieceAt(b, toSq(currentMove))])
+				//	lmrDepth++;
+
+				//if (!pvNode && moveList->scores[i] < KILLER_SCORE_2)
+				//	lmrDepth--;
+
+				//if (pvNode && dangerousPawnPush(b, currentMove)) 
+				//	lmrDepth++;
+
+				//lmrDepth = min(newDepth, lmrDepth);
+				lmrDepth = min(newDepth, max(1, lmrDepth));
 				lmrSameDepth = newDepth == lmrDepth;
 
-				value = -alphaBeta<NoPV>(-(alpha + 1), -alpha, lmrDepth, b, s, DO_NULL);
+				value = -alphaBeta<NoPV>(-(alpha + 1), -alpha, lmrDepth, b, s);
 			} else {
 				// Ensure, that PVS is always exexcuted if LMR is not applicable
 				value = alpha + 1;
@@ -512,10 +532,10 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 				// Do not research with same depth as LMR
 				if (!lmrSameDepth)
-					value = -alphaBeta<NoPV>(-(alpha + 1), -alpha, newDepth, b, s, DO_NULL);
+					value = -alphaBeta<NoPV>(-(alpha + 1), -alpha, newDepth, b, s);
 
 				if (value > alpha && (rootNode || value < beta)) {
-					value = -alphaBeta<PV>(-beta, -alpha, newDepth, b, s, DO_NULL);
+					value = -alphaBeta<PV>(-beta, -alpha, newDepth, b, s);
 				}
 			}
 		}
@@ -617,7 +637,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 			Assert(abs(beta) <= INF);
 
 			// Store position with bestMove and beta flag
-			storeTT(b, currentMove, searchToHash(b, beta), staticEval, TT_BETA, depth);
+			storeTT(b, currentMove, searchToHash(b, beta), ss->staticEval, TT_BETA, depth);
 			return beta;
 		}
 
@@ -661,12 +681,12 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		Assert(bestMove != NO_MOVE);
 		Assert(abs(bestValue) <= INF);
 
-		storeTT(b, bestMove, searchToHash(b, bestValue), staticEval, TT_VALUE, depth);
+		storeTT(b, bestMove, searchToHash(b, bestValue), ss->staticEval, TT_VALUE, depth);
 	} else if (bestMove) {
 		Assert(bestMove != NO_MOVE);
 		Assert(abs(alpha) <= INF);
 
-		storeTT(b, bestMove, searchToHash(b, alpha), staticEval, TT_ALPHA, depth);
+		storeTT(b, bestMove, searchToHash(b, alpha), ss->staticEval, TT_ALPHA, depth);
 	}
 
 	return alpha;
@@ -776,6 +796,7 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 
 		//bool moveGivesCheck = checkingMove(b, currentMove);
 		//(ss + 1)->isCheck = moveGivesCheck;
+		//(ss + 1)->currentMove = currentMove;
 		if (!push(b, currentMove)) {
 			Assert(!inCheck); // Position cannot be check because all check evasions are legal
 			continue;
@@ -903,7 +924,7 @@ value_t search(board_t* b, search_t* s) {
 
 	// TODO init in init function
 	for (int depth = 1; depth < moveCountPruningDepth; depth++) {
-		moveCountPruning[depth] = 8.0 + 3 * depth * depth / 3.5;
+		moveCountPruning[depth] = (int)(8.0 + 3.0 * depth * depth / 3.5);
 		//cout << "d=" << depth << " " << moveCountPruning[depth] << endl;
 	}
 
@@ -915,13 +936,14 @@ value_t search(board_t* b, search_t* s) {
 
 	sStack[b->ply].isCheck = isCheck(b, b->side);
 	sStack[b->ply].staticEval = evaluation(b);
+	sStack[b->ply].currentMove = NO_MOVE;
 
-	for (currentDepth; currentDepth <= s->depth; currentDepth++) {
+	for (; currentDepth <= s->depth; currentDepth++) {
 		selDepth = 0;
 		b->ply = 0;
 
 		//score = alphaBetaRoot(b, s, currentDepth, &bestMove);
-		score = alphaBeta<PV>(-INF, INF, currentDepth, b, s, DO_NULL);
+		score = alphaBeta<PV>(-INF, INF, currentDepth, b, s);
 		Assert(abs(score) < INF);
 
 		// forced stop, break and use pv line of previous iteration

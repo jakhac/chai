@@ -177,12 +177,6 @@
 
 TODO 2.5.5
 
-- cli for UCI etc.. (lichess-bot)?
-- opening book?
-- queen prom only in qui
-- search stack?
-- futile tuning
-
 - AlphaBeta
   - [x] Principal Variation Search
   - [x] Consider `IS_PV` and `NO_PV` in pruning decisions
@@ -190,6 +184,8 @@ TODO 2.5.5
   - [x] Refactor quiescence: Checkmate detection and standPat pruning
   - [x] Interal Iterative Deepening considers node type
   - [x] Check for repetition before probing ttable
+  - [x] Queen prom only in quiescence
+  - [ ] Search Stack
 - Transposition Table
   - [x] TT probing with index (lower bits) and key (upper bits)
   - [x] Retry different bucket sizes and replacement schemes
@@ -202,7 +198,7 @@ TODO 2.5.5
   - [x] `alphaBetaRoot()` function for save mate/draw detection and bestMove
   - [x] Templates for `alphaBeta()` and `quiescence()`
   - [ ] Retrieve pv-line from pv-structs
-  - [ ] Search Stack / Board Stack
+  - [x] Search Stack
 - Eval
   - [x] Check: insufficient material cannot be influenced by contempt factor
   - [ ] Add `eval_t` for evaluations
@@ -299,6 +295,9 @@ TODO 2.5.5
   - Error handler for invalid FEN
   - clean up utils, attacks, helper bitboards
   - refactor checkup usage and function
+  - EvalStack psqt
+  - Opening book
+  - Time management (rapid, blitz, bullet mode for lichess)
 
 - Alpha Beta
 

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "perft.h"
+#include "main.h"
 
 namespace {
 	class SeeTest : public ::testing::Test {

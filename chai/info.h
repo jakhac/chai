@@ -1,15 +1,13 @@
 #pragma once
 
-#include <iostream>
-#include <bitset>
-#include "io.h"
-#include <fstream>
-#include <chrono>  // chrono::system_clock
-#include <ctime>   // localtime
-#include <iomanip> // put_time
-#include "windows.h"
+//#include <iostream>
+//#include <bitset>
+#include "io.h" // _read()
+//#include <fstream>
+//#include <ctime>   // localtime
+//#include "windows.h"
 
-#include "defs.h"
+//#include "defs.h"
 #include "mask.h"
 #include "board.h"
 #include "tt.h"

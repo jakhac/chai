@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include "stdlib.h"
 
 #define MAX_DEPTH 64
 #define MAX_GAME_MOVES 512
@@ -32,8 +31,8 @@ typedef int16_t value_t;
  */
 struct moveList_t {
 	int cnt = 0;
-	int moves[256]; // MAX POSITION MOVES
-	int scores[256]; // MAX POSITION MOVES
+	int moves[256]{}; // MAX POSITION MOVES
+	int scores[256]{}; // MAX POSITION MOVES
 
 	bitboard_t attackedSquares = 0ULL;
 };
@@ -53,21 +52,25 @@ struct undo_t {
 
 struct searchStack_t {
 	bool isCheck;
-
 	int staticEval;
+	move_t currentMove;
 };
 
 /**
  * Transposition table entry.
  */
 struct ttable_entry_t {
-	uint8_t flag = 0;
-	uint8_t depth = 0;
+	int32_t key = 0; // upper 32bit to determine bucket
+
 	value_t value = 0;
 	value_t staticEval = 0;
 	move_t move = 0;
 
-	int32_t key = 0; // upper 32bit to determine bucket
+	uint8_t flag = 0;
+	uint8_t depth = 0;
+
+	char c; // padding to get 4 * 16 byte in a bucket
+
 };
 
 struct bucket_t {
@@ -78,7 +81,7 @@ struct bucket_t {
  * Transposition table instance. Contains stat-variables and pointer to entries.
  */
 struct ttable_t {
-	bucket_t* bucketList;
+	bucket_t* bucketList = NULL;
 
 	// total number of buckets (entries-stacks)
 	int buckets = 0;

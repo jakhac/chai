@@ -1,7 +1,7 @@
 #pragma once
 
-#include <chrono>
-#include <iomanip>
+//#include <chrono>
+#include <iomanip> // setprecision
 
 #include "eval.h"
 #include "moveOrdering.h"
@@ -74,7 +74,7 @@ typedef enum nodeType_t {
  * @returns Best score found in search.
  */
 template <nodeType_t nodeType>
-value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s, bool nullOk);
+value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s);
 
 /**
  * Quiescence search pushes all captures to evaluate a stable and quiet position. AlphaBeta

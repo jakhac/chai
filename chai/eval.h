@@ -2,8 +2,6 @@
 
 #include "board.h"
 #include "tt.h"
-#include "types.h"
-
 
 /**
  * Main evaluation function calculates static board evaulation.
@@ -54,7 +52,7 @@ value_t bishopPair(board_t* b, int side);
 
 value_t kingSafety(board_t* b, int side, float* t);
 
-value_t mobility(board_t* b, int side, float* t);
+value_t mobility(board_t* b, bool side, float* t);
 
 float interpolate(int a, int b, float t);
 

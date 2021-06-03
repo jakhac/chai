@@ -1,17 +1,12 @@
 #pragma once
 
-#include <stdint.h>
 
-#include "board.h"
+//#include <stdint.h>
+//#include "board.h"
 #include "moveGenerator.h"
 
 
-/**
- * Size of the transposition table.
- */
-const int ttSize = 0x100000 * 256;
-
-const int mbSize = 256;
+const size_t DEFAULT_TT_SIZE = 256;
 
 static int indexMask = 0;
 
@@ -25,7 +20,9 @@ const int pawnTableSize = 0x100000 * 8;
  *
  * @param  pvTable_s Transposition table.
  */
-void initTT(ttable_t* pvTable_s);
+ //void initTT(ttable_t* pvTable_s);
+void resizeTT(ttable_t* tt, size_t newMbSize);
+
 
 /**
  * Reset all variables in transposition table. Only used in initialization or new game.

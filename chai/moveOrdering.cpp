@@ -133,7 +133,7 @@ int lazySee(board_t* b, const int move) {
 }
 
 bool see_ge(board_t* b, move_t move, int threshHold) {
-	int color;
+	bool color;
 	int from = fromSq(move);
 	int to = toSq(move);
 	int nextVictim = pieceAt(b, from);

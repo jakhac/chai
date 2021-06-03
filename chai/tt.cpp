@@ -1,28 +1,34 @@
 #include "tt.h"
 
-void initTT(ttable_t* tt) {
-	if (tt->bucketList != NULL) {
-		free(tt->bucketList);
+void resizeTT(ttable_t* tt, size_t newMbSize) {
+	// Free TT if allocated memory already exists
+	if (tt->bucketList != NULL && !VirtualFree(tt->bucketList, 0, MEM_RELEASE)) {
+		DWORD err = GetLastError();
+		cerr << "Failed to free large page memory. Error code: 0x"
+			<< hex << err
+			<< dec << endl;
+		exit(1);
 	}
 
-	key_t totalBytes = (key_t)mbSize << 20;
-	key_t numBucketsPossible = totalBytes / sizeof(bucket_t);
+	unsigned long long totalBytes = (unsigned long long)newMbSize << 20;
+	unsigned long long numBucketsPossible = totalBytes / sizeof(bucket_t);
+	cout << "numBucketsPossible " << numBucketsPossible << endl;
 
-	// most significant bit is maximum power of 2 and still smaller than number of buckets
+	// Most significant bit is maximum power of 2 while smaller than number of buckets
 	int msb = bitscanReverse(numBucketsPossible);
-
 	Assert(pow(2, msb) <= numBucketsPossible);
+	cout << "msb" << msb << endl;
 
 	if (msb > 32) {
-		cout << "Error: TT-Size is too big. Cannot use lower 32-bits to index buckets." << endl;
+		cerr << "Error: TT-Size is too big (cannot use lower 32-bits to index buckets)." << endl;
 		exit(1);
 	}
 
 	tt->buckets = 1 << msb;
-	tt->bucketList = (bucket_t*)malloc(sizeof(bucket_t) * tt->buckets);
+	tt->bucketList = (bucket_t*)VirtualAlloc(NULL, sizeof(bucket_t) * tt->buckets, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	Assert(tt->bucketList);
 
 	for (int i = 0; i < msb; i++) indexMask |= (1 << i);
-
 	clearTT(tt);
 
 #ifdef INFO
@@ -31,6 +37,64 @@ void initTT(ttable_t* tt) {
 		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl;
 #endif // !LICHESS
 }
+
+void destroyTranspositionTables(board_t* b) {
+	if (b->tt->bucketList != NULL) {
+
+		if (!VirtualFree(b->tt->bucketList, 0, MEM_RELEASE)) {
+			DWORD err = GetLastError();
+			std::cerr << "Failed to free large page memory. Error code: 0x"
+				<< std::hex << err
+				<< std::dec << std::endl;
+			exit(1);
+		}
+		b->tt->bucketList = NULL;
+	}
+	if (b->pawnTable->table != NULL) {
+		free(b->pawnTable->table);
+	}
+}
+
+//void initTT(ttable_t* tt) {
+//	if (tt->bucketList != NULL && !VirtualFree(tt->bucketList, 0, MEM_RELEASE)) {
+//		DWORD err = GetLastError();
+//		cerr << "Failed to free large page memory. Error code: 0x"
+//			<< hex << err
+//			<< dec << endl;
+//		exit(1);
+//	}
+//
+//	key_t totalBytes = (key_t)mbSize << 20;
+//	key_t numBucketsPossible = totalBytes / sizeof(bucket_t);
+//
+//	// most significant bit is maximum power of 2 and still smaller than number of buckets
+//	int msb = bitscanReverse(numBucketsPossible);
+//	Assert(pow(2, msb) <= numBucketsPossible);
+//
+//	if (msb > 32) {
+//		cout << "Error: TT-Size is too big. Cannot use lower 32-bits to index buckets." << endl;
+//		exit(1);
+//	}
+//
+//	tt->buckets = 1 << msb;
+//	//tt->bucketList = (bucket_t*)malloc(sizeof(bucket_t) * tt->buckets);
+//	tt->bucketList = (bucket_t*)VirtualAlloc(NULL, sizeof(bucket_t) * tt->buckets, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+//
+//	if (!tt->bucketList) {
+//		cout << "Error in VirtualAlloc()" << endl;
+//		exit(0);
+//	}
+//
+//	for (int i = 0; i < msb; i++) indexMask |= (1 << i);
+//
+//	clearTT(tt);
+//
+//#ifdef INFO
+//	cout << "Buckets: " << BUCKETS << endl
+//		<< "Transposition table initialized with " << tt->buckets
+//		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl;
+//#endif // !LICHESS
+//}
 
 void clearTT(ttable_t* tt) {
 	memset(tt->bucketList, 0, (tt->buckets * sizeof(bucket_t)));
@@ -127,9 +191,7 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 			Assert(abs(e->value) < INF || e->value == NO_VALUE);
 			Assert(abs(e->staticEval) < ISMATE);
 
-			int newScore = e->value;
-
-			*hashValue = newScore;
+			*hashValue = hashToSearch(b, e->value);
 			*hashDepth = e->depth;
 			*move = e->move;
 			*hashFlag = e->flag;
@@ -144,7 +206,11 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 
 void prefetchTTEntry(board_t* b) {
 	key_t index = b->zobristKey & indexMask;
+#ifdef __GNUC__
+	__builtin_prefetch((bucket_t*)&b->tt->bucketList);
+#else
 	_m_prefetch((bucket_t*)&b->tt->bucketList);
+#endif
 }
 
 int hashToSearch(board_t* b, value_t score) {
@@ -192,26 +258,6 @@ move_t probePV(board_t* b) {
 	return NO_MOVE;
 
 }
-
-
-//move_t probePV(board_t* b) {
-//	int index = b->zobristKey % b->tt->buckets;
-//	int entry = index * BUCKETS;
-//	Assert(index >= 0 && index <= b->tt->buckets - 1);
-//
-//	ttable_entry_t* bucket = b->tt->table + entry;
-//
-//	for (int i = 0; i < BUCKETS; i++) {
-//		if (bucket->zobKey == b->zobristKey) {
-//			Assert(bucket->move != NO_MOVE);
-//			return bucket->move;
-//		}
-//
-//		bucket++;
-//	}
-//
-//	return NO_MOVE;
-//}
 
 int getPVLine(board_t* b, const int maxDepth) {
 	int move = probePV(b);
@@ -277,7 +323,11 @@ void storePawnEntry(board_t* b, const value_t eval) {
 
 void prefetchPawnEntry(board_t* b) {
 	int index = b->zobristPawnKey % b->pawnTable->entries;
+#ifdef __GNUC__
+	__builtin_prefetch(&b->pawnTable->table[index]);
+#else
 	_m_prefetch(&b->pawnTable->table[index]);
+#endif
 }
 
 bool probePawnEntry(board_t* b, value_t* hashScore) {
@@ -290,15 +340,6 @@ bool probePawnEntry(board_t* b, value_t* hashScore) {
 	}
 
 	return false;
-}
-
-void destroyTranspositionTables(board_t* b) {
-	if (b->tt->bucketList != NULL) {
-		free(b->tt->bucketList);
-	}
-	if (b->pawnTable->table != NULL) {
-		free(b->pawnTable->table);
-	}
 }
 
 void printTTStatus(board_t* b) {

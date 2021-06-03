@@ -220,7 +220,7 @@ value_t kingSafety(board_t* b, int side, float* t) {
 	return result;
 }
 
-value_t mobility(board_t* b, int side, float* t) {
+value_t mobility(board_t* b, bool side, float* t) {
 	int mobility = 0;
 	int restoreSide = b->side;
 	//int interpolFactor = // TODO ?
@@ -299,7 +299,7 @@ value_t evaluatePawns(board_t* b, float* t) {
 	score += stackedPawn(b, WHITE) - stackedPawn(b, BLACK);
 
 	// pawn mobility
-	score += pawnChain(b, WHITE), -pawnChain(b, BLACK);
+	score += pawnChain(b, WHITE) - pawnChain(b, BLACK);
 
 	// rams
 
@@ -312,7 +312,7 @@ value_t evaluatePawns(board_t* b, float* t) {
 
 value_t evaluation(board_t* b) {
 	value_t eval = 0;
-	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
+	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
 	prefetchPawnEntry(b);
 
@@ -361,7 +361,7 @@ value_t evaluation(board_t* b) {
 
 value_t lazyEvaluation(board_t* b) {
 	value_t eval = 0;
-	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
+	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
 	b->pawnTable->probed++;
 	value_t pawnEval = 0;
@@ -392,8 +392,8 @@ value_t contemptFactor(board_t* b) {
 		case BLACK:
 			return (contempt < -100) ? 50 : 0;
 			break;
-		default: Assert(0) break;
 	}
+	return 0;
 }
 
 bool insufficientMaterial(board_t* b) {

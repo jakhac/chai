@@ -5,15 +5,14 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include <ctime>
+#include <chrono> // time measurement
 
-#include "move.h"
 #include "types.h"
 
 using namespace std;
 
-//#define TESTING
-//#define ASSERT
+#define TESTING
+#define ASSERT
 #define INFO
 
 /**
@@ -22,34 +21,18 @@ using namespace std;
  * @param  logMsg Message to write into log file.
  */
 inline void logDebug(string logMsg, string file, string line) {
+#if defined(_MSC_VER)
 	time_t now = time(0);
 	tm gmtm[1];
-	char buffer[26];
-
+	char buffer[26]{};
 	gmtime_s(gmtm, &now);
 	asctime_s(buffer, gmtm);
-
 	ofstream ofs("./assertLog.txt", std::ios_base::app);
-
 	string streamMsg = "At " + string(buffer) + " Error in:" + file + " at line " + line + "\n\n";
 	cout << streamMsg;
 	ofs << streamMsg;
 	ofs.close();
-}
-
-inline void logDebug(string logMsg) {
-	time_t now = time(0);
-	tm gmtm[1];
-	char buffer[26];
-
-	gmtime_s(gmtm, &now);
-	asctime_s(buffer, gmtm);
-
-	ofstream ofs("iid.txt", std::ios_base::app | std::ios_base::app);
-
-	string streamMsg = "At " + string(buffer) + logMsg + "\n\n";
-	ofs << streamMsg;
-	ofs.close();
+#endif
 }
 
 #ifndef ASSERT

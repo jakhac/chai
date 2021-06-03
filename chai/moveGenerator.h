@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "board.h"
 #include "attacks.h"
 

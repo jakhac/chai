@@ -75,7 +75,7 @@ void initRookMagicTable() {
 
 			// check for desired hash collision
 			if (rookTable[sq][tableIndex] != 0) {
-				Assert(rookMoves == rookTable[sq][tableIndex])
+				Assert(rookMoves == rookTable[sq][tableIndex]);
 			}
 			rookTable[sq][tableIndex] = rookMoves;
 		}

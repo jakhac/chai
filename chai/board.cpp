@@ -916,7 +916,7 @@ bool isCheck(board_t* b, int side) {
 	if (knightAtkMask[kSq] & getPieces(b, Piece::KNIGHT, side ^ 1)) {
 		return true;
 	}
-	if (lookUpBishopMoves(kSq, b->occupied) & (b, getPieces(b, Piece::BISHOP, side ^ 1) | getPieces(b, Piece::QUEEN, side ^ 1))) {
+	if (lookUpBishopMoves(kSq, b->occupied) & (getPieces(b, Piece::BISHOP, side ^ 1) | getPieces(b, Piece::QUEEN, side ^ 1))) {
 		return true;
 	}
 	if (lookUpRookMoves(kSq, b->occupied) & (getPieces(b, Piece::ROOK, side ^ 1) | getPieces(b, Piece::QUEEN, side ^ 1))) {
