@@ -20,7 +20,7 @@ int main() {
 	init(&board);
 	parseFen(&board, STARTING_FEN);
 	//parseFen(&board, BUG_FEN);
-	//parseFen(&board, "7k/2rR3p/1Pp1qp1B/p1p3p1/P3P3/7P/5PP1/6K1 w - - 1 0");
+	//parseFen(&board, "1r4r1/q2b1p1k/p4P1p/1pn1P1p1/3N4/5B2/PPP2R1Q/4R1K1 w - - 1 0");
 
 	//while (1) {
 	//	int newMbSize;

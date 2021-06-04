@@ -12,15 +12,13 @@ void resizeTT(ttable_t* tt, size_t newMbSize) {
 
 	unsigned long long totalBytes = (unsigned long long)newMbSize << 20;
 	unsigned long long numBucketsPossible = totalBytes / sizeof(bucket_t);
-	cout << "numBucketsPossible " << numBucketsPossible << endl;
 
 	// Most significant bit is maximum power of 2 while smaller than number of buckets
 	int msb = bitscanReverse(numBucketsPossible);
 	Assert(pow(2, msb) <= numBucketsPossible);
-	cout << "msb" << msb << endl;
 
-	if (msb > 32) {
-		cerr << "Error: TT-Size is too big (cannot use lower 32-bits to index buckets)." << endl;
+	if (msb > 48) {
+		cerr << "Error: TT-Size is too big (cannot use lower 48-bits to index buckets)." << endl;
 		exit(1);
 	}
 
@@ -35,7 +33,7 @@ void resizeTT(ttable_t* tt, size_t newMbSize) {
 	cout << "Buckets: " << BUCKETS << endl
 		<< "Transposition table initialized with " << tt->buckets
 		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl;
-#endif // !LICHESS
+#endif // !INFO
 }
 
 void destroyTranspositionTables(board_t* b) {
@@ -55,57 +53,28 @@ void destroyTranspositionTables(board_t* b) {
 	}
 }
 
-//void initTT(ttable_t* tt) {
-//	if (tt->bucketList != NULL && !VirtualFree(tt->bucketList, 0, MEM_RELEASE)) {
-//		DWORD err = GetLastError();
-//		cerr << "Failed to free large page memory. Error code: 0x"
-//			<< hex << err
-//			<< dec << endl;
-//		exit(1);
-//	}
-//
-//	key_t totalBytes = (key_t)mbSize << 20;
-//	key_t numBucketsPossible = totalBytes / sizeof(bucket_t);
-//
-//	// most significant bit is maximum power of 2 and still smaller than number of buckets
-//	int msb = bitscanReverse(numBucketsPossible);
-//	Assert(pow(2, msb) <= numBucketsPossible);
-//
-//	if (msb > 32) {
-//		cout << "Error: TT-Size is too big. Cannot use lower 32-bits to index buckets." << endl;
-//		exit(1);
-//	}
-//
-//	tt->buckets = 1 << msb;
-//	//tt->bucketList = (bucket_t*)malloc(sizeof(bucket_t) * tt->buckets);
-//	tt->bucketList = (bucket_t*)VirtualAlloc(NULL, sizeof(bucket_t) * tt->buckets, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-//
-//	if (!tt->bucketList) {
-//		cout << "Error in VirtualAlloc()" << endl;
-//		exit(0);
-//	}
-//
-//	for (int i = 0; i < msb; i++) indexMask |= (1 << i);
-//
-//	clearTT(tt);
-//
-//#ifdef INFO
-//	cout << "Buckets: " << BUCKETS << endl
-//		<< "Transposition table initialized with " << tt->buckets
-//		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl;
-//#endif // !LICHESS
-//}
-
 void clearTT(ttable_t* tt) {
 	memset(tt->bucketList, 0, (tt->buckets * sizeof(bucket_t)));
 }
 
+uint32_t getTTIndex(key_t zobristKey) {
+	return (uint32_t)(zobristKey & indexMask);
+}
+
+uint16_t getBucketIndex(key_t zobristKey) {
+	return (uint16_t)(zobristKey >> 48);
+}
+
 void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int flag, int depth) {
 	// index is the lower n-bits
-	int32_t index = int32_t(b->zobristKey & indexMask);
-	int32_t key = int32_t(b->zobristKey >> 32);
+	//int32_t index = int32_t(b->zobristKey & indexMask);
+	//int32_t key = int32_t(b->zobristKey >> 32);
+
+	int32_t index = getTTIndex(b->zobristKey);
+	uint16_t key = getBucketIndex(b->zobristKey);
 
 	Assert(move != NO_MOVE);
+	Assert(flag >= TT_ALPHA && flag <= TT_EVAL);
 	Assert(index >= 0 && index <= (b->tt->buckets - 1));
 	Assert((depth >= 1 || TT_EVAL) && depth <= MAX_DEPTH);
 	Assert(flag >= TT_ALPHA && flag <= TT_EVAL);
@@ -138,10 +107,13 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 			break;
 		}
 
-		// Same key
 		if (e->key == key) {
-			leastValuable = e;
-			break;
+			if (depth >= e->depth || flag & TT_VALUE) {
+				leastValuable = e;
+				break;
+			} else {
+				return;
+			}
 		}
 
 		// Minimum Depth (longest distance to root thus least savings during search)
@@ -152,16 +124,22 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 	}
 
 	Assert(leastValuable);
-
 	if (leastValuable->flag != TT_NONE) {
 		b->tt->collided++;
 	}
+
+	//// Same key
+	//if (leastValuable->key == key
+	//	&& flag != TT_VALUE
+	//	&& depth < leastValuable->depth - 3) {
+	//	return;
+	//}
 
 	//if (value > ISMATE) value += b->ply;
 	//else if (value < -ISMATE) value -= b->ply;
 
 	// Replace entry has been determined: Store information 
-	leastValuable->key = (int32_t)(b->zobristKey >> 32);
+	leastValuable->key = key;
 	leastValuable->move = move;
 	leastValuable->flag = flag;
 	leastValuable->value = value;
@@ -170,9 +148,8 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 }
 
 bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int* hashDepth) {
-	// index is the lower n-bits
-	int32_t index = int32_t(b->zobristKey & indexMask);
-	int32_t key = int32_t(b->zobristKey >> 32);
+	int32_t index = getTTIndex(b->zobristKey);
+	uint16_t key = getBucketIndex(b->zobristKey);
 
 	Assert(index >= 0 && index <= (b->tt->buckets - 1));
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
@@ -183,7 +160,8 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 	for (int i = 0; i < BUCKETS; i++) {
 		b->tt->probed++;
 
-		if (bucket->bucketEntries[i].key == key) {
+		if (bucket->bucketEntries[i].key == key
+			&& bucket->bucketEntries[i].flag != TT_NONE) {
 
 			e = &bucket->bucketEntries[i];
 			Assert(e->flag >= TT_ALPHA && e->flag <= TT_EVAL);
@@ -205,11 +183,12 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 }
 
 void prefetchTTEntry(board_t* b) {
-	key_t index = b->zobristKey & indexMask;
+	//key_t index = b->zobristKey & indexMask;
+	uint32_t index = getTTIndex(b->zobristKey);
 #ifdef __GNUC__
-	__builtin_prefetch((bucket_t*)&b->tt->bucketList);
+	__builtin_prefetch((bucket_t*)&b->tt->bucketList[index]);
 #else
-	_m_prefetch((bucket_t*)&b->tt->bucketList);
+	_m_prefetch((bucket_t*)&b->tt->bucketList[index]);
 #endif
 }
 
@@ -232,8 +211,12 @@ int searchToHash(board_t* b, value_t score) {
 }
 
 move_t probePV(board_t* b) {
-	int32_t index = int32_t(b->zobristKey & indexMask);
-	int32_t key = int32_t(b->zobristKey >> 32);
+	//int32_t index = int32_t(b->zobristKey & indexMask);
+	//int32_t key = int32_t(b->zobristKey >> 32);
+
+	int32_t index = getTTIndex(b->zobristKey);
+	uint16_t key = getBucketIndex(b->zobristKey);
+	Assert(index == int32_t(b->zobristKey & indexMask));
 
 	Assert(index >= 0 && index <= (b->tt->buckets - 1));
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);

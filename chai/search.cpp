@@ -191,13 +191,14 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		return quietScore;
 	}
 
+	// Early TT prefetch
+	prefetchTTEntry(b);
+
 	// check for time and depth
 	if ((s->nodes & 2047) == 0) {
 		checkSearchInfo(s);
 	}
 	s->nodes++;
-
-	prefetchTTEntry(b);
 
 	/**
 	 * Mate Distance Pruning:
@@ -319,7 +320,8 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		&& !inCheck
 		&& !pvNode
 		&& depth > 2
-		&& ss->staticEval >= beta
+		//&& ss->staticEval >= beta
+		&& posValue >= beta
 		&& abs(beta) < ISMATE
 		&& nonPawnPieces(b, b->side)
 		&& countBits(b->occupied) > 7) {
@@ -502,22 +504,22 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				if (inCheck)
 					lmrDepth++;
 
-				if (ttCapture)
-					lmrDepth--;
+				//if (ttCapture)
+				//	lmrDepth--;
 
 				//if (isPromotion(currentMove))
 				//	lmrDepth++;
 
-				//if (inCheck && pieceKing[pieceAt(b, toSq(currentMove))])
-				//	lmrDepth++;
+				if (inCheck && pieceKing[pieceAt(b, toSq(currentMove))])
+					lmrDepth++;
 
-				//if (!pvNode && moveList->scores[i] < KILLER_SCORE_2)
-				//	lmrDepth--;
+				if (!pvNode && moveList->scores[i] < KILLER_SCORE_2)
+					lmrDepth--;
 
-				//if (pvNode && dangerousPawnPush(b, currentMove)) 
-				//	lmrDepth++;
+				if (pvNode && dangerousPawnPush(b, currentMove))
+					lmrDepth++;
 
-				//lmrDepth = min(newDepth, lmrDepth);
+				// Minimum depth 1 and maximum depth is newDepth
 				lmrDepth = min(newDepth, max(1, lmrDepth));
 				lmrSameDepth = newDepth == lmrDepth;
 

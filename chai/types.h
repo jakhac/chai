@@ -4,7 +4,7 @@
 
 #define MAX_DEPTH 64
 #define MAX_GAME_MOVES 512
-#define BUCKETS 4
+#define BUCKETS 3
 
 /**
  * Unsigned 64-Bit integer represents bitboard isntance.
@@ -60,7 +60,7 @@ struct searchStack_t {
  * Transposition table entry.
  */
 struct ttable_entry_t {
-	int32_t key = 0; // upper 32bit to determine bucket
+	uint16_t key = 0; // upper 16bit to determine bucket
 
 	value_t value = 0;
 	value_t staticEval = 0;
@@ -69,12 +69,11 @@ struct ttable_entry_t {
 	uint8_t flag = 0;
 	uint8_t depth = 0;
 
-	char c; // padding to get 4 * 16 byte in a bucket
-
 };
 
 struct bucket_t {
 	ttable_entry_t bucketEntries[BUCKETS];
+	char padding[2];
 };
 
 /**
