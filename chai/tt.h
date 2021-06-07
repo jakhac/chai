@@ -7,21 +7,23 @@
 
 
 const size_t DEFAULT_TT_SIZE = 256;
+const size_t MIN_TT_SIZE = 2;
+const size_t MAX_TT_SIZE = 8192;
 
 static int indexMask = 0;
 
 /**
  * Size of the pawn table.
  */
-const int pawnTableSize = 0x100000 * 8;
+const size_t DEFAULT_PT_SIZE = 8;
+const size_t MAX_PT_SIZE = 16;
 
 /**
  * Initialize transposition table: Clear used or allocated memory and re-allocate.
  *
  * @param  pvTable_s Transposition table.
  */
- //void initTT(ttable_t* pvTable_s);
-void resizeTT(ttable_t* tt, size_t newMbSize);
+bool resizeTT(ttable_t* tt, pawntable_t* pt, size_t newMbSize);
 
 
 /**
@@ -104,13 +106,6 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 int getPVLine(board_t* b, const int maxDepth);
 
 /**
- * Initialize pawn table. Re-allocate memory.
- *
- * @param  pawnTable Pawn table declared in board.
- */
-void initPawnTable(pawntable_t* pawnTable);
-
-/**
  * Reset all variables used in pawn table. Only used before new game.
  *
  * @param  pawnTable Pawn table to clear.
@@ -147,7 +142,7 @@ bool probePawnEntry(board_t* b, value_t* hashScore);
  *
  * @param  b The board with both hash tables.
  */
-void destroyTranspositionTables(board_t* b);
+void freeTT(ttable_t* tt, pawntable_t* pt);
 
 
 void printTTStatus(board_t* b);

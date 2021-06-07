@@ -169,14 +169,6 @@
 
 **Changes in v2.5**
 
-- TODO move encoding in 16bit
-- trans store/probe with staticEval
-- refactor futile pruning: caps, quiets, hopeless
-- moveIsCheck detection before push
-- see_ge algorithm
-
-TODO 2.5.5
-
 - AlphaBeta
   - [x] Principal Variation Search
   - [x] Consider `IS_PV` and `NO_PV` in pruning decisions
@@ -185,23 +177,23 @@ TODO 2.5.5
   - [x] Interal Iterative Deepening considers node type
   - [x] Check for repetition before probing ttable
   - [x] Queen prom only in quiescence
-  - [ ] Search Stack
+  - [x] Search Stack
 - Transposition Table
   - [x] TT probing with index (lower bits) and key (upper bits)
   - [x] Retry different bucket sizes and replacement schemes
-  - [ ] Prefetch bucket instead of entry
+  - [x] Prefetch bucket instead of entry
 - Project
   - [x] Replaced `pvLine_t` with `printTTablePV()`
   - [x] Remove `pvLine_t` lines from function signatures
   - [x] UCI currentMove and move number
-  - [ ] UCI refactor uci calls (to be executed without order) and cli
+  - [x] UCI refactor uci calls (to be executed without order) and cli
   - [x] `alphaBetaRoot()` function for save mate/draw detection and bestMove
   - [x] Templates for `alphaBeta()` and `quiescence()`
-  - [ ] Retrieve pv-line from pv-structs
+  - [x] Retrieve pv-line from pv-structs
   - [x] Search Stack
 - Eval
   - [x] Check: insufficient material cannot be influenced by contempt factor
-  - [ ] Add `eval_t` for evaluations
+  - [x] Add `eval_t` for evaluations
 - Bugfixes
   - [x] Forced quiescence checkmates used `moveList->cnt` instead of `legalMoves`
   - [x] standPat pruning considers check / not in-check and updates `score, bestScore, alpha` seperately
@@ -310,7 +302,6 @@ TODO 2.5.5
   - pvs
   - late move reductions
   - see reductions
-  - try hash move before generating moves
   - npm verification
   - ~~reorder fiftyMove, mate distance pruning before quiescence~~
   - ~~killer moves~~
@@ -325,7 +316,7 @@ TODO 2.5.5
 
   - ~~see pruning~~
   - delta pruning
-  - hash table with negative depth in qsearch
+  - hash table probing and storing (egative depth in qsearch)
   - ~~Add checkers in first quiesence ply~~
 
 - Hash table

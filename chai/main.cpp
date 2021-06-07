@@ -20,13 +20,13 @@ int main() {
 	init(&board);
 	parseFen(&board, STARTING_FEN);
 	//parseFen(&board, BUG_FEN);
-	//parseFen(&board, "1r4r1/q2b1p1k/p4P1p/1pn1P1p1/3N4/5B2/PPP2R1Q/4R1K1 w - - 1 0");
+	//parseFen(&board, "r7/3bb1kp/q4p1N/1pnPp1np/2p4Q/2P5/1PB3P1/2B2RK1 w - - 1 0");
 
 	//while (1) {
 	//	int newMbSize;
 	//	cin >> newMbSize;
 	//	cout << "newMB " << newMbSize << endl;
-	//	resizeTT(b->tt, newMbSize);
+	//	resizeTT(b->tt, b->pt, newMbSize);
 	//}
 
 
@@ -36,7 +36,7 @@ int main() {
 
 	cli(b, &perft, s);
 
-	destroyTranspositionTables(b);
+	freeTT(b->tt, b->pt);
 	return 0;
 }
 

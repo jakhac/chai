@@ -146,6 +146,14 @@ bool dangerousPawnPush(board_t* b, move_t m) {
 	return false;
 }
 
+void updatePvLine(move_t* pv, move_t move, move_t* childPv) {
+	Assert(pv && childPv);
+	for (*pv++ = move; childPv && *childPv != NO_MOVE; ) {
+		*pv++ = *childPv++;
+	}
+	*pv = NO_MOVE;
+}
+
 template <nodeType_t nodeType>
 value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s) {
 	Assert(checkBoard(b));
@@ -153,8 +161,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 	// TODO 2.5.5
 	// 2bishop king vs king test
-	// pvline from search
-	// TT mem functions, use remaining mb for pawntable
 	// clean repo: googletest name, gitignore, ...
 	// test advantage of storing evals only in tt
 
@@ -165,6 +171,8 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	bool improving = false;
 	int searchExt = 0;
 	int newDepth = depth - 1;
+
+	move_t pvLine[MAX_DEPTH];
 	searchStack_t* ss = &sStack[b->ply];
 
 	Assert(pvNode || (alpha == beta - 1));
@@ -225,7 +233,9 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 	bool hashStored = probeTT(b, &hashMove, &hashValue, &hashEval, &hashFlag, &hashDepth);
 	bool ttCapture = hashStored && isCapture(b, hashMove);
-	if (hashStored && !pvNode) {
+	if (hashStored
+		&& !pvNode
+		&& !(hashFlag & TT_EVAL)) {
 		b->tt->hit++;
 
 		// Look for valueHit: This position has already been searched before with greater depth.
@@ -274,7 +284,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 	} else {
 		ss->staticEval = posValue = evaluation(b);
-		//storeTT(b, NULL_MOVE, NO_VALUE, ss->staticEval, TT_EVAL, 0);
+		//storeTT(b, NULL_MOVE, NO_VALUE, ss->staticEval, TT_EVAL, MAX_DEPTH);
 	}
 	Assert(ss->staticEval != NO_VALUE && abs(ss->staticEval) < ISMATE);
 	Assert(ss->currentMove == getCurrentMove(b));
@@ -399,6 +409,9 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		bool moveGivesCheck = checkingMove(b, currentMove);
 		int moveCaptured = isCapture(b, currentMove);
 
+		if (pvNode)
+			(ss + 1)->pvLine = nullptr;
+
 		// Futiilty Pruning
 		if (!rootNode
 			&& legalMoves
@@ -471,6 +484,9 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		  */
 		if (legalMoves == 1) {
 
+			(ss + 1)->pvLine = pvLine;
+			(ss + 1)->pvLine[0] = NO_MOVE;
+
 			value = -alphaBeta<PV>(-beta, -alpha, newDepth, b, s);
 
 		} else {
@@ -479,7 +495,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				//&& !moveGivesCheck
 				//&& !inCheck
 				&& depth > 3
-				&& !isPromotion(currentMove) // TODO find better promotion extension
+				&& !isPromotion(currentMove)
 				//&& (!pvNode && moveList->scores[i] < KILLER_SCORE_2)
 				//&& !moveIsCapOrPromo
 				) {
@@ -519,7 +535,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				if (pvNode && dangerousPawnPush(b, currentMove))
 					lmrDepth++;
 
-				// Minimum depth 1 and maximum depth is newDepth
+				// Minimum depth is 1 and maximum depth is newDepth
 				lmrDepth = min(newDepth, max(1, lmrDepth));
 				lmrSameDepth = newDepth == lmrDepth;
 
@@ -537,6 +553,9 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 					value = -alphaBeta<NoPV>(-(alpha + 1), -alpha, newDepth, b, s);
 
 				if (value > alpha && (rootNode || value < beta)) {
+					(ss + 1)->pvLine = pvLine;
+					(ss + 1)->pvLine[0] = NO_MOVE;
+
 					value = -alphaBeta<PV>(-beta, -alpha, newDepth, b, s);
 				}
 			}
@@ -658,6 +677,10 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 			*/
 			if (value > alpha) {
 				alpha = value;
+
+				if (pvNode)
+					updatePvLine(ss->pvLine, bestMove, (ss + 1)->pvLine);
+
 			}
 		}
 	}
@@ -696,10 +719,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 template <nodeType_t nodeType>
 value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t* s) {
-	Assert((b->enPas == 0 || ((b->enPas <= H6) && (b->enPas >= A6)))
-		   || (b->enPas == 0 || ((b->enPas <= H3) && (b->enPas >= A3))));
 	Assert(checkBoard(b));
-	selDepth = max(selDepth, b->ply);
 
 	// check for time and depth
 	if ((s->nodes & 2047) == 0 || (s->qnodes & 2047) == 0) {
@@ -707,6 +727,15 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	}
 
 	s->qnodes++;
+	bool pvNode = nodeType == PV;
+	selDepth = max(selDepth, b->ply);
+	move_t currPvLine[MAX_DEPTH + 1];
+	searchStack_t* ss = &sStack[b->ply];
+
+	if (pvNode) {
+		(ss + 1)->pvLine = currPvLine;
+		ss->pvLine[0] = NO_MOVE;
+	}
 
 	// Draw detection
 	if (isRepetition(b) || insufficientMaterial(b)) {
@@ -724,12 +753,10 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 		return evaluation(b);
 	}
 
-	//searchStack_t* ss = &sStack[b->ply];
 	//bool inCheck = ss->isCheck;
 	//Assert(inCheck == isCheck(b, b->side));
 	bool inCheck = isCheck(b, b->side);
 
-	bool pvNode = nodeType == PV;
 	value_t value;
 	value_t bestValue = -INF;
 	value_t staticEval = evaluation(b);
@@ -818,6 +845,9 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 
 			if (value > alpha) {
 				alpha = value;
+
+				if (pvNode)
+					updatePvLine(ss->pvLine, bestMove, (ss + 1)->pvLine);
 			}
 		}
 
@@ -893,9 +923,9 @@ void clearForSearch(board_t* b, search_t* s) {
 		}
 	}
 
-	b->pawnTable->collided = 0;
-	b->pawnTable->probed = 0;
-	b->pawnTable->hit = 0;
+	b->pt->collided = 0;
+	b->pt->probed = 0;
+	b->pt->hit = 0;
 
 	s->startTime = getTimeMs();
 	s->stopped = 0;
@@ -930,6 +960,7 @@ value_t search(board_t* b, search_t* s) {
 		//cout << "d=" << depth << " " << moveCountPruning[depth] << endl;
 	}
 
+	move_t pvLine[MAX_DEPTH + 1]{};
 	int currentDepth = 1;
 	value_t score = -INF;
 	move_t bestMove = 0;
@@ -939,12 +970,12 @@ value_t search(board_t* b, search_t* s) {
 	sStack[b->ply].isCheck = isCheck(b, b->side);
 	sStack[b->ply].staticEval = evaluation(b);
 	sStack[b->ply].currentMove = NO_MOVE;
+	sStack[b->ply].pvLine = pvLine;
 
 	for (; currentDepth <= s->depth; currentDepth++) {
 		selDepth = 0;
 		b->ply = 0;
 
-		//score = alphaBetaRoot(b, s, currentDepth, &bestMove);
 		score = alphaBeta<PV>(-INF, INF, currentDepth, b, s);
 		Assert(abs(score) < INF);
 
@@ -953,11 +984,11 @@ value_t search(board_t* b, search_t* s) {
 			break;
 
 		printUCI(s, currentDepth, selDepth, score);
-		printTTablePV(b, currentDepth, selDepth);
+		//printTTablePV(b, currentDepth, selDepth);
+		printPvLine(b, pvLine, currentDepth, score);
 		fflush(stdout);
 
 		bestMove = probePV(b);
-
 		//printSearchInfo(b, s);
 
 		if (abs(score) > ISMATE) {
@@ -981,9 +1012,9 @@ void printSearchInfo(board_t* b, search_t* s) {
 	cout << "TTable hits/probed: \t\t" << setprecision(4) << fixed << (float)(b->tt->hit) / (b->tt->probed) << endl;
 	cout << "TTable valueHits/hits: \t\t" << setprecision(4) << fixed << (float)(b->tt->valueHit) / (b->tt->hit) << endl;
 	cout << "T table memory used: \t\t" << setprecision(4) << fixed << (float)(b->tt->stored) / (b->tt->buckets) << endl;
-	cout << "PTable hit percentage: \t\t" << setprecision(4) << fixed << (float)(b->pawnTable->hit) / (b->pawnTable->probed) << endl;
-	cout << "PTable memory used: \t\t" << setprecision(4) << fixed << (float)(b->pawnTable->stored) / (b->pawnTable->entries) << endl;
-	cout << "PTcollisions: \t\t\t" << setprecision(4) << fixed << b->pawnTable->collided << endl;
+	cout << "PTable hit percentage: \t\t" << setprecision(4) << fixed << (float)(b->pt->hit) / (b->pt->probed) << endl;
+	cout << "PTable memory used: \t\t" << setprecision(4) << fixed << (float)(b->pt->stored) / (b->pt->entries) << endl;
+	cout << "PTcollisions: \t\t\t" << setprecision(4) << fixed << b->pt->collided << endl;
 	//cout << "Futile failed/tried: \t\t\t" << s->futileFH << "/" << s->futileCnt << endl;
 	cout << "Futile moves pruned: \t\t" << s->futileCnt << endl;
 	cout << endl;

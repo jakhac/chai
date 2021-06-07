@@ -54,6 +54,8 @@ struct searchStack_t {
 	bool isCheck;
 	int staticEval;
 	move_t currentMove;
+
+	move_t* pvLine;
 };
 
 /**
@@ -170,7 +172,7 @@ struct board_t {
 	ttable_t tt[1];
 
 	// Pawn hash table.
-	pawntable_t pawnTable[1];
+	pawntable_t pt[1];
 
 	// Stores the pv line.
 	move_t pvArray[MAX_DEPTH];

@@ -70,6 +70,8 @@ void printUCI(search_t* s, int d, int selDpt, int score);
 void printPV(board_t* b, move_t* moves, int len);
 
 void printTTablePV(board_t* b, int depth, int selDepth);
+
+void printPvLine(board_t* b, move_t* pvLine, int d, int score);
 /**
  * Write logging information into log.txt file.
  *

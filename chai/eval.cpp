@@ -325,11 +325,11 @@ value_t evaluation(board_t* b) {
 	b->attackedSquares[WHITE] = attackerSet(b, WHITE);
 	b->attackedSquares[BLACK] = attackerSet(b, BLACK);
 
-	b->pawnTable->probed++;
+	b->pt->probed++;
 	value_t pawnEval = 0;
 	bool foundHash = probePawnEntry(b, &pawnEval);
 	if (foundHash) {
-		b->pawnTable->hit++;
+		b->pt->hit++;
 	} else {
 		pawnEval = evaluatePawns(b, &interpolFactor);
 		storePawnEntry(b, pawnEval);
@@ -363,11 +363,11 @@ value_t lazyEvaluation(board_t* b) {
 	value_t eval = 0;
 	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
-	b->pawnTable->probed++;
+	b->pt->probed++;
 	value_t pawnEval = 0;
 	bool foundHash = probePawnEntry(b, &pawnEval);
 	if (foundHash) {
-		b->pawnTable->hit++;
+		b->pt->hit++;
 		eval += pawnEval;
 	}
 

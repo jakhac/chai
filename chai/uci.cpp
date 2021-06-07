@@ -50,9 +50,9 @@ void uciSetOption(board_t* b, string cmd) {
 
 	if (cmd.rfind("setoption name Hash value ", 0) == 0) {
 		int newMbSize = stoi(cmd.substr(strlen("setoption name Hash value "), string::npos));
-		//TODO check for valid mb size
-		resizeTT(b->tt, newMbSize);
-		cout << "info string set Hash to " << newMbSize << "MB" << endl;
+		if (resizeTT(b->tt, b->pt, newMbSize)) {
+			cout << "info string set Hash to " << newMbSize << "MB" << endl;
+		}
 	}
 
 }
@@ -162,11 +162,11 @@ void init(board_t* b) {
 	initEvalMasks();
 	initManhattenMask();
 
-	//initTT(b->tt);
-	resizeTT(b->tt, DEFAULT_TT_SIZE);
-	initPawnTable(b->pawnTable);
+	if (!resizeTT(b->tt, b->pt, DEFAULT_TT_SIZE)) {
+		cout << "Error in memory allocation for TT." << endl;
+		exit(1);
+	}
 
-	// TODO performance
 	initObstructed();
 	initLine();
 

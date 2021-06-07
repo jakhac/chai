@@ -185,6 +185,17 @@ void printTTablePV(board_t* b, int depth, int selDepth) {
 
 }
 
+void printPvLine(board_t* b, move_t* pvLine, int d, int score) {
+	int pvLen = d;
+	if (score >= ISMATE)
+		d = MATE_VALUE - score;
+
+	cout << " pv ";
+	for (int i = 0; i < d; i++) {
+		cout << getStringMove(b, pvLine[i]);
+	}
+}
+
 string getTime() {
 	char str[32]{};
 	time_t a = time(nullptr);

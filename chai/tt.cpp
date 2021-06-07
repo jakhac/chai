@@ -1,15 +1,7 @@
 #include "tt.h"
 
-void resizeTT(ttable_t* tt, size_t newMbSize) {
-	// Free TT if allocated memory already exists
-	if (tt->bucketList != NULL && !VirtualFree(tt->bucketList, 0, MEM_RELEASE)) {
-		DWORD err = GetLastError();
-		cerr << "Failed to free large page memory. Error code: 0x"
-			<< hex << err
-			<< dec << endl;
-		exit(1);
-	}
-
+// allocate tt with virtualAlloc, return unused MB 
+size_t allocateTT(ttable_t* tt, size_t newMbSize) {
 	unsigned long long totalBytes = (unsigned long long)newMbSize << 20;
 	unsigned long long numBucketsPossible = totalBytes / sizeof(bucket_t);
 
@@ -18,7 +10,7 @@ void resizeTT(ttable_t* tt, size_t newMbSize) {
 	Assert(pow(2, msb) <= numBucketsPossible);
 
 	if (msb > 48) {
-		cerr << "Error: TT-Size is too big (cannot use lower 48-bits to index buckets)." << endl;
+		cerr << "Error: TT-Size is too big (cannot use lower 48-bits anymore to index table)." << endl;
 		exit(1);
 	}
 
@@ -29,28 +21,76 @@ void resizeTT(ttable_t* tt, size_t newMbSize) {
 	for (int i = 0; i < msb; i++) indexMask |= (1 << i);
 	clearTT(tt);
 
-#ifdef INFO
-	cout << "Buckets: " << BUCKETS << endl
-		<< "Transposition table initialized with " << tt->buckets
-		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl;
-#endif // !INFO
+	// return remaining bytes
+	return totalBytes - (sizeof(bucket_t) * tt->buckets);
 }
 
-void destroyTranspositionTables(board_t* b) {
-	if (b->tt->bucketList != NULL) {
+// Init pawn table with clamped remaining MBs
+size_t allocatePT(pawntable_t* pt, size_t remainingByte) {
+	if (remainingByte < (DEFAULT_PT_SIZE << 20)) {
+		remainingByte = DEFAULT_PT_SIZE << 20;
+	} else if (remainingByte > (MAX_PT_SIZE << 20)) {
+		remainingByte = MAX_PT_SIZE << 20;
+	}
 
-		if (!VirtualFree(b->tt->bucketList, 0, MEM_RELEASE)) {
-			DWORD err = GetLastError();
-			std::cerr << "Failed to free large page memory. Error code: 0x"
-				<< std::hex << err
-				<< std::dec << std::endl;
-			exit(1);
-		}
-		b->tt->bucketList = NULL;
+	pt->entries = remainingByte / sizeof(pawntable_entry_t);
+	pt->entries -= 2;
+	pt->stored = 0;
+
+	pt->table = (pawntable_entry_t*)malloc(pt->entries * sizeof(pawntable_entry_t));
+	clearPawnTable(pt);
+
+	// return used bytes
+	return remainingByte;
+}
+
+// try to resize tt, returns true if successfull, else false
+bool resizeTT(ttable_t* tt, pawntable_t* pt, size_t newMbSize) {
+	if (newMbSize < MIN_TT_SIZE || newMbSize > MAX_TT_SIZE) {
+		cout << "Request MB is too small / large. Choose from interval ["
+			<< MIN_TT_SIZE << ", " << MAX_TT_SIZE << "]" << endl;
+		return false;
 	}
-	if (b->pawnTable->table != NULL) {
-		free(b->pawnTable->table);
+
+	freeTT(tt, pt);
+
+	size_t possibleBytes = (newMbSize << 20);
+	size_t remainingBytes = allocateTT(tt, newMbSize);
+	size_t usedBytes = allocatePT(pt, remainingBytes);
+
+#ifdef INFO
+	if ((newMbSize & (newMbSize - 1)) != 0) {
+		cout << "TT only allocates MB sizes if power of 2. "
+			<< newMbSize << "MB is adjusted to "
+			<< ((possibleBytes - remainingBytes) >> 20) << "MB"
+			<< endl << endl;
 	}
+
+	cout
+		<< "TT " << ((possibleBytes - remainingBytes) >> 20) << "MB"
+		<< " initialized with " << tt->buckets
+		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl
+		<< "PT " << (usedBytes >> 20) << "MB"
+		<< " initialized with " << pt->entries << " entries." << endl;
+#endif // !INFO
+
+	return true;
+}
+
+void freeTT(ttable_t* tt, pawntable_t* pt) {
+	if (tt->bucketList != NULL && !VirtualFree(tt->bucketList, 0, MEM_RELEASE)) {
+		DWORD err = GetLastError();
+		cerr << "Failed to free large page memory. Error code: 0x"
+			<< hex << err
+			<< dec << endl;
+		exit(1);
+	}
+	if (pt->table != NULL) {
+		free(pt->table);
+	}
+
+	pt->table = NULL;
+	tt->bucketList = NULL;
 }
 
 void clearTT(ttable_t* tt) {
@@ -66,10 +106,6 @@ uint16_t getBucketIndex(key_t zobristKey) {
 }
 
 void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int flag, int depth) {
-	// index is the lower n-bits
-	//int32_t index = int32_t(b->zobristKey & indexMask);
-	//int32_t key = int32_t(b->zobristKey >> 32);
-
 	int32_t index = getTTIndex(b->zobristKey);
 	uint16_t key = getBucketIndex(b->zobristKey);
 
@@ -81,8 +117,6 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 	Assert(abs(value) < INF || value == NO_VALUE);
 	Assert(abs(staticEval) < INF);
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
-
-	//searchToHash(b, &value);
 
 	// Stats
 	b->tt->stored++;
@@ -127,16 +161,6 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 	if (leastValuable->flag != TT_NONE) {
 		b->tt->collided++;
 	}
-
-	//// Same key
-	//if (leastValuable->key == key
-	//	&& flag != TT_VALUE
-	//	&& depth < leastValuable->depth - 3) {
-	//	return;
-	//}
-
-	//if (value > ISMATE) value += b->ply;
-	//else if (value < -ISMATE) value -= b->ply;
 
 	// Replace entry has been determined: Store information 
 	leastValuable->key = key;
@@ -183,7 +207,7 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 }
 
 void prefetchTTEntry(board_t* b) {
-	//key_t index = b->zobristKey & indexMask;
+
 	uint32_t index = getTTIndex(b->zobristKey);
 #ifdef __GNUC__
 	__builtin_prefetch((bucket_t*)&b->tt->bucketList[index]);
@@ -211,9 +235,6 @@ int searchToHash(board_t* b, value_t score) {
 }
 
 move_t probePV(board_t* b) {
-	//int32_t index = int32_t(b->zobristKey & indexMask);
-	//int32_t key = int32_t(b->zobristKey >> 32);
-
 	int32_t index = getTTIndex(b->zobristKey);
 	uint16_t key = getBucketIndex(b->zobristKey);
 	Assert(index == int32_t(b->zobristKey & indexMask));
@@ -259,25 +280,6 @@ int getPVLine(board_t* b, const int maxDepth) {
 	return count;
 }
 
-void initPawnTable(pawntable_t* pawnTable) {
-	pawnTable->entries = pawnTableSize / sizeof(pawntable_entry_t);
-	pawnTable->entries -= 2;
-	pawnTable->stored = 0;
-
-	if (pawnTable->table != NULL) {
-		free(pawnTable->table);
-	}
-
-	// dynamically allocate memory hash table
-	pawnTable->table = (pawntable_entry_t*)malloc(pawnTable->entries * sizeof(pawntable_entry_t));
-	clearPawnTable(pawnTable);
-
-#ifdef INFO
-	cout << "Pawn table initialized with " << pawnTable->entries << " entries." << endl;
-#endif // !LICHESS
-
-}
-
 void clearPawnTable(pawntable_t* pawnTable) {
 	pawntable_entry_t* pawnEntry_s;
 	for (pawnEntry_s = pawnTable->table; pawnEntry_s < pawnTable->table + pawnTable->entries; pawnEntry_s++) {
@@ -290,35 +292,35 @@ void clearPawnTable(pawntable_t* pawnTable) {
 }
 
 void storePawnEntry(board_t* b, const value_t eval) {
-	int index = b->zobristPawnKey % b->pawnTable->entries;
-	Assert(index >= 0 && index <= b->pawnTable->entries - 1);
+	int index = b->zobristPawnKey % b->pt->entries;
+	Assert(index >= 0 && index <= b->pt->entries - 1);
 
-	if (b->pawnTable->table[index].zobristPawnKey == 0ULL) {
+	if (b->pt->table[index].zobristPawnKey == 0ULL) {
 		// count every new entry
-		b->pawnTable->stored++;
+		b->pt->stored++;
 	} else {
-		b->pawnTable->collided++;
+		b->pt->collided++;
 	}
 
-	b->pawnTable->table[index].eval = eval;
-	b->pawnTable->table[index].zobristPawnKey = b->zobristPawnKey;
+	b->pt->table[index].eval = eval;
+	b->pt->table[index].zobristPawnKey = b->zobristPawnKey;
 }
 
 void prefetchPawnEntry(board_t* b) {
-	int index = b->zobristPawnKey % b->pawnTable->entries;
+	int index = b->zobristPawnKey % b->pt->entries;
 #ifdef __GNUC__
 	__builtin_prefetch(&b->pawnTable->table[index]);
 #else
-	_m_prefetch(&b->pawnTable->table[index]);
+	_m_prefetch(&b->pt->table[index]);
 #endif
 }
 
 bool probePawnEntry(board_t* b, value_t* hashScore) {
-	int index = b->zobristPawnKey % b->pawnTable->entries;
-	Assert(index >= 0 && index <= b->pawnTable->entries - 1);
+	int index = b->zobristPawnKey % b->pt->entries;
+	Assert(index >= 0 && index <= b->pt->entries - 1);
 
-	if (b->pawnTable->table[index].zobristPawnKey == b->zobristPawnKey) {
-		*hashScore = b->pawnTable->table[index].eval;
+	if (b->pt->table[index].zobristPawnKey == b->zobristPawnKey) {
+		*hashScore = b->pt->table[index].eval;
 		return true;
 	}
 
