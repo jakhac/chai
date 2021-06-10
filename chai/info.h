@@ -1,17 +1,16 @@
 #pragma once
 
-#include <iostream>
-#include <bitset>
-#include "io.h"
-#include <fstream>
-#include <chrono>  // chrono::system_clock
-#include <ctime>   // localtime
-#include <iomanip> // put_time
-#include "windows.h"
+//#include <iostream>
+//#include <bitset>
+#include "io.h" // _read()
+//#include <fstream>
+//#include <ctime>   // localtime
+//#include "windows.h"
 
-#include "defs.h"
+//#include "defs.h"
 #include "mask.h"
 #include "board.h"
+#include "tt.h"
 
 using namespace std;
 
@@ -27,7 +26,7 @@ void printBitBoard(bitboard_t* bb);
  *
  * @param  move Move.
  */
-void printMove(const int move);
+void printMoveStatus(board_t* b, move_t move);
 
 /**
  * Returns the algebraic notation of given move.
@@ -36,14 +35,14 @@ void printMove(const int move);
  *
  * @returns The move in algebraic notation.
  */
-string getStringMove(const int move);
+string getStringMove(board_t* b, const int move);
 
-/**
- * Print all flags and attributes of given move.
- *
- * @param  move Move.
- */
-void printMoveStatus(int move);
+///**
+// * Print all flags and attributes of given move.
+// *
+// * @param  move Move.
+// */
+//void printMoveStatus(int move);
 
 /**
  * Print binary format of given integer.
@@ -68,8 +67,11 @@ void printUCI(search_t* s, int d, int selDpt, int score);
  * @param b The current board.
  * @param pvLine pvLine struct filled by alphaBeta search.
  */
-void printPV(move_t* moves, int len);
+void printPV(board_t* b, move_t* moves, int len);
 
+void printTTablePV(board_t* b, int depth, int selDepth);
+
+void printPvLine(board_t* b, move_t* pvLine, int d, int score);
 /**
  * Write logging information into log.txt file.
  *

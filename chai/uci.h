@@ -1,18 +1,21 @@
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <chrono>
-#include <string>
-#include <sstream>
-#include "io.h"
 
-#include "board.h"
+//#include <iostream>
+//#include <string>
+//#include <algorithm>
+//#include <chrono>
+//#include <string>
+//#include <sstream>
+//#include "io.h"
+
+#include <iterator>
+
+//#include "board.h"
 #include "search.h"
 
 #ifndef VERSION
-#define VERSION "v3.x"
+#define VERSION "v2.5.5"
 #endif // !VERSION
 
 /**
@@ -22,6 +25,8 @@
  * @param  s A search_t to process.
  */
 void uciMode(board_t* b, search_t* s);
+
+void uciSetOption(board_t* b, string cmd);
 
 /**
  * Parse a position from UCI command.

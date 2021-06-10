@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "perft.h"
+#include "uci.h"
 
 namespace {
 	class PerftTest : public ::testing::Test {
@@ -11,19 +12,8 @@ namespace {
 		virtual void SetUp() {
 			pBoard = new board_t();
 			pPerft = new Perft();
-			initHashKeys(pBoard);
 
-			initClearSetMask();
-			initSquareToRankFile();
-			initAttackerMasks();
-
-			initRookMasks();
-			initRookMagicTable();
-			initBishopMasks();
-			initBishopMagicTable();
-
-			initObstructed();
-			initLine();
+			init(pBoard);
 		}
 
 		virtual void TearDown() {

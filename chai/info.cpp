@@ -19,14 +19,14 @@ void printBitBoard(bitboard_t* bb) {
 	}
 }
 
-void printMove(const int move) {
+void printMove(board_t* b, const move_t move) {
 
 	if (move == NULL_MOVE) {
 		cout << "0000" << endl;
 		return;
 	}
 
-	int promoted = promPiece(move);
+	int promoted = promPiece(b, move);
 	char promChar = ' ';
 
 	if (promoted) {
@@ -49,20 +49,20 @@ void printMove(const int move) {
 	cout << ret << promChar << endl;
 }
 
-string getStringMove(const int move) {
+string getStringMove(board_t* b, const int move) {
 	if (move == NULL_MOVE) {
 		return "0000";
 	}
 
-	int promoted = promPiece(move);
+	int promoted = promPiece(b, move);
 	string promChar = " ";
 
 	if (promoted) {
-		promChar = "Piece::q ";
+		promChar = "q ";
 		if (promoted == Piece::n || promoted == Piece::N) {
-			promChar = "Piece::n ";
+			promChar = "n ";
 		} else if (promoted == Piece::r || promoted == Piece::R) {
-			promChar = "Piece::r ";
+			promChar = "r ";
 		} else if (promoted == Piece::b || promoted == Piece::B) {
 			promChar = "b ";
 		}
@@ -78,15 +78,15 @@ string getStringMove(const int move) {
 	return ret;
 }
 
-void printMoveStatus(int move) {
-	cout << "\n#### - Move Status: " << getStringMove(move) << endl;
+void printMoveStatus(board_t* b, move_t move) {
+	cout << "\n#### - Move Status: " << getStringMove(b, move) << endl;
+	printBinary(move);
 	cout << "From " << fromSq(move) << " to " << toSq(move) << endl;
-	cout << "Pawn start " << (move & MFLAG_PS) << endl;
-	cout << "EP capture " << (move & MFLAG_EP) << endl;
-	cout << "Castle move " << (move & MFLAG_CAS) << endl;
-	cout << "Promoted " << (move & MCHECK_PROM) << endl;
-	cout << "Promoted piece " << (promPiece(move)) << endl;
-	cout << "Capture " << (move & MCHECK_CAP) << " with captured piece " << capPiece(move) << endl;
+	cout << "Pawn start " << isPawnStart(move, pieceAt(b, fromSq(move))) << endl;
+	cout << "EP capture " << isEnPassant(move) << endl;
+	cout << "Castle move " << isCastling(move) << endl;
+	cout << "Promoted piece " << promPiece(b, move) << endl;
+	cout << "Captured piece " << capPiece(b, move) << endl;
 	cout << "####\n" << endl;
 }
 
@@ -133,7 +133,7 @@ void printUCI(search_t* s, int d, int selDpt, int score) {
 
 	if (abs(score) >= ISMATE) {
 		string sign = (score > 0) ? "" : "-";
-		scoreStr += "mate " + sign + to_string(MATE - abs(score));
+		scoreStr += "mate " + sign + to_string(MATE_VALUE - abs(score));
 	} else {
 		scoreStr += "cp " + to_string(score);
 	}
@@ -145,11 +145,11 @@ void printUCI(search_t* s, int d, int selDpt, int score) {
 		<< " time " << (getTimeMs() - s->startTime);
 }
 
-void printPV(move_t* moves, int len) {
+void printPV(board_t* b, move_t* moves, int len) {
 	cout << " pv ";
 
 	for (int i = 0; i < len; i++) {
-		cout << getStringMove(moves[i]);
+		cout << getStringMove(b, moves[i]);
 	}
 
 	//#define STRUCT_PV
@@ -162,6 +162,38 @@ void printPV(move_t* moves, int len) {
 	//		cout << getStringMove(b->pvArray[i]);
 	//	}
 	//#endif // STRUCT_PV
+}
+
+void printTTablePV(board_t* b, int depth, int selDepth) {
+	int cnt = 0;
+	cout << " pv ";
+
+	for (int i = 0; i <= depth; i++) {
+		move_t pvMove = probePV(b);
+
+		if (pvMove != NO_MOVE && isLegal(b, pvMove)) {
+			cout << getStringMove(b, pvMove);
+			push(b, pvMove);
+			cnt++;
+		} else {
+			// Ttable entry was overwritten or no further entries
+			break;
+		}
+	}
+
+	while (cnt--) pop(b);
+
+}
+
+void printPvLine(board_t* b, move_t* pvLine, int d, int score) {
+	int pvLen = d;
+	if (score >= ISMATE)
+		d = MATE_VALUE - score;
+
+	cout << " pv ";
+	for (int i = 0; i < d; i++) {
+		cout << getStringMove(b, pvLine[i]);
+	}
 }
 
 string getTime() {

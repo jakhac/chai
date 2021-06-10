@@ -1,14 +1,11 @@
 #pragma once
-#pragma warning(push)
-#pragma warning(disable:6386)
-#pragma warning(disable:6385)
 
-#include <chrono>
-#include <iomanip>
+//#include <chrono>
+#include <iomanip> // setprecision
 
-#include "tt.h"
 #include "eval.h"
 #include "moveOrdering.h"
+#include "tt.h"
 
 #define DO_NULL true
 #define NO_NULL false
@@ -21,29 +18,27 @@
 
 #define F1_MARGIN 125
 #define F2_MARGIN 550
+#define F3_MARGIN 800
 
 #define RAZOR_DEPTH 3
 
-/**
- * Maximum ply reached in alphaBeta and quiescence search.
- */
-extern int selDepth;
+// Maximum ply reached in alphaBeta and quiescence search.
+static int selDepth;
+
+// Maximum score before rescale in history heuristic. Max history score needs to be less than 10000
+// because move ordering scores "QUIET_SCORES=5000 + hist/10" before COUNTER_SCORE=6000.
+const int HISTORY_MAX = 1000 - 1;
+
+// Search stack used for all searches
+static searchStack_t sStack[MAX_GAME_MOVES];
+
+static const int moveCountPruningDepth = 5;
+static int moveCountPruning[moveCountPruningDepth];
 
 /**
- * Maximum score before rescale in history heuristic.
+ * Initialize some search parameters like MCP values.
  */
-const int HISTORY_MAX = 0x4000;
-
-/**
-  Principal variation line used for root alphaBeta call. Contains main line after search finished.
- */
-static pv_line_t pvLine[1];
-
-/**
- * Remember checks given in quiescence to detect checkmates. Quiescence depths are stored
- * as absolute values.
- */
-static int quiescenceChecks[MAX_DEPTH];
+void initSearch();
 
 /**
  * Alpha beta algorithm root. Searches current board for best move and score.
@@ -53,13 +48,11 @@ static int quiescenceChecks[MAX_DEPTH];
  * @param  depth  Current depth.
  * @param  b	  Current board.
  * @param  s	  Search info containing search parameters.
- * @param  nullOk Enables null move pruning in node.
- * @param  pvNode Determines the current node type.
- * @param  pvLine The pv line.
  *
  * @returns Best score found in search.
  */
-int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool nullOk, bool pvNode, pv_line_t* pvLine);
+template <nodeType_t nodeType>
+value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s);
 
 /**
  * Quiescence search pushes all captures to evaluate a stable and quiet position. AlphaBeta
@@ -67,12 +60,14 @@ int alphaBeta(int alpha, int beta, int depth, board_t* b, search_t* s, bool null
  *
  * @param  alpha Lower bound, minimum score the side is assured of.
  * @param  beta  Upper bound, maximum score the opponent is assured of.
+ * @param  depth  Current depth. Initial calls have depth=0
  * @param  b	 Current board.
  * @param  s	 Search info containing search parameters.
  *
  * @returns Best score found in quiescences search.
  */
-int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s, pv_line_t* pvLine);
+template <nodeType_t nodeType>
+value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t* s);
 
 /**
  * Root function that starts alphaBeta search in iterative deepening framework.
@@ -80,9 +75,9 @@ int quiescence(int alpha, int beta, int depth, board_t* b, search_t* s, pv_line_
  * @param  b Reference to current board.
  * @param  s Search info containing search parameters.
  *
- * @returns move_t Best move found search.
+ * @returns value_t Best value found search.
  */
-int search(board_t* b, search_t* s);
+value_t search(board_t* b, search_t* s);
 
 /**
  * Apply offset of aspiration windows in alphaBeta call and try to score inside alpha and beta.
@@ -107,16 +102,6 @@ int search_aspiration(board_t* b, search_t* s, int depth, int bestScore);
 bool isRepetition(board_t* b);
 
 /**
- * Searches the complete undoPly array for a position (including current position)
- * that occurred three times.
- *
- * @param  b Current board.
- *
- * @returns True if three fold repetition is found, else false.
- */
-bool isThreeFoldRepetition(board_t* b);
-
-/**
  * Checks if current position might be a zugzwang. Considers endgame
  *
  * @param  b	  Current board.
@@ -132,7 +117,7 @@ bool zugzwang(board_t* b);
  * @param  move_s Move struct with all moves and scores.
  * @param  curIdx Current index in moveList.
  */
-void getNextMove(board_t* b, moveList_t* move_s, int curIdx);
+void getNextMove(moveList_t* move_s, int curIdx);
 
 /**
  * Swap to moves and their score in given MOVE_S struct. Returns if id1 is equal to id2.
@@ -150,4 +135,3 @@ void swapMove(moveList_t* move_s, int id1, int id2);
  * @param  s This search info printed to console.
  */
 void printSearchInfo(board_t* b, search_t* s);
-

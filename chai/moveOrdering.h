@@ -24,7 +24,7 @@ const int HASH_MOVE = 20000;
 const int PROMOTING_CAPTURE = 16000;
 const int GOOD_CAPTURE = 15000;
 const int PROMOTION = 12000;
-const int EQUAL_CAPTURE = 10000;
+//const int EQUAL_CAPTURE = 10000;
 const int BAD_CAPTURE = 0;
 
 // quiet moves
@@ -33,16 +33,16 @@ const int KILLER_SCORE_1 = 8000;
 const int KILLER_SCORE_2 = 7000;
 const int COUNTER_SCORE = 6000;
 const int QUIET_SCORE = 5000;
+const int CASTLE_SCORE = QUIET_SCORE + 500;
 
-const int CASTLE_SCORE = 500;
-
-/*
-* No MVV-LVA score is greater than this upper bound.
-*/
+// No MVV-LVA score is greater than this upper bound.
 const int MVV_LVA_UBOUND = 1000;
 
 static int MVV_LVA[13][13];
 
+static const int SEEPieceValues[13] = {
+	0, 100, 325, 325, 550, 1100, 0, 100, 325, 325, 550, 1100, 0
+};
 
 /**
  * Initialize mvv-lva array. Only used once in start.
@@ -87,6 +87,16 @@ int see(board_t* b, const int move);
 int lazySee(board_t* b, const int move);
 
 /**
+ * Calculate the see score and compare against a given treshold.
+ *
+ * @param b
+ * @param move
+ * @param threshHold
+ * @return True if see score is greater than the threshold, else false.
+ */
+bool see_ge(board_t* b, move_t move, int threshHold);
+
+/**
  * Score moves according to moveOrdering.h rules. After scoring every move, best move is swapped
  * to first position. (not yet)
  *
@@ -97,14 +107,6 @@ int lazySee(board_t* b, const int move);
 void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove);
 
 /**
- * Score moves quiescence
- *
- * @param  b	    Reference to board.
- * @param  moveList Reference to moveList to score moves in.
- */
-void scoreMovesQuiescence(board_t* b, moveList_t* moveList);
-
-/**
  * Update the index of the move with highest score yet. Used to swap best move to the end after
  * all moves are scored.
  *
@@ -113,4 +115,3 @@ void scoreMovesQuiescence(board_t* b, moveList_t* moveList);
  * @param  curIdx  Current index of loop.
  */
 static void updateBestMove(int* scores, int* bestIdx, int curIdx);
-

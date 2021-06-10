@@ -1,15 +1,15 @@
 #pragma once
 
-#include <stack>
-#include <bitset>
-#include <iostream>
+//#include <stack>
+#include <bitset> // printBinary
+//#include <iostream>
 
-#include "defs.h"
-#include "validate.h"
+//#include "defs.h"
 #include "info.h"
 #include "attacks.h"
 #include "move.h"
 #include "pieceKeys.h"
+#include "validate.h"
 
 
 /**
@@ -25,7 +25,7 @@ extern move_t mateKiller[MAX_GAME_MOVES];
 /**
 * Stores history heuristic for both sides with [PIECE][TO] indices.
 */
-extern int histHeuristic[13][64];
+extern int histHeuristic[2][64][64];
 
 /**
 * Stores maximum history score.
@@ -78,12 +78,6 @@ void setPiece(board_t* b, int piece, int square, int side);
 void reset(board_t* b);
 
 /**
- * @deprecated pieceKeys.h already stores fixed values
- * Initialize hash keys for zobristkey generation.
- */
-void initHashKeys(board_t* b); // TODO
-
-/**
  * Generate a unique zobristKey for current board.
  *
  * @param  b board_t to call function.
@@ -119,6 +113,18 @@ bitboard_t getPieces(board_t* b, int piece, int side);
  * @returns Piece index or zero if empty.
  */
 int pieceAt(board_t* b, int square);
+
+inline int capPiece(board_t* b, move_t move) {
+	return pieceAt(b, toSq(move));
+}
+
+inline bool isCapture(board_t* b, move_t move) {
+	return pieceAt(b, toSq(move));
+}
+
+inline bool isCaptureOrPromotion(board_t* b, move_t move) {
+	return isCapture(b, move) || isPromotion(move);
+}
 
 /**
  * Calculates all pinners towards given king square.
@@ -207,7 +213,7 @@ bool checkBoard(board_t* b);
  *
  * @returns Returns true if move was valid and does not leave king in check, else false.
  */
-bool push(board_t* b, int move);
+bool push(board_t* b, move_t move);
 
 /**
  * Push rooks with castle move on board. Small checks for valid init positions of king and rook.
@@ -283,6 +289,18 @@ bitboard_t squareAttackedBy(board_t* b, int square, int side);
 bitboard_t squareAtkDef(board_t* b, int square);
 
 /**
+ * Get all pieces attacking the given square, independet of side.
+ * Extra parameter to pass the occupied squares needed or slider generation.
+ *
+ * @param  b board_t to call function.
+ * @param occupied Bitboard of currently occupied squares
+ * @param  square Square to check.
+ *
+ * @returns Bitboard with attackers / defenders.
+ */
+bitboard_t squareAtkDefOcc(board_t* b, bitboard_t occupied, int square);
+
+/**
  * Check if given side is currently in check.
  *
  * @param  b board_t to call function.
@@ -291,11 +309,6 @@ bitboard_t squareAtkDef(board_t* b, int square);
  * @returns Returns the mask of pieces giving check.
  */
 bool isCheck(board_t* b, int side);
-
-/**
- * Deprecated, do not use.
- */
-bool leavesKingInCheck(board_t* b, const move_t move, const bool inCheck);
 
 /**
  * Check if castle move is valid: castle permission, current check, empty squares between rook
@@ -308,3 +321,24 @@ bool leavesKingInCheck(board_t* b, const move_t move, const bool inCheck);
  * @returns True if castling move is valid, else false.
  */
 bool castleValid(board_t* b, int castle, bitboard_t* attackerSet);
+
+/**
+ * Check if potBlockerSq is blocking an attack to kSq by the discoverSide.
+ *
+ * @param  b board_t to call function.
+ * @param  kSq king getting checked by discovered attack
+ * @param  discoverSide Side to move, moves own piece with pot discovered check
+ * @param  potBlockerSq sq that potentially discovers a check when piece moves.
+ *
+ * @returns True if moving potBlockerSq results in a discovered check to KSq.
+ */
+bool sqIsBlockerForKing(board_t* b, int kSq, int discoverSide, int potBlockerSq);
+
+/**
+ * Check before making the move if move gives check.
+ * @param  b board_t to call function.
+ * @param  move
+ */
+bool checkingMove(board_t* b, move_t move);
+
+move_t getCurrentMove(board_t* b);

@@ -3,8 +3,9 @@
 void uciMode(board_t* b, search_t* s) {
 	string cmd;
 
-	cout << "id name chai Chess Engine\n";
-	cout << "id author chai\n";
+	cout << "id name chai_" << VERSION << "\n";
+	cout << "id author Jakob Hackstein\n";
+	cout << "option name Hash type spin default 256 min 2 max 8192" << endl;
 	cout << "uciok\n";
 
 	while (true) {
@@ -12,11 +13,18 @@ void uciMode(board_t* b, search_t* s) {
 		fflush(stdout);
 
 		if (!cmd.compare("quit")) {
-			cout << "quit game\n";
+			//cout << "quit uci protocol" << endl;
 			exit(0);
+			return;
+		} else if (!cmd.compare("uci")) {
+			cout << "id name chai_" << VERSION << "\n";
+			cout << "id author Jakob Hackstein\n";
+			cout << "option name Hash type spin default 256 min 2 max 8192" << endl;
+			cout << "uciok\n";
 		} else if (!cmd.compare("isready")) {
 			init(b);
-			cout << "isreadyok\n";
+			uciParsePosition(b, "position startpos");
+			cout << "readyok\n";
 		} else if (!cmd.compare("ucinewgame")) {
 			// start new game with standard position
 			uciParsePosition(b, "position startpos");
@@ -25,11 +33,28 @@ void uciMode(board_t* b, search_t* s) {
 			uciParsePosition(b, cmd);
 		} else if (!cmd.substr(0, 2).compare("go")) {
 			uciParseGo(b, s, cmd);
+		} else if (!cmd.substr(0, strlen("setoption")).compare("setoption")) {
+			uciSetOption(b, cmd);
 		}
 
 		fflush(stdout);
 	}
-	cout << "Error: left uci loop" << endl;
+
+}
+
+int strStartsWith(char* str, char* key) {
+	return strstr(str, key) == str;
+}
+
+void uciSetOption(board_t* b, string cmd) {
+
+	if (cmd.rfind("setoption name Hash value ", 0) == 0) {
+		int newMbSize = stoi(cmd.substr(strlen("setoption name Hash value "), string::npos));
+		if (resizeTT(b->tt, b->pt, newMbSize)) {
+			cout << "info string set Hash to " << newMbSize << "MB" << endl;
+		}
+	}
+
 }
 
 void uciParsePosition(board_t* b, string cmd) {
@@ -79,10 +104,10 @@ void uciParseGo(board_t* b, search_t* s, string cmd) {
 
 	for (int i = 0; i < tokens.size() - 1; i++) {
 		if (tokens[i] == "infinite") continue;
-		if (tokens[i] == "binc" && b->side == BLACK) inc = stoi(tokens[i + 1]);
-		if (tokens[i] == "winc" && b->side == WHITE) inc = stoi(tokens[i + 1]);
-		if (tokens[i] == "btime" && b->side == BLACK) time = stoi(tokens[i + 1]);
-		if (tokens[i] == "wtime" && b->side == WHITE) time = stoi(tokens[i + 1]);
+		if (tokens[i] == "binc" && b->stm == BLACK) inc = stoi(tokens[i + 1]);
+		if (tokens[i] == "winc" && b->stm == WHITE) inc = stoi(tokens[i + 1]);
+		if (tokens[i] == "btime" && b->stm == BLACK) time = stoi(tokens[i + 1]);
+		if (tokens[i] == "wtime" && b->stm == WHITE) time = stoi(tokens[i + 1]);
 		if (tokens[i] == "movestogo") movesLeft = stoi(tokens[i + 1]);
 		if (tokens[i] == "movetime") moveTime = stoi(tokens[i + 1]);
 		if (tokens[i] == "depth") depth = stoi(tokens[i + 1]);
@@ -94,7 +119,9 @@ void uciParseGo(board_t* b, search_t* s, string cmd) {
 		movesLeft = 1;
 	}
 
+#ifdef INFO
 	cout << "Parsed wbtime:" << time << " wbinc:" << inc << " movetime:" << moveTime << endl;
+#endif // !LICHESS
 
 	// if stop is set
 	s->startTime = getTimeMs();
@@ -102,13 +129,16 @@ void uciParseGo(board_t* b, search_t* s, string cmd) {
 		if (movesLeft < 1 || movesLeft > 30) movesLeft = 30;
 		s->timeSet = true;
 
-		// catch low time
-		if (time <= 2000) {
-			s->stopTime = s->startTime + 300;
+		// catch low time (ok for tc 20/0.3)
+		if (time <= 3000) {
+			s->stopTime = s->startTime + (inc / 8);
+		} else if (time <= 4000) {
+			s->stopTime = s->startTime + (inc / 4);
 		} else {
 			time /= movesLeft;
 			time -= 50;
-			s->stopTime = s->startTime + time + inc;
+			//s->stopTime = s->startTime + time + inc;
+			s->stopTime = s->startTime + time;
 		}
 
 		Assert(s->startTime < s->stopTime);
@@ -120,22 +150,10 @@ void uciParseGo(board_t* b, search_t* s, string cmd) {
 		s->depth = depth;
 	}
 
-	cout << "time " << time << ", start " << s->startTime << ", stop " << s->stopTime
-		<< ", depth " << s->depth << ", timeset " << s->timeSet << endl;
-
 	search(b, s);
 }
 
 void init(board_t* b) {
-	cout << "Initialize chai. " << VERSION << endl;
-
-#ifdef ASSERT
-	cout << "Asserts: 1" << endl;
-#else
-	cout << "Asserts: 0" << endl;
-#endif // ASSERT
-
-
 	auto start = std::chrono::high_resolution_clock::now();
 	initClearSetMask();
 	initSquareToRankFile();
@@ -144,25 +162,30 @@ void init(board_t* b) {
 	initEvalMasks();
 	initManhattenMask();
 
-	initTT(b->tt);
-	initPawnTable(b->pawnTable);
+	if (!resizeTT(b->tt, b->pt, DEFAULT_TT_SIZE)) {
+		cout << "Error in memory allocation for TT." << endl;
+		exit(1);
+	}
 
-	// TODO performance
 	initObstructed();
 	initLine();
+	initSearch();
 
+#ifdef INFO
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 	cout << "Init keys and masks ... " << duration.count() << "ms\n";
+#endif // !1
 
 	start = std::chrono::high_resolution_clock::now();
-	cout << "here ready" << endl;
 	initRookMasks();
 	initRookMagicTable();
 	initBishopMasks();
 	initBishopMagicTable();
+#ifdef INFO
 	stop = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 	cout << "Init magic tables for bishop and rooks ... " << duration.count() << "ms\n" << endl;
+#endif // !LICHESS
 }
 

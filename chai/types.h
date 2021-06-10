@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include "stdlib.h"
 
 #define MAX_DEPTH 64
 #define MAX_GAME_MOVES 512
+#define BUCKETS 3
 
 /**
  * Unsigned 64-Bit integer represents bitboard isntance.
@@ -19,15 +19,20 @@ typedef unsigned long long key_t;
 /**
  * Move type. All moves are unsigned.
  */
-typedef uint32_t move_t;
+typedef uint16_t move_t;
+
+/**
+ * Value type. Used for all evalutions.
+ */
+typedef int16_t value_t;
 
 /**
  * Store moves, scores and number entries in moveList. Used in move generation.
  */
 struct moveList_t {
 	int cnt = 0;
-	int moves[256]; // MAX POSITION MOVES
-	int scores[256]; // MAX POSITION MOVES
+	int moves[256]{}; // MAX POSITION MOVES
+	int scores[256]{}; // MAX POSITION MOVES
 
 	bitboard_t attackedSquares = 0ULL;
 };
@@ -40,26 +45,52 @@ struct undo_t {
 	int castle;
 	int enPas;
 	uint8_t fiftyMove;
+	uint8_t cap;
 	key_t zobKey;
 	key_t pawnKey;
 };
+
+struct searchStack_t {
+	bool isCheck;
+	int staticEval;
+	move_t currentMove;
+
+	move_t* pvLine;
+};
+
+typedef enum nodeType_t {
+	PV,
+	NoPV,
+	AllNode
+} nodeType_t;
 
 /**
  * Transposition table entry.
  */
 struct ttable_entry_t {
+	uint16_t key = 0; // upper 16bit to determine bucket
+
+	value_t value = 0;
+	value_t staticEval = 0;
+	move_t move = 0;
+
 	uint8_t flag = 0;
 	uint8_t depth = 0;
-	int16_t score = 0;
-	move_t move = 0;
-	key_t zobKey = 0x0;
+
+};
+
+struct bucket_t {
+	ttable_entry_t bucketEntries[BUCKETS];
+	char padding[2];
 };
 
 /**
  * Transposition table instance. Contains stat-variables and pointer to entries.
  */
 struct ttable_t {
-	ttable_entry_t* table = NULL;
+	bucket_t* bucketList = NULL;
+
+	// total number of buckets (entries-stacks)
 	int buckets = 0;
 
 	// measure successful probes
@@ -99,7 +130,7 @@ struct pawntable_t {
 
 struct board_t {
 	// Current side, 0 for black and 1 for white. Use enums for debug purpose.
-	int side;
+	bool stm;
 
 	// Current en passant square. 0, if not set.
 	int enPas;
@@ -147,7 +178,7 @@ struct board_t {
 	ttable_t tt[1];
 
 	// Pawn hash table.
-	pawntable_t pawnTable[1];
+	pawntable_t pt[1];
 
 	// Stores the pv line.
 	move_t pvArray[MAX_DEPTH];
@@ -183,9 +214,7 @@ struct search_t {
 	int pvHits = 0;
 };
 
-/**
- * Store PV-Line.
- */
+// Store PV-Line
 struct pv_line_t {
 	uint8_t len;
 	move_t line[64 * 64]; // MAX DEPTH
@@ -220,8 +249,25 @@ enum CASTLING_RIGHTS {
 	K_CASTLE = 1, Q_CASTLE = 2, k_CASTLE = 4, q_CASTLE = 8
 };
 
-enum TT_FLAG {
-	TT_NONE, TT_ALPHA, TT_BETA, TT_SCORE
+typedef enum TT_FLAG {
+	TT_NONE = 0,
+	TT_ALPHA = 1,
+	TT_BETA = 1 << 1,
+	TT_VALUE = 1 << 2,
+	TT_EVAL = 1 << 3
+} tt_flag_t;
+
+enum moveFlag {
+	NORMAL_MOVE = 0 << 12,
+	CASTLE_MOVE = 1 << 12,
+	EP_MOVE = 2 << 12,
+	PROM_MOVE = 3 << 12,
+
+	//PROM_NONE = 0,
+	PROM_TO_KNIGHT = 0 << 14,
+	PROM_TO_BISHOP = 1 << 14,
+	PROM_TO_ROOK = 2 << 14,
+	PROM_TO_QUEEN = 3 << 14,
 };
 
 enum SQUARES {

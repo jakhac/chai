@@ -1,7 +1,7 @@
 #pragma once
 
-#include "board.h"
-#include "magics.h"
+#include "defs.h"
+#include "bitUtils.h"
 
 /** Store number of bits required for that square in rook magic table index */
 const int rookIndexBits[64] = {

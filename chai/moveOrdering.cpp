@@ -29,11 +29,10 @@ bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkDef, int side, int at
 }
 
 int see(board_t* b, const int move) {
-	Assert(pieceValid(capPiece(move)) || MCHECK_EP & move);
-
 	int to = toSq(move);
 	int attackerPiece = pieceAt(b, fromSq(move));
-	int gain[32]{}, d = 0, side = b->side;
+	int movingPiece = attackerPiece;
+	int gain[32]{}, d = 0, side = b->stm;
 
 	bitboard_t occ = b->occupied;
 	bitboard_t mayXray = b->pieces[Piece::PAWN] | b->pieces[Piece::BISHOP] | b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
@@ -41,13 +40,14 @@ int see(board_t* b, const int move) {
 	bitboard_t from = setMask[fromSq(move)];
 	bitboard_t used = 0ULL, discovered = 0ULL;
 
-	gain[d] = pieceScores[capPiece(move)];
+	gain[d] = pieceValues[capPiece(b, move)];
 	do {
 		Assert(pieceValid(attackerPiece));
 		d++; // next depth and side
-		gain[d] = -gain[d - 1] + pieceScores[attackerPiece]; // speculative store, if defended
+		gain[d] = -gain[d - 1] + pieceValues[attackerPiece]; // speculative store, if defended
 
-		if (max(-gain[d - 1], gain[d]) < 0) break; // pruning does not influence the result
+		if (max(-gain[d - 1], gain[d]) < 0)
+			break; // pruning does not influence the result
 
 		attadef ^= from; // reset bit in set to traverse
 		occ ^= from; // reset bit in temporary occupancy (for magic move generation)
@@ -69,17 +69,20 @@ int see(board_t* b, const int move) {
 		gain[d - 1] = -max(-gain[d - 1], gain[d]);
 	}
 
-	if (MFLAG_EP & move) gain[0] += 100;
+	if (isEnPassant(move))
+		gain[0] += 100;
 
 	return gain[0];
 }
 
 int lazySee(board_t* b, const int move) {
-	Assert(pieceValid(capPiece(move)));
+	Assert(false); // deprecated
+	Assert(pieceValid(capPiece(b, move)));
 
 	int to = toSq(move);
 	int attackerPiece = pieceAt(b, fromSq(move));
-	int gain[32]{}, d = 0, side = b->side;
+	int movingPiece = attackerPiece;
+	int gain[32]{}, d = 0, side = b->stm;
 
 	bitboard_t occ = b->occupied;
 	bitboard_t mayXray = b->pieces[Piece::PAWN] | b->pieces[Piece::BISHOP] | b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
@@ -87,20 +90,21 @@ int lazySee(board_t* b, const int move) {
 	bitboard_t from = setMask[fromSq(move)];
 	bitboard_t used = 0ULL, discovered = 0ULL;
 
-	gain[d] = pieceScores[capPiece(move)];
+	gain[d] = pieceValues[capPiece(b, move)];
 
 	// If the captured piece is worth more than the attacker, it is always
 	// winning. An estimated SEE score is then returned.
-	if (gain[d] > pieceScores[attackerPiece]) {
-		return gain[d] - (pieceScores[attackerPiece] / 2);
+	if (gain[d] > pieceValues[attackerPiece]) {
+		return gain[d] - (pieceValues[attackerPiece] / 2);
 	}
 
 	do {
 		Assert(pieceValid(attackerPiece));
 		d++; // next depth and side
-		gain[d] = -gain[d - 1] + pieceScores[attackerPiece]; // speculative store, if defended
+		gain[d] = -gain[d - 1] + pieceValues[attackerPiece]; // speculative store, if defended
 
-		if (max(-gain[d - 1], gain[d]) < 0) break; // pruning does not influence the result
+		if (max(-gain[d - 1], gain[d]) < 0)
+			break; // pruning does not influence the result
 
 		attadef ^= from; // reset bit in set to traverse
 		occ ^= from; // reset bit in temporary occupancy (for magic move generation)
@@ -122,9 +126,96 @@ int lazySee(board_t* b, const int move) {
 		gain[d - 1] = -max(-gain[d - 1], gain[d]);
 	}
 
-	if (MFLAG_EP & move) gain[0] += 100;
+	if (isEnPassant(move))
+		gain[0] += 100;
 
 	return gain[0];
+}
+
+bool see_ge(board_t* b, move_t move, int threshold) {
+	bool color;
+	int from = fromSq(move);
+	int to = toSq(move);
+	int nextVictim = pieceAt(b, from);
+	int balance = SEEPieceValues[pieceAt(b, to)];
+
+	if (isCastling(move)) {
+		return false;
+	}
+
+	if (isPromotion(move)) {
+		nextVictim = promPiece(b, move);
+		balance += (SEEPieceValues[nextVictim] - SEEPieceValues[Piece::PAWN]);
+	}
+
+	if (isEnPassant(move)) {
+		balance = SEEPieceValues[Piece::PAWN];
+	}
+
+	balance -= threshold;
+	balance -= SEEPieceValues[nextVictim];
+
+	// Even after losing the moved piece balance is up
+	if (balance >= 0) return true;
+
+	// slider used to detect discovered attack
+	bitboard_t bishops = b->pieces[Piece::BISHOP] | b->pieces[Piece::QUEEN];
+	bitboard_t rooks = b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
+
+	// copy occupied to simulate captures on bitboard
+	bitboard_t occ = b->occupied;
+	occ = (occ ^ (1ULL << from)) | (1ULL << to);
+	if (isEnPassant(move)) {
+		occ ^= (1ULL << b->enPas);
+	}
+
+	bitboard_t nowAttacking;
+	bitboard_t attackers = squareAtkDefOcc(b, occ, to) & occ;
+
+	color = !b->stm;
+
+	while (1) {
+		nowAttacking = attackers & b->color[color];
+
+		// No more attackers left
+		if (!nowAttacking) {
+			break;
+		}
+
+		// Find weakest attacker
+		for (nextVictim = Piece::PAWN; nextVictim <= Piece::KING; nextVictim++) {
+			if (nowAttacking & b->pieces[nextVictim])
+				break;
+		}
+
+		// Remove least valuable attacker
+		occ ^= (1ULL << popBit(nowAttacking & b->pieces[nextVictim]));
+
+		if (nextVictim == Piece::PAWN || nextVictim == Piece::BISHOP || nextVictim == Piece::QUEEN) {
+			attackers |= lookUpBishopMoves(to, occ) & bishops;
+		}
+
+		if (nextVictim == Piece::ROOK || nextVictim == Piece::QUEEN) {
+			attackers |= lookUpRookMoves(to, occ) & rooks;
+		}
+
+		attackers &= occ;
+		color ^= 1;
+
+		balance = -balance - 1 - SEEPieceValues[nextVictim];
+
+		if (balance >= 0) {
+
+			if (nextVictim == Piece::KING && (attackers & b->color[color])) {
+				color ^= 1;
+			}
+
+			break;
+		}
+
+	}
+
+	return b->stm != color;
 }
 
 static void updateBestMove(int* scores, int* bestIdx, int curIdx) {
@@ -138,9 +229,11 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 	int seeScore = 0;
 	int mvvLvaScore = 0;
 	int bestIdx = 0;
+	int capturedPiece = 0;
 
-	// set all scores to 0
-	for (int i = 0; i < moveList->cnt; i++) moveList->scores[i] = 0;
+	//// set all scores to 0
+	//for (int i = 0; i < moveList->cnt; i++)
+	//	moveList->scores[i] = 0;
 
 	for (int i = 0; i < moveList->cnt; i++) {
 		currentMove = moveList->moves[i];
@@ -156,33 +249,31 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		}
 
 		// enpas move
-		if (currentMove & MCHECK_EP) {
+		if (isEnPassant(currentMove)) {
 			moveList->scores[i] = GOOD_CAPTURE + 105;
-
 			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
 		// capture moves
-		if (currentMove & MCHECK_CAP) {
+		if (capturedPiece = capPiece(b, currentMove)) {
+			Assert(pieceValid(capturedPiece));
 
-			if (currentMove & MCHECK_PROM) {
+			if (promPiece(b, currentMove)) {
 				// Promoting captures
 				moveList->scores[i] = PROMOTING_CAPTURE + pieceAt(b, fromSq(currentMove));
 			} else {
 				// Plain Captures
-				seeScore = see(b, currentMove);
-				mvvLvaScore = MVV_LVA[capPiece(currentMove)][pieceAt(b, fromSq(currentMove))];
+				mvvLvaScore = MVV_LVA[capturedPiece][pieceAt(b, fromSq(currentMove))];
 				Assert(mvvLvaScore > 0);
 				Assert(mvvLvaScore < MVV_LVA_UBOUND);
 
-				if (seeScore > 0) {
+				if (see_ge(b, currentMove, 0)) {
 					moveList->scores[i] = GOOD_CAPTURE + mvvLvaScore;
-				} else if (seeScore == 0) {
-					moveList->scores[i] = EQUAL_CAPTURE + mvvLvaScore;
 				} else {
 					moveList->scores[i] = BAD_CAPTURE + mvvLvaScore;
 				}
+
 			}
 
 			updateBestMove(moveList->scores, &bestIdx, i);
@@ -192,7 +283,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		// Only quiet moves left:
 
 		// promotion
-		if (currentMove & MCHECK_PROM) {
+		if (promPiece(b, currentMove)) {
 			moveList->scores[i] = PROMOTION + pieceAt(b, fromSq(currentMove));
 
 			updateBestMove(moveList->scores, &bestIdx, i);
@@ -209,7 +300,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 
 		// first killer
 		if (currentMove == killer[0][b->ply]) {
-			Assert(!(currentMove & MCHECK_CAP));
+			Assert(!capPiece(b, currentMove));
 			moveList->scores[i] = KILLER_SCORE_1;
 
 			updateBestMove(moveList->scores, &bestIdx, i);
@@ -218,7 +309,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 
 		// second killer
 		if (currentMove == killer[1][b->ply]) {
-			Assert(!(currentMove & MCHECK_CAP));
+			Assert(!capPiece(b, currentMove));
 			moveList->scores[i] = KILLER_SCORE_2;
 
 			updateBestMove(moveList->scores, &bestIdx, i);
@@ -228,27 +319,30 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		// counter move
 		if (b->ply > 0) {
 			move_t prevMove = b->undoHistory[b->ply - 1].move;
-			move_t counterMove = counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side];
+			move_t counterMove = counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->stm];
 
 			if (currentMove == counterMove) {
 				moveList->scores[i] = COUNTER_SCORE;
+				updateBestMove(moveList->scores, &bestIdx, i);
+				continue;
 			}
 
-			updateBestMove(moveList->scores, &bestIdx, i);
-			continue;
 		}
 
 		// castle move
-		if (currentMove & MCHECK_CAS) {
-			moveList->scores[i] = QUIET_SCORE + CASTLE_SCORE;
+		if (isCastling(currentMove)) {
+			moveList->scores[i] = CASTLE_SCORE;
 
 			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
 		// last resort: history heuristic
-		int histScore = histHeuristic[pieceAt(b, fromSq(currentMove))][toSq(currentMove)];
-		moveList->scores[i] = QUIET_SCORE + (histScore / 250);
+		int histScore = histHeuristic[b->stm][fromSq(currentMove)][toSq(currentMove)];
+		Assert(histScore >= 0);
+		moveList->scores[i] = QUIET_SCORE + (histScore);
+		Assert(moveList->scores[i] < COUNTER_SCORE);
+
 		updateBestMove(moveList->scores, &bestIdx, i);
 	}
 
@@ -258,5 +352,4 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 	//	moveList->moves[0] = moveList->moves[bestIdx];
 	//	moveList->moves[0] = temp;
 	//}
-
 }

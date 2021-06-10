@@ -2,6 +2,17 @@
 
 #include "defs.h"
 
+const bool validEnPas[64] = {
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	1, 1, 1, 1, 1, 1, 1, 1,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	1, 1, 1, 1, 1, 1, 1, 1,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0
+};
+
 /**
  * Checks if index is square on board.
  *
@@ -18,7 +29,9 @@ int squareOnBoard(int sq);
  *
  * @returns True if piece is valid.
  */
-int pieceValid(int piece);
+bool pieceValid(int piece);
+
+bool pieceValidPromotion(int piece);
 
 /**
  * File valid
@@ -37,3 +50,5 @@ bool fileValid(int file);
  * @returns True if move is neither NULL_MOVE, NO_MOVE and from and to square are legal.
  */
 bool pseudoValidBitMove(move_t move);
+
+bool validEnPasSq(int sq);

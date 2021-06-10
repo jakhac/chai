@@ -15,7 +15,7 @@ float interpolate(int a, int b, float t) {
 	return (float)a + t * ((float)b - (float)a);
 }
 
-int evalPST(board_t* b, int side, float* t) {
+value_t evalPST(board_t* b, int side, float* t) {
 	bitboard_t pieces;
 	int score = 0, kSq = getKingSquare(b, side), sq;
 
@@ -69,17 +69,17 @@ int evalPST(board_t* b, int side, float* t) {
 	return score;
 }
 
-int materialScore(board_t* b, int side) {
+value_t materialScore(board_t* b, int side) {
 	int score = 0;
 	for (int i = 1; i < 7; i++) {
-		score += countBits(getPieces(b, i, side)) * pieceScores[i];
+		score += countBits(getPieces(b, i, side)) * pieceValues[i];
 	}
 
 	return score;
 }
 
 // number of isolated pawns
-int isolatedPawns(board_t* b, int side) {
+value_t isolatedPawns(board_t* b, int side) {
 	int isolated = 0, sq;
 	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
 	bitboard_t refPawns = pawns;
@@ -95,7 +95,7 @@ int isolatedPawns(board_t* b, int side) {
 }
 
 // number of passed pawns
-int passedPawns(board_t* b, int side) {
+value_t passedPawns(board_t* b, int side) {
 	int passedScore = 0, sq;
 	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
 	bitboard_t oppPawns = getPieces(b, Piece::PAWN, side ^ 1);
@@ -110,7 +110,7 @@ int passedPawns(board_t* b, int side) {
 	return (int)interpolate(passedScore, scale(4, passedScore), (float)b->halfMoves);
 }
 
-int stackedPawn(board_t* b, int side) {
+value_t stackedPawn(board_t* b, int side) {
 	int stackedPenalty = 0;
 
 	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
@@ -123,7 +123,7 @@ int stackedPawn(board_t* b, int side) {
 	return stackedPenalty;
 }
 
-int pawnChain(board_t* b, int side) {
+value_t pawnChain(board_t* b, int side) {
 	int result = 0;
 	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
 	bitboard_t tPawns = pawns;
@@ -138,7 +138,7 @@ int pawnChain(board_t* b, int side) {
 	return result;
 }
 
-int openFilesRQ(board_t* b, int side) {
+value_t openFilesRQ(board_t* b, int side) {
 	int sq, score = 0;
 	bitboard_t pawns = b->pieces[Piece::PAWN];
 
@@ -169,12 +169,12 @@ int openFilesRQ(board_t* b, int side) {
 	return score;
 }
 
-int bishopPair(board_t* b, int side) {
+value_t bishopPair(board_t* b, int side) {
 	Assert(((bool)(countBits(getPieces(b, Piece::BISHOP, side)) >= 2)) * 30 <= 30);
 	return ((bool)(countBits(getPieces(b, Piece::BISHOP, side)) >= 2)) * 30;
 }
 
-int kingSafety(board_t* b, int side, float* t) {
+value_t kingSafety(board_t* b, int side, float* t) {
 	int result = 0;
 	int kSq = getKingSquare(b, side);
 	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
@@ -220,21 +220,20 @@ int kingSafety(board_t* b, int side, float* t) {
 	return result;
 }
 
-int mobility(board_t* b, int side, float* t) {
+value_t mobility(board_t* b, bool side, float* t) {
 	int mobility = 0;
-	int restoreSide = b->side;
-	int interpolFactor =
+	int restoreSide = b->stm;
 
-		// how many pieces are attacked by side
-		mobility += countBits(b->attackedSquares[side] & b->color[side ^ 1]) / 4;
+	// how many pieces are attacked by side
+	mobility += countBits(b->attackedSquares[side] & b->color[side ^ 1]) / 4;
 
 	// weighted sum of possible moves, reward knight, bishop and rook moves
 	moveList_t move_s[1];
 
 	// change side for move generation
-	if (b->side != side) b->side = side;
+	if (b->stm != side) b->stm = side;
 
-	if (b->side == WHITE) {
+	if (b->stm == WHITE) {
 		whiteSinglePawnPush(b, move_s);
 		whiteDoublePawnPush(b, move_s);
 		whitePawnCaptures(b, move_s);
@@ -261,7 +260,7 @@ int mobility(board_t* b, int side, float* t) {
 	addRookCaptures(b, move_s);
 	mobility += move_s->cnt / 3;
 	move_s->cnt = 0;
-	b->side = restoreSide;
+	b->stm = restoreSide;
 
 	return mobility;
 }
@@ -280,8 +279,8 @@ int scale(int scaler, int pressure) {
 	return scaledPressure;
 }
 
-int evaluatePawns(board_t* b, float* t) {
-	int score = 0;
+value_t evaluatePawns(board_t* b, float* t) {
+	value_t score = 0;
 
 	// lack of pawns penalty
 	if (!getPieces(b, Piece::PAWN, WHITE)) score -= 16;
@@ -299,7 +298,7 @@ int evaluatePawns(board_t* b, float* t) {
 	score += stackedPawn(b, WHITE) - stackedPawn(b, BLACK);
 
 	// pawn mobility
-	score += pawnChain(b, WHITE), -pawnChain(b, BLACK);
+	score += pawnChain(b, WHITE) - pawnChain(b, BLACK);
 
 	// rams
 
@@ -310,9 +309,9 @@ int evaluatePawns(board_t* b, float* t) {
 }
 
 
-int eval(board_t* b) {
-	int eval = 0;
-	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
+value_t evaluation(board_t* b) {
+	value_t eval = 0;
+	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
 	prefetchPawnEntry(b);
 
@@ -325,11 +324,11 @@ int eval(board_t* b) {
 	b->attackedSquares[WHITE] = attackerSet(b, WHITE);
 	b->attackedSquares[BLACK] = attackerSet(b, BLACK);
 
-	b->pawnTable->probed++;
-	int pawnEval = 0;
+	b->pt->probed++;
+	value_t pawnEval = 0;
 	bool foundHash = probePawnEntry(b, &pawnEval);
 	if (foundHash) {
-		b->pawnTable->hit++;
+		b->pt->hit++;
 	} else {
 		pawnEval = evaluatePawns(b, &interpolFactor);
 		storePawnEntry(b, pawnEval);
@@ -337,7 +336,7 @@ int eval(board_t* b) {
 
 	// squares controlled
 	int centerSquares = (countBits(b->attackedSquares[WHITE] & CENTER_SQUARES) -
-		countBits(b->attackedSquares[BLACK] & CENTER_SQUARES));
+						 countBits(b->attackedSquares[BLACK] & CENTER_SQUARES));
 	int surroundingSquares = countBits(b->attackedSquares[WHITE] & ~CENTER_SQUARES) -
 		countBits(b->attackedSquares[BLACK] & ~CENTER_SQUARES);
 	int kingSquares = countBits(b->attackedSquares[WHITE] & kingAtkMask[getKingSquare(b, WHITE)]) -
@@ -355,19 +354,19 @@ int eval(board_t* b) {
 	Assert(abs(eval) < ISMATE);
 
 	// white scores positive and black scores negative
-	int sign = (b->side == WHITE) ? 1 : -1;
+	int sign = (b->stm == WHITE) ? 1 : -1;
 	return eval * sign;
 }
 
-int lazyEvalulation(board_t* b) {
-	int eval = 0;
-	float interpolFactor = min(1, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
+value_t lazyEvaluation(board_t* b) {
+	value_t eval = 0;
+	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
 
-	b->pawnTable->probed++;
-	int pawnEval = 0;
+	b->pt->probed++;
+	value_t pawnEval = 0;
 	bool foundHash = probePawnEntry(b, &pawnEval);
 	if (foundHash) {
-		b->pawnTable->hit++;
+		b->pt->hit++;
 		eval += pawnEval;
 	}
 
@@ -377,29 +376,31 @@ int lazyEvalulation(board_t* b) {
 	Assert(abs(eval) < ISMATE);
 
 	// white scores positive and black scores negative
-	int sign = (b->side == WHITE) ? 1 : -1;
+	int sign = (b->stm == WHITE) ? 1 : -1;
 	return eval * sign;
 }
 
-int contemptFactor(board_t* b) {
-	if (insufficientMaterial(b)) {
-		return 0;
-	}
+value_t contemptFactor(board_t* b) {
 
-	int contempt = lazyEvalulation(b);
+	value_t contempt = lazyEvaluation(b);
 
-	switch (b->side) {
+	switch (b->stm) {
 		case WHITE:
 			return (contempt > 100) ? -50 : 0;
 			break;
 		case BLACK:
 			return (contempt < -100) ? 50 : 0;
 			break;
-		default: Assert(0) break;
 	}
+	return 0;
 }
 
 bool insufficientMaterial(board_t* b) {
+
+	// Trivial case, most likely to happen
+	if (countBits(b->occupied) > 5) {
+		return false;
+	}
 
 	// King vs King
 	if (countBits(b->occupied) == 2) {

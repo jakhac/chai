@@ -1,31 +1,27 @@
 #pragma once
 
-#include <stdint.h>
 
-#include "board.h"
+//#include <stdint.h>
+//#include "board.h"
 #include "moveGenerator.h"
 
-/*
-* Determines the number of buckets used in ttable.
-*/
-#define BUCKETS 1
 
-/**
- * Size of the transposition table.
- */
-const int ttSize = 0x100000 * 256;
+const size_t DEFAULT_TT_SIZE = 256;
+const size_t MIN_TT_SIZE = 2;
+const size_t MAX_TT_SIZE = 8192;
 
-/**
- * Size of the pawn table.
- */
-const int pawnTableSize = 0x100000 * 8;
+static int indexMask = 0;
+
+const size_t DEFAULT_PT_SIZE = 8;
+const size_t MAX_PT_SIZE = 16;
 
 /**
  * Initialize transposition table: Clear used or allocated memory and re-allocate.
  *
  * @param  pvTable_s Transposition table.
  */
-void initTT(ttable_t* pvTable_s);
+bool resizeTT(ttable_t* tt, pawntable_t* pt, size_t newMbSize);
+
 
 /**
  * Reset all variables in transposition table. Only used in initialization or new game.
@@ -52,7 +48,7 @@ void prefetchTTEntry(board_t* b);
  * @param  flag  Flag for score type.
  * @param  depth Depth used in search for move and score.
  */
-void storeTT(board_t* b, move_t move, int score, int flag, int depth);
+void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int flag, int depth);
 
 /**
  * Probe PV move from ttable.
@@ -70,7 +66,7 @@ move_t probePV(board_t* b);
  * @param  b	 The current board.
  * @param  score The score to check.
  */
-void hashToSearch(board_t* b, int* score);
+int hashToSearch(board_t* b, value_t score);
 
 /**
  * Checks if score from search is mate score. Update score according with ply to
@@ -79,7 +75,7 @@ void hashToSearch(board_t* b, int* score);
  * @param  b	 The current board.
  * @param  score The score to check.
  */
-void searchToHash(board_t* b, int* score);
+int searchToHash(board_t* b, value_t score);
 
 /**
  * Probe the transposition table. If a hash entry with equal zobristKey is found, all
@@ -94,7 +90,7 @@ void searchToHash(board_t* b, int* score);
  *
  * @returns True if hash entry was found, else false.
  */
-bool probeTT(board_t* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* hashDepth);
+bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int* hashDepth);
 
 /**
  * Walk through best move stored in transposition table to collect principal variation line.
@@ -105,13 +101,6 @@ bool probeTT(board_t* b, move_t* move, int* hashScore, uint8_t* hashFlag, int* h
  * @returns Length of principal variation found in ttable.
  */
 int getPVLine(board_t* b, const int maxDepth);
-
-/**
- * Initialize pawn table. Re-allocate memory.
- *
- * @param  pawnTable Pawn table declared in board.
- */
-void initPawnTable(pawntable_t* pawnTable);
 
 /**
  * Reset all variables used in pawn table. Only used before new game.
@@ -126,7 +115,7 @@ void clearPawnTable(pawntable_t* pawnTable);
  * @param  b    Current board.
  * @param  eval Score for pawn structure.
  */
-void storePawnEntry(board_t* b, const int eval);
+void storePawnEntry(board_t* b, const value_t eval);
 
 /**
  * Prefetch pawn entry in cache line using assembly instruction.
@@ -143,14 +132,14 @@ void prefetchPawnEntry(board_t* b);
  *
  * @returns True if hash was found and score is assigned.
  */
-bool probePawnEntry(board_t* b, int* hashScore);
+bool probePawnEntry(board_t* b, value_t* hashScore);
 
 /**
  * Free memory allocated for ttable and ptable.
  *
  * @param  b The board with both hash tables.
  */
-void destroyTranspositionTables(board_t* b);
+void freeTT(ttable_t* tt, pawntable_t* pt);
 
 
 void printTTStatus(board_t* b);

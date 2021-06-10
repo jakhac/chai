@@ -25,7 +25,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <ProjectName>Test</ProjectName>
+    <ProjectName>test</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -96,7 +96,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>attacks.obj;board.obj;defs.obj;move.obj;moveGenerator.obj;perft.obj;validate.obj;legalMoveGenerator.obj;search.obj;eval.obj;tt.obj;uci.obj;moveOrdering.obj;info.obj;mask.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>attacks.obj;board.obj;defs.obj;move.obj;moveGenerator.obj;perft.obj;validate.obj;search.obj;eval.obj;tt.obj;uci.obj;moveOrdering.obj;info.obj;mask.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>F:\SmartGit-Repositories\chai\chai\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

@@ -5,15 +5,15 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include <ctime>
+#include <chrono> // time measurement
 
-#include "move.h"
 #include "types.h"
 
 using namespace std;
 
 //#define TESTING
 //#define ASSERT
+// #define INFO
 
 /**
  * Write logging information into log.txt file.
@@ -21,33 +21,18 @@ using namespace std;
  * @param  logMsg Message to write into log file.
  */
 inline void logDebug(string logMsg, string file, string line) {
+#if defined(_MSC_VER)
 	time_t now = time(0);
 	tm gmtm[1];
-	char buffer[26];
-
+	char buffer[26]{};
 	gmtime_s(gmtm, &now);
 	asctime_s(buffer, gmtm);
-
-	ofstream ofs("assertLog.txt", std::ios_base::app | std::ios_base::app);
-
+	ofstream ofs("./assertLog.txt", std::ios_base::app);
 	string streamMsg = "At " + string(buffer) + " Error in:" + file + " at line " + line + "\n\n";
+	cout << streamMsg;
 	ofs << streamMsg;
 	ofs.close();
-}
-
-inline void logDebug(string logMsg) {
-	time_t now = time(0);
-	tm gmtm[1];
-	char buffer[26];
-
-	gmtime_s(gmtm, &now);
-	asctime_s(buffer, gmtm);
-
-	ofstream ofs("iid.txt", std::ios_base::app | std::ios_base::app);
-
-	string streamMsg = "At " + string(buffer) + logMsg + "\n\n";
-	ofs << streamMsg;
-	ofs.close();
+#endif
 }
 
 #ifndef ASSERT
@@ -67,13 +52,14 @@ exit(1); \
 
 const int NUM_SQUARES = 64;
 const int MAX_POSITION_MOVES = 256;
-const int NO_SCORE = 10000000;
-const int NO_MOVE = 0;
-const int NULL_MOVE = 129; // B1-B1 used as nullmove (impossible move, never generated)
+const int DEFAULT_EP_SQ = 65;
+const move_t NO_MOVE = 0;
+const move_t NULL_MOVE = 4095; // C1-C1 used as nullmove (impossible move, never generated)
 
-const int INF = 30000;
-const int MATE = 29000;
-const int ISMATE = MATE - (MAX_DEPTH * 2);
+const value_t INF = 32000;
+const value_t MATE_VALUE = 31000;
+const value_t ISMATE = MATE_VALUE - 1000;
+const value_t NO_VALUE = INF + 1;
 
 const bitboard_t RANK_1_HEX = 0xFF;
 const bitboard_t RANK_2_HEX = 0xFF00;
@@ -114,9 +100,6 @@ const string MID_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R 
 const string END_FEN_1 = "8/PPP4k/8/8/8/8/4Kppp/8 w - - 0 1";
 const string END_FEN_2 = "8/3K4/2p5/p2b2r1/5k2/8/8/1q6 b - - 1 67";
 const string END_FEN_3 = "8/7p/p5pb/4k3/P1pPn3/8/P5PP/1rB2RK1 b - d3 0 28";
-
-const string WAC11 = "r1b1k2r/ppppnppp/2n2q2/2b5/3NP3/2P1B3/PP3PPP/RN1QKB1R w KQkq - 0 1";
-const string WAC1 = "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - - 0 1";
 const string BUG_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string PIN_FEN = "r3k3/p1pp1p2/bn2pnp1/3PN3/Nb2r3/5Q1p/PPPBBPPP/R3K2R w KQq - 0 1";
 const string EP_CHECK_EVA = "r3k2r/pp1n1ppp/8/2pP1b2/2PK1NqP/1Q2P3/P5P1/2B2B1R w - c6 0 1";
@@ -131,8 +114,7 @@ const int pieceBishopQueen[13] = { 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0 };
 // victim scores used to calculate mvv lva score
 const int victimScore[13] = { 0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 };
 
-// index true if piece is big / maj / min /wb and value
-const int pieceScores[13] = { 0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000 };
+const int pieceValues[13] = { 0, 100, 325, 325, 550, 1000, 0, 100, 325, 325, 550, 1000, 0 };
 const int piecePawn[13] = { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
 
 // color for given index
@@ -140,9 +122,6 @@ const int pieceCol[13] = { BOTH, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK
 
 // Converts piece 1..12 to 1..6
 const int pieceType[13] = { 0, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6 };
-
-// contains piece slides for indexed piece
-const int pieceSlides[13] = { 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0 };
 
 // color to string
 const string colorString[2] = { "BLACK", "WHITE" };
@@ -152,7 +131,6 @@ const string pieceChar = ".PNBRQKpnbrqk";
 const string sideChar = "wb-";
 const string rankChar = "12345678";
 const string fileChar = "abcdefgh";
-const string gameStateStr[3] = { "OPENING", "MIDDLE GAME" , "ENDGAME" };
 
 const bitboard_t rand64();
 const bitboard_t randomFewBits();

@@ -2,65 +2,70 @@
 
 
 int main() {
+	cout << "CHAI " << VERSION << endl
+		<< "info: assert="
+#ifdef ASSERT
+		<< "1"
+#else
+		<< "0"
+#endif // ASSERT
+		<< " buckets=" << BUCKETS << endl;
+
+	cout << "compiler="
+#if defined(_MSC_VER)
+		<< "MSVC"
+#elif defined(__GNUC__)
+		<< "GCC"
+#endif
+		<< " date=" << __DATE__
+		<< endl;
+
 	init(&board);
 	parseFen(&board, STARTING_FEN);
-	//parseFen(&board, BUG_FEN);
-	//parseFen(&board, "3r1k2/1q1P4/5b2/p3p2p/1p6/1B3P2/PPPQ4/1K1R4 w - - 1 0");
+
+#ifdef INFO
 	printBoard(&board);
+#endif // INFO
 
-	//moveList_t moveList[1];
-	//generateMoves(&board, moveList, board.isCheck(board.side));
-	//addKingCheckEvasions(&board, moveList);
-	//printGeneratedMoves(moveList);
-	//return 0;
+	cli(b, &perft, s);
 
-	play(&board, &perft, s);
-
-	destroyTranspositionTables(&board);
+	freeTT(b->tt, b->pt);
 	return 0;
 }
 
-void play(board_t* b, Perft* p, search_t* s) {
-	string m;
+void cli(board_t* b, Perft* p, search_t* s) {
+	string userInput;
 
-	while (true) {
-		cout << "\n##################\n\n";
-		getline(cin, m);
+	while (1) {
+		cin >> userInput;
+
+		// start UCI protocol
+		if (userInput == "uci") {
+			uciMode(b, s);
+			continue;
+		}
+
+		if (userInput == "quit") {
+			return;
+		}
+
+		if (userInput == "test") {
+			continue;
+		}
 
 		// POP MOVE FROM BOARD
-		if (m == "pop") {
+		if (userInput == "pop") {
 			undo_t undoPop = pop(b);
-			cout << "Popped " << getStringMove(undoPop.move) << " from stack." << endl;
+			cout << "Popped " << getStringMove(b, undoPop.move) << " from stack." << endl;
 			printBoard(b);
 			continue;
 		}
 
-		if (m == "autoplay") {
-			while (true) {
-				s->depth = 7;
-				s->startTime = getTimeMs();
-				s->stopTime = getTimeMs() + 10000;
-
-				s->timeSet = true;
-				s->depthSet = false;
-				search(b, s);
-
-				getPVLine(b, s->depth);
-
-				moveList_t move_s[1];
-				generateMoves(b, move_s, isCheck(b, b->side));
-				push(b, move_s->moves[move_s->cnt / 3]);
-				cout << "Push move " << b->halfMoves << ". " << getStringMove(move_s->moves[move_s->cnt / 2]) << endl;
-				printBoard(b);
-				cout << "###############" << endl;
-			}
-		}
-
-		// SEARCH POSITION
-		if (m == "s") {
-			s->depth = 12;
+		// start searching this position
+		if (userInput == "s") {
+			s->depth = 15;
 			s->startTime = getTimeMs();
-			s->stopTime = getTimeMs() + 5000;
+			s->stopTime = getTimeMs() + 10000;
 
 			s->timeSet = false;
 			s->depthSet = true;
@@ -68,97 +73,78 @@ void play(board_t* b, Perft* p, search_t* s) {
 			continue;
 		}
 
-		if (m == "uci") {
-			uciMode(b, s);
-		}
+		if (userInput == "perft") {
+			cout << "Enter perft depth: ";
 
-		// PRINT PV LINE FROM CURRENT BOARD
-		if (m == "pv") {
-			int d = getPVLine(b, MAX_DEPTH);
-			cout << "PV line length " << d << endl;
-			for (int i = 0; i < d; i++) {
-				cout << "Best move " << i << " is: " << getStringMove(b->pvArray[i]) << endl;
+			string perftDepth;
+			cin >> perftDepth;
+
+			if (stoi(perftDepth) >= 1 && stoi(perftDepth) <= 15) {
+				dividePerft(b, stoi(perftDepth));
 			}
 			continue;
 		}
 
-		if (m == "perft") {
-			cout << "Perft this position to depth ";
-			getline(cin, m);
-			if (stoi(m) >= 1 && stoi(m) <= 15) {
-				dividePerft(b, "-1", stoi(m));
-			}
+		if (userInput == "movegen") {
+			moveList_t moveList[1];
+			generateMoves(&board, moveList, isCheck(&board, board.stm));
+			printGeneratedMoves(b, moveList);
 			continue;
 		}
 
-		if (m == "fen") {
+		if (userInput == "fen") {
 			cout << "Enter FEN: ";
 			cin.ignore();
-			getline(cin, m);
-			cout << "Parsed FEN \"" << m << "\" into board." << endl;
-			parseFen(b, m);
+			getline(cin, userInput);
+			cout << "Parsed FEN \"" << userInput << "\" into board." << endl;
+			parseFen(b, userInput);
 			printBoard(b);
 			continue;
 		}
 
-		if (m == "reps") {
-			cout << "board_t is three fold repetition " << isThreeFoldRepetition(b) << endl;
-			cout << "board_t is repetition " << isRepetition(b) << endl;
+		if (userInput == "print") {
+			printBoard(b);
+			continue;
 		}
 
-		if (m == "0000") {
+		if (userInput == "0000") {
 			pushNull(b);
-
-			cout << "Pushed " << getStringMove(parseMove(b, m)) << " on board." << endl;
-			printBoard(b);
-
-			continue;
 		}
 
-		if (m == "p") {
-			printBoard(b);
-			continue;
-		}
-
-		// PUSH MOVE IN ALGEBRAIC NOTATION
-		moveList_t _move_s[1];
-		generateMoves(b, _move_s, isCheck(b, b->side));
-
-		int parsedMove = parseMove(b, m);
-		bool flag_found = false;
-		for (int i = 0; i < _move_s->cnt; i++) {
-			if (parsedMove == _move_s->moves[i]) {
-				flag_found = true;
-				//storeTT(b, parsedMove);
-
-				if (!push(b, parsedMove)) {
-					cout << "Move " << getStringMove(parsedMove) << " remains check or is no valid move. Try again." << endl;
-					continue;
-				}
-
-				if (isThreeFoldRepetition(b)) {
-					cout << "Position was repeated the third time. Both players can claim draw." << endl;
-				}
-
-				cout << "Pushed " << getStringMove(parsedMove) << " on board." << endl;
-				printBoard(b);
+		// Assume userInput is a move
+		generateMoves(b, move_s, isCheck(b, b->stm));
+		int parsedMove = parseMove(b, userInput);
+		bool inputIsMove = false;
+		for (int i = 0; i < move_s->cnt; i++) {
+			if (parsedMove == move_s->moves[i]) {
+				inputIsMove = true;
 				break;
 			}
 		}
 
-		if (!flag_found) cout << "Move or command not valid. Try again." << endl;
+		if (inputIsMove) {
+			push(b, parsedMove);
+			printBoard(b);
+			continue;
+		}
+
+		cout << "Command does not exist. Valid commands are:" << endl
+			<< "\tuci\t(start uci protocol)" << endl
+			<< "\ts\t(search current position)" << endl
+			<< "\t[move]\t(apply move)" << endl
+			<< "\tpop\t(undo move)" << endl
+			<< "\tfen\t(parse fen)" << endl
+			<< "\tprint\t(print board status)" << endl
+			<< "\tperft\t(perft this position)" << endl
+			<< "\tquit\t(exit program)" << endl
+			<< endl;
 	}
 }
 
-void dividePerft(board_t* b, string fen, int depth) {
+void dividePerft(board_t* b, int depth) {
 
 	string move = "";
 	Perft p;
-
-	// parse fen if valid
-	if (fen != "-1") {
-		parseFen(b, fen);
-	}
 
 	while (depth) {
 
@@ -171,7 +157,7 @@ void dividePerft(board_t* b, string fen, int depth) {
 		p.perftRoot(b, depth);
 
 		cout << "\nDivide at move ";
-		getline(cin, move);
+		cin >> move;
 
 		if (move == "quit") {
 			return;

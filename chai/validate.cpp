@@ -4,8 +4,15 @@ int squareOnBoard(int sq) {
 	return ((sq >= 0) && (sq <= 64));
 }
 
-int pieceValid(int piece) {
+bool pieceValid(int piece) {
 	return ((piece >= 1) && (piece <= 13));
+}
+
+bool pieceValidPromotion(int piece) {
+	return piece == Piece::q || piece == Piece::r
+		|| piece == Piece::b || piece == Piece::n
+		|| piece == Piece::Q || piece == Piece::R
+		|| piece == Piece::B || piece == Piece::N;
 }
 
 bool fileValid(int file) {
@@ -18,4 +25,8 @@ bool pseudoValidBitMove(move_t move) {
 	}
 
 	return false;
+}
+
+bool validEnPasSq(int sq) {
+	return validEnPas[sq];
 }

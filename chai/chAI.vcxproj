@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;V=4;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard>stdcpp14</LanguageStandard>
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
@@ -156,7 +156,6 @@
     <ClInclude Include="defs.h" />
     <ClInclude Include="eval.h" />
     <ClInclude Include="info.h" />
-    <ClInclude Include="legalMoveGenerator.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="mask.h" />
     <ClInclude Include="move.h" />
@@ -177,7 +176,6 @@
     <ClCompile Include="defs.cpp" />
     <ClCompile Include="eval.cpp" />
     <ClCompile Include="info.cpp" />
-    <ClCompile Include="legalMoveGenerator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mask.cpp" />
     <ClCompile Include="move.cpp" />

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "search.h"
+#include "uci.h"
 
 namespace {
 	class Zugzwang : public ::testing::Test {
@@ -9,19 +10,8 @@ namespace {
 
 		virtual void SetUp() {
 			pBoard = new board_t();
-			initHashKeys(pBoard);
 
-			initClearSetMask();
-			initSquareToRankFile();
-			initAttackerMasks();
-
-			initRookMasks();
-			initRookMagicTable();
-			initBishopMasks();
-			initBishopMagicTable();
-
-			initObstructed();
-			initLine();
+			init(pBoard);
 		}
 
 		virtual void TearDown() {
