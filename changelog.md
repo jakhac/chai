@@ -174,7 +174,7 @@
   - [x] Consider `IS_PV` and `NO_PV` in pruning decisions
   - [x] Late Move Reductions
   - [x] Refactor quiescence: Checkmate detection and standPat pruning
-  - [x] Interal Iterative Deepening considers node type
+  - [x] Interal Iterative Deepening, reduction style
   - [x] Check for repetition before probing ttable
   - [x] Queen prom only in quiescence
   - [x] Search Stack
@@ -186,8 +186,7 @@
   - [x] Replaced `pvLine_t` with `printTTablePV()`
   - [x] Remove `pvLine_t` lines from function signatures
   - [x] UCI currentMove and move number
-  - [x] UCI refactor uci calls (to be executed without order) and cli
-  - [x] `alphaBetaRoot()` function for save mate/draw detection and bestMove
+  - [x] UCI refactor calls (to be executed without order) and cli
   - [x] Templates for `alphaBeta()` and `quiescence()`
   - [x] Retrieve pv-line from pv-structs
   - [x] Search Stack
