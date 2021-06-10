@@ -151,10 +151,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	Assert(checkBoard(b));
 	Assert(alpha < beta);
 
-	// TODO 2.5.5
-	// Code cleanup:
-	// clean repo: googletest name, vcxproj issue
-
 	// Initialize node
 	bool rootNode = b->ply == 0;
 	bool pvNode = nodeType == PV;
@@ -815,7 +811,7 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	Assert(abs(bestValue) < INF);
 
 	return bestValue;
-}
+	}
 
 void clearForSearch(board_t* b, search_t* s) {
 	b->ply = 0;

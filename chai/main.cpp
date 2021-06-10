@@ -25,14 +25,6 @@ int main() {
 	//parseFen(&board, BUG_FEN);
 	//parseFen(&board, "8/8/8/8/b7/4k3/4n1K1/8 b - - 55 28");
 
-	//while (1) {
-	//	int newMbSize;
-	//	cin >> newMbSize;
-	//	cout << "newMB " << newMbSize << endl;
-	//	resizeTT(b->tt, b->pt, newMbSize);
-	//}
-
-
 #ifdef INFO
 	printBoard(&board);
 #endif // INFO
