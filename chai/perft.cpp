@@ -6,7 +6,7 @@ long long Perft::perftRoot(board_t* b, int depth) {
 	auto start = std::chrono::high_resolution_clock::now();
 
 	leafNodes = 0;
-	bool inCheck = isCheck(b, b->side);
+	bool inCheck = isCheck(b, b->stm);
 	moveList_t _moveList[1];
 	generateMoves(b, _moveList, inCheck);
 
@@ -23,11 +23,11 @@ long long Perft::perftRoot(board_t* b, int depth) {
 			continue;
 		}
 
-		if (isCheck(b, b->side) != moveGivesCheck) {
+		if (isCheck(b, b->stm) != moveGivesCheck) {
 			cout << "error in moveGivesCheck" << endl;
 			exit(1);
 		}
-		Assert(isCheck(b, b->side) == moveGivesCheck);
+		Assert(isCheck(b, b->stm) == moveGivesCheck);
 
 		long long cumnodes = leafNodes;
 		perft(b, depth - 1);
@@ -52,11 +52,11 @@ void Perft::perft(board_t* b, int depth) {
 		return;
 	}
 
-	bool inCheck = isCheck(b, b->side);
+	bool inCheck = isCheck(b, b->stm);
 	moveList_t _moveList[1];
 	generateMoves(b, _moveList, inCheck);
 
-	Assert(attackerSet(b, b->side ^ 1) == _moveList->attackedSquares);
+	Assert(attackerSet(b, b->stm ^ 1) == _moveList->attackedSquares);
 
 	int move;
 	for (int i = 0; i < _moveList->cnt; i++) {
@@ -70,7 +70,7 @@ void Perft::perft(board_t* b, int depth) {
 			continue;
 		}
 
-		if (isCheck(b, b->side) != moveGivesCheck) {
+		if (isCheck(b, b->stm) != moveGivesCheck) {
 			cout << "error in moveGivesCheck" << endl;
 			pop(b);
 			printBoard(b);
@@ -79,7 +79,7 @@ void Perft::perft(board_t* b, int depth) {
 			cout << "fen " << getFEN(b) << endl;
 			exit(1);
 		}
-		Assert(isCheck(b, b->side) == moveGivesCheck);
+		Assert(isCheck(b, b->stm) == moveGivesCheck);
 
 		perft(b, depth - 1);
 		pop(b);

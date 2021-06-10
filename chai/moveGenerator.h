@@ -3,19 +3,63 @@
 #include "board.h"
 #include "attacks.h"
 
+/**
+ * Generate all moves for current position. Runs check evasions if inCheck is true.
+ *
+ * @param b
+ * @param moveList
+ * @param inCheck
+ */
 void generateMoves(board_t* b, moveList_t* moveList, bool inCheck);
 
+/**
+ * Generate tactical moves for quiescence search. If inCheck, all evading moves are generated.
+ *
+ * @param b
+ * @param moveList
+ * @param inCheck
+ */
 void generateQuiescence(board_t* b, moveList_t* moveList, bool inCheck);
 
-// generates only legal moves!
+/**
+ * Generate all check evasions. All moves generated here are legal!
+ *
+ * @param b
+ * @param moveList
+ */
 void generateCheckEvasions(board_t* b, moveList_t* moveList);
 
+/**
+ * Generate all check moves delivering check.
+ *
+ * @param b
+ * @param moveList
+ */
 void generateQuietCheckers(board_t* b, moveList_t* moveList);
 
+/**
+ * Check if a given move is pseudo-legal (might still hang king).
+ *
+ * @param b
+ * @param moveList
+ */
 bool isLegal(board_t* b, const move_t move);
 
+/**
+ * Check if the current position has a safe pawn push:
+ * - Without being captured immediatly after
+ * - No obvious blocks or rams in front
+ *
+ * @param b
+ * @param side
+ */
 bitboard_t hasSafePawnPush(board_t* b, int side);
 
+/**
+ * Check if a position that is already in check has an evading move.
+ *
+ * @param b
+ */
 bool hasEvadingMove(board_t* b);
 
 /**

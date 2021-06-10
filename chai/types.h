@@ -58,6 +58,12 @@ struct searchStack_t {
 	move_t* pvLine;
 };
 
+typedef enum nodeType_t {
+	PV,
+	NoPV,
+	AllNode
+} nodeType_t;
+
 /**
  * Transposition table entry.
  */
@@ -124,7 +130,7 @@ struct pawntable_t {
 
 struct board_t {
 	// Current side, 0 for black and 1 for white. Use enums for debug purpose.
-	bool side;
+	bool stm;
 
 	// Current en passant square. 0, if not set.
 	int enPas;

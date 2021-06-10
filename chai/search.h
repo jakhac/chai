@@ -22,42 +22,23 @@
 
 #define RAZOR_DEPTH 3
 
-/**
- * Maximum ply reached in alphaBeta and quiescence search.
- */
-extern int selDepth;
+// Maximum ply reached in alphaBeta and quiescence search.
+static int selDepth;
 
-/**
- * Maximum score before rescale in history heuristic. Max history score needs to be less than 10000
- * because move ordering scores "QUIET_SCORES=5000 + hist/10" before COUNTER_SCORE=6000.
- */
+// Maximum score before rescale in history heuristic. Max history score needs to be less than 10000
+// because move ordering scores "QUIET_SCORES=5000 + hist/10" before COUNTER_SCORE=6000.
 const int HISTORY_MAX = 1000 - 1;
-
-/**
-  Principal variation line used for root alphaBeta call. Contains main line after search finished.
-*/
-//static pv_line_t pvLine[1];
 
 // Search stack used for all searches
 static searchStack_t sStack[MAX_GAME_MOVES];
 
 static const int moveCountPruningDepth = 5;
-
 static int moveCountPruning[moveCountPruningDepth];
 
 /**
- * Remember checks given in quiescence to detect checkmates. Quiescence depths are stored
- * as absolute values.
+ * Initialize some search parameters like MCP values.
  */
-static int quiescenceChecks[MAX_DEPTH];
-
-//int alphaBetaRoot(board_t* b, search_t* s, int depth, move_t* move);
-
-typedef enum nodeType_t {
-	PV,
-	NoPV,
-	AllNode
-} nodeType_t;
+void initSearch();
 
 /**
  * Alpha beta algorithm root. Searches current board for best move and score.
@@ -67,9 +48,6 @@ typedef enum nodeType_t {
  * @param  depth  Current depth.
  * @param  b	  Current board.
  * @param  s	  Search info containing search parameters.
- * @param  nullOk Enables null move pruning in node.
- * @param  pvNode Determines the current node type.
- * @param  pvLine The pv line.
  *
  * @returns Best score found in search.
  */
@@ -82,6 +60,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
  *
  * @param  alpha Lower bound, minimum score the side is assured of.
  * @param  beta  Upper bound, maximum score the opponent is assured of.
+ * @param  depth  Current depth. Initial calls have depth=0
  * @param  b	 Current board.
  * @param  s	 Search info containing search parameters.
  *
@@ -121,16 +100,6 @@ int search_aspiration(board_t* b, search_t* s, int depth, int bestScore);
  * @returns True if repetition is found in undoPly array, else false.
  */
 bool isRepetition(board_t* b);
-
-/**
- * Counts repetitions of current board (excluding current position).
- * Return value greater equal 2 means 3-fold-repetition.
- *
- * @param  b Current board.
- *
- * @returns True if three fold repetition is found, else false.
- */
-int getRepetitions(board_t* b);
 
 /**
  * Checks if current position might be a zugzwang. Considers endgame

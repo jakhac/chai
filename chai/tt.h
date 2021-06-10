@@ -12,9 +12,6 @@ const size_t MAX_TT_SIZE = 8192;
 
 static int indexMask = 0;
 
-/**
- * Size of the pawn table.
- */
 const size_t DEFAULT_PT_SIZE = 8;
 const size_t MAX_PT_SIZE = 16;
 

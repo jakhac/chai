@@ -11,16 +11,19 @@ int main() {
 #endif // ASSERT
 		<< " buckets=" << BUCKETS << endl;
 
-	//#if defined(_MSC_VER)
-	//	cout << "MSCV is defined" << endl;
-	//#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
-	//	cout << "GNUC is defined" << endl;
-	//#endif
+	cout << "compiler="
+#if defined(_MSC_VER)
+		<< "MSVC"
+#elif defined(__GNUC__)
+		<< "GCC"
+#endif
+		<< " date=" << __DATE__
+		<< endl;
 
 	init(&board);
 	parseFen(&board, STARTING_FEN);
 	//parseFen(&board, BUG_FEN);
-	//parseFen(&board, "r7/3bb1kp/q4p1N/1pnPp1np/2p4Q/2P5/1PB3P1/2B2RK1 w - - 1 0");
+	//parseFen(&board, "8/8/8/8/b7/4k3/4n1K1/8 b - - 55 28");
 
 	//while (1) {
 	//	int newMbSize;
@@ -94,7 +97,7 @@ void cli(board_t* b, Perft* p, search_t* s) {
 
 		if (userInput == "movegen") {
 			moveList_t moveList[1];
-			generateMoves(&board, moveList, isCheck(&board, board.side));
+			generateMoves(&board, moveList, isCheck(&board, board.stm));
 			printGeneratedMoves(b, moveList);
 			continue;
 		}
@@ -119,7 +122,7 @@ void cli(board_t* b, Perft* p, search_t* s) {
 		}
 
 		// Assume userInput is a move
-		generateMoves(b, move_s, isCheck(b, b->side));
+		generateMoves(b, move_s, isCheck(b, b->stm));
 		int parsedMove = parseMove(b, userInput);
 		bool inputIsMove = false;
 		for (int i = 0; i < move_s->cnt; i++) {

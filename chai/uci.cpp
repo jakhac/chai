@@ -104,10 +104,10 @@ void uciParseGo(board_t* b, search_t* s, string cmd) {
 
 	for (int i = 0; i < tokens.size() - 1; i++) {
 		if (tokens[i] == "infinite") continue;
-		if (tokens[i] == "binc" && b->side == BLACK) inc = stoi(tokens[i + 1]);
-		if (tokens[i] == "winc" && b->side == WHITE) inc = stoi(tokens[i + 1]);
-		if (tokens[i] == "btime" && b->side == BLACK) time = stoi(tokens[i + 1]);
-		if (tokens[i] == "wtime" && b->side == WHITE) time = stoi(tokens[i + 1]);
+		if (tokens[i] == "binc" && b->stm == BLACK) inc = stoi(tokens[i + 1]);
+		if (tokens[i] == "winc" && b->stm == WHITE) inc = stoi(tokens[i + 1]);
+		if (tokens[i] == "btime" && b->stm == BLACK) time = stoi(tokens[i + 1]);
+		if (tokens[i] == "wtime" && b->stm == WHITE) time = stoi(tokens[i + 1]);
 		if (tokens[i] == "movestogo") movesLeft = stoi(tokens[i + 1]);
 		if (tokens[i] == "movetime") moveTime = stoi(tokens[i + 1]);
 		if (tokens[i] == "depth") depth = stoi(tokens[i + 1]);
@@ -169,6 +169,7 @@ void init(board_t* b) {
 
 	initObstructed();
 	initLine();
+	initSearch();
 
 #ifdef INFO
 	auto stop = std::chrono::high_resolution_clock::now();

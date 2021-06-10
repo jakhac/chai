@@ -72,7 +72,7 @@ value_t evalPST(board_t* b, int side, float* t) {
 value_t materialScore(board_t* b, int side) {
 	int score = 0;
 	for (int i = 1; i < 7; i++) {
-		score += countBits(getPieces(b, i, side)) * pieceScores[i];
+		score += countBits(getPieces(b, i, side)) * pieceValues[i];
 	}
 
 	return score;
@@ -222,8 +222,7 @@ value_t kingSafety(board_t* b, int side, float* t) {
 
 value_t mobility(board_t* b, bool side, float* t) {
 	int mobility = 0;
-	int restoreSide = b->side;
-	//int interpolFactor = // TODO ?
+	int restoreSide = b->stm;
 
 	// how many pieces are attacked by side
 	mobility += countBits(b->attackedSquares[side] & b->color[side ^ 1]) / 4;
@@ -232,9 +231,9 @@ value_t mobility(board_t* b, bool side, float* t) {
 	moveList_t move_s[1];
 
 	// change side for move generation
-	if (b->side != side) b->side = side;
+	if (b->stm != side) b->stm = side;
 
-	if (b->side == WHITE) {
+	if (b->stm == WHITE) {
 		whiteSinglePawnPush(b, move_s);
 		whiteDoublePawnPush(b, move_s);
 		whitePawnCaptures(b, move_s);
@@ -261,7 +260,7 @@ value_t mobility(board_t* b, bool side, float* t) {
 	addRookCaptures(b, move_s);
 	mobility += move_s->cnt / 3;
 	move_s->cnt = 0;
-	b->side = restoreSide;
+	b->stm = restoreSide;
 
 	return mobility;
 }
@@ -355,7 +354,7 @@ value_t evaluation(board_t* b) {
 	Assert(abs(eval) < ISMATE);
 
 	// white scores positive and black scores negative
-	int sign = (b->side == WHITE) ? 1 : -1;
+	int sign = (b->stm == WHITE) ? 1 : -1;
 	return eval * sign;
 }
 
@@ -377,7 +376,7 @@ value_t lazyEvaluation(board_t* b) {
 	Assert(abs(eval) < ISMATE);
 
 	// white scores positive and black scores negative
-	int sign = (b->side == WHITE) ? 1 : -1;
+	int sign = (b->stm == WHITE) ? 1 : -1;
 	return eval * sign;
 }
 
@@ -385,7 +384,7 @@ value_t contemptFactor(board_t* b) {
 
 	value_t contempt = lazyEvaluation(b);
 
-	switch (b->side) {
+	switch (b->stm) {
 		case WHITE:
 			return (contempt > 100) ? -50 : 0;
 			break;

@@ -309,7 +309,7 @@ void storePawnEntry(board_t* b, const value_t eval) {
 void prefetchPawnEntry(board_t* b) {
 	int index = b->zobristPawnKey % b->pt->entries;
 #ifdef __GNUC__
-	__builtin_prefetch(&b->pawnTable->table[index]);
+	__builtin_prefetch(&b->pt->table[index]);
 #else
 	_m_prefetch(&b->pt->table[index]);
 #endif

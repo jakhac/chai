@@ -1,46 +1,214 @@
-CXX := g++
-TARGET_EXEC := chai_g++
+.DEFAULT_GOAL := default
+
+VERSION = 2.5
+
+EXE = chai_$(VERSION)_$(CXX).exe
+
+optimize = yes
+debug = no
+bits = 64
+prefetch = no
+popcnt = no
+sse = no
+sse2 = no
+ssse3 = no
+sse41 = no
+pext = no
+avx2 = no
+
+# Set architecture
+ifeq ($(ARCH),x86-64-popc)
+	arch = x86_64
+	bits = 64
+	prefetch = yes
+	popcnt = yes
+	sse = yes
+	sse2 = yes
+	ssse3 = yes
+	sse41 = yes
+endif
+
+ifeq ($(ARCH),x86-64-avx2)
+	arch = x86_64
+	bits = 64
+	prefetch = yes
+	popcnt = yes
+	sse = yes
+	sse2 = yes
+	ssse3 = yes
+	sse41 = yes
+	avx2 = yes
+endif
+
+ifeq ($(ARCH),x86-64-bmi2)
+	arch = x86_64
+	bits = 64
+	prefetch = yes
+	popcnt = yes
+	sse = yes
+	sse2 = yes
+	ssse3 = yes
+	sse41 = yes
+	avx2 = yes
+	pext = yes
+endif
+
+ifeq ($(ARCH),)
+	arch = x86_64
+	bits = 64
+	prefetch = yes
+	popcnt = yes
+	sse = yes
+	sse2 = yes
+	ssse3 = yes
+	sse41 = yes
+	avx2 = yes
+	pext = yes
+endif
+
+# Define INFO for additional messages on runtime
+# ifeq ($(INFO),yes)
+# 	CFLAGS =-DINFO
+# endif
+
+CXXFLAGS += -Wcast-qual -fno-exceptions
+DEPENDFLAGS += -std=c++17
+
+# Set compiler
+ifeq ($(CXX),)
+	CXX=g++
+endif
+
+ifeq ($(CXX),g++)
+	CXX=g++
+endif
+
+ifeq ($(CXX),clang++)
+	CXX=clang++
+endif
+
+# Set flags according to architecture options
+ifeq ($(INFO),yes)
+	CXXFLAGS += -DINFO=
+endif
+
+ifeq ($(optimize),yes)
+	CXXFLAGS += -O3
+endif
+
+ifeq ($(bits),64)
+	CXXFLAGS += -DIS_64_BIT
+endif
+
+ifeq ($(prefetch),yes)
+	ifeq ($(sse),yes)
+		CXXFLAGS += -msse
+		DEPENDFLAGS += -msse
+	endif
+else
+	CXXFLAGS += -DNO_PREFETCH
+endif
+
+ifeq ($(popcnt),yes)
+	ifeq ($(bits),64)
+		CXXFLAGS += -msse3 -mpopcnt -DUSE_POPCNT
+	else
+		CXXFLAGS += -mpopcnt -DUSE_POPCNT
+	endif
+endif
+
+ifeq ($(avx2),yes)
+	CXXFLAGS += -DUSE_AVX2
+	CXXFLAGS += -mavx2
+endif
+ifeq ($(pext),yes)
+	CXXFLAGS += -DUSE_PEXT
+	CXXFLAGS += -mbmi -mbmi2
+endif
+
+CXXFLAGS += -flto
+LDFLAGS += $(CXXFLAGS) # $(CFLAGS)
 
 BUILD_DIR := ./build
-SRC_DIRS := ./chai
+SRC_DIR := ./chai
 
-# Find all the C and C++ files we want to compile
-# SRCS := $(shell find $(SRC_DIRS) -name *.cpp)
-SRCS := $(wildcard $(SRC_DIRS)/*.cpp)
+CPP = $(wildcard $(SRC_DIR)/*.cpp)
 
-# String substitution for every C/C++ file.
-# As an example, hello.cpp turns into ./build/hello.cpp.o
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+# All .o files go to build dir.
+OBJ = $(CPP:%.cpp=$(BUILD_DIR)/%.o)
+# Gcc/Clang will create these .d files containing dependencies.
+DEP = $(OBJ:%.o=%.d)
 
-# String substitution (suffix version without %).
-# As an example, ./build/hello.cpp.o turns into ./build/hello.cpp.d
-DEPS := $(OBJS:.o=.d)
+# Default target: chai.exe
+$(EXE):$(BUILD_DIR)/$(EXE)
 
-# Every folder in ./src will need to be passed to GCC so that it can find header files
-# INC_DIRS := $(shell find $(SRC_DIRS) -type d)
-INC_DIRS := $(wildcard $(SRC_DIRS)/*.d)
-# Add a prefix to INC_DIRS. So moduleA would become -ImoduleA. GCC understands this -I flag
-INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+# Target binary depends on all .o files.
+$(BUILD_DIR)/$(EXE): $(OBJ)
+	$(CXX) $(LDFLAGS) $^ -o $@
 
-# The -MMD and -MP flags together generate Makefiles for us!
-# These files will have .d instead of .o as the output.
-CPPFLAGS := $(INC_FLAGS) -MMD -MP
-CPPFLAGS += -Wswitch-bool -std=c++14 -march=native -O3
+# Build out files from src with dependecies
+$(BUILD_DIR)/%.o: %.cpp
+	$(CXX) $(LDFLAGS) -MMD -c $< -o $@
 
-# The final build step.
-$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) -o $@ $(LDFLAGS)
-
-# Build step for C++ source
-$(BUILD_DIR)/%.cpp.o: %.cpp createDir
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
-
-createDir:
-	rmdir /S /Q $(subst ./,,$(BUILD_DIR))
-	mkdir build\chai
-
-.PHONY: clean
+# Remove all generated files.
 clean:
-	rmdir /S /Q $(subst ./,,$(BUILD_DIR))
+	del /Q $(subst /,\,$(BUILD_DIR)\$(EXE)) 2>nul
+	del /Q $(subst /,\,.\$(OBJ))
+	del /Q $(subst /,\,.\$(DEP))
 
--include $(DEPS)
+default:
+	$(MAKE) help
+
+build:
+	$(MAKE) ARCH=$(ARCH) CXX=$(CXX) config
+	$(MAKE) ARCH=$(ARCH) CXX=$(CXX) $(EXE)
+
+
+help:
+	@echo ""
+	@echo "To compile chai, type: "
+	@echo "make build [ARCH=arch] [CXX=cxx] [INFO=yes|no]"
+	@echo ""
+	@echo "Supported targets:"
+	@echo "build                   > Default build"
+	@echo "clean                   > Clean up"
+	@echo "help                    > Compiler options"
+	@echo ""
+	@echo "Supported architectures:"
+	@echo "x86-64-popc             > x86 64-bit with popcnt support"
+	@echo "x86-64-avx2             > x86 64-bit with avx2 support"
+	@echo "x86-64-bmi2(default)    > x86 64-bit with bmi2 support"
+	@echo ""
+	@echo "Supported compilers:"
+	@echo "g++ (default)
+	@echo "clang++"
+	@echo ""
+
+
+config:
+	@echo ""
+	@echo "Settings:"
+	@echo "debug: '$(debug)'"
+	@echo "optimize: '$(optimize)'"
+	@echo "arch: '$(arch)'"
+	@echo "bits: '$(bits)'"
+	@echo "prefetch: '$(prefetch)'"
+	@echo "popcnt: '$(popcnt)'"
+	@echo "sse: '$(sse)'"
+	@echo "sse2: '$(sse2)'"
+	@echo "ssse3: '$(ssse3)'"
+	@echo "sse41: '$(sse41)'"
+	@echo "avx2: '$(avx2)'"
+	@echo "pext: '$(pext)'"	
+	@echo ""
+	@echo "Compiler:"
+	@echo "CXX: $(CXX)"
+	@echo "CXXFLAGS: $(CXXFLAGS)"
+	@echo "DEPENDFLAGS: $(DEPENDFLAGS)"
+	@echo ""
+
+
+# Include all .d files
+-include $(DEP)
+
+.PHONY: clean build all default config

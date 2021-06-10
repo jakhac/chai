@@ -32,7 +32,7 @@ int see(board_t* b, const int move) {
 	int to = toSq(move);
 	int attackerPiece = pieceAt(b, fromSq(move));
 	int movingPiece = attackerPiece;
-	int gain[32]{}, d = 0, side = b->side;
+	int gain[32]{}, d = 0, side = b->stm;
 
 	bitboard_t occ = b->occupied;
 	bitboard_t mayXray = b->pieces[Piece::PAWN] | b->pieces[Piece::BISHOP] | b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
@@ -40,11 +40,11 @@ int see(board_t* b, const int move) {
 	bitboard_t from = setMask[fromSq(move)];
 	bitboard_t used = 0ULL, discovered = 0ULL;
 
-	gain[d] = pieceScores[capPiece(b, move)];
+	gain[d] = pieceValues[capPiece(b, move)];
 	do {
 		Assert(pieceValid(attackerPiece));
 		d++; // next depth and side
-		gain[d] = -gain[d - 1] + pieceScores[attackerPiece]; // speculative store, if defended
+		gain[d] = -gain[d - 1] + pieceValues[attackerPiece]; // speculative store, if defended
 
 		if (max(-gain[d - 1], gain[d]) < 0)
 			break; // pruning does not influence the result
@@ -82,7 +82,7 @@ int lazySee(board_t* b, const int move) {
 	int to = toSq(move);
 	int attackerPiece = pieceAt(b, fromSq(move));
 	int movingPiece = attackerPiece;
-	int gain[32]{}, d = 0, side = b->side;
+	int gain[32]{}, d = 0, side = b->stm;
 
 	bitboard_t occ = b->occupied;
 	bitboard_t mayXray = b->pieces[Piece::PAWN] | b->pieces[Piece::BISHOP] | b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
@@ -90,18 +90,18 @@ int lazySee(board_t* b, const int move) {
 	bitboard_t from = setMask[fromSq(move)];
 	bitboard_t used = 0ULL, discovered = 0ULL;
 
-	gain[d] = pieceScores[capPiece(b, move)];
+	gain[d] = pieceValues[capPiece(b, move)];
 
 	// If the captured piece is worth more than the attacker, it is always
 	// winning. An estimated SEE score is then returned.
-	if (gain[d] > pieceScores[attackerPiece]) {
-		return gain[d] - (pieceScores[attackerPiece] / 2);
+	if (gain[d] > pieceValues[attackerPiece]) {
+		return gain[d] - (pieceValues[attackerPiece] / 2);
 	}
 
 	do {
 		Assert(pieceValid(attackerPiece));
 		d++; // next depth and side
-		gain[d] = -gain[d - 1] + pieceScores[attackerPiece]; // speculative store, if defended
+		gain[d] = -gain[d - 1] + pieceValues[attackerPiece]; // speculative store, if defended
 
 		if (max(-gain[d - 1], gain[d]) < 0)
 			break; // pruning does not influence the result
@@ -132,7 +132,7 @@ int lazySee(board_t* b, const int move) {
 	return gain[0];
 }
 
-bool see_ge(board_t* b, move_t move, int threshHold) {
+bool see_ge(board_t* b, move_t move, int threshold) {
 	bool color;
 	int from = fromSq(move);
 	int to = toSq(move);
@@ -152,7 +152,7 @@ bool see_ge(board_t* b, move_t move, int threshHold) {
 		balance = SEEPieceValues[Piece::PAWN];
 	}
 
-	balance -= threshHold;
+	balance -= threshold;
 	balance -= SEEPieceValues[nextVictim];
 
 	// Even after losing the moved piece balance is up
@@ -172,7 +172,7 @@ bool see_ge(board_t* b, move_t move, int threshHold) {
 	bitboard_t nowAttacking;
 	bitboard_t attackers = squareAtkDefOcc(b, occ, to) & occ;
 
-	color = !b->side;
+	color = !b->stm;
 
 	while (1) {
 		nowAttacking = attackers & b->color[color];
@@ -215,7 +215,7 @@ bool see_ge(board_t* b, move_t move, int threshHold) {
 
 	}
 
-	return b->side != color;
+	return b->stm != color;
 }
 
 static void updateBestMove(int* scores, int* bestIdx, int curIdx) {
@@ -319,7 +319,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		// counter move
 		if (b->ply > 0) {
 			move_t prevMove = b->undoHistory[b->ply - 1].move;
-			move_t counterMove = counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->side];
+			move_t counterMove = counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->stm];
 
 			if (currentMove == counterMove) {
 				moveList->scores[i] = COUNTER_SCORE;
@@ -338,7 +338,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		}
 
 		// last resort: history heuristic
-		int histScore = histHeuristic[b->side][fromSq(currentMove)][toSq(currentMove)];
+		int histScore = histHeuristic[b->stm][fromSq(currentMove)][toSq(currentMove)];
 		Assert(histScore >= 0);
 		moveList->scores[i] = QUIET_SCORE + (histScore);
 		Assert(moveList->scores[i] < COUNTER_SCORE);

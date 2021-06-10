@@ -15,7 +15,7 @@
 #include "search.h"
 
 #ifndef VERSION
-#define VERSION "v3.x"
+#define VERSION "v2.5.5"
 #endif // !VERSION
 
 /**

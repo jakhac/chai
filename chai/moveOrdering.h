@@ -41,10 +41,7 @@ const int MVV_LVA_UBOUND = 1000;
 static int MVV_LVA[13][13];
 
 static const int SEEPieceValues[13] = {
-	0, 100, 325, 325, 550, 1100, 0, 100, 325, 325, 550, 1100, 0 // pieceScores
-	//0,
-	//100,  450,  450,  675, 1300, 0,
-	//100,  450,  450,  675, 1300, 0
+	0, 100, 325, 325, 550, 1100, 0, 100, 325, 325, 550, 1100, 0
 };
 
 /**
@@ -89,6 +86,14 @@ int see(board_t* b, const int move);
  */
 int lazySee(board_t* b, const int move);
 
+/**
+ * Calculate the see score and compare against a given treshold.
+ *
+ * @param b
+ * @param move
+ * @param threshHold
+ * @return True if see score is greater than the threshold, else false.
+ */
 bool see_ge(board_t* b, move_t move, int threshHold);
 
 /**

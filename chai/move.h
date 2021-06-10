@@ -65,7 +65,7 @@ inline bool isPromotion(move_t move) {
 
 inline int promPiece(board_t* b, move_t move) {
 	return isPromotion(move) ?
-		(move >> 14) + 2 + (b->side == BLACK ? 6 : 0)
+		(move >> 14) + 2 + (b->stm == BLACK ? 6 : 0)
 		: Piece::NO_PIECE;
 }
 

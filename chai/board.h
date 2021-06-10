@@ -78,12 +78,6 @@ void setPiece(board_t* b, int piece, int square, int side);
 void reset(board_t* b);
 
 /**
- * @deprecated pieceKeys.h already stores fixed values
- * Initialize hash keys for zobristkey generation.
- */
-void initHashKeys(board_t* b); // TODO
-
-/**
  * Generate a unique zobristKey for current board.
  *
  * @param  b board_t to call function.
