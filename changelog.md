@@ -187,10 +187,13 @@
   - [x] Remove `pvLine_t` lines from function signatures
   - [x] UCI currentMove and move number
   - [x] UCI refactor uci calls (to be executed without order) and cli
+  - [ ] UCI setoption hash size
   - [x] `alphaBetaRoot()` function for save mate/draw detection and bestMove
   - [x] Templates for `alphaBeta()` and `quiescence()`
   - [x] Retrieve pv-line from pv-structs
   - [x] Search Stack
+  - [x] 16Bit move encoding
+  - [x] Support Makefile
 - Eval
   - [x] Check: insufficient material cannot be influenced by contempt factor
   - [x] Add `eval_t` for evaluations
