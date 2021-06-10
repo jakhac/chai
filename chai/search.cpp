@@ -197,7 +197,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 	// Mate Distance Pruning:
 	// If alpha or beta are already mate scores, bounds can be adjusted to prune irrelevant subtrees.
-	// Mates are delivered faster, but does not speed are search.
+	// Mates are delivered faster, but does not speed up search in general.
 	if (!rootNode) {
 		alpha = max(alpha, (value_t)(-MATE_VALUE + b->ply));
 		beta = min(beta, (value_t)(MATE_VALUE - b->ply - 1));
@@ -302,7 +302,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	}
 
 	// Null Move Pruning:
-	// Give opposite side a free move and use nullScore as lower bound (alpha).
+	// Give opposite side a free move and use nullScore as lower bound.
 	// If this position is still winning, e.g. fails high, it will never be reached.
 	// Restrict NMP to reasonable positions (zugzwang, depth, checks).
 	if (ss->currentMove != NULL_MOVE
@@ -362,7 +362,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	int legalMoves = 0;
 	int oldAlpha = alpha;
 
-	// This position could not be refuted yet. Therefore, moves are generated
+	// This position could not be refuted yet. All moves are generated
 	// and searching continues.
 	for (int i = 0; i < moveList->cnt; i++) {
 
@@ -588,8 +588,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 			// Counter-Move Heuristic:
 			// If currentMove caused a beta cutoff, store previous move FROM and TO
 			// and assign currentMove as an intuitive counter move for consideration in
-			// move ordering. Counter moves are not stored if in check or currentMove is
-			// a capture or promotion (already considered in move ordering). Only possible if ply > 0.
+			// move ordering.
 			if (!inCheck
 				&& b->ply > 0
 				&& !moveIsCapOrPromo
@@ -689,13 +688,11 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 
 	if (b->ply > MAX_DEPTH - 1) {
 #ifdef INFO
-		cout << "Warning: MAX_DEPTH reached in quiescence." << endl;
+		cout << "MAX_DEPTH in quiescence." << endl;
 #endif // !LICHESS
 		return evaluation(b);
 	}
 
-	//bool inCheck = ss->isCheck;
-	//Assert(inCheck == isCheck(b, b->side));
 	bool inCheck = isCheck(b, b->stm);
 
 	value_t value;
@@ -740,7 +737,7 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	scoreMoves(b, moveList, NO_MOVE);
 
 	// There are no cutoffs in this node yet. Generate all captures, promotions or check evasions
-	// and expand this node.
+	// and expand search.
 	for (int i = 0; i < moveList->cnt; i++) {
 
 		getNextMove(moveList, i);
@@ -811,7 +808,7 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	Assert(abs(bestValue) < INF);
 
 	return bestValue;
-	}
+}
 
 void clearForSearch(board_t* b, search_t* s) {
 	b->ply = 0;
@@ -869,20 +866,20 @@ void clearForSearch(board_t* b, search_t* s) {
 	s->futileCnt = 0;
 }
 
-int search_aspiration(board_t* b, search_t* s, int depth, int bestScore) {
-	int temp = bestScore;
-	int alpha = bestScore - 75;
-	int beta = bestScore + 75;
-
+//int search_aspiration(board_t* b, search_t* s, int depth, int bestScore) {
+//	int temp = bestScore;
+//	int alpha = bestScore - 75;
+//	int beta = bestScore + 75;
+//
 	//selDepth = 0;
 	//temp = alphaBeta(alpha, beta, depth, b, s, DO_NULL, IS_PV);
 	//if (temp <= alpha || temp >= beta) {
 	//selDepth = 0;
 	//temp = alphaBeta(-INF, INF, depth, b, s, DO_NULL, IS_PV);
 	//}
-
-	return temp;
-}
+//
+//	return temp;
+//}
 
 value_t search(board_t* b, search_t* s) {
 

@@ -11,8 +11,8 @@
 
 using namespace std;
 
-// #define TESTING
-// #define ASSERT
+//#define TESTING
+//#define ASSERT
 // #define INFO
 
 /**

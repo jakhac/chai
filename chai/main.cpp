@@ -22,8 +22,6 @@ int main() {
 
 	init(&board);
 	parseFen(&board, STARTING_FEN);
-	//parseFen(&board, BUG_FEN);
-	//parseFen(&board, "8/8/8/8/b7/4k3/4n1K1/8 b - - 55 28");
 
 #ifdef INFO
 	printBoard(&board);
