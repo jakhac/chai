@@ -1,6 +1,22 @@
 # chai - Chess Engine
 
-_chai_ is an open source UCI compatible chess engine. The engine is still under development but latest versions including source code, a complete changelog (containing test results) and binaries can be found in [releases](https://github.com/jakhac/chai/releases).
+_chai_ is an open source UCI compatible chess engine playing at estimated ~2000 elo.
+
+## Install
+
+### Prebuild Binaries
+
+Latest prebuild binaries compiled with GCC or MSVC can be found under [releases](https://github.com/jakhac/chai/releases).
+
+### Building From Source for Windows
+
+Either use makefile as explained in the following or compile with MSVC-Compiler via .sln-file.
+
+```
+$ git clone https://github.com/jakhac/chai
+$ cd chai
+$ make build
+```
 
 ## Usage
 
@@ -13,7 +29,7 @@ id author chai
 uciok
 > isready
 ... init logging
-isreadyok
+readyok
 > ucinewgame
 ... set up new game from starting position
 > go depth 10
