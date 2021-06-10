@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := default
 
-VERSION = 2.5
+VERSION = 2.5.5
 
 EXE = chai_$(VERSION)_$(CXX).exe
 
@@ -83,9 +83,9 @@ ifeq ($(CXX),g++)
 	CXX=g++
 endif
 
-ifeq ($(CXX),clang++)
-	CXX=clang++
-endif
+# ifeq ($(CXX),clang++)
+# 	CXX=clang++
+# endif
 
 # Set flags according to architecture options
 ifeq ($(INFO),yes)
@@ -167,7 +167,7 @@ build:
 help:
 	@echo ""
 	@echo "To compile chai, type: "
-	@echo "make build [ARCH=arch] [CXX=cxx] [INFO=yes|no]"
+	@echo "make build [ARCH=arch] [INFO=yes|no]"
 	@echo ""
 	@echo "Supported targets:"
 	@echo "build                   > Default build"
