@@ -8,14 +8,14 @@ _chai_ is an open source UCI compatible chess engine playing at estimated ~2000 
 
 Latest prebuild binaries compiled with GCC or MSVC can be found under [releases](https://github.com/jakhac/chai/releases).
 
-### Building From Source for Windows
+### Building From Source (Windows 64Bit)
 
 Either use makefile as explained in the following or compile with MSVC-Compiler via .sln-file.
 
 ```
 $ git clone https://github.com/jakhac/chai
 $ cd chai
-$ make build
+$ make
 ```
 
 ## Usage
