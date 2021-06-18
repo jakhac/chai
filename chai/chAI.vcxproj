@@ -119,7 +119,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;V=4;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;V=4;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp14</LanguageStandard>
       <Optimization>Disabled</Optimization>
@@ -154,6 +154,9 @@
     <ClInclude Include="attacks.h" />
     <ClInclude Include="board.h" />
     <ClInclude Include="defs.h" />
+    <ClInclude Include="egtb\stdendian.h" />
+    <ClInclude Include="egtb\tbconfig.h" />
+    <ClInclude Include="egtb\tbprobe.h" />
     <ClInclude Include="eval.h" />
     <ClInclude Include="info.h" />
     <ClInclude Include="main.h" />
@@ -164,6 +167,7 @@
     <ClInclude Include="perft.h" />
     <ClInclude Include="pieceKeys.h" />
     <ClInclude Include="search.h" />
+    <ClInclude Include="syzygy.h" />
     <ClInclude Include="tt.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="uci.h" />
@@ -174,6 +178,8 @@
     <ClCompile Include="attacks.cpp" />
     <ClCompile Include="board.cpp" />
     <ClCompile Include="defs.cpp" />
+    <ClCompile Include="egtb\tbchess.cpp" />
+    <ClCompile Include="egtb\tbprobe.cpp" />
     <ClCompile Include="eval.cpp" />
     <ClCompile Include="info.cpp" />
     <ClCompile Include="main.cpp" />
@@ -183,6 +189,7 @@
     <ClCompile Include="moveOrdering.cpp" />
     <ClCompile Include="perft.cpp" />
     <ClCompile Include="search.cpp" />
+    <ClCompile Include="syzygy.cpp" />
     <ClCompile Include="tt.cpp" />
     <ClCompile Include="uci.cpp" />
     <ClCompile Include="validate.cpp" />

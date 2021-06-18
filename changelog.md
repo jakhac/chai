@@ -196,6 +196,7 @@
   - [x] Check: insufficient material cannot be influenced by contempt factor
   - [x] Add `eval_t` for evaluations
 - Bugfixes
+
   - [x] Forced quiescence checkmates used `moveList->cnt` instead of `legalMoves`
   - [x] standPat pruning considers check / not in-check and updates `score, bestScore, alpha` seperately
   - [x] Quiescence check up used `nodes` instead of `qnodes`
@@ -204,21 +205,6 @@
   - [x] Bigger margin for `ISMATE` to include long checking sequences from quiescence mate detection
   - [x] Not finding mates: Unforced Draw in winning endgame (fixed with new quiescence mate detection und reordering alphaBeta)
   - [x] Redordered alphaBeta functions till move loop
-
-<!-- - Engines
-  - chai_v2.5.2_pv_iid:
-    - Root-Call, Old TT, Repetition-Returns, 1B
-    - Draws Mate!
-  - chai_v2.5.3_basic_rep-return_4b:
-    - Basic-Call, New TT, Repetition-Returns, 4B
-    - Draws Mate!
-  - chai_v2.5.3_root_rep-return_4b:
-    - Root-Call, New TT, Repetition-Returns, 4B
-    - Draws Mate!
-  - chai_v2.5.3_basic_rep-ret-no-root_tt-no_pv:
-    - Basic-Call, New TT, Repetition-Returns, 4B
-    - No Rep-Return at rootNode, No TT-Cut at pvNode
-    - Draw 1 mate in 100 games (might be tt collision or fpruning) -->
 
 - Elo
 
@@ -250,11 +236,8 @@
   - v2.5.4
 
     - Final changes:
-      - (Elo) No mate distance pruning in rootNodes, IID extends when check, first move is always PV, bucket prefetch (cachelines?)
+      - (Elo) No mate distance pruning in rootNodes, IID extends when check, first move is always PV, bucket prefetch
       - (Code) Template functions, currmove UCI info, value_t
-    - TODO:
-      - uci setoptions
-      - pvline struct, uci cli (debug lichess-bot)
     - chai_v2.5.4 - chai_v2.5.3 &rarr; 38%: 93-210-197 (-85)
     - chai_v2.5.4_no_prefetch - chai_v2.5.3 &rarr; 40%: 111-214-175 (-70)
     - chai_v2.5.4_pv_var - chai_v2.5.3 &rarr; 49%: 143-158-199 (-7)
@@ -265,13 +248,31 @@
     - chai_2.5.4_calc_lmr - chai_v2.5.3 &rarr; 37%: 91-225-184 (-92)
     <!-- - chai_2.5.4_tt_cutoffOk - chai_v2.5.3 &rarr; 37%: 91-225-184 (-92) -->
 
+**Changes in v2.6**
+
+- Search
+  - [ ] Delta Pruning
+  - [ ] Aspiration Windows
+  - [ ] Store/Probe ttable in quiescence search
+  - [ ] EGTB Probing
+- Project
+  - [ ] UCI fixes, e.g. q to quit current mode
+  - [ ] UCI refactor parsing
+  - [ ] Added syzygy tablebases
+- Bugfixes
+- Versions
+  - v2.6.1: Added EGTB functionality, Delta Pruning
+  - v2.6.2: Store/Probe in quiescence
+  - v2.6.3: Aspiration Windows
+  - v2.6.4: EGTB probing (Opening book?)
+
 # Todo
 
 - ~~Compiler optimizations~~
 - Move Generation
 
   - ~~`scoreMoves()` instead of scoring while generating~~
-  - run move gen after hash move failed -> pvs still possible?
+  - ~~run move gen after hash move failed -> pvs still possible?~~
   - ~~check evasion~~
   - ~~quiesence move gen (captures, promotions, check evasions)~~
   - ~~generate quiet checks~~
@@ -283,41 +284,33 @@
 
   - ~~detect endgames (knight, bishop endgame, light/dark squared bishop)~~
   - ~~update typedefs, src, structs, key_t, ...~~
-  - Disable log (and use one fd for programm)
   - Timeman.c: dynamic time management
-  - Error handler for invalid FEN
-  - clean up utils, attacks, helper bitboards
-  - refactor checkup usage and function
-  - EvalStack psqt
-  - Opening book
   - Time management (rapid, blitz, bullet mode for lichess)
+  - Opening book
 
 - Alpha Beta
 
   - ~~mate distance pruning~~
-  - futility pruning / reverse null move pruning
-  - razoring
+  - ~~futility pruning / reverse null move pruning~~
+  - ~~raozring~~
   - ~~tt probing~~
   - aspiration windows
   - ~~iid if no hash move~~
-  - pvs
-  - late move reductions
-  - see reductions
-  - npm verification
+  - ~~pvs~~
+  - ~~late move reductions~~
+  - ~~see reductions~~
+  - ~~npm verification~~
   - ~~reorder fiftyMove, mate distance pruning before quiescence~~
   - ~~killer moves~~
   - ~~matekiller moves~~
   - ~~counter moves~~
   - ~~history heuristic~~
 
-  - nmp drops into qui ?
-  - null killer move?
-
 - Quiesence
 
   - ~~see pruning~~
-  - delta pruning
-  - hash table probing and storing (egative depth in qsearch)
+  - ~~delta pruning~~
+  - hash table probing and storing (negative depth in qsearch)
   - ~~Add checkers in first quiesence ply~~
 
 - Hash table
@@ -325,14 +318,13 @@
   - ~~prefetch table instruction~~
   - ~~buckets~~
   - ~~rework table probing (in search)~~
-  - probe in qsearch
-  - hash table with negative depth in qsearch
 
 - Evaluation
 
   - more heuristics
   - interpolation with pieces instead of moves
   - traps, pins
+  - EvalStack psqt
   - (texel) tuning
 
 - Maybe

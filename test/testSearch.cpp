@@ -13,9 +13,14 @@ namespace {
 			pSearch = new search_t();
 
 			init(pBoard);
+			if (!resizeHashTables(pBoard->tt, pBoard->pt, DEFAULT_TT_SIZE)) {
+				cout << "Error in memory allocation for TT." << endl;
+				exit(1);
+			}
 		}
 
 		virtual void TearDown() {
+			freeHashTables(pBoard->tt, pBoard->pt);
 			delete pBoard;
 			delete pSearch;
 		}
@@ -29,7 +34,7 @@ namespace {
 		pSearch->depthSet = true;
 		pSearch->timeSet = false;
 
-		EXPECT_GE(search(pBoard, pSearch), ISMATE);
+		EXPECT_GE(search(pBoard, pSearch), VALUE_IS_MATE_IN);
 	}
 
 	// Mating positions
@@ -39,7 +44,7 @@ namespace {
 		pSearch->depthSet = true;
 		pSearch->timeSet = false;
 
-		EXPECT_GE(search(pBoard, pSearch), ISMATE);
+		EXPECT_GE(search(pBoard, pSearch), VALUE_IS_MATE_IN);
 	}
 
 	// Mating positions
@@ -49,7 +54,7 @@ namespace {
 		pSearch->depthSet = true;
 		pSearch->timeSet = false;
 
-		EXPECT_GE(search(pBoard, pSearch), ISMATE);
+		EXPECT_GE(search(pBoard, pSearch), VALUE_IS_MATE_IN);
 	}
 
 	TEST_F(SearchTest, MateIn7) {
@@ -58,7 +63,7 @@ namespace {
 		pSearch->depthSet = true;
 		pSearch->timeSet = false;
 
-		EXPECT_GE(search(pBoard, pSearch), ISMATE);
+		EXPECT_GE(search(pBoard, pSearch), VALUE_IS_MATE_IN);
 	}
 
 	TEST_F(SearchTest, Fisher_4) {
@@ -67,7 +72,7 @@ namespace {
 		pSearch->depthSet = true;
 		pSearch->timeSet = false;
 
-		EXPECT_GE(search(pBoard, pSearch), ISMATE);
+		EXPECT_GE(search(pBoard, pSearch), VALUE_IS_MATE_IN);
 	}
 
 	TEST_F(SearchTest, Fisher_3) {
@@ -76,7 +81,7 @@ namespace {
 		pSearch->depthSet = true;
 		pSearch->timeSet = false;
 
-		EXPECT_GE(search(pBoard, pSearch), ISMATE);
+		EXPECT_GE(search(pBoard, pSearch), VALUE_IS_MATE_IN);
 	}
 
 	TEST_F(SearchTest, Fisher_5) {
@@ -85,7 +90,7 @@ namespace {
 		pSearch->depthSet = true;
 		pSearch->timeSet = false;
 
-		EXPECT_GE(search(pBoard, pSearch), ISMATE);
+		EXPECT_GE(search(pBoard, pSearch), VALUE_IS_MATE_IN);
 	}
 
 

@@ -16,7 +16,6 @@ bitboard_t inBetween[64][64];
 int dirFromTo[64][64];
 bitboard_t lineBB[64][64];
 
-
 void initClearSetMask() {
 	int index = 0;
 
@@ -49,10 +48,10 @@ void initAttackerMasks() {
 
 	// pawns
 	for (int i = 0; i < 64; i++) {
-		pawnAtkMask[WHITE][i] = (setMask[i] << 7 & ~FILE_H_HEX) | (setMask[i] << 9 & ~FILE_A_HEX);
+		pawnAtkMask[chai::WHITE][i] = (setMask[i] << 7 & ~FILE_H_HEX) | (setMask[i] << 9 & ~FILE_A_HEX);
 	}
 	for (int i = 63; i >= 0; i--) {
-		pawnAtkMask[BLACK][i] = (setMask[i] >> 7 & ~FILE_A_HEX) | (setMask[i] >> 9 & ~FILE_H_HEX);
+		pawnAtkMask[chai::BLACK][i] = (setMask[i] >> 7 & ~FILE_A_HEX) | (setMask[i] >> 9 & ~FILE_H_HEX);
 	}
 
 	// knights
@@ -106,20 +105,20 @@ void initEvalMasks() {
 	}
 
 	for (int i = 0; i < 64; i++) {
-		pawnPassedMask[WHITE][i] = upperMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
-		pawnPassedMask[BLACK][i] = lowerMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
+		pawnPassedMask[chai::WHITE][i] = upperMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
+		pawnPassedMask[chai::BLACK][i] = lowerMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
 	}
 
 	bitboard_t shield;
 	for (int i = 0; i < 64; i++) {
 		shield = 0ULL;
 		shield = (setMask[i] >> 1 & ~FILE_H_HEX) | (setMask[i] << 1 & ~FILE_A_HEX) | setMask[i];
-		pawnShield[WHITE][i] = (shield << 8) | (shield << 16);
-		pawnShield[BLACK][i] = (shield >> 8) | (shield >> 16);
+		pawnShield[chai::WHITE][i] = (shield << 8) | (shield << 16);
+		pawnShield[chai::BLACK][i] = (shield >> 8) | (shield >> 16);
 	}
 
 	for (int i = 0; i < 64; i++) {
-		xMask[i] = pawnAtkMask[WHITE][i] | pawnAtkMask[BLACK][i];
+		xMask[i] = pawnAtkMask[chai::WHITE][i] | pawnAtkMask[chai::BLACK][i];
 	}
 }
 
@@ -166,13 +165,13 @@ void initObstructed() {
 	}
 }
 
-vector<bitboard_t> initLine() {
+std::vector<bitboard_t> initLine() {
 
 	bitboard_t midDiagonalUp = 0x8040201008040201;
 	bitboard_t midDiagonalDown = 0x0102040810204080;
 	bitboard_t vertical = FILE_A_HEX;
 	bitboard_t horizontal = RANK_1_HEX;
-	vector<bitboard_t> axis = { midDiagonalDown, midDiagonalUp, vertical, horizontal,
+	std::vector<bitboard_t> axis = { midDiagonalDown, midDiagonalUp, vertical, horizontal,
 		FILE_B_HEX, FILE_C_HEX, FILE_D_HEX, FILE_E_HEX,
 		FILE_F_HEX, FILE_G_HEX, FILE_H_HEX };
 
@@ -218,3 +217,4 @@ bool aligned(int s1, int s2, int s3) {
 bitboard_t obstructed(int sq1, int sq2) {
 	return inBetween[sq1][sq2];
 }
+

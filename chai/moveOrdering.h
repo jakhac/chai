@@ -40,9 +40,14 @@ const int MVV_LVA_UBOUND = 1000;
 
 static int MVV_LVA[13][13];
 
+// victim scores used to calculate mvv lva score
+const int victimScore[13] = { 0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 };
+
 static const int SEEPieceValues[13] = {
 	0, 100, 325, 325, 550, 1100, 0, 100, 325, 325, 550, 1100, 0
 };
+
+
 
 /**
  * Initialize mvv-lva array. Only used once in start.

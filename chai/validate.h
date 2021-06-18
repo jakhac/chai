@@ -1,6 +1,7 @@
 #pragma once
 
 #include "defs.h"
+#include "move.h"
 
 const bool validEnPas[64] = {
 	0, 0, 0, 0, 0, 0, 0, 0,

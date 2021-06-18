@@ -13,6 +13,10 @@
 /build/**/*.o
 /build/**/*.d
 
+# syzygy egtb
+
+/syzygy
+
 /packages
 
 # Local History for Visual Studio Code

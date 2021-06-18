@@ -7,33 +7,21 @@
 #include "moveOrdering.h"
 #include "tt.h"
 
-#define DO_NULL true
-#define NO_NULL false
-
-#define IS_PV true
-#define NO_PV false
-
-#define R_2 2
-#define R_3 3
-
-#define F1_MARGIN 125
-#define F2_MARGIN 550
-#define F3_MARGIN 800
-
-#define RAZOR_DEPTH 3
-
 // Maximum ply reached in alphaBeta and quiescence search.
 static int selDepth;
-
-// Maximum score before rescale in history heuristic. Max history score needs to be less than 10000
-// because move ordering scores "QUIET_SCORES=5000 + hist/10" before COUNTER_SCORE=6000.
-const int HISTORY_MAX = 1000 - 1;
 
 // Search stack used for all searches
 static searchStack_t sStack[MAX_GAME_MOVES];
 
+// MCP depth limit
 static const int moveCountPruningDepth = 5;
+
+// MCP movecount according to all depths
 static int moveCountPruning[moveCountPruningDepth];
+
+// Maximum score before rescale in history heuristic. Max history score needs to be less than 10000
+// because move ordering scores "QUIET_SCORES=5000 + hist/10" before COUNTER_SCORE=6000.
+const int HISTORY_MAX = 1000 - 1;
 
 /**
  * Initialize some search parameters like MCP values.
@@ -51,7 +39,7 @@ void initSearch();
  *
  * @returns Best score found in search.
  */
-template <nodeType_t nodeType>
+template <chai::nodeType_t nodeType>
 value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s);
 
 /**
@@ -66,7 +54,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
  *
  * @returns Best score found in quiescences search.
  */
-template <nodeType_t nodeType>
+template <chai::nodeType_t nodeType>
 value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t* s);
 
 /**

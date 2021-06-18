@@ -1,10 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 #define MAX_DEPTH 64
 #define MAX_GAME_MOVES 512
 #define BUCKETS 3
+
 
 /**
  * Unsigned 64-Bit integer represents bitboard isntance.
@@ -57,12 +56,6 @@ struct searchStack_t {
 
 	move_t* pvLine;
 };
-
-typedef enum nodeType_t {
-	PV,
-	NoPV,
-	AllNode
-} nodeType_t;
 
 /**
  * Transposition table entry.
@@ -220,15 +213,24 @@ struct pv_line_t {
 	move_t line[64 * 64]; // MAX DEPTH
 };
 
-namespace Piece {
+namespace Pieces {
+	typedef enum PIECE {
+		NO_PIECE, P, N, B, R, Q, K, p, n, b, r, q, k
+	} piece_t;
+}
 
-	enum PIECE_VALUES {
-		EMPTY, P, N, B, R, Q, K, p, n, b, r, q, k
-	};
+namespace chai {
+	typedef enum COLORS {
+		BLACK, WHITE, BOTH
+	} color_t;
 
-	enum PIECES_TYPES {
-		NO_PIECE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
-	};
+	typedef enum nodeType_t {
+		PV, NoPV
+	} nodeType_t;
+
+	typedef enum PIECES_TYPES {
+		NO_TYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
+	} pieceType_t;
 }
 
 enum FILES {
@@ -240,10 +242,6 @@ enum RANKS {
 	RANK_1, RANK_2, RANK_3, RANK_4,
 	RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE
 };
-
-typedef enum COLORS {
-	BLACK, WHITE, BOTH
-} color_t;
 
 enum CASTLING_RIGHTS {
 	K_CASTLE = 1, Q_CASTLE = 2, k_CASTLE = 4, q_CASTLE = 8
@@ -257,13 +255,12 @@ typedef enum TT_FLAG {
 	TT_EVAL = 1 << 3
 } tt_flag_t;
 
-enum moveFlag {
+enum MOVE_FLAG {
 	NORMAL_MOVE = 0 << 12,
 	CASTLE_MOVE = 1 << 12,
 	EP_MOVE = 2 << 12,
 	PROM_MOVE = 3 << 12,
 
-	//PROM_NONE = 0,
 	PROM_TO_KNIGHT = 0 << 14,
 	PROM_TO_BISHOP = 1 << 14,
 	PROM_TO_ROOK = 2 << 14,
@@ -279,15 +276,4 @@ enum SQUARES {
 	A3 = 16, B3, C3, D3, E3, F3, G3, H3,
 	A2 = 8, B2, C2, D2, E2, F2, G2, H2,
 	A1 = 0, B1, C1, D1, E1, F1, G1, H1
-};
-
-enum {
-	NORTH,
-	SOUTH,
-	EAST,
-	WEST,
-	NORTH_EAST,
-	NORTH_WEST,
-	SOUTH_EAST,
-	SOUTH_WEST
 };

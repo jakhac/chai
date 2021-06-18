@@ -11,6 +11,46 @@
 #include "pieceKeys.h"
 #include "validate.h"
 
+const int pieceKnight[13] = {
+	0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0
+};
+
+const int pieceKing[13] = {
+	0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1
+};
+
+const int pieceRookQueen[13] = {
+	0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0
+};
+
+const int pieceRook[13] = {
+	0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0
+};
+
+const int pieceBishopQueen[13] = {
+	0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0
+};
+
+const int piecePawn[13] = {
+	0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0
+};
+
+const chai::pieceType_t pieceType[13] = {
+	chai::NO_TYPE,
+	chai::PAWN, chai::KNIGHT, chai::BISHOP, chai::ROOK, chai::QUEEN, chai::KING,
+	chai::PAWN, chai::KNIGHT, chai::BISHOP, chai::ROOK, chai::QUEEN, chai::KING
+};
+
+const chai::color_t pieceCol[13] = {
+	chai::BOTH,
+	chai::WHITE, chai::WHITE, chai::WHITE, chai::WHITE, chai::WHITE, chai::WHITE,
+	chai::BLACK, chai::BLACK, chai::BLACK, chai::BLACK, chai::BLACK, chai::BLACK
+};
+
+const std::string pieceChar = ".PNBRQKpnbrqk";
+const std::string sideChar = "wb-";
+const std::string rankChar = "12345678";
+const std::string fileChar = "abcdefgh";
 
 /**
 * Stores up to 2 killer moves for each ply.
@@ -38,7 +78,8 @@ extern int histMax;
 extern move_t counterHeuristic[64][64][2];
 
 /**
- * Count major pieces (Piece::n, b, Piece::r, Piece::q, Piece::k) on current board
+ * Count major pieces (
+ * ::n, b, Piece::r, Piece::q, Piece::k) on current board
  *
  * @param  b board_t to call function.
  * @param  side Side of pieces.
@@ -71,6 +112,11 @@ void clearPiece(board_t* b, int piece, int square, int side);
  * @param  side   Color of set piece.
  */
 void setPiece(board_t* b, int piece, int square, int side);
+
+#/*
+Converts a file and a rank into the corresponding square.
+*/
+int fileRankToSq(int f, int r);
 
 /**
  * Reset board variables to default values.
@@ -175,9 +221,9 @@ void clearCastlePermission(board_t* b, int side);
  * @param  fen FEN Notation string of board.
  * @returns bool true if error occured or FEN invalid, else false.
  */
-bool parseFen(board_t* b, string fen);
+bool parseFen(board_t* b, std::string fen);
 
-string getFEN(board_t* b);
+std::string getFEN(board_t* b);
 
 /**
  * Parse a move into a bit move. Sets flags and captures according to current board state.
@@ -187,7 +233,7 @@ string getFEN(board_t* b);
  *
  * @returns int move.
  */
-move_t parseMove(board_t* b, string move);
+move_t parseMove(board_t* b, std::string move);
 
 /**
  * Print board with piece chars, rank and file indices.

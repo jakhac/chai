@@ -1,5 +1,7 @@
 #include "eval.h"
 
+using namespace chai;
+
 // include extern vars
 const int* maps[7];
 bitboard_t pawnIsolatedMask[64];
@@ -12,7 +14,7 @@ int manhattenDistance[64][64];
 
 // 0 == a / 1 == b
 float interpolate(int a, int b, float t) {
-	return (float)a + t * ((float)b - (float)a);
+	return (float)a + t * ((float)b - (float)a); // TODO this aint right?
 }
 
 value_t evalPST(board_t* b, int side, float* t) {
@@ -20,10 +22,10 @@ value_t evalPST(board_t* b, int side, float* t) {
 	int score = 0, kSq = getKingSquare(b, side), sq;
 
 	// PAWNS
-	pieces = getPieces(b, Piece::PAWN, side);
-	int kingPawnDistance = 0, pawnSum = countBits(pieces);
+	pieces = getPieces(b, PAWN, side);
+	int kingPawnDistance = 0, pawnSum = popCount(pieces);
 	while (pieces) {
-		sq = popBit(&pieces);
+		sq = getPopLSB(&pieces);
 
 		// king pawn tropism, average distance to own pawns
 		kingPawnDistance += manhattenDistance[kSq][sq];
@@ -35,30 +37,30 @@ value_t evalPST(board_t* b, int side, float* t) {
 	score += (int)interpolate(kingPawnDistance, kingPawnDistance * 2, *t);
 
 	// KNIGHTS
-	pieces = getPieces(b, Piece::KNIGHT, side);
+	pieces = getPieces(b, KNIGHT, side);
 	while (pieces) {
-		sq = popBit(&pieces);
+		sq = getPopLSB(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(KNIGHT_OPEN[sq], KNIGHT_ENDGAME[sq], *t);
 	}
 
-	pieces = getPieces(b, Piece::BISHOP, side);
+	pieces = getPieces(b, BISHOP, side);
 	while (pieces) {
-		sq = popBit(&pieces);
+		sq = getPopLSB(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(BISHOP_OPEN[sq], BISHOP_ENDGAME[sq], *t);
 	}
 
-	pieces = getPieces(b, Piece::ROOK, side);
+	pieces = getPieces(b, ROOK, side);
 	while (pieces) {
-		sq = popBit(&pieces);
+		sq = getPopLSB(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(ROOK_OPEN[sq], ROOK_ENDGAME[sq], *t);
 	}
 
-	pieces = getPieces(b, Piece::QUEEN, side);
+	pieces = getPieces(b, QUEEN, side);
 	while (pieces) {
-		sq = popBit(&pieces);
+		sq = getPopLSB(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(QUEEN_OPEN[sq], QUEEN_ENDGAME[sq], *t);
 	}
@@ -72,7 +74,7 @@ value_t evalPST(board_t* b, int side, float* t) {
 value_t materialScore(board_t* b, int side) {
 	int score = 0;
 	for (int i = 1; i < 7; i++) {
-		score += countBits(getPieces(b, i, side)) * pieceValues[i];
+		score += popCount(getPieces(b, i, side)) * pieceValues[i];
 	}
 
 	return score;
@@ -81,11 +83,11 @@ value_t materialScore(board_t* b, int side) {
 // number of isolated pawns
 value_t isolatedPawns(board_t* b, int side) {
 	int isolated = 0, sq;
-	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
+	bitboard_t pawns = getPieces(b, PAWN, side);
 	bitboard_t refPawns = pawns;
 
 	while (pawns) {
-		sq = popBit(&pawns);
+		sq = getPopLSB(&pawns);
 		if (!(pawnIsolatedMask[sq] & refPawns)) {
 			isolated++;
 		}
@@ -97,10 +99,10 @@ value_t isolatedPawns(board_t* b, int side) {
 // number of passed pawns
 value_t passedPawns(board_t* b, int side) {
 	int passedScore = 0, sq;
-	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
-	bitboard_t oppPawns = getPieces(b, Piece::PAWN, side ^ 1);
+	bitboard_t pawns = getPieces(b, PAWN, side);
+	bitboard_t oppPawns = getPieces(b, PAWN, side ^ 1);
 	while (pawns) {
-		sq = popBit(&pawns);
+		sq = getPopLSB(&pawns);
 		if (!(pawnPassedMask[side][sq] & oppPawns)) {
 			passedScore += passedBonus[side][squareToRank[sq]];
 		}
@@ -113,9 +115,9 @@ value_t passedPawns(board_t* b, int side) {
 value_t stackedPawn(board_t* b, int side) {
 	int stackedPenalty = 0;
 
-	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
+	bitboard_t pawns = getPieces(b, PAWN, side);
 	for (int i = 0; i < 8; i++) {
-		if (countBits(FILE_LIST[i] & pawns) > 1) {
+		if (popCount(FILE_LIST[i] & pawns) > 1) {
 			stackedPenalty -= 4;
 		}
 	}
@@ -125,13 +127,13 @@ value_t stackedPawn(board_t* b, int side) {
 
 value_t pawnChain(board_t* b, int side) {
 	int result = 0;
-	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
+	bitboard_t pawns = getPieces(b, PAWN, side);
 	bitboard_t tPawns = pawns;
 
 	// use xMask to reward protected pawns
 	int sq;
 	while (pawns) {
-		sq = popBit(&pawns);
+		sq = getPopLSB(&pawns);
 		result += (bool)(tPawns & xMask[sq]);
 	}
 
@@ -140,13 +142,13 @@ value_t pawnChain(board_t* b, int side) {
 
 value_t openFilesRQ(board_t* b, int side) {
 	int sq, score = 0;
-	bitboard_t pawns = b->pieces[Piece::PAWN];
+	bitboard_t pawns = b->pieces[PAWN];
 
 	// openFileBonus for rooks
-	bitboard_t rooks = getPieces(b, Piece::ROOK, side);
+	bitboard_t rooks = getPieces(b, ROOK, side);
 	bitboard_t oppKing = getKingSquare(b, side ^ 1);
 	while (rooks) {
-		sq = popBit(&rooks);
+		sq = getPopLSB(&rooks);
 		if (!(setMask[squareToFile[sq]] & pawns)) {
 			score += openFileBonusR;
 		}
@@ -158,9 +160,9 @@ value_t openFilesRQ(board_t* b, int side) {
 	}
 
 	// openFileBonus for queens
-	bitboard_t queens = getPieces(b, Piece::QUEEN, side);
+	bitboard_t queens = getPieces(b, QUEEN, side);
 	while (queens) {
-		sq = popBit(&queens);
+		sq = getPopLSB(&queens);
 		if (!(setMask[squareToFile[sq]] & pawns)) {
 			score += openFileBonusQ;
 		}
@@ -170,24 +172,24 @@ value_t openFilesRQ(board_t* b, int side) {
 }
 
 value_t bishopPair(board_t* b, int side) {
-	Assert(((bool)(countBits(getPieces(b, Piece::BISHOP, side)) >= 2)) * 30 <= 30);
-	return ((bool)(countBits(getPieces(b, Piece::BISHOP, side)) >= 2)) * 30;
+	Assert(((bool)(popCount(getPieces(b, BISHOP, side)) >= 2)) * 30 <= 30);
+	return ((bool)(popCount(getPieces(b, BISHOP, side)) >= 2)) * 30;
 }
 
 value_t kingSafety(board_t* b, int side, float* t) {
 	int result = 0;
 	int kSq = getKingSquare(b, side);
-	bitboard_t pawns = getPieces(b, Piece::PAWN, side);
+	bitboard_t pawns = getPieces(b, PAWN, side);
 
 	// count pawn shielder
-	result += countBits(pawnShield[side][kSq] & pawns) * 3;
+	result += popCount(pawnShield[side][kSq] & pawns) * 3;
 
 	// punish attacked squares around king 
-	result += 8 - countBits(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
+	result += 8 - popCount(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
 
 	int openFilePenalty = 0;
 	// if not endgame
-	if (!(countBits(b->occupied) <= 7 || countMajorPieces(b, side) <= 6)) {
+	if (!(popCount(b->occupied) <= 7 || countMajorPieces(b, side) <= 6)) {
 		int file;
 		// punish open king file
 		if (!(FILE_LIST[squareToFile[kSq]] & pawns)) {
@@ -206,17 +208,17 @@ value_t kingSafety(board_t* b, int side, float* t) {
 	}
 
 	// punish pinned pieces (excluding pawns) to kSq
-	result -= countBits(getPinned(b, kSq, side) & ~pawns);
+	result -= popCount(getPinned(b, kSq, side) & ~pawns);
 
 	//scale depending on gamestate
 	result = (int)interpolate(result * 2, result, *t);
 
-	int attackedKingSquares = countBits(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
+	int attackedKingSquares = popCount(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
 	Assert(attackedKingSquares <= 8);
 
 	result -= kingZoneTropism[attackedKingSquares];
 
-	Assert(abs(result) < ISMATE);
+	Assert(abs(result) < VALUE_IS_MATE_IN);
 	return result;
 }
 
@@ -225,7 +227,7 @@ value_t mobility(board_t* b, bool side, float* t) {
 	int restoreSide = b->stm;
 
 	// how many pieces are attacked by side
-	mobility += countBits(b->attackedSquares[side] & b->color[side ^ 1]) / 4;
+	mobility += popCount(b->attackedSquares[side] & b->color[side ^ 1]) / 4;
 
 	// weighted sum of possible moves, reward knight, bishop and rook moves
 	moveList_t move_s[1];
@@ -283,8 +285,8 @@ value_t evaluatePawns(board_t* b, float* t) {
 	value_t score = 0;
 
 	// lack of pawns penalty
-	if (!getPieces(b, Piece::PAWN, WHITE)) score -= 16;
-	if (!getPieces(b, Piece::PAWN, WHITE)) score += 16;
+	if (!getPieces(b, PAWN, WHITE)) score -= 16;
+	if (!getPieces(b, PAWN, WHITE)) score += 16;
 
 	// isolani
 	score += -10 * (isolatedPawns(b, WHITE) - isolatedPawns(b, BLACK));
@@ -304,19 +306,19 @@ value_t evaluatePawns(board_t* b, float* t) {
 
 	// reward defended pawns
 
-	Assert(abs(score) < ISMATE);
+	Assert(abs(score) < VALUE_IS_MATE_IN);
 	return score;
 }
 
 
 value_t evaluation(board_t* b) {
 	value_t eval = 0;
-	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
+	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
 
-	prefetchPawnEntry(b);
+	prefetchPT(b);
 
 	// Check insufficient material to detect drawn positions
-	if (countBits(b->occupied) <= 5 && insufficientMaterial(b)) {
+	if (popCount(b->occupied) <= 5 && insufficientMaterial(b)) {
 		return 0;
 	}
 
@@ -326,21 +328,21 @@ value_t evaluation(board_t* b) {
 
 	b->pt->probed++;
 	value_t pawnEval = 0;
-	bool foundHash = probePawnEntry(b, &pawnEval);
+	bool foundHash = probePT(b, &pawnEval);
 	if (foundHash) {
 		b->pt->hit++;
 	} else {
 		pawnEval = evaluatePawns(b, &interpolFactor);
-		storePawnEntry(b, pawnEval);
+		storePT(b, pawnEval);
 	}
 
 	// squares controlled
-	int centerSquares = (countBits(b->attackedSquares[WHITE] & CENTER_SQUARES) -
-						 countBits(b->attackedSquares[BLACK] & CENTER_SQUARES));
-	int surroundingSquares = countBits(b->attackedSquares[WHITE] & ~CENTER_SQUARES) -
-		countBits(b->attackedSquares[BLACK] & ~CENTER_SQUARES);
-	int kingSquares = countBits(b->attackedSquares[WHITE] & kingAtkMask[getKingSquare(b, WHITE)]) -
-		countBits(b->attackedSquares[BLACK] & kingAtkMask[getKingSquare(b, BLACK)]);
+	int centerSquares = (popCount(b->attackedSquares[WHITE] & CENTER_SQUARES) -
+						 popCount(b->attackedSquares[BLACK] & CENTER_SQUARES));
+	int surroundingSquares = popCount(b->attackedSquares[WHITE] & ~CENTER_SQUARES) -
+		popCount(b->attackedSquares[BLACK] & ~CENTER_SQUARES);
+	int kingSquares = popCount(b->attackedSquares[WHITE] & kingAtkMask[getKingSquare(b, WHITE)]) -
+		popCount(b->attackedSquares[BLACK] & kingAtkMask[getKingSquare(b, BLACK)]);
 
 	eval += surroundingSquares + 2 * centerSquares + 3 * kingSquares;
 	eval += pawnEval;
@@ -351,7 +353,7 @@ value_t evaluation(board_t* b) {
 	eval += kingSafety(b, WHITE, &interpolFactor) - kingSafety(b, BLACK, &interpolFactor);
 	eval += mobility(b, WHITE, &interpolFactor) - mobility(b, BLACK, &interpolFactor);
 
-	Assert(abs(eval) < ISMATE);
+	Assert(abs(eval) < VALUE_IS_MATE_IN);
 
 	// white scores positive and black scores negative
 	int sign = (b->stm == WHITE) ? 1 : -1;
@@ -360,11 +362,11 @@ value_t evaluation(board_t* b) {
 
 value_t lazyEvaluation(board_t* b) {
 	value_t eval = 0;
-	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + countBits(b->occupied)));
+	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
 
 	b->pt->probed++;
 	value_t pawnEval = 0;
-	bool foundHash = probePawnEntry(b, &pawnEval);
+	bool foundHash = probePT(b, &pawnEval);
 	if (foundHash) {
 		b->pt->hit++;
 		eval += pawnEval;
@@ -373,7 +375,7 @@ value_t lazyEvaluation(board_t* b) {
 	eval += evalPST(b, WHITE, &interpolFactor) - evalPST(b, BLACK, &interpolFactor);
 	eval += materialScore(b, WHITE) - materialScore(b, BLACK);
 
-	Assert(abs(eval) < ISMATE);
+	Assert(abs(eval) < VALUE_IS_MATE_IN);
 
 	// white scores positive and black scores negative
 	int sign = (b->stm == WHITE) ? 1 : -1;
@@ -398,41 +400,41 @@ value_t contemptFactor(board_t* b) {
 bool insufficientMaterial(board_t* b) {
 
 	// Trivial case, most likely to happen
-	if (countBits(b->occupied) > 5) {
+	if (popCount(b->occupied) > 5) {
 		return false;
 	}
 
 	// King vs King
-	if (countBits(b->occupied) == 2) {
+	if (popCount(b->occupied) == 2) {
 		return true;
 	}
 
 	// 3 pieces on board:
-	if (countBits(b->occupied) == 3) {
+	if (popCount(b->occupied) == 3) {
 		// King Knight vs King
-		if (b->pieces[Piece::KNIGHT]) {
+		if (b->pieces[KNIGHT]) {
 			return true;
 		}
 
 		// King Bishop vs King
-		if (b->pieces[Piece::BISHOP]) {
+		if (b->pieces[BISHOP]) {
 			return true;
 		}
 	}
 
-	if (countBits(b->occupied) == 4) {
+	if (popCount(b->occupied) == 4) {
 		// King Bishop vs King Bishop (all same color)
-		if (countBits(b->pieces[Piece::BISHOP] & WHITE_SQUARES) == 2 &&
-			countBits(b->pieces[Piece::BISHOP] & BLACK_SQUARES) == 2) {
+		if (popCount(b->pieces[BISHOP] & WHITE_SQUARES) == 2 &&
+			popCount(b->pieces[BISHOP] & BLACK_SQUARES) == 2) {
 			return true;
 		}
 
 	}
 
-	if (countBits(b->occupied) == 5) {
+	if (popCount(b->occupied) == 5) {
 		// King Bishop Bishop vs King Bishop (all same color)
-		if (countBits(b->pieces[Piece::BISHOP] & WHITE_SQUARES) == 3 &&
-			countBits(b->pieces[Piece::BISHOP] & BLACK_SQUARES) == 3) {
+		if (popCount(b->pieces[BISHOP] & WHITE_SQUARES) == 3 &&
+			popCount(b->pieces[BISHOP] & BLACK_SQUARES) == 3) {
 			return true;
 		}
 

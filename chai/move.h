@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "board.h"
 #include "defs.h"
 
 /*
@@ -22,9 +21,13 @@
 	11-- Q
 */
 
+
+const move_t MOVE_NONE = 0;
+const move_t MOVE_NULL = 4095; // C1-C1 used as nullmove (impossible move, never generated)
+
 const int sqBitMask = 0x3F;
 
-const int promPieceIndex[] = { Piece::KNIGHT, Piece::BISHOP, Piece::ROOK, Piece::QUEEN };
+const int promIndex[] = { chai::KNIGHT, chai::BISHOP, chai::ROOK, chai::QUEEN };
 const int piecePromIndex[] = { 0, 0, PROM_TO_KNIGHT, PROM_TO_BISHOP, PROM_TO_ROOK, PROM_TO_QUEEN, 0 };
 
 // new move, promPiece
@@ -65,12 +68,13 @@ inline bool isPromotion(move_t move) {
 
 inline int promPiece(board_t* b, move_t move) {
 	return isPromotion(move) ?
-		(move >> 14) + 2 + (b->stm == BLACK ? 6 : 0)
-		: Piece::NO_PIECE;
+		(move >> 14) + 2 + (b->stm == chai::BLACK ? 6 : 0)
+		: chai::NO_TYPE;
 }
 
 inline bool isPawnStart(move_t move, int movingPiece) {
-	return piecePawn[movingPiece] && abs(fromSq(move) - toSq(move)) == 16;
+	return (movingPiece == Pieces::P || movingPiece == Pieces::p)
+		&& abs(fromSq(move) - toSq(move)) == 16;
 }
 
 inline bool isEnPassant(move_t move) {

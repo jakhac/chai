@@ -3,37 +3,17 @@
 // Include extern vars declared in board.h
 move_t killer[2][MAX_GAME_MOVES];
 move_t mateKiller[MAX_GAME_MOVES];
-//int histHeuristic[13][64];
-int histHeuristic[2][64][64];
-int histMax = 0;
 move_t counterHeuristic[64][64][2];
 
+int histHeuristic[2][64][64];
+int histMax = 0;
 
 bool checkBoard(board_t* b) {
-
-	// check castle permission
 	Assert(b->castlePermission >= 0 && b->castlePermission <= 15);
-
-	// check min/max pieces on board
-	Assert(countBits(b->occupied) >= 2 && countBits(b->occupied) <= 32);
-
-	// check valid en pas square and rank regarding side
-	if (b->stm == WHITE) {
-		Assert(b->enPas == 0 || ((b->enPas <= H6) && (b->enPas >= A6)));
-	} else {
-		Assert(b->enPas == 0 || ((b->enPas <= H3) && (b->enPas >= A3)));
-	}
-
-	//if (!(b->zobristKey == generateZobristKey(b))) {
-	//	printBoard(b);
-	//	for (int i = 5; i >= 0; i--) {
-	//		cout << "played " << getStringMove(b, b->undoHistory->move) << endl;
-	//	}
-	//}
-
+	Assert(popCount(b->occupied) >= 2 && popCount(b->occupied) <= 32);
+	Assert(validEnPasSq(b->enPas) || b->enPas == DEFAULT_EP_SQ);
 	Assert(b->zobristKey == generateZobristKey(b));
 	Assert(b->zobristPawnKey == generatePawnHashKey(b));
-
 	return true;
 }
 
@@ -49,9 +29,13 @@ void clearPiece(board_t* b, int piece, int square, int side) {
 	b->occupied &= clearMask[square];
 }
 
+int fileRankToSq(int f, int r) {
+	return 8 * r + f;
+}
+
 void reset(board_t* b) {
-	b->stm = WHITE;
-	b->enPas = 0;
+	b->stm = chai::WHITE;
+	b->enPas = DEFAULT_EP_SQ;
 	b->halfMoves = 0;
 	b->ply = 0;
 	b->undoPly = 0;
@@ -60,19 +44,20 @@ void reset(board_t* b) {
 	b->zobristPawnKey = 0x0;
 	b->castlePermission = 0;
 
+	// Reset all heuristics used to order moves during search.
+
 	for (int i = 0; i < MAX_GAME_MOVES; i++) {
-		mateKiller[i] = NO_MOVE;
+		mateKiller[i] = MOVE_NONE;
 	}
 
 	for (int i = 0; i < 64; i++) {
 		for (int j = 0; j < 64; j++) {
 			for (int k = 0; k < 2; k++) {
-				counterHeuristic[i][j][k] = NO_MOVE;
+				counterHeuristic[i][j][k] = MOVE_NONE;
 			}
 		}
 	}
 
-	// reset history heuristic
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < NUM_SQUARES; j++) {
 			for (int k = 0; k < NUM_SQUARES; k++) {
@@ -82,14 +67,13 @@ void reset(board_t* b) {
 	}
 	histMax = 0;
 
-	// reset history of killer heuristic
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < MAX_DEPTH; j++) {
-			killer[i][j] = NO_MOVE;
+			killer[i][j] = MOVE_NONE;
 		}
 	}
 
-	for (int i = Piece::NO_PIECE; i <= Piece::KING; i++) b->pieces[i] = 0ULL;
+	for (int i = chai::NO_TYPE; i <= chai::KING; i++) b->pieces[i] = 0ULL;
 
 	b->color[0] = 0ULL;
 	b->color[1] = 0ULL;
@@ -102,22 +86,22 @@ key_t generateZobristKey(board_t* b) {
 	int square = 0;
 	int piece = 0;
 
-	// hash all pieces on current square
+	// Hash all pieces on their current square
 	while (occ) {
-		square = popBit(&occ);
+		square = getPopLSB(&occ);
 		piece = pieceAt(b, square);
 		finalZobristKey ^= pieceKeys[piece][square];
 	}
 
-	// hash in sideKey if white plays
-	if (b->stm == WHITE) {
+	// Hash in sideKey if white plays
+	if (b->stm == chai::WHITE) {
 		finalZobristKey ^= sideKey;
 	}
 
-	// hash in en passant square
-	finalZobristKey ^= pieceKeys[Piece::EMPTY][b->enPas];
+	// Hash in en passant square
+	finalZobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas];
 
-	// hash in castlePermission
+	// Hash in castlePermission
 	finalZobristKey ^= castleKeys[b->castlePermission];
 
 	Assert(finalZobristKey != 0);
@@ -127,17 +111,17 @@ key_t generateZobristKey(board_t* b) {
 key_t generatePawnHashKey(board_t* b) {
 	int sq;
 	key_t finalPawnKey = 0x0;
-	bitboard_t whitePawns = getPieces(b, Piece::PAWN, WHITE);
-	bitboard_t blackPawns = getPieces(b, Piece::PAWN, BLACK);
+	bitboard_t whitePawns = getPieces(b, chai::PAWN, chai::WHITE);
+	bitboard_t blackPawns = getPieces(b, chai::PAWN, chai::BLACK);
 
 	while (whitePawns) {
-		sq = popBit(&whitePawns);
-		finalPawnKey ^= pieceKeys[Piece::P][sq];
+		sq = getPopLSB(&whitePawns);
+		finalPawnKey ^= pieceKeys[Pieces::P][sq];
 	}
 
 	while (blackPawns) {
-		sq = popBit(&blackPawns);
-		finalPawnKey ^= pieceKeys[Piece::p][sq];
+		sq = getPopLSB(&blackPawns);
+		finalPawnKey ^= pieceKeys[Pieces::p][sq];
 	}
 
 	return finalPawnKey;
@@ -148,43 +132,42 @@ bitboard_t getPieces(board_t* b, int piece, int side) {
 }
 
 bitboard_t getDiagPieces(board_t* b, int side) {
-	return getPieces(b, Piece::BISHOP, b->stm) | getPieces(b, Piece::QUEEN, b->stm);
+	return getPieces(b, chai::BISHOP, b->stm) | getPieces(b, chai::QUEEN, b->stm);
 }
 
-bitboard_t getVerticalPieces(board_t* b, int side) {
-	return getPieces(b, Piece::ROOK, b->stm) | getPieces(b, Piece::QUEEN, b->stm);
+bitboard_t getVerticalPieces(board_t* b, int side) { //TODO side stm
+	return getPieces(b, chai::ROOK, b->stm) | getPieces(b, chai::QUEEN, b->stm);
 }
 
 int pieceAt(board_t* b, int square) {
-
 	for (int i = 0; i < 7; i++) {
-		// find piece type
 		if (b->pieces[i] & setMask[square]) {
-			// find side
-			if (b->color[WHITE] & setMask[square]) return i;
-			if (b->color[BLACK] & setMask[square]) return i + 6;
+			if (b->color[chai::WHITE] & setMask[square]) return i;
+			if (b->color[chai::BLACK] & setMask[square]) return i + 6;
 		}
 	}
+
 	return 0;
 }
 
 int countMajorPieces(board_t* b, int side) {
 	int cnt = 0;
 	for (int i = 2; i < 7; i++) {
-		cnt += countBits(getPieces(b, i, side));
+		cnt += popCount(getPieces(b, i, side));
 	}
 
 	return cnt;
 }
 
 void printBoard(board_t* b) {
+#ifdef INFO
 	int sq, file, rank, piece;
 
 	// print board
 	for (rank = RANK_8; rank >= RANK_1; rank--) {
 		printf("%d  ", rank + 1);
 		for (file = FILE_A; file <= FILE_H; file++) {
-			sq = file_rank_2_sq(file, rank);
+			sq = fileRankToSq(file, rank);
 			piece = pieceAt(b, sq);
 			printf("%2c", pieceChar[piece]);
 		}
@@ -196,7 +179,6 @@ void printBoard(board_t* b) {
 		printf("%2c", 'a' + file);
 	}
 
-#ifdef INFO
 	cout << "\n\nPlayer to move: " << b->stm << endl;
 	printf("Zobrist key: %llX\n", b->zobristKey);
 	printf("Pawn key: %llX\n", b->zobristPawnKey);
@@ -210,9 +192,9 @@ void printBoard(board_t* b) {
 		   b->castlePermission & k_CASTLE ? 'k' : ' ',
 		   b->castlePermission & q_CASTLE ? 'q' : ' '
 	);
-#endif // INFO
 
 	cout << endl;
+#endif // INFO
 }
 
 void _printBoard(board_t* b) {
@@ -222,7 +204,7 @@ void _printBoard(board_t* b) {
 	for (rank = RANK_8; rank >= RANK_1; rank--) {
 		printf("%d  ", rank + 1);
 		for (file = FILE_A; file <= FILE_H; file++) {
-			sq = file_rank_2_sq(file, rank);
+			sq = fileRankToSq(file, rank);
 			piece = pieceAt(b, sq);
 			printf("%2c", pieceChar[piece]);
 		}
@@ -236,7 +218,7 @@ void _printBoard(board_t* b) {
 	cout << endl;
 }
 
-bool parseFen(board_t* board, string fen) {
+bool parseFen(board_t* board, std::string fen) {
 	reset(board);
 
 	// Shortest fen (2 kings, no rights) "8/8/8/k7/K7/8/8/8 w - - 0 1"
@@ -250,18 +232,18 @@ bool parseFen(board_t* board, string fen) {
 	while (rank >= RANK_1) {
 		count = 1;
 		switch (fen[index]) {
-			case 'p': piece = Piece::p; break;
-			case 'r': piece = Piece::r; break;
-			case 'n': piece = Piece::n; break;
-			case 'b': piece = Piece::b; break;
-			case 'k': piece = Piece::k; break;
-			case 'q': piece = Piece::q; break;
-			case 'P': piece = Piece::P; break;
-			case 'R': piece = Piece::R; break;
-			case 'N': piece = Piece::N; break;
-			case 'B': piece = Piece::B; break;
-			case 'K': piece = Piece::K; break;
-			case 'Q': piece = Piece::Q; break;
+			case 'p': piece = Pieces::p; break;
+			case 'r': piece = Pieces::r; break;
+			case 'n': piece = Pieces::n; break;
+			case 'b': piece = Pieces::b; break;
+			case 'k': piece = Pieces::k; break;
+			case 'q': piece = Pieces::q; break;
+			case 'P': piece = Pieces::P; break;
+			case 'R': piece = Pieces::R; break;
+			case 'N': piece = Pieces::N; break;
+			case 'B': piece = Pieces::B; break;
+			case 'K': piece = Pieces::K; break;
+			case 'Q': piece = Pieces::Q; break;
 
 			case '1':
 			case '2':
@@ -271,7 +253,7 @@ bool parseFen(board_t* board, string fen) {
 			case '6':
 			case '7':
 			case '8':
-				piece = Piece::NO_PIECE;
+				piece = chai::NO_TYPE;
 				count = fen[index] - '0';
 				break;
 
@@ -289,7 +271,7 @@ bool parseFen(board_t* board, string fen) {
 
 		for (int i = 0; i < count; i++) {
 			square = rank * 8 + file;
-			if (piece != Piece::NO_PIECE) {
+			if (piece != chai::NO_TYPE) {
 				setPiece(board, piece, square, pieceCol[piece]);
 			}
 			file++;
@@ -299,7 +281,7 @@ bool parseFen(board_t* board, string fen) {
 
 	// assert for correct position
 	Assert(fen[index] == 'w' || fen[index] == 'b');
-	board->stm = (fen[index] == 'w') ? WHITE : BLACK;
+	board->stm = (fen[index] == 'w') ? chai::WHITE : chai::BLACK;
 	index += 2;
 
 	// castle permission
@@ -327,7 +309,7 @@ bool parseFen(board_t* board, string fen) {
 		Assert(file >= FILE_A && file <= FILE_H);
 		Assert(rank >= RANK_1 && rank <= RANK_8);
 
-		board->enPas = file_rank_2_sq(file, rank);
+		board->enPas = fileRankToSq(file, rank);
 		index += 3;
 	} else {
 		index += 2;
@@ -337,13 +319,13 @@ bool parseFen(board_t* board, string fen) {
 
 	index += 2;
 
-	string fullMoveStr = "";
+	std::string fullMoveStr = "";
 	while (fen[index]) {
 		fullMoveStr += fen[index];
 		index++;
 	}
 
-	board->halfMoves += stoi(fullMoveStr) * 2;
+	board->halfMoves += std::stoi(fullMoveStr) * 2;
 
 	board->zobristPawnKey = generatePawnHashKey(board);
 	board->zobristKey = generateZobristKey(board);
@@ -353,10 +335,10 @@ bool parseFen(board_t* board, string fen) {
 	return false;
 }
 
-string getFEN(board_t* b) {
+std::string getFEN(board_t* b) {
 	int piece;
 	int empty = 0;
-	string fen = "";
+	std::string fen = "";
 
 	int i = 0;
 	int r = RANK_8;
@@ -366,12 +348,12 @@ string getFEN(board_t* b) {
 
 		f = FILE_A;
 		while (f <= FILE_H) {
-			i = file_rank_2_sq(f, r);
+			i = fileRankToSq(f, r);
 
 			piece = pieceAt(b, i);
 			if (pieceValid(piece)) {
 				if (empty) {
-					fen += to_string(empty);
+					fen += std::to_string(empty);
 					empty = 0;
 				}
 				fen += pieceChar[piece];
@@ -383,7 +365,7 @@ string getFEN(board_t* b) {
 		}
 
 		if (empty) {
-			fen += to_string(empty);
+			fen += std::to_string(empty);
 		}
 
 		empty = 0;
@@ -395,7 +377,7 @@ string getFEN(board_t* b) {
 		r--;
 	}
 
-	if (b->stm == WHITE) {
+	if (b->stm == chai::WHITE) {
 		fen += " w KQkq ";
 	} else {
 		fen += " b KQkq ";
@@ -406,20 +388,20 @@ string getFEN(board_t* b) {
 		fen += ('1' + squareToRank[b->enPas]);
 	}
 
-	fen += " " + to_string(b->undoPly) + " " + to_string(b->halfMoves);
+	fen += " " + std::to_string(b->undoPly) + " " + std::to_string(b->halfMoves);
 
 	return fen;
 }
 
-move_t parseMove(board_t* b, string move) {
+move_t parseMove(board_t* b, std::string move) {
 	// trivial case for null move
-	if (move == "0000") return NULL_MOVE;
+	if (move == "0000") return MOVE_NULL;
 
-	int from = file_rank_2_sq(move[0] - 97, move[1] - 49);
-	int to = file_rank_2_sq(move[2] - 97, move[3] - 49);
+	int from = fileRankToSq(move[0] - 97, move[1] - 49);
+	int to = fileRankToSq(move[2] - 97, move[3] - 49);
 	int movingPiece = pieceAt(b, from);
 	int promPiece = 0;
-	int moveFlag = NORMAL_MOVE;
+	int MOVE_FLAG = NORMAL_MOVE;
 
 	// set possible pawn flags
 	if (piecePawn[movingPiece]) {
@@ -427,10 +409,10 @@ move_t parseMove(board_t* b, string move) {
 
 		// set ep flag if to square is en passant (ep capture)
 		if (to == b->enPas && (moveDistance == 7 || moveDistance == 9)) {
-			moveFlag = EP_MOVE;
+			MOVE_FLAG = EP_MOVE;
 
 		} else if (squareToRank[to] == RANK_1 || squareToRank[to] == RANK_8) {
-			moveFlag = PROM_MOVE;
+			MOVE_FLAG = PROM_MOVE;
 			switch (move[4]) {
 				case 'n': promPiece = PROM_TO_KNIGHT; break;
 				case 'b': promPiece = PROM_TO_BISHOP; break;
@@ -441,11 +423,10 @@ move_t parseMove(board_t* b, string move) {
 	}
 
 	if (pieceKing[movingPiece] && abs(from - to) == 2) {
-		moveFlag = CASTLE_MOVE;
+		MOVE_FLAG = CASTLE_MOVE;
 	}
-	//position startpos moves g1f3 g8f6 g2g3 d7d5 f1g2 e7e6 e1g1
 
-	return serializeMove(from, to, moveFlag, promPiece);
+	return serializeMove(from, to, MOVE_FLAG, promPiece);
 }
 
 bool push(board_t* b, move_t move) {
@@ -462,7 +443,7 @@ bool push(board_t* b, move_t move) {
 	undo_s->cap = captured;
 	undo_s->fiftyMove = b->fiftyMove;
 
-	Assert(b->enPas == 0 || validEnPasSq(b->enPas));
+	Assert(b->enPas == DEFAULT_EP_SQ || validEnPasSq(b->enPas));
 	Assert(b->zobristKey == generateZobristKey(b));
 	Assert(squareOnBoard(from_square));
 	Assert(squareOnBoard(to_square));
@@ -472,39 +453,39 @@ bool push(board_t* b, move_t move) {
 	b->fiftyMove++;
 
 	// pawn moves reset fiftyMove rule, update pawn key
-	if (movingPiece == Piece::P || movingPiece == Piece::p) {
-		b->zobristPawnKey ^= pieceKeys[movingPiece][to_square]; //set piece
+	if (movingPiece == Pieces::P || movingPiece == Pieces::p) {
+		b->zobristPawnKey ^= pieceKeys[movingPiece][to_square]; // set piece
 		b->zobristPawnKey ^= pieceKeys[movingPiece][from_square]; // clear piece
 		b->fiftyMove = 0;
 
 		if (isEnPassant(move)) {
-			int sq = (b->stm == WHITE) ? -8 : 8;
+			int sq = (b->stm == chai::WHITE) ? -8 : 8;
 			sq += to_square;
 
 			b->zobristKey ^= pieceKeys[pieceAt(b, sq)][sq];
 			b->zobristPawnKey ^= pieceKeys[pieceAt(b, sq)][sq];
-			clearPiece(b, Piece::PAWN, sq, b->stm ^ 1);
+			clearPiece(b, chai::PAWN, sq, b->stm ^ 1);
 		}
 	}
 
-	b->zobristKey ^= pieceKeys[Piece::EMPTY][b->enPas]; // ep out
+	b->zobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas]; // ep out
 	if (isPawnStart(move, movingPiece)) {
-		if (b->stm == WHITE) b->enPas = to_square - 8;
+		if (b->stm == chai::WHITE) b->enPas = to_square - 8;
 		else b->enPas = to_square + 8;
 	} else {
-		b->enPas = 0;
+		b->enPas = DEFAULT_EP_SQ;
 	}
-	b->zobristKey ^= pieceKeys[Piece::EMPTY][b->enPas]; // ep in
+	b->zobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas]; // ep in
 
 	// clear to_square and move piece
 	if (captured) {
-		Assert(captured != Piece::K && captured != Piece::k);
+		Assert(captured != Pieces::K && captured != Pieces::k);
 		b->fiftyMove = 0;
 		b->zobristKey ^= pieceKeys[captured][to_square];
 		clearPiece(b, captured, to_square, b->stm ^ 1);
 
 		// delete captured pawn from pawn key
-		if (captured == Piece::P || captured == Piece::p) {
+		if (captured == Pieces::P || captured == Pieces::p) {
 			b->zobristPawnKey ^= pieceKeys[captured][to_square];
 		}
 	}
@@ -573,13 +554,13 @@ bool push(board_t* b, move_t move) {
 void pushCastle(board_t* b, int clearRookSq, int setRookSq, int side) {
 	int rook = pieceAt(b, clearRookSq);
 
-	Assert(rook == Piece::r || rook == Piece::R);
+	Assert(rook == Pieces::r || rook == Pieces::R);
 
 	b->zobristKey ^= pieceKeys[rook][clearRookSq];
-	clearPiece(b, Piece::ROOK, clearRookSq, side);
+	clearPiece(b, chai::ROOK, clearRookSq, side);
 
 	b->zobristKey ^= pieceKeys[rook][setRookSq];
-	setPiece(b, Piece::ROOK, setRookSq, side);
+	setPiece(b, chai::ROOK, setRookSq, side);
 
 	clearCastlePermission(b, side);
 }
@@ -592,18 +573,18 @@ void pushNull(board_t* b) {
 	undo_s.castle = b->castlePermission;
 	undo_s.zobKey = b->zobristKey;
 	undo_s.pawnKey = b->zobristPawnKey;
-	undo_s.move = NULL_MOVE;
-	undo_s.cap = Piece::NO_PIECE;
+	undo_s.move = MOVE_NULL;
+	undo_s.cap = chai::NO_TYPE;
 
-	b->zobristKey ^= pieceKeys[Piece::EMPTY][b->enPas]; // ep out
+	b->zobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas]; // ep out
 	b->enPas = 0;
-	b->zobristKey ^= pieceKeys[Piece::EMPTY][b->enPas]; // ep in
+	b->zobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas]; // ep in
 
 	// update game state variables
 	b->stm ^= 1;
 	b->zobristKey ^= sideKey;
 
-	Assert(b->enPas == 0 || validEnPasSq(b->enPas));
+	Assert(b->enPas == DEFAULT_EP_SQ || validEnPasSq(b->enPas));
 	Assert(b->zobristKey == generateZobristKey(b));
 	Assert(b->zobristPawnKey == generatePawnHashKey(b));
 
@@ -611,14 +592,14 @@ void pushNull(board_t* b) {
 	undo_s.fiftyMove = b->fiftyMove;
 	b->undoHistory[b->undoPly] = undo_s;
 
-	b->fiftyMove++; // might cause negative ply in isRepetition() check
+	b->fiftyMove++;
 	b->halfMoves++;
 	b->undoPly++;
 	b->ply++;
 }
 
 void clearCastlePermission(board_t* b, int side) {
-	if (side == WHITE) {
+	if (side == chai::WHITE) {
 		b->castlePermission &= ~K_CASTLE;
 		b->castlePermission &= ~Q_CASTLE;
 	} else {
@@ -647,11 +628,8 @@ undo_t pop(board_t* b) {
 	b->enPas = undo.enPas;
 	int capturedPiece = undo.cap;
 
-	Assert((b->enPas == 0 || ((b->enPas <= H6) && (b->enPas >= A6)))
-		   || (b->enPas == 0 || ((b->enPas <= H3) && (b->enPas >= A3))));
-
 	// trivial case for null moves
-	if (undo.move == NULL_MOVE) {
+	if (undo.move == MOVE_NULL) {
 		Assert(b->ply >= 0);
 		return undo;
 	}
@@ -671,37 +649,36 @@ undo_t pop(board_t* b) {
 
 	// undo ep captures
 	if (isEnPassant(undo.move)) {
-		if (b->stm == WHITE) setPiece(b, Piece::PAWN, to_square - 8, b->stm ^ 1);
-		else setPiece(b, Piece::PAWN, to_square + 8, b->stm ^ 1);
+		if (b->stm == chai::WHITE) setPiece(b, chai::PAWN, to_square - 8, b->stm ^ 1);
+		else setPiece(b, chai::PAWN, to_square + 8, b->stm ^ 1);
 	}
 
 	// undo promotions
 	if (promPiece(b, undo.move)) {
 		clearPiece(b, movingPiece, from_square, b->stm);
-		setPiece(b, Piece::PAWN, from_square, b->stm);
+		setPiece(b, chai::PAWN, from_square, b->stm);
 	}
 
 	// undo castles
 	if (isCastling(undo.move)) {
 		switch (to_square) {
-			case C1: popCastle(b, D1, A1, WHITE); break;
-			case G1: popCastle(b, F1, H1, WHITE); break;
-			case C8: popCastle(b, D8, A8, BLACK); break;
-			case G8: popCastle(b, F8, H8, BLACK); break;
+			case C1: popCastle(b, D1, A1, chai::WHITE); break;
+			case G1: popCastle(b, F1, H1, chai::WHITE); break;
+			case C8: popCastle(b, D8, A8, chai::BLACK); break;
+			case G8: popCastle(b, F8, H8, chai::BLACK); break;
 			default: Assert(0);
 		}
 	}
 
-	Assert((b->enPas == 0 || ((b->enPas <= H6) && (b->enPas >= A6)))
-		   || (b->enPas == 0 || ((b->enPas <= H3) && (b->enPas >= A3))));
+	Assert(validEnPasSq(b->enPas) || b->enPas == DEFAULT_EP_SQ);
 	Assert(checkBoard(b));
 	return undo;
 }
 
 void popCastle(board_t* b, int clearRookSq, int setRookSq, int side) {
-	Assert(pieceAt(b, clearRookSq) == Piece::R || pieceAt(b, clearRookSq) == Piece::r);
-	clearPiece(b, Piece::ROOK, clearRookSq, side);
-	setPiece(b, Piece::ROOK, setRookSq, side);
+	Assert(pieceAt(b, clearRookSq) == Pieces::R || pieceAt(b, clearRookSq) == Pieces::r);
+	clearPiece(b, chai::ROOK, clearRookSq, side);
+	setPiece(b, chai::ROOK, setRookSq, side);
 }
 
 move_t getCurrentMove(board_t* b) {
@@ -713,12 +690,12 @@ bitboard_t getPinner(board_t* b, int kSq, int kSide) {
 	bitboard_t potPinned = kingSlider & b->color[kSide];
 	bitboard_t xrays = kingSlider ^ lookUpRookMoves(kSq, b->occupied ^ potPinned);
 
-	bitboard_t pinner = xrays & (getPieces(b, Piece::QUEEN, kSide ^ 1) | (getPieces(b, Piece::ROOK, kSide ^ 1)));
+	bitboard_t pinner = xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::ROOK, kSide ^ 1)));
 
 	kingSlider = lookUpBishopMoves(kSq, b->occupied);
 	potPinned = kingSlider & b->color[kSide];
 	xrays = kingSlider ^ lookUpBishopMoves(kSq, b->occupied ^ potPinned);
-	pinner |= xrays & (getPieces(b, Piece::QUEEN, kSide ^ 1) | (getPieces(b, Piece::BISHOP, kSide ^ 1)));
+	pinner |= xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::BISHOP, kSide ^ 1)));
 
 	return pinner;
 }
@@ -729,20 +706,20 @@ bitboard_t getPinned(board_t* b, int kSq, int kSide) {
 	bitboard_t kingSlider = lookUpRookMoves(kSq, b->occupied);
 	bitboard_t potPinned = kingSlider & b->color[kSide];
 	bitboard_t xrays = kingSlider ^ lookUpRookMoves(kSq, b->occupied ^ potPinned);
-	bitboard_t pinner = xrays & (getPieces(b, Piece::QUEEN, kSide ^ 1) | (getPieces(b, Piece::ROOK, kSide ^ 1)));
+	bitboard_t pinner = xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::ROOK, kSide ^ 1)));
 
 	while (pinner) {
-		int sq = popBit(&pinner);
+		int sq = getPopLSB(&pinner);
 		pinned |= obstructed(sq, kSq) & b->color[kSide];
 	}
 
 	kingSlider = lookUpBishopMoves(kSq, b->occupied);
 	potPinned = kingSlider & b->color[kSide];
 	xrays = kingSlider ^ lookUpBishopMoves(kSq, b->occupied ^ potPinned);
-	pinner = xrays & (getPieces(b, Piece::QUEEN, kSide ^ 1) | (getPieces(b, Piece::BISHOP, kSide ^ 1)));
+	pinner = xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::BISHOP, kSide ^ 1)));
 
 	while (pinner) {
-		int sq = popBit(&pinner);
+		int sq = getPopLSB(&pinner);
 		pinned |= obstructed(sq, kSq) & b->color[kSide];
 	}
 
@@ -750,7 +727,7 @@ bitboard_t getPinned(board_t* b, int kSq, int kSide) {
 }
 
 int getKingSquare(board_t* b, int side) {
-	return bitscanForward(getPieces(b, Piece::KING, side));
+	return getLSB(getPieces(b, chai::KING, side));
 }
 
 bitboard_t attackerSet(board_t* b, int side) {
@@ -758,9 +735,9 @@ bitboard_t attackerSet(board_t* b, int side) {
 	bitboard_t attackerSet = 0ULL, piece;
 
 	// pawn attacks
-	piece = getPieces(b, Piece::PAWN, side);
+	piece = getPieces(b, chai::PAWN, side);
 	while (piece) {
-		sq = popBit(&piece);
+		sq = getPopLSB(&piece);
 		attackerSet |= pawnAtkMask[side][sq];
 	}
 
@@ -769,23 +746,23 @@ bitboard_t attackerSet(board_t* b, int side) {
 	attackerSet |= kingAtkMask[kSq];
 
 	// knight attacks
-	piece = getPieces(b, Piece::KNIGHT, side);
+	piece = getPieces(b, chai::KNIGHT, side);
 	while (piece) {
-		sq = popBit(&piece);
+		sq = getPopLSB(&piece);
 		attackerSet |= knightAtkMask[sq];
 	}
 
 	// bishop attacks OR in queen square
-	piece = getPieces(b, Piece::BISHOP, side) | getPieces(b, Piece::QUEEN, side);
+	piece = getPieces(b, chai::BISHOP, side) | getPieces(b, chai::QUEEN, side);
 	while (piece) {
-		sq = popBit(&piece);
+		sq = getPopLSB(&piece);
 		attackerSet |= lookUpBishopMoves(sq, b->occupied);
 	}
 
 	// rook attacks OR in queen square
-	piece = getPieces(b, Piece::ROOK, side) | getPieces(b, Piece::QUEEN, side);
+	piece = getPieces(b, chai::ROOK, side) | getPieces(b, chai::QUEEN, side);
 	while (piece) {
-		sq = popBit(&piece);
+		sq = getPopLSB(&piece);
 		attackerSet |= lookUpRookMoves(sq, b->occupied);
 	}
 
@@ -798,9 +775,9 @@ bitboard_t blockerSet(board_t* b, int side, int blockSq) {
 	int sq;
 
 	// find pawn pushes, that block the square
-	piece = getPieces(b, Piece::PAWN, side);
+	piece = getPieces(b, chai::PAWN, side);
 	bitboard_t pushedPawns;
-	if (side == WHITE) {
+	if (side == chai::WHITE) {
 		// Single push
 		pushedPawns = (piece << 8) & ~b->occupied & blockSqBoard;
 		blockerSet |= (pushedPawns >> 8);
@@ -836,25 +813,25 @@ bitboard_t blockerSet(board_t* b, int side, int blockSq) {
 		}
 	}
 
-	piece = getPieces(b, Piece::KNIGHT, side);
+	piece = getPieces(b, chai::KNIGHT, side);
 	while (piece) {
-		sq = popBit(&piece);
+		sq = getPopLSB(&piece);
 		if (knightAtkMask[sq] & blockSqBoard) {
 			blockerSet |= setMask[sq];
 		}
 	}
 
-	piece = getPieces(b, Piece::BISHOP, side) | getPieces(b, Piece::QUEEN, side);
+	piece = getPieces(b, chai::BISHOP, side) | getPieces(b, chai::QUEEN, side);
 	while (piece) {
-		sq = popBit(&piece);
+		sq = getPopLSB(&piece);
 		if (lookUpBishopMoves(sq, b->occupied) & blockSqBoard) {
 			blockerSet |= setMask[sq];
 		}
 	}
 
-	piece = getPieces(b, Piece::ROOK, side) | getPieces(b, Piece::QUEEN, side);
+	piece = getPieces(b, chai::ROOK, side) | getPieces(b, chai::QUEEN, side);
 	while (piece) {
-		sq = popBit(&piece);
+		sq = getPopLSB(&piece);
 		if (lookUpRookMoves(sq, b->occupied) & blockSqBoard) {
 			blockerSet |= setMask[sq];
 		}
@@ -865,28 +842,28 @@ bitboard_t blockerSet(board_t* b, int side, int blockSq) {
 
 bitboard_t squareAttackedBy(board_t* b, int square, int side) {
 	bitboard_t attacker = 0ULL;
-	attacker |= pawnAtkMask[side ^ 1][square] & getPieces(b, Piece::PAWN, side);
-	attacker |= knightAtkMask[square] & getPieces(b, Piece::KNIGHT, side);
-	attacker |= lookUpBishopMoves(square, b->occupied) & (getPieces(b, Piece::BISHOP, side) | getPieces(b, Piece::QUEEN, side));
-	attacker |= lookUpRookMoves(square, b->occupied) & (getPieces(b, Piece::ROOK, side) | getPieces(b, Piece::QUEEN, side));
+	attacker |= pawnAtkMask[side ^ 1][square] & getPieces(b, chai::PAWN, side);
+	attacker |= knightAtkMask[square] & getPieces(b, chai::KNIGHT, side);
+	attacker |= lookUpBishopMoves(square, b->occupied) & (getPieces(b, chai::BISHOP, side) | getPieces(b, chai::QUEEN, side));
+	attacker |= lookUpRookMoves(square, b->occupied) & (getPieces(b, chai::ROOK, side) | getPieces(b, chai::QUEEN, side));
 	return attacker;
 }
 
 bitboard_t squareAtkDef(board_t* b, int square) {
 	bitboard_t attacker = 0ULL;
-	attacker |= (pawnAtkMask[b->stm ^ 1][square] | pawnAtkMask[b->stm][square]) & b->pieces[Piece::PAWN];
-	attacker |= knightAtkMask[square] & b->pieces[Piece::KNIGHT];
-	attacker |= lookUpBishopMoves(square, b->occupied) & (b->pieces[Piece::BISHOP] | b->pieces[Piece::QUEEN]);
-	attacker |= lookUpRookMoves(square, b->occupied) & (b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN]);
+	attacker |= (pawnAtkMask[b->stm ^ 1][square] | pawnAtkMask[b->stm][square]) & b->pieces[chai::PAWN];
+	attacker |= knightAtkMask[square] & b->pieces[chai::KNIGHT];
+	attacker |= lookUpBishopMoves(square, b->occupied) & (b->pieces[chai::BISHOP] | b->pieces[chai::QUEEN]);
+	attacker |= lookUpRookMoves(square, b->occupied) & (b->pieces[chai::ROOK] | b->pieces[chai::QUEEN]);
 	return attacker;
 }
 
 bitboard_t squareAtkDefOcc(board_t* b, bitboard_t occupied, int square) {
 	bitboard_t attacker = 0ULL;
-	attacker |= (pawnAtkMask[b->stm ^ 1][square] | pawnAtkMask[b->stm][square]) & b->pieces[Piece::PAWN];
-	attacker |= knightAtkMask[square] & b->pieces[Piece::KNIGHT];
-	attacker |= lookUpBishopMoves(square, occupied) & (b->pieces[Piece::BISHOP] | b->pieces[Piece::QUEEN]);
-	attacker |= lookUpRookMoves(square, occupied) & (b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN]);
+	attacker |= (pawnAtkMask[b->stm ^ 1][square] | pawnAtkMask[b->stm][square]) & b->pieces[chai::PAWN];
+	attacker |= knightAtkMask[square] & b->pieces[chai::KNIGHT];
+	attacker |= lookUpBishopMoves(square, occupied) & (b->pieces[chai::BISHOP] | b->pieces[chai::QUEEN]);
+	attacker |= lookUpRookMoves(square, occupied) & (b->pieces[chai::ROOK] | b->pieces[chai::QUEEN]);
 	return attacker;
 }
 
@@ -894,16 +871,16 @@ bool isCheck(board_t* b, int side) {
 	//return squareAttackedBy(getKingSquare(side), side ^ 1);
 
 	int kSq = getKingSquare(b, side);
-	if (pawnAtkMask[side][kSq] & getPieces(b, Piece::PAWN, side ^ 1)) {
+	if (pawnAtkMask[side][kSq] & getPieces(b, chai::PAWN, side ^ 1)) {
 		return true;
 	}
-	if (knightAtkMask[kSq] & getPieces(b, Piece::KNIGHT, side ^ 1)) {
+	if (knightAtkMask[kSq] & getPieces(b, chai::KNIGHT, side ^ 1)) {
 		return true;
 	}
-	if (lookUpBishopMoves(kSq, b->occupied) & (getPieces(b, Piece::BISHOP, side ^ 1) | getPieces(b, Piece::QUEEN, side ^ 1))) {
+	if (lookUpBishopMoves(kSq, b->occupied) & (getPieces(b, chai::BISHOP, side ^ 1) | getPieces(b, chai::QUEEN, side ^ 1))) {
 		return true;
 	}
-	if (lookUpRookMoves(kSq, b->occupied) & (getPieces(b, Piece::ROOK, side ^ 1) | getPieces(b, Piece::QUEEN, side ^ 1))) {
+	if (lookUpRookMoves(kSq, b->occupied) & (getPieces(b, chai::ROOK, side ^ 1) | getPieces(b, chai::QUEEN, side ^ 1))) {
 		return true;
 	}
 	return false;
@@ -920,7 +897,7 @@ bool sqIsBlockerForKing(board_t* b, int kSq, int movingSide, int potBlockerSq) {
 
 	pinner |= xrays & (getVerticalPieces(b, movingSide));
 	while (pinner) {
-		sq = popBit(&pinner);
+		sq = getPopLSB(&pinner);
 		if (obstructed(kSq, sq) & setMask[potBlockerSq]) return true;
 	}
 
@@ -930,7 +907,7 @@ bool sqIsBlockerForKing(board_t* b, int kSq, int movingSide, int potBlockerSq) {
 
 	pinner |= xrays & (getDiagPieces(b, movingSide));
 	while (pinner) {
-		sq = popBit(&pinner);
+		sq = getPopLSB(&pinner);
 		if (obstructed(kSq, sq) & setMask[potBlockerSq]) return true;
 	}
 
@@ -946,20 +923,20 @@ bool checkingMove(board_t* b, move_t move) {
 
 	// 1. Direct check: atkMask hits kingSq
 	switch (movingPiece) {
-		case Piece::P:
-		case Piece::p:
+		case Pieces::P:
+		case Pieces::p:
 			if (pawnAtkMask[b->stm][to] & kingMask) return true; break;
-		case Piece::N:
-		case Piece::n:
+		case Pieces::N:
+		case Pieces::n:
 			if (knightAtkMask[to] & kingMask) return true; break;
-		case Piece::B:
-		case Piece::b:
+		case Pieces::B:
+		case Pieces::b:
 			if (lookUpBishopMoves(to, b->occupied) & kingMask) return true; break;
-		case Piece::R:
-		case Piece::r:
+		case Pieces::R:
+		case Pieces::r:
 			if (lookUpRookMoves(to, b->occupied) & kingMask) return true; break;
-		case Piece::Q:
-		case Piece::q:
+		case Pieces::Q:
+		case Pieces::q:
 			if (lookUpBishopMoves(to, b->occupied) & kingMask
 				|| lookUpRookMoves(to, b->occupied) & kingMask) return true; break;
 	}
@@ -975,24 +952,24 @@ bool checkingMove(board_t* b, move_t move) {
 	if (piecePawn[movingPiece]) {
 		// 3.1 Promoted piece gives check
 		switch (promPiece(b, move)) {
-			case Piece::N:
-			case Piece::n:
+			case Pieces::N:
+			case Pieces::n:
 				return (knightAtkMask[to] & kingMask);
-			case Piece::B:
-			case Piece::b:
+			case Pieces::B:
+			case Pieces::b:
 				return (lookUpBishopMoves(to, b->occupied ^ setMask[from]) & kingMask);
-			case Piece::R:
-			case Piece::r:
+			case Pieces::R:
+			case Pieces::r:
 				return (lookUpRookMoves(to, b->occupied ^ setMask[from]) & kingMask);
-			case Piece::Q:
-			case Piece::q:
+			case Pieces::Q:
+			case Pieces::q:
 				return (lookUpBishopMoves(to, b->occupied ^ setMask[from]) & kingMask)
 					|| (lookUpRookMoves(to, b->occupied ^ setMask[from]) & kingMask);
 		}
 
 		// 3.2 EnPassant check
 		if (isEnPassant(move)) {
-			int capSq = b->enPas + ((b->stm == WHITE) ? -8 : 8);
+			int capSq = b->enPas + ((b->stm == chai::WHITE) ? -8 : 8);
 			b->occupied ^= (1ULL << capSq);
 			b->occupied ^= (1ULL << from);
 			b->occupied ^= (1ULL << to);
@@ -1016,7 +993,7 @@ bool checkingMove(board_t* b, move_t move) {
 				return lookUpRookMoves(F8, b->occupied) & kingMask;
 			case C8: // => rook lands on D8
 				return lookUpRookMoves(D8, b->occupied) & kingMask;
-			default: Assert(false) break;
+			default: Assert(false); break;
 		}
 	}
 
@@ -1031,22 +1008,22 @@ bool castleValid(board_t* b, int castle, bitboard_t* attackerSet) {
 	switch (castle) {
 		case K_CASTLE:
 			if ((setMask[F1] | setMask[G1]) & b->occupied) return false;
-			if (pieceAt(b, H1) != Piece::R) return false;
+			if (pieceAt(b, H1) != Pieces::R) return false;
 			if ((*attackerSet & setMask[F1]) | (*attackerSet & setMask[G1])) return false;
 			break;
 		case Q_CASTLE:
 			if ((setMask[D1] | setMask[C1] | setMask[B1]) & b->occupied) return false;
-			if (pieceAt(b, A1) != Piece::R) return false;
+			if (pieceAt(b, A1) != Pieces::R) return false;
 			if ((*attackerSet & setMask[D1]) | (*attackerSet & setMask[C1])) return false;
 			break;
 		case k_CASTLE:
 			if ((setMask[F8] | setMask[G8]) & b->occupied) return false;
-			if (pieceAt(b, H8) != Piece::r) return false;
+			if (pieceAt(b, H8) != Pieces::r) return false;
 			if ((*attackerSet & setMask[F8]) | (*attackerSet & setMask[G8])) return false;
 			break;
 		case q_CASTLE:
 			if ((setMask[D8] | setMask[C8] | setMask[B8]) & b->occupied) return false;
-			if (pieceAt(b, A8) != Piece::r) return false;
+			if (pieceAt(b, A8) != Pieces::r) return false;
 			if ((*attackerSet & setMask[D8]) | (*attackerSet & setMask[C8])) return false;
 			break;
 		default: return false; break;

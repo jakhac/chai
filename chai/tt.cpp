@@ -1,16 +1,40 @@
 #include "tt.h"
 
+
+void initHashTables(board_t* b) {
+	if (!resizeHashTables(b->tt, b->pt, DEFAULT_TT_SIZE)) {
+		cerr << "Error in memory allocation for TT." << endl;
+		exit(1);
+	}
+}
+
+void freeHashTables(ttable_t* tt, pawntable_t* pt) {
+	if (tt->bucketList != NULL && !VirtualFree(tt->bucketList, 0, MEM_RELEASE)) {
+		DWORD err = GetLastError();
+		cerr << "Failed to free large page memory. Error code: 0x"
+			<< std::hex << err
+			<< std::dec << endl;
+		exit(1);
+	}
+	if (pt->table != NULL) {
+		free(pt->table);
+	}
+
+	pt->table = NULL;
+	tt->bucketList = NULL;
+}
+
 // allocate tt with virtualAlloc, return unused MB 
-size_t allocateTT(ttable_t* tt, size_t newMbSize) {
+static size_t allocateTT(ttable_t* tt, size_t newMbSize) {
 	unsigned long long totalBytes = (unsigned long long)newMbSize << 20;
 	unsigned long long numBucketsPossible = totalBytes / sizeof(bucket_t);
 
 	// Most significant bit is maximum power of 2 while smaller than number of buckets
-	int msb = bitscanReverse(numBucketsPossible);
+	int msb = getMSB(numBucketsPossible);
 	Assert(pow(2, msb) <= numBucketsPossible);
 
 	if (msb > 48) {
-		cerr << "Error: TT-Size is too big (cannot use lower 48-bits anymore to index table)." << endl;
+		cerr << "Error: TT-Size is too big." << endl;
 		exit(1);
 	}
 
@@ -19,6 +43,7 @@ size_t allocateTT(ttable_t* tt, size_t newMbSize) {
 	Assert(tt->bucketList);
 
 	for (int i = 0; i < msb; i++) indexMask |= (1 << i);
+
 	clearTT(tt);
 
 	// return remaining bytes
@@ -26,7 +51,7 @@ size_t allocateTT(ttable_t* tt, size_t newMbSize) {
 }
 
 // Init pawn table with clamped remaining MBs
-size_t allocatePT(pawntable_t* pt, size_t remainingByte) {
+static size_t allocatePT(pawntable_t* pt, size_t remainingByte) {
 	if (remainingByte < (DEFAULT_PT_SIZE << 20)) {
 		remainingByte = DEFAULT_PT_SIZE << 20;
 	} else if (remainingByte > (MAX_PT_SIZE << 20)) {
@@ -38,21 +63,22 @@ size_t allocatePT(pawntable_t* pt, size_t remainingByte) {
 	pt->stored = 0;
 
 	pt->table = (pawntable_entry_t*)malloc(pt->entries * sizeof(pawntable_entry_t));
-	clearPawnTable(pt);
+	clearPT(pt);
 
 	// return used bytes
 	return remainingByte;
 }
 
-// try to resize tt, returns true if successfull, else false
-bool resizeTT(ttable_t* tt, pawntable_t* pt, size_t newMbSize) {
+bool resizeHashTables(ttable_t* tt, pawntable_t* pt, size_t newMbSize) {
 	if (newMbSize < MIN_TT_SIZE || newMbSize > MAX_TT_SIZE) {
-		cout << "Request MB is too small / large. Choose from interval ["
+		cerr << "Request MB is too small / large. Choose from interval ["
 			<< MIN_TT_SIZE << ", " << MAX_TT_SIZE << "]" << endl;
 		return false;
 	}
 
-	freeTT(tt, pt);
+	freeHashTables(tt, pt);
+	Assert(!tt->bucketList);
+	Assert(!pt->table);
 
 	size_t possibleBytes = (newMbSize << 20);
 	size_t remainingBytes = allocateTT(tt, newMbSize);
@@ -77,31 +103,19 @@ bool resizeTT(ttable_t* tt, pawntable_t* pt, size_t newMbSize) {
 	return true;
 }
 
-void freeTT(ttable_t* tt, pawntable_t* pt) {
-	if (tt->bucketList != NULL && !VirtualFree(tt->bucketList, 0, MEM_RELEASE)) {
-		DWORD err = GetLastError();
-		cerr << "Failed to free large page memory. Error code: 0x"
-			<< hex << err
-			<< dec << endl;
-		exit(1);
-	}
-	if (pt->table != NULL) {
-		free(pt->table);
-	}
-
-	pt->table = NULL;
-	tt->bucketList = NULL;
-}
-
 void clearTT(ttable_t* tt) {
 	memset(tt->bucketList, 0, (tt->buckets * sizeof(bucket_t)));
 }
 
-uint32_t getTTIndex(key_t zobristKey) {
+void clearPT(pawntable_t* pt) {
+	memset(pt->table, 0, (pt->entries * sizeof(pawntable_entry_t)));
+}
+
+static uint32_t getTTIndex(key_t zobristKey) {
 	return (uint32_t)(zobristKey & indexMask);
 }
 
-uint16_t getBucketIndex(key_t zobristKey) {
+static uint16_t getBucketIndex(key_t zobristKey) {
 	return (uint16_t)(zobristKey >> 48);
 }
 
@@ -109,13 +123,13 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 	int32_t index = getTTIndex(b->zobristKey);
 	uint16_t key = getBucketIndex(b->zobristKey);
 
-	Assert(move != NO_MOVE);
+	Assert(move != MOVE_NONE);
 	Assert(flag >= TT_ALPHA && flag <= TT_EVAL);
 	Assert(index >= 0 && index <= (b->tt->buckets - 1));
 	Assert((depth >= 1 || TT_EVAL) && depth <= MAX_DEPTH);
 	Assert(flag >= TT_ALPHA && flag <= TT_EVAL);
-	Assert(abs(value) < INF || value == NO_VALUE);
-	Assert(abs(staticEval) < INF);
+	Assert(abs(value) < VALUE_INFTY || value == VALUE_NONE);
+	Assert(abs(staticEval) < VALUE_INFTY);
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
 	// Stats
@@ -162,13 +176,28 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 		b->tt->collided++;
 	}
 
-	// Replace entry has been determined: Store information 
+	// Replace entry has been determined: Store information
 	leastValuable->key = key;
 	leastValuable->move = move;
 	leastValuable->flag = flag;
 	leastValuable->value = value;
 	leastValuable->staticEval = staticEval;
 	leastValuable->depth = depth;
+}
+
+void storePT(board_t* b, const value_t eval) {
+	int index = b->zobristPawnKey % b->pt->entries;
+	Assert(index >= 0 && index <= b->pt->entries - 1);
+
+	if (b->pt->table[index].zobristPawnKey == 0ULL) {
+		// count every new entry
+		b->pt->stored++;
+	} else {
+		b->pt->collided++;
+	}
+
+	b->pt->table[index].eval = eval;
+	b->pt->table[index].zobristPawnKey = b->zobristPawnKey;
 }
 
 bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int* hashDepth) {
@@ -189,9 +218,9 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 
 			e = &bucket->bucketEntries[i];
 			Assert(e->flag >= TT_ALPHA && e->flag <= TT_EVAL);
-			Assert(e->move != NO_MOVE);
-			Assert(abs(e->value) < INF || e->value == NO_VALUE);
-			Assert(abs(e->staticEval) < ISMATE);
+			Assert(e->move != MOVE_NONE);
+			Assert(abs(e->value) < VALUE_INFTY || e->value == VALUE_NONE);
+			Assert(abs(e->staticEval) < VALUE_IS_MATE_IN);
 
 			*hashValue = hashToSearch(b, e->value);
 			*hashDepth = e->depth;
@@ -206,29 +235,41 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 	return false;
 }
 
-void prefetchTTEntry(board_t* b) {
+bool probePT(board_t* b, value_t* hashScore) {
+	int index = b->zobristPawnKey % b->pt->entries;
+	Assert(index >= 0 && index <= b->pt->entries - 1);
 
+	if (b->pt->table[index].zobristPawnKey == b->zobristPawnKey) {
+		*hashScore = b->pt->table[index].eval;
+		return true;
+	}
+
+	return false;
+}
+
+void prefetchTT(board_t* b) {
 	uint32_t index = getTTIndex(b->zobristKey);
-#ifdef __GNUC__
-	__builtin_prefetch((bucket_t*)&b->tt->bucketList[index]);
-#else
-	_m_prefetch((bucket_t*)&b->tt->bucketList[index]);
-#endif
+	prefetch((bucket_t*)&b->tt->bucketList[index]);
+}
+
+void prefetchPT(board_t* b) {
+	int index = b->zobristPawnKey % b->pt->entries;
+	prefetch(&b->pt->table[index]);
 }
 
 int hashToSearch(board_t* b, value_t score) {
-	if (score > ISMATE) {
+	if (score > VALUE_IS_MATE_IN) {
 		return score - b->ply;
-	} else if (score < -ISMATE) {
+	} else if (score < -VALUE_IS_MATE_IN) {
 		return score + b->ply;
 	}
 	return score;
 }
 
 int searchToHash(board_t* b, value_t score) {
-	if (score > ISMATE) {
+	if (score > VALUE_IS_MATE_IN) {
 		return score + b->ply;
-	} else if (score < -ISMATE) {
+	} else if (score < -VALUE_IS_MATE_IN) {
 		return score - b->ply;
 	}
 	return score;
@@ -251,15 +292,15 @@ move_t probePV(board_t* b) {
 		if (bucket->bucketEntries[i].key == key) {
 			e = &bucket->bucketEntries[i];
 			Assert(e->flag >= TT_ALPHA && e->flag <= TT_EVAL);
-			Assert(e->move != NO_MOVE);
-			Assert(e->value >= -INF && e->value <= INF);
+			Assert(e->move != MOVE_NONE);
+			Assert(e->value >= -VALUE_INFTY && e->value <= VALUE_INFTY);
 
 			return e->move;
 
 		}
 	}
 
-	return NO_MOVE;
+	return MOVE_NONE;
 
 }
 
@@ -267,7 +308,7 @@ int getPVLine(board_t* b, const int maxDepth) {
 	int move = probePV(b);
 	int count = 0;
 
-	while (move != NO_MOVE && count < maxDepth && isLegal(b, move)) {
+	while (move != MOVE_NONE && count < maxDepth && isLegal(b, move)) {
 		push(b, move);
 		b->pvArray[count++] = move;
 		move = probePV(b);
@@ -278,109 +319,4 @@ int getPVLine(board_t* b, const int maxDepth) {
 	}
 
 	return count;
-}
-
-void clearPawnTable(pawntable_t* pawnTable) {
-	pawntable_entry_t* pawnEntry_s;
-	for (pawnEntry_s = pawnTable->table; pawnEntry_s < pawnTable->table + pawnTable->entries; pawnEntry_s++) {
-		pawnEntry_s->zobristPawnKey = 0x0;
-		pawnEntry_s->eval = 0;
-	}
-
-	pawnTable->stored = 0;
-	pawnTable->collided = 0;
-}
-
-void storePawnEntry(board_t* b, const value_t eval) {
-	int index = b->zobristPawnKey % b->pt->entries;
-	Assert(index >= 0 && index <= b->pt->entries - 1);
-
-	if (b->pt->table[index].zobristPawnKey == 0ULL) {
-		// count every new entry
-		b->pt->stored++;
-	} else {
-		b->pt->collided++;
-	}
-
-	b->pt->table[index].eval = eval;
-	b->pt->table[index].zobristPawnKey = b->zobristPawnKey;
-}
-
-void prefetchPawnEntry(board_t* b) {
-	int index = b->zobristPawnKey % b->pt->entries;
-#ifdef __GNUC__
-	__builtin_prefetch(&b->pt->table[index]);
-#else
-	_m_prefetch(&b->pt->table[index]);
-#endif
-}
-
-bool probePawnEntry(board_t* b, value_t* hashScore) {
-	int index = b->zobristPawnKey % b->pt->entries;
-	Assert(index >= 0 && index <= b->pt->entries - 1);
-
-	if (b->pt->table[index].zobristPawnKey == b->zobristPawnKey) {
-		*hashScore = b->pt->table[index].eval;
-		return true;
-	}
-
-	return false;
-}
-
-void printTTStatus(board_t* b) {
-
-	cout << "Buckets: " << b->tt->buckets << endl;
-	cout << "Entries: " << (b->tt->buckets * BUCKETS) << endl;
-	cout << "Collided: " << b->tt->collided << "/" << b->tt->stored << endl;
-	cout << endl;
-
-	bucket_t* bucket = b->tt->bucketList;
-
-	int firstEntries = 0;
-	int secEntries = 0;
-	int thirdEntries = 0;
-	int fourthEntries = 0;
-
-	for (int i = 0; i < b->tt->buckets; i++) {
-
-		for (int j = 0; j < BUCKETS; j++) {
-
-			// Count non-empty buckets
-			if (bucket->bucketEntries->key != 0x0) {
-
-				if (bucket->bucketEntries->move == NO_MOVE) {
-
-					//cout << "Depth " << (int)bucket->depth << endl;
-					//cout << "Score " << (int)bucket->score << endl;
-					//cout << "Flag " << (int)bucket->flag << endl;
-
-				}
-
-				Assert(bucket->bucketEntries->move != NO_MOVE);
-
-				switch (j) {
-					case 0:
-						firstEntries++;
-						break;
-					case 1:
-						secEntries++;
-						break;
-					case 2:
-						thirdEntries++;
-						break;
-					case 3:
-						fourthEntries++;
-						break;
-					default: break;
-				}
-			}
-
-			bucket++;
-		}
-	}
-
-	cout << "First entries population: non-empty/buckets " << firstEntries << "/" << b->tt->buckets << endl;
-	cout << "Secon entries population: non-empty/buckets " << secEntries << "/" << b->tt->buckets << endl;
-	cout << "Third entries population: non-empty/buckets " << thirdEntries << "/" << b->tt->buckets << endl;
-	cout << "Fourth entries population: non-empty/buckets " << fourthEntries << "/" << b->tt->buckets << endl;
 }

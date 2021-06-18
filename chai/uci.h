@@ -26,7 +26,7 @@
  */
 void uciMode(board_t* b, search_t* s);
 
-void uciSetOption(board_t* b, string cmd);
+void uciSetOption(board_t* b, std::string cmd);
 
 /**
  * Parse a position from UCI command.
@@ -34,7 +34,7 @@ void uciSetOption(board_t* b, string cmd);
  * @param  b   A board_t to process.
  * @param  cmd The command.
  */
-void uciParsePosition(board_t* b, string cmd);
+void uciParsePosition(board_t* b, std::string cmd);
 
 /**
  * Parse search information from UCI go command.
@@ -43,7 +43,7 @@ void uciParsePosition(board_t* b, string cmd);
  * @param  s   A search_t to process.
  * @param  cmd The command.
  */
-void uciParseGo(board_t* b, search_t* s, string cmd);
+void uciParseGo(board_t* b, search_t* s, std::string cmd);
 
 /**
  * Complete initialization for chess engine. Called once at startup.

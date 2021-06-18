@@ -1,16 +1,14 @@
 #pragma once
 
-#if defined(_MSC_VER)
-/* Microsoft C/C++-compatible compiler */
-#include <intrin.h>
-#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
-/* GCC-compatible compiler, targeting x86/x86-64 */
-#include <x86intrin.h>
-#endif
-
 #include "windows.h" // used for getTimeMs()
 
 #include "types.h"
+
+#if defined(_MSC_VER)
+#include <intrin.h>
+#elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
+#include <x86intrin.h>
+#endif
 
 /**
  * Bit scan forward and return index. If board_t is 0 return -1. Uses compiler bitscan.
@@ -19,7 +17,7 @@
  *
  * @returns Index of first found bit.
  */
-inline int bitscanForward(bitboard_t board) {
+inline int getLSB(bitboard_t board) {
 	if (board == 0ULL) return -1;
 
 	unsigned long ret;
@@ -28,13 +26,13 @@ inline int bitscanForward(bitboard_t board) {
 }
 
 /**
- * Reversed bit scan forward and return index. If board_t is 0 return -1.
+ * Reversed bit scan reverse and return index. If board_t is 0 return -1.
  *
  * @param  board board_t.
  *
  * @returns Index of first found bit.
  */
-inline int bitscanReverse(bitboard_t board) {
+inline int getMSB(bitboard_t board) {
 	if (board == 0ULL) return -1;
 
 	unsigned long ret;
@@ -49,7 +47,7 @@ inline int bitscanReverse(bitboard_t board) {
  *
  * @returns Amount of bits set to 1 in bb.
  */
-inline int countBits(bitboard_t bb) {
+inline int popCount(bitboard_t bb) {
 #if defined(_MSC_VER)
 	return (int)__popcnt64(bb);
 #elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
@@ -64,25 +62,18 @@ inline int countBits(bitboard_t bb) {
  *
  * @returns Index of popped bit.
  */
-inline int popBit(bitboard_t* bb) {
+inline int getPopLSB(bitboard_t* bb) {
 	unsigned long ret;
 	_BitScanForward64(&ret, *bb);
 	*bb &= (*bb - 1);
 	return (int)ret;
 }
 
-/**
- * Pops least significant bit from bitboard and returns index.
- *
- * @param  bb Bitboard to pop lsb on.
- *
- * @returns Index of popped bit.
- */
-inline int popBit(bitboard_t bb) {
-	unsigned long ret;
-	_BitScanForward64(&ret, bb);
-	bb &= (bb - 1);
-	return (int)ret;
+// Pop lsb and return modified board
+inline bitboard_t popLSB(bitboard_t bb) {
+	if (!bb) return 0;
+
+	return (bb & (bb - 1));
 }
 
 /**

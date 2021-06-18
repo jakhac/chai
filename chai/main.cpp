@@ -1,40 +1,27 @@
 #include "main.h"
 
-
 int main() {
 	cout << "CHAI " << VERSION << endl
-		<< "info: assert="
-#ifdef ASSERT
-		<< "1"
-#else
-		<< "0"
-#endif // ASSERT
-		<< " buckets=" << BUCKETS << endl;
-
-	cout << "compiler="
-#if defined(_MSC_VER)
-		<< "MSVC"
-#elif defined(__GNUC__)
-		<< "GCC"
-#endif
-		<< " date=" << __DATE__
-		<< endl;
+		<< "info: assert=" << info_ASSERT
+		<< " buckets=" << BUCKETS << endl
+		<< "compiler=" << info_COMPILER
+		<< " date=" << __DATE__ << endl;
 
 	init(&board);
+	initHashTables(b);
+
 	parseFen(&board, STARTING_FEN);
+	//parseFen(&board, "8/5k2/8/8/1N2K3/2B5/7p/8 w - - 0 1");
 
-#ifdef INFO
-	printBoard(&board);
-#endif // INFO
-
+	printBoard(b);
 	cli(b, &perft, s);
 
-	freeTT(b->tt, b->pt);
+	freeHashTables(b->tt, b->pt);
 	return 0;
 }
 
 void cli(board_t* b, Perft* p, search_t* s) {
-	string userInput;
+	std::string userInput;
 
 	while (1) {
 		cin >> userInput;
@@ -74,14 +61,17 @@ void cli(board_t* b, Perft* p, search_t* s) {
 		}
 
 		if (userInput == "perft") {
-			cout << "Enter perft depth: ";
+			cout << "Enter Perft depth: ";
 
-			string perftDepth;
+			std::string perftDepth;
 			cin >> perftDepth;
 
 			if (stoi(perftDepth) >= 1 && stoi(perftDepth) <= 15) {
 				dividePerft(b, stoi(perftDepth));
+			} else {
+				cerr << "Enter a number between 1 and 15." << endl;
 			}
+			cout << "Leaving perft option." << endl;
 			continue;
 		}
 
@@ -131,7 +121,7 @@ void cli(board_t* b, Perft* p, search_t* s) {
 		cout << "Command does not exist. Valid commands are:" << endl
 			<< "\tuci\t(start uci protocol)" << endl
 			<< "\ts\t(search current position)" << endl
-			<< "\t[move]\t(apply move)" << endl
+			<< "\t[e2e4]\t(apply move)" << endl
 			<< "\tpop\t(undo move)" << endl
 			<< "\tfen\t(parse fen)" << endl
 			<< "\tprint\t(print board status)" << endl
@@ -143,7 +133,7 @@ void cli(board_t* b, Perft* p, search_t* s) {
 
 void dividePerft(board_t* b, int depth) {
 
-	string move = "";
+	std::string move = "";
 	Perft p;
 
 	while (depth) {

@@ -1,27 +1,41 @@
 #pragma once
 
-
-//#include <stdint.h>
-//#include "board.h"
 #include "moveGenerator.h"
 
+#ifdef __GNUC__
+#define prefetch(x) __builtin_prefetch(x);
+#else
+#define prefetch(x) _m_prefetch(x);
+#endif
 
 const size_t DEFAULT_TT_SIZE = 256;
+const size_t DEFAULT_PT_SIZE = 8;
+
 const size_t MIN_TT_SIZE = 2;
 const size_t MAX_TT_SIZE = 8192;
+const size_t MAX_PT_SIZE = 16;
 
 static int indexMask = 0;
 
-const size_t DEFAULT_PT_SIZE = 8;
-const size_t MAX_PT_SIZE = 16;
+
+/**
+ * Initialize both TT and PT with default MB size.
+ */
+void initHashTables(board_t* b);
+
+/**
+ * Free memory allocated for ttable and ptable.
+ *
+ * @param  b The board with both hash tables.
+ */
+void freeHashTables(ttable_t* tt, pawntable_t* pt);
 
 /**
  * Initialize transposition table: Clear used or allocated memory and re-allocate.
  *
  * @param  pvTable_s Transposition table.
  */
-bool resizeTT(ttable_t* tt, pawntable_t* pt, size_t newMbSize);
-
+bool resizeHashTables(ttable_t* tt, pawntable_t* pt, size_t newMbSize);
 
 /**
  * Reset all variables in transposition table. Only used in initialization or new game.
@@ -31,11 +45,11 @@ bool resizeTT(ttable_t* tt, pawntable_t* pt, size_t newMbSize);
 void clearTT(ttable_t* pvTable_s);
 
 /**
- * Prefetch first tt entry of bucket into cache using assembly instructions.
+ * Reset all variables used in pawn table. Only used before new game.
  *
- * @param  key The zobrist hash of current board.
+ * @param  pawnTable Pawn table to clear.
  */
-void prefetchTTEntry(board_t* b);
+void clearPT(pawntable_t* pawnTable);
 
 /**
  * Store a transposition entry containing score, score flag, move and depth in in transposition
@@ -49,6 +63,54 @@ void prefetchTTEntry(board_t* b);
  * @param  depth Depth used in search for move and score.
  */
 void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int flag, int depth);
+
+/**
+ * Store a pawn table entry with pawn evaluation score.
+ *
+ * @param  b    Current board.
+ * @param  eval Score for pawn structure.
+ */
+void storePT(board_t* b, const value_t eval);
+
+/**
+ * Probe the transposition table. If a hash entry with equal zobristKey is found, all
+ * information are written to referenced parameters. AlphaBeta search then decides if and
+ * how to use these. Iterates over all entries inside a bucket.
+ *
+ * @param  b		 Current board.
+ * @param  move		 Move of best entry.
+ * @param  hashScore Score of stored entry.
+ * @param  hashFlag  Flag of stored entry.
+ * @param  hashDepth Depth of stored entry.
+ *
+ * @returns True if hash entry was found, else false.
+ */
+bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int* hashDepth);
+
+/**
+ * Probe pawn table and return score if found.
+ *
+ * @param  b		 Current board.
+ * @param  hashScore The pointer to hash score.
+ *
+ * @returns True if hash was found and score is assigned.
+ */
+bool probePT(board_t* b, value_t* hashScore);
+
+/**
+ * Prefetch pawn entry in cache line using assembly instruction.
+ *
+ * @param  b The current board.
+ */
+void prefetchPT(board_t* b);
+
+/**
+ * Prefetch first tt entry of bucket into cache using assembly instructions.
+ *
+ * @param  key The zobrist hash of current board.
+ */
+void prefetchTT(board_t* b);
+
 
 /**
  * Probe PV move from ttable.
@@ -78,21 +140,6 @@ int hashToSearch(board_t* b, value_t score);
 int searchToHash(board_t* b, value_t score);
 
 /**
- * Probe the transposition table. If a hash entry with equal zobristKey is found, all
- * information are written to referenced parameters. AlphaBeta search then decides if and
- * how to use these. Iterates over all entries inside a bucket.
- *
- * @param  b		 Current board.
- * @param  move		 Move of best entry.
- * @param  hashScore Score of stored entry.
- * @param  hashFlag  Flag of stored entry.
- * @param  hashDepth Depth of stored entry.
- *
- * @returns True if hash entry was found, else false.
- */
-bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int* hashDepth);
-
-/**
  * Walk through best move stored in transposition table to collect principal variation line.
  *
  * @param  b	    Current board.
@@ -102,44 +149,7 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
  */
 int getPVLine(board_t* b, const int maxDepth);
 
-/**
- * Reset all variables used in pawn table. Only used before new game.
- *
- * @param  pawnTable Pawn table to clear.
- */
-void clearPawnTable(pawntable_t* pawnTable);
-
-/**
- * Store a pawn table entry with pawn evaluation score.
- *
- * @param  b    Current board.
- * @param  eval Score for pawn structure.
- */
-void storePawnEntry(board_t* b, const value_t eval);
-
-/**
- * Prefetch pawn entry in cache line using assembly instruction.
- *
- * @param  b The current board.
- */
-void prefetchPawnEntry(board_t* b);
-
-/**
- * Probe pawn table and return score if found.
- *
- * @param  b		 Current board.
- * @param  hashScore The pointer to hash score.
- *
- * @returns True if hash was found and score is assigned.
- */
-bool probePawnEntry(board_t* b, value_t* hashScore);
-
-/**
- * Free memory allocated for ttable and ptable.
- *
- * @param  b The board with both hash tables.
- */
-void freeTT(ttable_t* tt, pawntable_t* pt);
 
 
-void printTTStatus(board_t* b);
+
+

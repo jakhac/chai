@@ -11,8 +11,9 @@
 #include "mask.h"
 #include "board.h"
 #include "tt.h"
+#include "eval.h"
 
-using namespace std;
+//using namespace std;
 
 /**
  * Print referenced bitboard.
@@ -35,7 +36,7 @@ void printMoveStatus(board_t* b, move_t move);
  *
  * @returns The move in algebraic notation.
  */
-string getStringMove(board_t* b, const int move);
+std::string getStringMove(board_t* b, const int move);
 
 ///**
 // * Print all flags and attributes of given move.
@@ -77,14 +78,14 @@ void printPvLine(board_t* b, move_t* pvLine, int d, int score);
  *
  * @param  logMsg Message to write into log file.
  */
-void log(string logMsg);
+void log(std::string logMsg);
 
 /**
  * Gets the time.
  *
  * @returns The time.
  */
-string getTime();
+std::string getTime();
 
 /**
  * Read input from command line during search. Sets stop to true,

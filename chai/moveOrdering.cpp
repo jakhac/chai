@@ -3,8 +3,8 @@
 void initMVV_LVA() {
 	int attacker;
 	int victim;
-	for (attacker = Piece::P; attacker <= Piece::k; attacker++) {
-		for (victim = Piece::P; victim <= Piece::k; victim++) {
+	for (attacker = Pieces::P; attacker <= Pieces::k; attacker++) {
+		for (victim = Pieces::P; victim <= Pieces::k; victim++) {
 			MVV_LVA[victim][attacker] = victimScore[victim] + 6 - (victimScore[attacker] / 100);
 		}
 	}
@@ -17,10 +17,10 @@ bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkDef, int side, int at
 	}
 
 	bitboard_t lva;
-	for (int i = Piece::PAWN; i <= Piece::KING; i++) {
+	for (int i = chai::PAWN; i <= chai::KING; i++) {
 		lva = atkDef & b->pieces[i];
 		if (lva) {
-			return setMask[bitscanForward(lva)];
+			return setMask[getLSB(lva)];
 		}
 	}
 
@@ -35,7 +35,7 @@ int see(board_t* b, const int move) {
 	int gain[32]{}, d = 0, side = b->stm;
 
 	bitboard_t occ = b->occupied;
-	bitboard_t mayXray = b->pieces[Piece::PAWN] | b->pieces[Piece::BISHOP] | b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
+	bitboard_t mayXray = b->pieces[chai::PAWN] | b->pieces[chai::BISHOP] | b->pieces[chai::ROOK] | b->pieces[chai::QUEEN];
 	bitboard_t attadef = squareAtkDef(b, to);
 	bitboard_t from = setMask[fromSq(move)];
 	bitboard_t used = 0ULL, discovered = 0ULL;
@@ -55,14 +55,14 @@ int see(board_t* b, const int move) {
 
 		if (from & mayXray) {
 			discovered = 0ULL;
-			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, Piece::QUEEN, side) | getPieces(b, Piece::BISHOP, side));
-			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, Piece::QUEEN, side) | getPieces(b, Piece::ROOK, side));
+			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, chai::QUEEN, side) | getPieces(b, chai::BISHOP, side));
+			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, chai::QUEEN, side) | getPieces(b, chai::ROOK, side));
 			attadef |= discovered & ~used;
 		}
 
 		side ^= 1;
 		from = getLeastValuablePiece(b, attadef, side, attackerPiece);
-		attackerPiece = pieceAt(b, bitscanForward(from));
+		attackerPiece = pieceAt(b, getLSB(from));
 
 	} while (from && attackerPiece);
 	while (--d) {
@@ -85,7 +85,7 @@ int lazySee(board_t* b, const int move) {
 	int gain[32]{}, d = 0, side = b->stm;
 
 	bitboard_t occ = b->occupied;
-	bitboard_t mayXray = b->pieces[Piece::PAWN] | b->pieces[Piece::BISHOP] | b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
+	bitboard_t mayXray = b->pieces[chai::PAWN] | b->pieces[chai::BISHOP] | b->pieces[chai::ROOK] | b->pieces[chai::QUEEN];
 	bitboard_t attadef = squareAtkDef(b, to);
 	bitboard_t from = setMask[fromSq(move)];
 	bitboard_t used = 0ULL, discovered = 0ULL;
@@ -112,14 +112,14 @@ int lazySee(board_t* b, const int move) {
 
 		if (from & mayXray) {
 			discovered = 0ULL;
-			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, Piece::QUEEN, side) | getPieces(b, Piece::BISHOP, side));
-			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, Piece::QUEEN, side) | getPieces(b, Piece::ROOK, side));
+			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, chai::QUEEN, side) | getPieces(b, chai::BISHOP, side));
+			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, chai::QUEEN, side) | getPieces(b, chai::ROOK, side));
 			attadef |= discovered & ~used;
 		}
 
 		side ^= 1;
 		from = getLeastValuablePiece(b, attadef, side, attackerPiece);
-		attackerPiece = pieceAt(b, bitscanForward(from));
+		attackerPiece = pieceAt(b, getLSB(from));
 
 	} while (from && attackerPiece);
 	while (--d) {
@@ -145,11 +145,11 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 
 	if (isPromotion(move)) {
 		nextVictim = promPiece(b, move);
-		balance += (SEEPieceValues[nextVictim] - SEEPieceValues[Piece::PAWN]);
+		balance += (SEEPieceValues[nextVictim] - SEEPieceValues[chai::PAWN]);
 	}
 
 	if (isEnPassant(move)) {
-		balance = SEEPieceValues[Piece::PAWN];
+		balance = SEEPieceValues[chai::PAWN];
 	}
 
 	balance -= threshold;
@@ -159,8 +159,8 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 	if (balance >= 0) return true;
 
 	// slider used to detect discovered attack
-	bitboard_t bishops = b->pieces[Piece::BISHOP] | b->pieces[Piece::QUEEN];
-	bitboard_t rooks = b->pieces[Piece::ROOK] | b->pieces[Piece::QUEEN];
+	bitboard_t bishops = b->pieces[chai::BISHOP] | b->pieces[chai::QUEEN];
+	bitboard_t rooks = b->pieces[chai::ROOK] | b->pieces[chai::QUEEN];
 
 	// copy occupied to simulate captures on bitboard
 	bitboard_t occ = b->occupied;
@@ -183,19 +183,19 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 		}
 
 		// Find weakest attacker
-		for (nextVictim = Piece::PAWN; nextVictim <= Piece::KING; nextVictim++) {
+		for (nextVictim = chai::PAWN; nextVictim <= chai::KING; nextVictim++) {
 			if (nowAttacking & b->pieces[nextVictim])
 				break;
 		}
 
 		// Remove least valuable attacker
-		occ ^= (1ULL << popBit(nowAttacking & b->pieces[nextVictim]));
+		occ ^= (1ULL << getLSB(nowAttacking & b->pieces[nextVictim]));
 
-		if (nextVictim == Piece::PAWN || nextVictim == Piece::BISHOP || nextVictim == Piece::QUEEN) {
+		if (nextVictim == chai::PAWN || nextVictim == chai::BISHOP || nextVictim == chai::QUEEN) {
 			attackers |= lookUpBishopMoves(to, occ) & bishops;
 		}
 
-		if (nextVictim == Piece::ROOK || nextVictim == Piece::QUEEN) {
+		if (nextVictim == chai::ROOK || nextVictim == chai::QUEEN) {
 			attackers |= lookUpRookMoves(to, occ) & rooks;
 		}
 
@@ -206,7 +206,7 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 
 		if (balance >= 0) {
 
-			if (nextVictim == Piece::KING && (attackers & b->color[color])) {
+			if (nextVictim == chai::KING && (attackers & b->color[color])) {
 				color ^= 1;
 			}
 
@@ -237,8 +237,8 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 
 	for (int i = 0; i < moveList->cnt; i++) {
 		currentMove = moveList->moves[i];
-		Assert(currentMove != NO_MOVE);
-		Assert(currentMove != NULL_MOVE);
+		Assert(currentMove != MOVE_NONE);
+		Assert(currentMove != MOVE_NULL);
 
 		// hash move
 		if (currentMove == hashMove) {

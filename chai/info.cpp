@@ -1,5 +1,11 @@
 #include "info.h"
 
+void logDebug(std::string errMsg) {
+	std::ofstream ofs("./assertLog.txt", std::ios_base::app);
+	ofs << errMsg;
+	ofs.close();
+}
+
 void printBitBoard(bitboard_t* bb) {
 	bitboard_t shiftBit = 1ULL;
 	int sq;
@@ -21,7 +27,7 @@ void printBitBoard(bitboard_t* bb) {
 
 void printMove(board_t* b, const move_t move) {
 
-	if (move == NULL_MOVE) {
+	if (move == MOVE_NULL) {
 		cout << "0000" << endl;
 		return;
 	}
@@ -31,16 +37,16 @@ void printMove(board_t* b, const move_t move) {
 
 	if (promoted) {
 		promChar = 'q';
-		if (promoted == Piece::n || promoted == Piece::N) {
+		if (promoted == Pieces::n || promoted == Pieces::N) {
 			promChar = 'n';
-		} else if (promoted == Piece::r || promoted == Piece::R) {
+		} else if (promoted == Pieces::r || promoted == Pieces::R) {
 			promChar = 'r';
-		} else if (promoted == Piece::b || promoted == Piece::B) {
+		} else if (promoted == Pieces::b || promoted == Pieces::B) {
 			promChar = 'b';
 		}
 	}
 
-	string ret = "";
+	std::string ret = "";
 	ret += ('a' + squareToFile[fromSq(move)]);
 	ret += ('1' + squareToRank[fromSq(move)]);
 	ret += ('a' + squareToFile[toSq(move)]);
@@ -49,26 +55,26 @@ void printMove(board_t* b, const move_t move) {
 	cout << ret << promChar << endl;
 }
 
-string getStringMove(board_t* b, const int move) {
-	if (move == NULL_MOVE) {
+std::string getStringMove(board_t* b, const int move) {
+	if (move == MOVE_NULL) {
 		return "0000";
 	}
 
 	int promoted = promPiece(b, move);
-	string promChar = " ";
+	std::string promChar = " ";
 
 	if (promoted) {
 		promChar = "q ";
-		if (promoted == Piece::n || promoted == Piece::N) {
+		if (promoted == Pieces::n || promoted == Pieces::N) {
 			promChar = "n ";
-		} else if (promoted == Piece::r || promoted == Piece::R) {
+		} else if (promoted == Pieces::r || promoted == Pieces::R) {
 			promChar = "r ";
-		} else if (promoted == Piece::b || promoted == Piece::B) {
+		} else if (promoted == Pieces::b || promoted == Pieces::B) {
 			promChar = "b ";
 		}
 	}
 
-	string ret = "";
+	std::string ret = "";
 	ret += ('a' + squareToFile[fromSq(move)]);
 	ret += ('1' + squareToRank[fromSq(move)]);
 	ret += ('a' + squareToFile[toSq(move)]);
@@ -99,13 +105,15 @@ void printSearchInfo(board_t* b) {
 	cout << "\n";
 }
 
-void log(string logMsg) {
-	ofstream ofs("log.txt", std::ios_base::out | std::ios_base::app);
+void log(std::string logMsg) {
+	std::ofstream ofs("log.txt", std::ios_base::out | std::ios_base::app);
 	ofs << getTime() << "\t" << logMsg << '\n';
 	ofs.close();
 }
 
 void readInput(search_t* s) {
+	// read input causes tests to wait for cin and does not terminate
+#ifndef TESTING
 	int bytes;
 	char input[256] = "", * endc;
 
@@ -126,16 +134,17 @@ void readInput(search_t* s) {
 		}
 		return;
 	}
+#endif
 }
 
 void printUCI(search_t* s, int d, int selDpt, int score) {
-	string scoreStr = " score ";
+	std::string scoreStr = " score ";
 
-	if (abs(score) >= ISMATE) {
-		string sign = (score > 0) ? "" : "-";
-		scoreStr += "mate " + sign + to_string(MATE_VALUE - abs(score));
+	if (abs(score) >= VALUE_IS_MATE_IN) {
+		std::string sign = (score > 0) ? "" : "-";
+		scoreStr += "mate " + sign + std::to_string(VALUE_MATE - abs(score));
 	} else {
-		scoreStr += "cp " + to_string(score);
+		scoreStr += "cp " + std::to_string(score);
 	}
 
 	cout << "info depth " << d
@@ -171,7 +180,7 @@ void printTTablePV(board_t* b, int depth, int selDepth) {
 	for (int i = 0; i <= depth; i++) {
 		move_t pvMove = probePV(b);
 
-		if (pvMove != NO_MOVE && isLegal(b, pvMove)) {
+		if (pvMove != MOVE_NONE && isLegal(b, pvMove)) {
 			cout << getStringMove(b, pvMove);
 			push(b, pvMove);
 			cnt++;
@@ -187,8 +196,8 @@ void printTTablePV(board_t* b, int depth, int selDepth) {
 
 void printPvLine(board_t* b, move_t* pvLine, int d, int score) {
 	int pvLen = d;
-	if (score >= ISMATE)
-		d = MATE_VALUE - score;
+	if (score >= VALUE_IS_MATE_IN)
+		d = VALUE_MATE - score;
 
 	cout << " pv ";
 	for (int i = 0; i < d; i++) {
@@ -196,7 +205,7 @@ void printPvLine(board_t* b, move_t* pvLine, int d, int score) {
 	}
 }
 
-string getTime() {
+std::string getTime() {
 	char str[32]{};
 	time_t a = time(nullptr);
 	struct tm time_info;

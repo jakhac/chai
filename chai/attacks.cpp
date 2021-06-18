@@ -28,9 +28,9 @@ bitboard_t rays[8][64];
 bitboard_t getBlockers(bitboard_t mask, int idx) {
 	bitboard_t blockers = 0ULL;
 	bitboard_t m = mask;
-	int bits = countBits(m);
+	int bits = popCount(m);
 	for (int i = 0; i < bits; i++) {
-		int bitPos = popBit(&m);
+		int bitPos = getPopLSB(&m);
 		if (idx & (1 << i)) {
 			blockers |= (1ULL << bitPos);
 		}
