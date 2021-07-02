@@ -17,6 +17,9 @@ const size_t MAX_PT_SIZE = 16;
 
 static int indexMask = 0;
 
+const int QS_DEPTH = -1;
+const int QS_DEPTH_CHECK = 0;
+
 
 /**
  * Initialize both TT and PT with default MB size.
@@ -85,7 +88,7 @@ void storePT(board_t* b, const value_t eval);
  *
  * @returns True if hash entry was found, else false.
  */
-bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int* hashDepth);
+bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int8_t* hashDepth);
 
 /**
  * Probe pawn table and return score if found.

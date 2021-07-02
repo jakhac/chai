@@ -157,7 +157,7 @@ void generateQuietCheckers(board_t* b, moveList_t* moveList) {
 	int oppkSq = getKingSquare(b, b->stm ^ 1);
 	int ownkSq = getKingSquare(b, b->stm);
 	bitboard_t pieces;
-	bitboard_t kingBoard = setMask[oppkSq];
+	bitboard_t kingBoard = (1ULL << oppkSq);
 
 	// Pawn pushes that check the king
 	bitboard_t pawns;
@@ -427,10 +427,10 @@ void whitePawnCaptures(board_t* board, moveList_t* moveList) {
 	whitePawns &= ~RANK_7_HEX;
 
 	// en passant square
-	if ((whitePawns << 7 & ~FILE_H_HEX) & setMask[board->enPas]) {
+	if ((whitePawns << 7 & ~FILE_H_HEX) & (1ULL << board->enPas)) {
 		moveList->moves[moveList->cnt++] = serializeMove(board->enPas - 7, board->enPas, EP_MOVE, Pieces::NO_PIECE);
 	}
-	if ((whitePawns << 9 & ~FILE_A_HEX) & setMask[board->enPas]) {
+	if ((whitePawns << 9 & ~FILE_A_HEX) & (1ULL << board->enPas)) {
 		moveList->moves[moveList->cnt++] = serializeMove(board->enPas - 9, board->enPas, EP_MOVE, Pieces::NO_PIECE);
 	}
 
@@ -467,10 +467,10 @@ void blackPawnCaptures(board_t* board, moveList_t* moveList) {
 	blackPawns &= ~RANK_2_HEX;
 
 	// en passant square
-	if ((blackPawns >> 7 & ~FILE_A_HEX) & setMask[board->enPas]) {
+	if ((blackPawns >> 7 & ~FILE_A_HEX) & (1ULL << board->enPas)) {
 		moveList->moves[moveList->cnt++] = serializeMove(board->enPas + 7, board->enPas, EP_MOVE, Pieces::NO_PIECE);
 	}
-	if ((blackPawns >> 9 & ~FILE_H_HEX) & setMask[board->enPas]) {
+	if ((blackPawns >> 9 & ~FILE_H_HEX) & (1ULL << board->enPas)) {
 		moveList->moves[moveList->cnt++] = serializeMove(board->enPas + 9, board->enPas, EP_MOVE, Pieces::NO_PIECE);
 	}
 

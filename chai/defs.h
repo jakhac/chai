@@ -15,9 +15,8 @@ using std::cerr;
 using std::endl;
 using std::fixed;
 
-
-#define ASSERT
-#define TESTING
+//#define ASSERT
+//#define TESTING
 #define INFO
 
 #define STRINGIFY(x) #x

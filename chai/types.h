@@ -68,7 +68,7 @@ struct ttable_entry_t {
 	move_t move = 0;
 
 	uint8_t flag = 0;
-	uint8_t depth = 0;
+	int8_t depth = 0;
 
 };
 
@@ -215,7 +215,9 @@ struct pv_line_t {
 
 namespace Pieces {
 	typedef enum PIECE {
-		NO_PIECE, P, N, B, R, Q, K, p, n, b, r, q, k
+		NO_PIECE = 0,
+		P = 1, N, B, R, Q, K,
+		p = 7, n, b, r, q, k
 	} piece_t;
 }
 
@@ -253,7 +255,7 @@ typedef enum TT_FLAG {
 	TT_BETA = 1 << 1,
 	TT_VALUE = 1 << 2,
 	TT_EVAL = 1 << 3
-} tt_flag_t;
+} bound_t;
 
 enum MOVE_FLAG {
 	NORMAL_MOVE = 0 << 12,

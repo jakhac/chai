@@ -252,13 +252,13 @@
 
 - Search
   - [ ] Delta Pruning
-  - [ ] Aspiration Windows
   - [ ] Store/Probe ttable in quiescence search
+  - [ ] Aspiration Windows
   - [ ] EGTB Probing
 - Project
   - [ ] UCI fixes, e.g. q to quit current mode
   - [ ] UCI refactor parsing
-  - [ ] Added syzygy tablebases
+  - [ ] Add syzygy tablebases
 - Bugfixes
 - Versions
   - v2.6.1: Added EGTB functionality, Delta Pruning

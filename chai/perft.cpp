@@ -15,7 +15,9 @@ long long Perft::perftRoot(board_t* b, int depth) {
 	for (int i = 0; i < _moveList->cnt; i++) {
 		move = _moveList->moves[i];
 
+#ifdef ASSERT
 		bool moveGivesCheck = checkingMove(b, move);
+#endif // ASSERT
 
 		//skip illegal moves
 		if (!push(b, move)) {
@@ -23,10 +25,6 @@ long long Perft::perftRoot(board_t* b, int depth) {
 			continue;
 		}
 
-		if (isCheck(b, b->stm) != moveGivesCheck) {
-			cout << "error in moveGivesCheck" << endl;
-			exit(1);
-		}
 		Assert(isCheck(b, b->stm) == moveGivesCheck);
 
 		long long cumnodes = leafNodes;
@@ -62,26 +60,19 @@ void Perft::perft(board_t* b, int depth) {
 	for (int i = 0; i < _moveList->cnt; i++) {
 		move = _moveList->moves[i];
 
+#ifdef ASSERT
 		bool moveGivesCheck = checkingMove(b, move);
+#endif // ASSERT
 
 		//skip illegal moves
 		if (!push(b, move)) {
 			Assert(!inCheck);
 			continue;
-		}
+	}
 
-		if (isCheck(b, b->stm) != moveGivesCheck) {
-			cout << "error in moveGivesCheck" << endl;
-			pop(b);
-			printBoard(b);
-			cout << "moveGivesCheck " << moveGivesCheck << endl;
-			cout << "move " << getStringMove(b, move) << endl;
-			cout << "fen " << getFEN(b) << endl;
-			exit(1);
-		}
 		Assert(isCheck(b, b->stm) == moveGivesCheck);
 
 		perft(b, depth - 1);
 		pop(b);
-	}
+}
 }

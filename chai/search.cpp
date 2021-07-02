@@ -170,8 +170,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	Assert(checkBoard(b));
 	Assert(alpha < beta);
 
-	// TODO fast score moves in quiescence
-
 	// Initialize node
 	bool rootNode = b->ply == 0;
 	bool pvNode = nodeType == PV;
@@ -231,12 +229,11 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	// stored a better score at same or greater depth. Do not return if close to 50-move draw.
 	value_t hashValue = -VALUE_INFTY;
 	value_t hashEval = -VALUE_INFTY;
-	int hashDepth = -1;
+	int8_t hashDepth = -1;
 	uint8_t hashFlag = TT_NONE;
 	move_t hashMove = MOVE_NONE;
 
 	bool hashStored = probeTT(b, &hashMove, &hashValue, &hashEval, &hashFlag, &hashDepth);
-	bool ttCapture = hashStored && isCapture(b, hashMove);
 	if (hashStored
 		&& !pvNode
 		&& !(hashFlag & TT_EVAL)) {
@@ -244,7 +241,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 		// Look for valueHit: This position has already been searched before with greater depth.
 		if (hashDepth >= depth && b->fiftyMove < 90) {
-			Assert(hashDepth >= 1 && hashDepth <= MAX_DEPTH);
+			Assert(hashDepth >= QS_DEPTH && hashDepth <= MAX_DEPTH);
 			Assert(hashFlag >= TT_ALPHA && hashFlag <= TT_VALUE);
 			Assert(hashValue > -VALUE_INFTY && hashValue < VALUE_INFTY);
 
@@ -253,20 +250,22 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				return hashValue;
 			}
 
-			if (hashFlag & TT_BETA && beta <= hashValue) {
+			if (hashFlag & TT_BETA && hashValue >= beta) {
 				b->tt->valueHit++;
 				return hashValue;
 			}
 
-			if (hashFlag & TT_ALPHA && alpha >= hashValue) {
+			if (hashFlag & TT_ALPHA && hashValue <= alpha) {
 				b->tt->valueHit++;
 				return hashValue;
 			}
+
 		}
 	}
 
 	// EGTB:
 	// Endgame-Tablebase probing.
+	// ... implementation ...
 
 
 	// Static evaluation of position:
@@ -346,7 +345,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		(ss + 1)->currentMove = MOVE_NULL;
 		pushNull(b);
 		value_t nullValue = -alphaBeta<NoPV>(-beta, -beta + 1, depth - 1 - reduction, b, s);
-		pop(b);
+		popNull(b);
 
 		if (s->stopped) {
 			return 0;
@@ -378,9 +377,9 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		newDepth--;
 	}
 
-	moveList_t moveList[1];
-	generateMoves(b, moveList, inCheck);
-	scoreMoves(b, moveList, hashMove);
+	moveList_t moveList;
+	generateMoves(b, &moveList, inCheck);
+	scoreMoves(b, &moveList, hashMove);
 
 	move_t currentMove;
 	move_t bestMove = MOVE_NONE;
@@ -390,12 +389,12 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 	// This position could not be refuted yet. All moves are generated
 	// and searching continues.
-	for (int i = 0; i < moveList->cnt; i++) {
+	for (int i = 0; i < moveList.cnt; i++) {
 
-		getNextMove(moveList, i);
-		currentMove = moveList->moves[i];
+		getNextMove(&moveList, i);
+		currentMove = moveList.moves[i];
 		Assert(currentMove != MOVE_NONE);
-		Assert(moveList->scores[i] >= 0);
+		Assert(moveList.scores[i] >= 0);
 
 		if (rootNode && getTimeMs() > s->startTime + 750) {
 			cout << "info"
@@ -457,7 +456,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				// The lower the histScore, the higher the scaled score
 				// => bad moves score near histmax and good moves score near 0
 				int scaledHistScore = histMax / (histScore ? histScore : 1);
-				bool specialQuiet = moveList->scores[i] > COUNTER_SCORE;
+				bool specialQuiet = moveList.scores[i] > COUNTER_SCORE;
 
 				if (ss->staticEval + (depth * 234) + (specialQuiet * 50) < alpha
 					&& scaledHistScore > 2 * histMax / 3) {
@@ -518,7 +517,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				if (inCheck && pieceKing[pieceAt(b, toSq(currentMove))])
 					lmrDepth++;
 
-				if (!pvNode && moveList->scores[i] < KILLER_SCORE_2)
+				if (!pvNode && moveList.scores[i] < KILLER_SCORE_2)
 					lmrDepth--;
 
 				if (pvNode && dangerousPawnPush(b, currentMove))
@@ -687,14 +686,18 @@ template <nodeType_t nodeType>
 value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t* s) {
 	Assert(checkBoard(b));
 
+	// Early TT prefetch 
+	prefetchTT(b);
+
 	// check for time and depth
 	if ((s->nodes & 2047) == 0 || (s->qnodes & 2047) == 0) {
 		checkSearchInfo(s);
 	}
 
 	s->qnodes++;
-	bool pvNode = nodeType == PV;
 	selDepth = max(selDepth, b->ply);
+
+	bool pvNode = nodeType == PV;
 	move_t currPvLine[MAX_DEPTH + 1];
 	searchStack_t* ss = &sStack[b->ply];
 
@@ -716,21 +719,71 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 		return evaluation(b);
 	}
 
-	bool inCheck = isCheck(b, b->stm);
 	//bool inCheck = ss->isCheck;
+	bool inCheck = (depth == 0) ? ss->isCheck : isCheck(b, b->stm);
+	int ttDepth = (inCheck) ? QS_DEPTH_CHECK : QS_DEPTH;
 	Assert(inCheck == isCheck(b, b->stm));
 
-	value_t value;
-	value_t bestValue = -VALUE_INFTY;
-	value_t staticEval = evaluation(b);
-	Assert(abs(staticEval) < VALUE_INFTY);
+	// Transposition Table:
+	// Probe transposition table and try to cutoff, if this node is non-pv.
+	move_t hashMove = MOVE_NONE;
+	value_t hashValue = -VALUE_INFTY;
+	value_t hashEval = -VALUE_INFTY;
+	uint8_t hashFlag = TT_NONE;
+	int8_t hashDepth;
+
+	//if (depth == 0) {
+	//bool hashStored = false;
+	bool hashStored = probeTT(b, &hashMove, &hashValue, &hashEval, &hashFlag, &hashDepth);
+	//}
+
+	if (hashStored && !pvNode) {
+		b->tt->hit++;
+
+		Assert(hashDepth <= MAX_DEPTH);
+		Assert(hashFlag >= TT_ALPHA && hashFlag <= TT_VALUE);
+		Assert(hashValue > -VALUE_INFTY && hashValue < VALUE_INFTY);
+
+		if (hashDepth >= ttDepth) {
+
+			if (hashFlag & TT_VALUE) {
+				b->tt->valueHit++;
+				return hashValue;
+			}
+
+			if (hashFlag & TT_BETA && beta <= hashValue) {
+				b->tt->valueHit++;
+				return hashValue;
+			}
+
+			if (hashFlag & TT_ALPHA && alpha >= hashValue) {
+				b->tt->valueHit++;
+				return hashValue;
+			}
+		}
+	}
+
+	// Static evaluation of the position
+	if (hashStored) {
+		ss->staticEval = hashEval;
+
+	} else if (ss->currentMove == MOVE_NULL) {
+		ss->staticEval = -(ss - 1)->staticEval;
+
+	} else {
+		ss->staticEval = evaluation(b);
+	}
+	Assert(abs(ss->staticEval) < VALUE_INFTY);
 
 	// Stand Pat Pruning:
 	// Side to move can reject a recapture, if static evaluation is already good enough.
 	// Stand pat is not valid when in check, because this could result in misleading
 	// evaluation in checkmate or stalemate position.
+	value_t value;
+	value_t bestValue = -VALUE_INFTY;
+
 	if (!inCheck) {
-		bestValue = staticEval;
+		bestValue = ss->staticEval;
 		if (bestValue >= beta) {
 			return bestValue;
 		}
@@ -742,8 +795,8 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 
 	// Delta Pruning:
 	// If biggest possible positional material swing cannot improve alpha, 
-	// this position is hopeless.
-	if (staticEval + biggestMaterialSwing(b) <= alpha) {
+	// this position is hopeless. 
+	if (ss->staticEval + biggestMaterialSwing(b) <= alpha) {
 		return alpha;
 	}
 
@@ -751,38 +804,38 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	value_t oldAlpha = alpha;
 	move_t bestMove = MOVE_NONE;
 
-	moveList_t moveList[1];
-	generateQuiescence(b, moveList, inCheck);
+	moveList_t moveList;
+	generateQuiescence(b, &moveList, inCheck);
 
 	// Checkmate Detection:
 	// Quiescence generates check evasions. If in check and no evading moves possible, 
 	// return: this is mate.
-	if (moveList->cnt == 0 && inCheck) {
+	if (moveList.cnt == 0 && inCheck) {
 		// Checkmate
 		return -VALUE_MATE + b->ply;
 	}
 
 	// First ply of quiescence generates checkers, if there is no check at current position.
 	if (!inCheck && depth == 0) {
-		generateQuietCheckers(b, moveList);
+		generateQuietCheckers(b, &moveList);
 	}
 
-	scoreMoves(b, moveList, MOVE_NONE);
+	scoreMoves(b, &moveList, hashMove);
 
-	// There are no cutoffs in this node yet. Generate all captures, promotions or check evasions
+	// There are no cutoffs in this node yet. Loop through all captures, promotions or check evasions
 	// and expand search.
-	for (int i = 0; i < moveList->cnt; i++) {
+	for (int i = 0; i < moveList.cnt; i++) {
 
-		getNextMove(moveList, i);
-		move_t currentMove = moveList->moves[i];
+		getNextMove(&moveList, i);
+		move_t currentMove = moveList.moves[i];
 		Assert(currentMove != MOVE_NONE);
-		Assert(moveList->scores[i] >= 0);
+		Assert(moveList.scores[i] >= 0);
 
 		// SEE-Pruning:
 		// If SEE score is negative, this is a losing capture. Since there is little to no chance that
 		// this move raises alpha, it can be pruned.
 		if (bestValue > -VALUE_IS_MATE_IN
-			&& moveList->scores[i] < BAD_CAPTURE + MVV_LVA_UBOUND) {
+			&& moveList.scores[i] < BAD_CAPTURE + MVV_LVA_UBOUND) {
 			continue;
 		}
 
@@ -822,19 +875,20 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 			}
 			s->fh++;
 
+			storeTT(b, currentMove, searchToHash(b, beta), ss->staticEval, TT_BETA, ttDepth);
 			return beta;
 		}
 	}
 
-	//if (pvNode && alpha != oldAlpha) {
-	//	Assert(bestMove != NO_MOVE);
-	//	Assert(abs(bestValue) <= INF);
-	//	storeTT(b, bestMove, searchToHash(b, bestValue), staticEval, TT_VALUE, 0);
-	//} else if (bestMove) {
-	//	Assert(bestMove != NO_MOVE);
-	//	Assert(abs(alpha) <= INF);
-	//	storeTT(b, bestMove, searchToHash(b, alpha), staticEval, TT_ALPHA, 0);
-	//}
+	if (alpha > oldAlpha) {
+		Assert(bestMove != MOVE_NONE);
+		Assert(abs(bestValue) <= VALUE_INFTY);
+		storeTT(b, bestMove, searchToHash(b, bestValue), ss->staticEval, TT_VALUE, ttDepth);
+	} else if (bestMove) {
+		Assert(bestMove != MOVE_NONE);
+		Assert(abs(alpha) <= VALUE_INFTY);
+		storeTT(b, bestMove, searchToHash(b, alpha), ss->staticEval, TT_ALPHA, ttDepth);
+	}
 
 	Assert(alpha >= oldAlpha);
 	Assert(abs(bestValue) < VALUE_INFTY);
@@ -842,7 +896,7 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	return bestValue;
 }
 
-void clearForSearch(board_t* b, search_t* s) {
+void resetSearchParameters(board_t* b, search_t* s) {
 	b->ply = 0;
 
 	// reset stats
@@ -919,7 +973,7 @@ value_t search(board_t* b, search_t* s) {
 	value_t score = -VALUE_INFTY;
 	move_t bestMove = 0;
 
-	clearForSearch(b, s);
+	resetSearchParameters(b, s);
 
 	sStack[b->ply].isCheck = isCheck(b, b->stm);
 	sStack[b->ply].staticEval = evaluation(b);

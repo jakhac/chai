@@ -35,6 +35,16 @@ const int piecePawn[13] = {
 	0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0
 };
 
+const int stmPiece[7][2] = {
+	{},
+	{Pieces::p, Pieces::P},
+	{Pieces::n, Pieces::N},
+	{Pieces::b, Pieces::B},
+	{Pieces::r, Pieces::R},
+	{Pieces::q, Pieces::Q},
+	{Pieces::k, Pieces::K},
+};
+
 const chai::pieceType_t pieceType[13] = {
 	chai::NO_TYPE,
 	chai::PAWN, chai::KNIGHT, chai::BISHOP, chai::ROOK, chai::QUEEN, chai::KING,
@@ -256,10 +266,17 @@ bool checkBoard(board_t* b);
  *
  * @param  b board_t to call function.
  * @param  move int move.
+ * @param  bool evadingCheck Set to true if this is an evading move. This skips inCheck-
+ *				check after move is done.
  *
  * @returns Returns true if move was valid and does not leave king in check, else false.
  */
 bool push(board_t* b, move_t move);
+
+void pushCastle(board_t* b, move_t move);
+void pushEnPas(board_t* b, move_t move);
+void pushPromotion(board_t* b, move_t move);
+void pushNormal(board_t* b, move_t move);
 
 /**
  * Push rooks with castle move on board. Small checks for valid init positions of king and rook.
@@ -280,6 +297,8 @@ void pushCastle(board_t* b, int clearRookSq, int setRookSq, int side);
  * @returns Undo struct.
  */
 undo_t pop(board_t* b);
+
+undo_t popNull(board_t* b);
 
 /**
  * Reverse pushed castle move from board. Resets rook on init square.

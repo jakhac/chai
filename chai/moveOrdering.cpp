@@ -218,22 +218,11 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 	return b->stm != color;
 }
 
-static void updateBestMove(int* scores, int* bestIdx, int curIdx) {
-	if (scores[curIdx] > scores[*bestIdx]) {
-		*bestIdx = curIdx;
-	}
-}
-
 void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 	move_t currentMove;
 	int seeScore = 0;
 	int mvvLvaScore = 0;
-	int bestIdx = 0;
 	int capturedPiece = 0;
-
-	//// set all scores to 0
-	//for (int i = 0; i < moveList->cnt; i++)
-	//	moveList->scores[i] = 0;
 
 	for (int i = 0; i < moveList->cnt; i++) {
 		currentMove = moveList->moves[i];
@@ -243,15 +232,12 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		// hash move
 		if (currentMove == hashMove) {
 			moveList->scores[i] = HASH_MOVE;
-
-			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
 		// enpas move
 		if (isEnPassant(currentMove)) {
 			moveList->scores[i] = GOOD_CAPTURE + 105;
-			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
@@ -275,8 +261,6 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 				}
 
 			}
-
-			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
@@ -285,16 +269,12 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		// promotion
 		if (promPiece(b, currentMove)) {
 			moveList->scores[i] = PROMOTION + pieceAt(b, fromSq(currentMove));
-
-			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
 		// mate killer
 		if (currentMove == mateKiller[b->ply]) {
 			moveList->scores[i] = MATE_KILLER;
-
-			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
@@ -302,8 +282,6 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		if (currentMove == killer[0][b->ply]) {
 			Assert(!capPiece(b, currentMove));
 			moveList->scores[i] = KILLER_SCORE_1;
-
-			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
@@ -311,8 +289,6 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		if (currentMove == killer[1][b->ply]) {
 			Assert(!capPiece(b, currentMove));
 			moveList->scores[i] = KILLER_SCORE_2;
-
-			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
@@ -323,7 +299,6 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 
 			if (currentMove == counterMove) {
 				moveList->scores[i] = COUNTER_SCORE;
-				updateBestMove(moveList->scores, &bestIdx, i);
 				continue;
 			}
 
@@ -332,8 +307,6 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		// castle move
 		if (isCastling(currentMove)) {
 			moveList->scores[i] = CASTLE_SCORE;
-
-			updateBestMove(moveList->scores, &bestIdx, i);
 			continue;
 		}
 
@@ -342,14 +315,5 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		Assert(histScore >= 0);
 		moveList->scores[i] = QUIET_SCORE + (histScore);
 		Assert(moveList->scores[i] < COUNTER_SCORE);
-
-		updateBestMove(moveList->scores, &bestIdx, i);
 	}
-
-	// swap best move to first position !!!!! score has to be moved too
-	//if (moveList->cnt > 1) {
-	//	move_t temp = moveList->moves[0];
-	//	moveList->moves[0] = moveList->moves[bestIdx];
-	//	moveList->moves[0] = temp;
-	//}
 }

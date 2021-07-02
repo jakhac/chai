@@ -126,7 +126,7 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 	Assert(move != MOVE_NONE);
 	Assert(flag >= TT_ALPHA && flag <= TT_EVAL);
 	Assert(index >= 0 && index <= (b->tt->buckets - 1));
-	Assert((depth >= 1 || TT_EVAL) && depth <= MAX_DEPTH);
+	Assert(depth >= QS_DEPTH && depth <= MAX_DEPTH);
 	Assert(flag >= TT_ALPHA && flag <= TT_EVAL);
 	Assert(abs(value) < VALUE_INFTY || value == VALUE_NONE);
 	Assert(abs(staticEval) < VALUE_INFTY);
@@ -144,7 +144,7 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 	for (int i = 0; i < BUCKETS; i++) {
 		e = bucket->bucketEntries + i;
 
-		Assert(e->depth >= 0 && e->depth <= MAX_DEPTH + 1);
+		Assert(e->depth >= QS_DEPTH && e->depth <= MAX_DEPTH + 1);
 
 		// Empty entry
 		if (e->flag & TT_NONE) {
@@ -200,7 +200,7 @@ void storePT(board_t* b, const value_t eval) {
 	b->pt->table[index].zobristPawnKey = b->zobristPawnKey;
 }
 
-bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int* hashDepth) {
+bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int8_t* hashDepth) {
 	int32_t index = getTTIndex(b->zobristKey);
 	uint16_t key = getBucketIndex(b->zobristKey);
 
@@ -278,8 +278,8 @@ int searchToHash(board_t* b, value_t score) {
 move_t probePV(board_t* b) {
 	int32_t index = getTTIndex(b->zobristKey);
 	uint16_t key = getBucketIndex(b->zobristKey);
-	Assert(index == int32_t(b->zobristKey & indexMask));
 
+	Assert(index == int32_t(b->zobristKey & indexMask));
 	Assert(index >= 0 && index <= (b->tt->buckets - 1));
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
@@ -289,8 +289,10 @@ move_t probePV(board_t* b) {
 	for (int i = 0; i < BUCKETS; i++) {
 		b->tt->probed++;
 
-		if (bucket->bucketEntries[i].key == key) {
+		if (bucket->bucketEntries[i].key == key
+			&& bucket->bucketEntries[i].flag != TT_NONE) {
 			e = &bucket->bucketEntries[i];
+
 			Assert(e->flag >= TT_ALPHA && e->flag <= TT_EVAL);
 			Assert(e->move != MOVE_NONE);
 			Assert(e->value >= -VALUE_INFTY && e->value <= VALUE_INFTY);

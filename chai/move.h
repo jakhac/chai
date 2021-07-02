@@ -6,10 +6,6 @@
 	16 Bit encoding:
 	0000 0000 0011 1111 from square
 	0000 1111 1100 1111 to square
-	0001 0000 0000 0000 n prom
-	0010 0000 0000 0000 b prom
-	0100 0000 0000 0000 r prom
-	1000 0000 0000 0000 q prom
 
 	--00 Normal
 	--01 Castle
@@ -70,6 +66,10 @@ inline int promPiece(board_t* b, move_t move) {
 	return isPromotion(move) ?
 		(move >> 14) + 2 + (b->stm == chai::BLACK ? 6 : 0)
 		: chai::NO_TYPE;
+}
+
+inline int promPieceType(move_t move) {
+	return (move >> 14) + 2;
 }
 
 inline bool isPawnStart(move_t move, int movingPiece) {
