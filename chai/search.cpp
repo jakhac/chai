@@ -165,6 +165,164 @@ static void updatePvLine(move_t* pv, move_t move, move_t* childPv) {
 	*pv = MOVE_NONE;
 }
 
+
+static void resetSearchParameters(board_t* b, search_t* s) {
+	b->ply = 0;
+
+	selDepth = 0;
+
+	// Reset stats
+	b->tt->probed = 0;
+	b->tt->hit = 0;
+	b->tt->valueHit = 0;
+
+	// Reset term stats
+	b->tt->collided = 0;
+	b->tt->stored = 0;
+
+	// Reset mate killer
+	for (int i = 0; i < MAX_GAME_MOVES; i++) {
+		mateKiller[i] = MOVE_NONE;
+	}
+
+	// Reset killers
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < MAX_DEPTH; j++) {
+			killer[i][j] = 0;
+		}
+	}
+
+	// Reset history heuristic
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < NUM_SQUARES; j++) {
+			for (int l = 0; l < NUM_SQUARES; l++) {
+				histHeuristic[i][j][l] = 0;
+			}
+		}
+	}
+	histMax = 0;
+
+	// Reset counter move history
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < NUM_SQUARES; j++) {
+			for (int l = 0; l < NUM_SQUARES; l++) {
+				counterHeuristic[j][l][i] = MOVE_NONE;
+			}
+		}
+	}
+
+	b->pt->collided = 0;
+	b->pt->probed = 0;
+	b->pt->hit = 0;
+
+	s->startTime = getTimeMs();
+	s->stopped = 0;
+	s->nodes = 0;
+	s->qnodes = 0;
+	s->fhf = 0;
+	s->fh = 0;
+	s->futileFH = 0;
+	s->futileCnt = 0;
+}
+
+//TODO
+// UCI setoption not working in arena
+
+value_t search(board_t* b, search_t* s) {
+	value_t bestScore = VALUE_NONE;
+
+	move_t bestMove = MOVE_NONE;
+	move_t pvLine[MAX_DEPTH + 1];
+
+	// Search setup
+	resetSearchParameters(b, s);
+
+	// Set up variables used before first recursive call
+	searchStack_t* ss = &sStack[b->ply];
+	ss->currentMove = MOVE_NONE;
+	ss->isCheck = isCheck(b, b->stm);
+	ss->staticEval = evaluation(b);
+	ss->pvLine = pvLine;
+
+	// Iterative deepening
+	int d = 1;
+	while (d <= s->depth && !s->stopped) {
+
+		// Open window for small depths, then aspiration window
+		if (d > 3) {
+			bestScore = aspirationSearch(b, s, d, bestScore);
+		} else {
+			bestScore = alphaBeta<PV>(-VALUE_INFTY, VALUE_INFTY, d, b, s);
+		}
+
+		Assert(abs(bestScore) < VALUE_INFTY);
+
+		// Use previous bestMove if forced stop mid-search
+		if (s->stopped)
+			break;
+
+		printUCI(s, d, selDepth, bestScore);
+		printPvLine(b, pvLine, d, bestScore);
+		cout << endl;
+
+		// Update best move after every complete search iteration
+		bestMove = probePV(b);
+		Assert(bestMove != MOVE_NONE);
+
+		// Leave IID when mate is found
+		if (abs(bestScore) > VALUE_IS_MATE_IN)
+			break;
+
+		d++;
+	}
+
+
+	printUCIBestMove(b, bestMove);
+	return bestScore;
+}
+
+value_t aspirationSearch(board_t* b, search_t* s, int d, value_t bestScore) {
+	value_t score;
+	int64_t newAlpha, newBeta;
+	int researchCnt = 0;
+	Assert(abs(bestScore) < VALUE_INFTY);
+
+	// Determine initial alpha/beta values
+	int64_t alpha = max(-VALUE_INFTY, bestScore - aspiration);
+	int64_t beta = min(VALUE_INFTY, bestScore + aspiration);
+
+	// Research, until score is within bounds
+	while (1) {
+
+		//cout << "d=" << d << " " << alpha << " " << beta << endl;
+		score = alphaBeta<PV>(alpha, beta, d, b, s);
+
+		// Score within bound is returned immediatly
+		if (alpha < score && score < beta) {
+			return score;
+		}
+
+		// Alpha window was too high, decrease
+		if (score <= alpha) {
+			Assert(score == alpha);
+			newAlpha = alpha - aspirationWindows[researchCnt++];
+
+			alpha = max(-VALUE_INFTY, newAlpha);
+		}
+
+		// Beta window was too low, increase
+		if (score >= beta) {
+			Assert(score == beta);
+			newBeta = beta + aspirationWindows[researchCnt++];
+
+			beta = min(VALUE_INFTY, newBeta);
+		}
+	}
+
+	Assert(abs(score) < VALUE_INFTY);
+	return score;
+}
+
 template <nodeType_t nodeType>
 value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s) {
 	Assert(checkBoard(b));
@@ -732,11 +890,7 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	uint8_t hashFlag = TT_NONE;
 	int8_t hashDepth;
 
-	//if (depth == 0) {
-	//bool hashStored = false;
 	bool hashStored = probeTT(b, &hashMove, &hashValue, &hashEval, &hashFlag, &hashDepth);
-	//}
-
 	if (hashStored && !pvNode) {
 		b->tt->hit++;
 
@@ -896,78 +1050,8 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	return bestValue;
 }
 
-void resetSearchParameters(board_t* b, search_t* s) {
-	b->ply = 0;
-
-	// reset stats
-	b->tt->probed = 0;
-	b->tt->hit = 0;
-	b->tt->valueHit = 0;
-
-	// long term stats
-	b->tt->collided = 0;
-	b->tt->stored = 0;
-
-	// reset mate killer
-	for (int i = 0; i < MAX_GAME_MOVES; i++) {
-		mateKiller[i] = MOVE_NONE;
-	}
-	// reset killers
-	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < MAX_DEPTH; j++) {
-			killer[i][j] = 0;
-		}
-	}
-
-	// reset history heuristic
-	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < NUM_SQUARES; j++) {
-			for (int l = 0; l < NUM_SQUARES; l++) {
-				histHeuristic[i][j][l] = 0;
-			}
-		}
-	}
-	histMax = 0;
-
-	// reset counter move history
-	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < NUM_SQUARES; j++) {
-			for (int l = 0; l < NUM_SQUARES; l++) {
-				counterHeuristic[j][l][i] = MOVE_NONE;
-			}
-		}
-	}
-
-	b->pt->collided = 0;
-	b->pt->probed = 0;
-	b->pt->hit = 0;
-
-	s->startTime = getTimeMs();
-	s->stopped = 0;
-	s->nodes = 0;
-	s->qnodes = 0;
-	s->fhf = 0;
-	s->fh = 0;
-	s->futileFH = 0;
-	s->futileCnt = 0;
-}
-
-//int search_aspiration(board_t* b, search_t* s, int depth, int bestScore) {
-//	int temp = bestScore;
-//	int alpha = bestScore - 75;
-//	int beta = bestScore + 75;
-//
-	//selDepth = 0;
-	//temp = alphaBeta(alpha, beta, depth, b, s, DO_NULL, IS_PV);
-	//if (temp <= alpha || temp >= beta) {
-	//selDepth = 0;
-	//temp = alphaBeta(-INF, INF, depth, b, s, DO_NULL, IS_PV);
-	//}
-//
-//	return temp;
-//}
-
-value_t search(board_t* b, search_t* s) {
+//TODO
+value_t _search(board_t* b, search_t* s) {
 	move_t pvLine[MAX_DEPTH + 1]{};
 	int currentDepth = 1;
 	value_t score = -VALUE_INFTY;
@@ -979,6 +1063,7 @@ value_t search(board_t* b, search_t* s) {
 	sStack[b->ply].staticEval = evaluation(b);
 	sStack[b->ply].currentMove = MOVE_NONE;
 	sStack[b->ply].pvLine = pvLine;
+
 
 	for (; currentDepth <= s->depth; currentDepth++) {
 		selDepth = 0;

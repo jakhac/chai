@@ -23,6 +23,12 @@ static int moveCountPruning[moveCountPruningDepth];
 // because move ordering scores "QUIET_SCORES=5000 + hist/10" before COUNTER_SCORE=6000.
 const int HISTORY_MAX = 1000 - 1;
 
+const value_t aspiration = 18;
+
+const unsigned long long aspirationWindows[] = {
+	100, 2500, 32000, 64000
+};
+
 /**
  * Initialize some search parameters like MCP values.
  */
@@ -78,7 +84,7 @@ value_t search(board_t* b, search_t* s);
  *
  * @returns Best score found in alphaBeta search.
  */
-int search_aspiration(board_t* b, search_t* s, int depth, int bestScore);
+value_t aspirationSearch(board_t* b, search_t* s, int depth, value_t bestScore);
 
 /**
  * Tries to find a single(!) repetition in undoPly array. Used in search to find upcoming draws.

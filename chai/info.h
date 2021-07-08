@@ -62,6 +62,8 @@ void printBinary(bitboard_t x);
  */
 void printUCI(search_t* s, int d, int selDpt, int score);
 
+void printUCIBestMove(board_t* b, move_t bestMove);
+
 /**
  * Print pv line to console. Either hash-line form ttable probing or pvline struct.
  *

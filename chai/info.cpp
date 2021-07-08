@@ -154,6 +154,14 @@ void printUCI(search_t* s, int d, int selDpt, int score) {
 		<< " time " << (getTimeMs() - s->startTime);
 }
 
+void printUCIBestMove(board_t* b, move_t bestMove) {
+	Assert(bestMove != MOVE_NONE);
+
+	cout << "bestmove "
+		<< getStringMove(b, bestMove)
+		<< endl;
+}
+
 void printPV(board_t* b, move_t* moves, int len) {
 	cout << " pv ";
 

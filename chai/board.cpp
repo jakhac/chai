@@ -772,7 +772,8 @@ undo_t popNull(board_t* b) {
 }
 
 move_t getCurrentMove(board_t* b) {
-	return b->undoHistory[b->undoPly - 1].move;
+	return b->undoPly > 0 ? b->undoHistory[b->undoPly - 1].move
+		: MOVE_NONE;
 }
 
 bitboard_t getPinner(board_t* b, int kSq, int kSide) {

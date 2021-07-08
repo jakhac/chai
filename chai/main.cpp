@@ -11,7 +11,7 @@ int main() {
 	initHashTables(b);
 
 	parseFen(&board, STARTING_FEN);
-	//parseFen(&board, "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 1 1");
+	//parseFen(&board, "7k/2rR3p/1Pp1qp1B/p1p3p1/P3P3/7P/5PP1/6K1 w - - 1 0");
 
 	printBoard(b);
 	cli(b, &perft, s);
@@ -69,7 +69,7 @@ void cli(board_t* b, Perft* p, search_t* s) {
 			if (stoi(perftDepth) >= 1 && stoi(perftDepth) <= 15) {
 				dividePerft(b, stoi(perftDepth));
 			} else {
-				cerr << "Enter a number between 1 and 15." << endl;
+				cerr << "Enter an integer between in [1, 15]." << endl;
 			}
 			cout << "Leaving perft option." << endl;
 			continue;

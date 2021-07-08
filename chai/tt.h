@@ -142,17 +142,3 @@ int hashToSearch(board_t* b, value_t score);
  */
 int searchToHash(board_t* b, value_t score);
 
-/**
- * Walk through best move stored in transposition table to collect principal variation line.
- *
- * @param  b	    Current board.
- * @param  maxDepth Depth of principal variation.
- *
- * @returns Length of principal variation found in ttable.
- */
-int getPVLine(board_t* b, const int maxDepth);
-
-
-
-
-

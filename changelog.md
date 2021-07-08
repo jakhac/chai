@@ -251,9 +251,12 @@
 **Changes in v2.6**
 
 - Search
-  - [ ] Delta Pruning
-  - [ ] Store/Probe ttable in quiescence search
+  - v2.6.1
+    - [x] Delta Pruning
+    - [x] Store/Probe ttable in quiescence search
+  - v2.6.2
   - [ ] Aspiration Windows
+  - v2.6.3
   - [ ] EGTB Probing
 - Project
   - [ ] UCI fixes, e.g. q to quit current mode

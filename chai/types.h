@@ -4,6 +4,9 @@
 #define MAX_GAME_MOVES 512
 #define BUCKETS 3
 
+#define NUM_SQUARES 64
+#define MAX_POSITION_MOVES 256
+#define DEFAULT_EP_SQ 0
 
 /**
  * Unsigned 64-Bit integer represents bitboard isntance.
@@ -30,8 +33,8 @@ typedef int16_t value_t;
  */
 struct moveList_t {
 	int cnt = 0;
-	int moves[256]{}; // MAX POSITION MOVES
-	int scores[256]{}; // MAX POSITION MOVES
+	int moves[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
+	int scores[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
 
 	bitboard_t attackedSquares = 0ULL;
 };
@@ -161,9 +164,6 @@ struct board_t {
 	// Stores the currently attacked squares by side.
 	bitboard_t attackedSquares[2];
 
-	// Castle keys. // TODO use fixed keys
-	key_t castleKeys[16];
-
 	// Stack stores pushed moves as Undo objects.
 	undo_t undoHistory[MAX_GAME_MOVES];
 
@@ -172,9 +172,6 @@ struct board_t {
 
 	// Pawn hash table.
 	pawntable_t pt[1];
-
-	// Stores the pv line.
-	move_t pvArray[MAX_DEPTH];
 };
 
 /**
@@ -205,12 +202,6 @@ struct search_t {
 
 	// pv hits
 	int pvHits = 0;
-};
-
-// Store PV-Line
-struct pv_line_t {
-	uint8_t len;
-	move_t line[64 * 64]; // MAX DEPTH
 };
 
 namespace Pieces {

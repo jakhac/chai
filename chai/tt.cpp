@@ -306,19 +306,3 @@ move_t probePV(board_t* b) {
 
 }
 
-int getPVLine(board_t* b, const int maxDepth) {
-	int move = probePV(b);
-	int count = 0;
-
-	while (move != MOVE_NONE && count < maxDepth && isLegal(b, move)) {
-		push(b, move);
-		b->pvArray[count++] = move;
-		move = probePV(b);
-	}
-
-	while (b->ply > 0) {
-		pop(b);
-	}
-
-	return count;
-}
