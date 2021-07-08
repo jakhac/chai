@@ -11,7 +11,7 @@ int main() {
 	initHashTables(b);
 
 	parseFen(&board, STARTING_FEN);
-	//parseFen(&board, "7k/2rR3p/1Pp1qp1B/p1p3p1/P3P3/7P/5PP1/6K1 w - - 1 0");
+	//parseFen(&board, "8/1p2pp1k/6p1/p2P1n2/1K3Q1P/1P6/q1n5/3R4 w - - 0 1");
 
 	printBoard(b);
 	cli(b, &perft, s);

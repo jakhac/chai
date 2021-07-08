@@ -8,7 +8,7 @@
 #define prefetch(x) _m_prefetch(x);
 #endif
 
-const size_t DEFAULT_TT_SIZE = 256;
+const size_t DEFAULT_TT_SIZE = 512;
 const size_t DEFAULT_PT_SIZE = 8;
 
 const size_t MIN_TT_SIZE = 2;
