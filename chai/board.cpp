@@ -88,7 +88,7 @@ key_t generateZobristKey(board_t* b) {
 
 	// Hash all pieces on their current square
 	while (occ) {
-		square = getPopLSB(&occ);
+		square = popLSB(&occ);
 		piece = pieceAt(b, square);
 		finalZobristKey ^= pieceKeys[piece][square];
 	}
@@ -115,12 +115,12 @@ key_t generatePawnHashKey(board_t* b) {
 	bitboard_t blackPawns = getPieces(b, chai::PAWN, chai::BLACK);
 
 	while (whitePawns) {
-		sq = getPopLSB(&whitePawns);
+		sq = popLSB(&whitePawns);
 		finalPawnKey ^= pieceKeys[Pieces::P][sq];
 	}
 
 	while (blackPawns) {
-		sq = getPopLSB(&blackPawns);
+		sq = popLSB(&blackPawns);
 		finalPawnKey ^= pieceKeys[Pieces::p][sq];
 	}
 
@@ -288,6 +288,7 @@ bool parseFen(board_t* board, std::string fen) {
 		Assert(rank >= RANK_1 && rank <= RANK_8);
 
 		board->enPas = fileRankToSq(file, rank);
+		Assert(validEnPasSq(board->enPas));
 		index += 3;
 	} else {
 		index += 2;
@@ -386,7 +387,9 @@ move_t parseMove(board_t* b, std::string move) {
 		int moveDistance = abs(from - to);
 
 		// set ep flag if to square is en passant (ep capture)
-		if (to == b->enPas && (moveDistance == 7 || moveDistance == 9)) {
+		if (b->enPas != DEFAULT_EP_SQ
+			&& to == b->enPas) {
+			Assert(moveDistance == 7 || moveDistance == 9);
 			MOVE_FLAG = EP_MOVE;
 
 		} else if (squareToRank[to] == RANK_1 || squareToRank[to] == RANK_8) {
@@ -529,7 +532,6 @@ void pushNormal(board_t* b, move_t move) {
 	int toSquare = toSq(move);
 
 	int fromPiece = pieceAt(b, fromSquare);
-	int toPiece = pieceAt(b, toSquare);
 	int capturedPiece = capPiece(b, move);
 
 	// Update captured piece
@@ -632,7 +634,18 @@ bool push(board_t* b, move_t move) {
 	b->undoPly++;
 	b->ply++;
 
-	Assert(b->zobristPawnKey == generatePawnHashKey(b));
+#if defined(Assert)
+	if (b->zobristPawnKey != generatePawnHashKey(b)) {
+		logDebug("Pawn key wrong.\n");
+		logDebug(getFEN(b) + "\n");
+		pop(b);
+		logDebug(getFEN(b) + "\n");
+		logDebug("Move pushed " + getStringMove(b, move) + "\n");
+		logDebug("MoveType " + std::to_string(moveType) + "\n");
+	}
+#endif
+
+	Assert3(b->zobristPawnKey == generatePawnHashKey(b), getStringMove(b, move), getFEN(b));
 	Assert(b->zobristKey == generateZobristKey(b));
 
 	// Check if move leaves king in check
@@ -656,7 +669,7 @@ void pushNull(board_t* b) {
 	undo->cap = chai::NO_TYPE;
 
 	b->zobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas]; // ep out
-	b->enPas = 0;
+	b->enPas = DEFAULT_EP_SQ;
 	b->zobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas]; // ep in
 
 	// update game state variables
@@ -800,7 +813,7 @@ bitboard_t getPinned(board_t* b, int kSq, int kSide) {
 	bitboard_t pinner = xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::ROOK, kSide ^ 1)));
 
 	while (pinner) {
-		int sq = getPopLSB(&pinner);
+		int sq = popLSB(&pinner);
 		pinned |= obstructed(sq, kSq) & b->color[kSide];
 	}
 
@@ -810,7 +823,7 @@ bitboard_t getPinned(board_t* b, int kSq, int kSide) {
 	pinner = xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::BISHOP, kSide ^ 1)));
 
 	while (pinner) {
-		int sq = getPopLSB(&pinner);
+		int sq = popLSB(&pinner);
 		pinned |= obstructed(sq, kSq) & b->color[kSide];
 	}
 
@@ -818,6 +831,7 @@ bitboard_t getPinned(board_t* b, int kSq, int kSide) {
 }
 
 int getKingSquare(board_t* b, int side) {
+	Assert(getPieces(b, chai::KING, side));
 	return getLSB(getPieces(b, chai::KING, side));
 }
 
@@ -828,7 +842,7 @@ bitboard_t attackerSet(board_t* b, int side) {
 	// pawn attacks
 	piece = getPieces(b, chai::PAWN, side);
 	while (piece) {
-		sq = getPopLSB(&piece);
+		sq = popLSB(&piece);
 		attackerSet |= pawnAtkMask[side][sq];
 	}
 
@@ -839,21 +853,21 @@ bitboard_t attackerSet(board_t* b, int side) {
 	// knight attacks
 	piece = getPieces(b, chai::KNIGHT, side);
 	while (piece) {
-		sq = getPopLSB(&piece);
+		sq = popLSB(&piece);
 		attackerSet |= knightAtkMask[sq];
 	}
 
 	// bishop attacks OR in queen square
 	piece = getPieces(b, chai::BISHOP, side) | getPieces(b, chai::QUEEN, side);
 	while (piece) {
-		sq = getPopLSB(&piece);
+		sq = popLSB(&piece);
 		attackerSet |= lookUpBishopMoves(sq, b->occupied);
 	}
 
 	// rook attacks OR in queen square
 	piece = getPieces(b, chai::ROOK, side) | getPieces(b, chai::QUEEN, side);
 	while (piece) {
-		sq = getPopLSB(&piece);
+		sq = popLSB(&piece);
 		attackerSet |= lookUpRookMoves(sq, b->occupied);
 	}
 
@@ -906,7 +920,7 @@ bitboard_t blockerSet(board_t* b, int side, int blockSq) {
 
 	piece = getPieces(b, chai::KNIGHT, side);
 	while (piece) {
-		sq = getPopLSB(&piece);
+		sq = popLSB(&piece);
 		if (knightAtkMask[sq] & blockSqBoard) {
 			blockerSet |= (1ULL << sq);
 		}
@@ -914,7 +928,7 @@ bitboard_t blockerSet(board_t* b, int side, int blockSq) {
 
 	piece = getPieces(b, chai::BISHOP, side) | getPieces(b, chai::QUEEN, side);
 	while (piece) {
-		sq = getPopLSB(&piece);
+		sq = popLSB(&piece);
 		if (lookUpBishopMoves(sq, b->occupied) & blockSqBoard) {
 			blockerSet |= (1ULL << sq);
 		}
@@ -922,7 +936,7 @@ bitboard_t blockerSet(board_t* b, int side, int blockSq) {
 
 	piece = getPieces(b, chai::ROOK, side) | getPieces(b, chai::QUEEN, side);
 	while (piece) {
-		sq = getPopLSB(&piece);
+		sq = popLSB(&piece);
 		if (lookUpRookMoves(sq, b->occupied) & blockSqBoard) {
 			blockerSet |= (1ULL << sq);
 		}
@@ -986,7 +1000,7 @@ bool sqIsBlockerForKing(board_t* b, int kSq, int movingSide, int potBlockerSq) {
 
 	pinner |= xrays & (getVerticalPieces(b, movingSide));
 	while (pinner) {
-		sq = getPopLSB(&pinner);
+		sq = popLSB(&pinner);
 		if (obstructed(kSq, sq) & (1ULL << potBlockerSq)) return true;
 	}
 
@@ -996,7 +1010,7 @@ bool sqIsBlockerForKing(board_t* b, int kSq, int movingSide, int potBlockerSq) {
 
 	pinner |= xrays & (getDiagPieces(b, movingSide));
 	while (pinner) {
-		sq = getPopLSB(&pinner);
+		sq = popLSB(&pinner);
 		if (obstructed(kSq, sq) & (1ULL << potBlockerSq)) return true;
 	}
 
@@ -1075,13 +1089,13 @@ bool checkingMove(board_t* b, move_t move) {
 	if (isCastling(move)) {
 		switch (to) {
 			case G1: // => rook lands on F1
-				return lookUpRookMoves(F1, b->occupied) & kingMask;
+				return lookUpRookMoves(F1, b->occupied ^ (1ULL << E1)) & kingMask;
 			case C1: // => rook lands on D1
-				return lookUpRookMoves(D1, b->occupied) & kingMask;
+				return lookUpRookMoves(D1, b->occupied ^ (1ULL << E1)) & kingMask;
 			case G8: // => rook lands on F8
-				return lookUpRookMoves(F8, b->occupied) & kingMask;
+				return lookUpRookMoves(F8, b->occupied ^ (1ULL << E8)) & kingMask;
 			case C8: // => rook lands on D8
-				return lookUpRookMoves(D8, b->occupied) & kingMask;
+				return lookUpRookMoves(D8, b->occupied ^ (1ULL << E8)) & kingMask;
 			default: Assert(false); break;
 		}
 	}

@@ -25,12 +25,23 @@ using std::fixed;
 
 #ifndef ASSERT
 #define Assert(n)
+#define Assert3(n, x, y)
 #else
 #define Assert(n) \
 if(!(n)) { \
 	std::string errMsg = "Failed assert \"" + TOSTRING(n) + "\"\n" \
 		+ "in " + TOSTRING(__FILE__) + ":" + TOSTRING(__LINE__) + "\n" \
-		+ "at " + TOSTRING(__DATE__) + " " + TOSTRING(__TIME__) + "\n\n"; \
+		+ "at " + getTime() +"\n\n"; \
+	cerr << errMsg; \
+	logDebug(errMsg); \
+	exit(1); \
+}
+#define Assert3(n, x, y) \
+if(!(n)) { \
+	std::string errMsg = "Failed assert \"" + TOSTRING(n) + "\"\n" \
+		+ TOSTRING(x) + "=" + x + " " + TOSTRING(y) + "=" + y + "\n" \
+		+ "in " + TOSTRING(__FILE__) + ":" + TOSTRING(__LINE__) + "\n" \
+		+ "at " + getTime() + "\n\n"; \
 	cerr << errMsg; \
 	logDebug(errMsg); \
 	exit(1); \
@@ -38,6 +49,7 @@ if(!(n)) { \
 #endif // ASSERT
 
 extern void logDebug(std::string errMsg);
+extern std::string getTime();
 
 const std::string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const std::string MID_FEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";

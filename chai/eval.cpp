@@ -25,7 +25,7 @@ value_t evalPST(board_t* b, int side, float* t) {
 	pieces = getPieces(b, PAWN, side);
 	int kingPawnDistance = 0, pawnSum = popCount(pieces);
 	while (pieces) {
-		sq = getPopLSB(&pieces);
+		sq = popLSB(&pieces);
 
 		// king pawn tropism, average distance to own pawns
 		kingPawnDistance += manhattenDistance[kSq][sq];
@@ -39,28 +39,28 @@ value_t evalPST(board_t* b, int side, float* t) {
 	// KNIGHTS
 	pieces = getPieces(b, KNIGHT, side);
 	while (pieces) {
-		sq = getPopLSB(&pieces);
+		sq = popLSB(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(KNIGHT_OPEN[sq], KNIGHT_ENDGAME[sq], *t);
 	}
 
 	pieces = getPieces(b, BISHOP, side);
 	while (pieces) {
-		sq = getPopLSB(&pieces);
+		sq = popLSB(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(BISHOP_OPEN[sq], BISHOP_ENDGAME[sq], *t);
 	}
 
 	pieces = getPieces(b, ROOK, side);
 	while (pieces) {
-		sq = getPopLSB(&pieces);
+		sq = popLSB(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(ROOK_OPEN[sq], ROOK_ENDGAME[sq], *t);
 	}
 
 	pieces = getPieces(b, QUEEN, side);
 	while (pieces) {
-		sq = getPopLSB(&pieces);
+		sq = popLSB(&pieces);
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(QUEEN_OPEN[sq], QUEEN_ENDGAME[sq], *t);
 	}
@@ -87,7 +87,7 @@ value_t isolatedPawns(board_t* b, int side) {
 	bitboard_t refPawns = pawns;
 
 	while (pawns) {
-		sq = getPopLSB(&pawns);
+		sq = popLSB(&pawns);
 		if (!(pawnIsolatedMask[sq] & refPawns)) {
 			isolated++;
 		}
@@ -102,7 +102,7 @@ value_t passedPawns(board_t* b, int side) {
 	bitboard_t pawns = getPieces(b, PAWN, side);
 	bitboard_t oppPawns = getPieces(b, PAWN, side ^ 1);
 	while (pawns) {
-		sq = getPopLSB(&pawns);
+		sq = popLSB(&pawns);
 		if (!(pawnPassedMask[side][sq] & oppPawns)) {
 			passedScore += passedBonus[side][squareToRank[sq]];
 		}
@@ -133,7 +133,7 @@ value_t pawnChain(board_t* b, int side) {
 	// use xMask to reward protected pawns
 	int sq;
 	while (pawns) {
-		sq = getPopLSB(&pawns);
+		sq = popLSB(&pawns);
 		result += (bool)(tPawns & xMask[sq]);
 	}
 
@@ -148,7 +148,7 @@ value_t openFilesRQ(board_t* b, int side) {
 	bitboard_t rooks = getPieces(b, ROOK, side);
 	bitboard_t oppKing = getKingSquare(b, side ^ 1);
 	while (rooks) {
-		sq = getPopLSB(&rooks);
+		sq = popLSB(&rooks);
 		if (!(setMask[squareToFile[sq]] & pawns)) {
 			score += openFileBonusR;
 		}
@@ -162,7 +162,7 @@ value_t openFilesRQ(board_t* b, int side) {
 	// openFileBonus for queens
 	bitboard_t queens = getPieces(b, QUEEN, side);
 	while (queens) {
-		sq = getPopLSB(&queens);
+		sq = popLSB(&queens);
 		if (!(setMask[squareToFile[sq]] & pawns)) {
 			score += openFileBonusQ;
 		}

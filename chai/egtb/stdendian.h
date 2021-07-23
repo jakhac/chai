@@ -1,67 +1,6 @@
-#ifndef _STDENDIAN_H_
-#define _STDENDIAN_H_
-/* from https://gist.github.com/michaeljclark/3b4fd912f6fa8bb598b3 */
-/* modified to use functions not macros for bswap */
-/* and added a fix for Cygwin */
-/*
- *   stdendian.h
- *
- *   This header defines the following endian macros as defined here:
- *   http://austingroupbugs.net/view.php?id=162
- *
- *     BYTE_ORDER         this macro shall have a value equal to one
- *                        of the *_ENDIAN macros in this header.
- *     LITTLE_ENDIAN      if BYTE_ORDER == LITTLE_ENDIAN, the host
- *                        byte order is from least significant to
- *                        most significant.
- *     BIG_ENDIAN         if BYTE_ORDER == BIG_ENDIAN, the host byte
- *                        order is from most significant to least
- *                        significant.
- *
- *   The following are defined as macros:
- *
- *     uint16_t bswap16(uint16_t x);
- *     uint32_t bswap32(uint32_t x);
- *     uint64_t bswap64(uint64_t x);
+#pragma once
 
- *     uint16_t htobe16(uint16_t x);
- *     uint16_t htole16(uint16_t x);
- *     uint16_t be16toh(uint16_t x);
- *     uint16_t le16toh(uint16_t x);
- *
- *     uint32_t htobe32(uint32_t x);
- *     uint32_t htole32(uint32_t x);
- *     uint32_t be32toh(uint32_t x);
- *     uint32_t le32toh(uint32_t x);
- *
- *     uint64_t htobe64(uint64_t x);
- *     uint64_t htole64(uint64_t x);
- *     uint64_t be64toh(uint64_t x);
- *     uint64_t le64toh(uint64_t x);
- *
- *   The header defines the following macro for OpenCL compatibility
- *   https://www.khronos.org/registry/cl/sdk/2.0/docs/man/xhtml/preprocessorDirectives.html
- *
- *     __ENDIAN_LITTLE__  if BYTE_ORDER == LITTLE_ENDIAN then this
- *                        macro is present for OpenCL compatibility
- *
- *   The implementation provides a uniform interface to endian macros using only
- *   system headers on recent Linux, Darwin, FreeBSD, Solaris and Windows systems.
- *
- *   This approach is intended to avoid the need for preflight configure scripts.
- *   An alternative approach would be to test compiler CPU architecture marcros.
- *
- *   This header has had *limited* testing on recent C11/C++11 compilers and is
- *   based on the austin bug tracker interface, manpages, and headers present in
- *   Linux, FreeBSD, Windows, Solaris and Darwin.
- *
- *   The header uses __builtin_bswapXX intrinsic with GCC/Clang (__GNUC__) on
- *   platforms that do not provide bswap16, bswap32, bswap64 (Darwin)
- *
- *   Public Domain.
- */
-
- /* requires C11 or C++11 */
+/* requires C11 or C++11 */
 #if defined (__cplusplus)
 #include <cstdint>
 #elif !defined (__OPENCL_VERSION__)
@@ -113,10 +52,9 @@
 #define __ENDIAN_DEFINED        1
 #endif /* sun */
 
-/* Windows (also Emscripten) */
-#if defined(_WIN32) || defined(_MSC_VER) || defined(__EMSCRIPTEN__)
-/* assumes all Microsoft targets are little endian. */
-/* Emscripten (emcc) also currently assumes little endian. */
+/* Windows */
+#if defined(_WIN32) || defined(_MSC_VER)
+/* assumes all Microsoft targets are little endian */
 #define _LITTLE_ENDIAN          1234
 #define _BIG_ENDIAN             4321
 #define _BYTE_ORDER             _LITTLE_ENDIAN
@@ -180,8 +118,8 @@
 #define bswap16(x) __builtin_bswap16(x)
 #else
 inline uint16_t bswap16(uint16_t x) {
-	return (uint16_t)((((uint16_t)(x) & 0xff00) >> 8) | \
-					  (((uint16_t)(x) & 0x00ff) << 8));
+  return (uint16_t)((((uint16_t) (x) & 0xff00) >> 8) | \
+                    (((uint16_t) (x) & 0x00ff) << 8));
 }
 #endif
 #endif
@@ -191,10 +129,10 @@ inline uint16_t bswap16(uint16_t x) {
 #define bswap32(x) __builtin_bswap32(x)
 #else
 inline uint32_t bswap32(uint32_t x) {
-	return ((x & 0xff000000) >> 24) | \
-		((x & 0x00ff0000) >> 8) | \
-		((x & 0x0000ff00) << 8) | \
-		((x & 0x000000ff) << 24);
+  return (( x & 0xff000000) >> 24) | \
+  (( x & 0x00ff0000) >> 8) | \
+  (( x & 0x0000ff00) << 8) | \
+  (( x & 0x000000ff) << 24);
 }
 #endif
 #endif
@@ -204,14 +142,14 @@ inline uint32_t bswap32(uint32_t x) {
 #define bswap64(x) __builtin_bswap64(x)
 #else
 inline uint64_t bswap64(uint64_t x) {
-	return ((x & 0xff00000000000000ull) >> 56) | \
-		((x & 0x00ff000000000000ull) >> 40) | \
-		((x & 0x0000ff0000000000ull) >> 24) | \
-		((x & 0x000000ff00000000ull) >> 8) | \
-		((x & 0x00000000ff000000ull) << 8) | \
-		((x & 0x0000000000ff0000ull) << 24) | \
-		((x & 0x000000000000ff00ull) << 40) | \
-		((x & 0x00000000000000ffull) << 56);
+    return (( x & 0xff00000000000000ull) >> 56) | \
+  (( x & 0x00ff000000000000ull) >> 40) | \
+  (( x & 0x0000ff0000000000ull) >> 24) | \
+  (( x & 0x000000ff00000000ull) >> 8) | \
+  (( x & 0x00000000ff000000ull) << 8) | \
+  (( x & 0x0000000000ff0000ull) << 24) | \
+  (( x & 0x000000000000ff00ull) << 40) | \
+  (( x & 0x00000000000000ffull) << 56);
 }
 #endif
 #endif
@@ -251,36 +189,4 @@ inline uint64_t bswap64(uint64_t x) {
 #define be64toh(x)              ((uint64_t)(x))
 #define le32toh(x)              bswap32((x))
 #endif
-#endif
-
-/*
-
-#include <stdio.h>
-#include <stdendian.h>
-
-int main()
-{
-
-#if BYTE_ORDER == LITTLE_ENDIAN
-printf("little endian\n");
-#endif
-
-#if BYTE_ORDER == BIG_ENDIAN
-printf("big endian\n");
-#endif
-
-printf("bswap16(%04x) %04x\n", 0xf0e0, bswap16(0xf0e0));
-printf("htobe16(%04x) %04x\n", 0xf0e0, htobe16(0xf0e0));
-printf("htole16(%04x) %04x\n", 0xf0e0, htole16(0xf0e0));
-
-printf("bswap32(%08x) %08x\n", 0xf0e0d0c0, bswap32(0xf0e0d0c0));
-printf("htobe32(%08x) %08x\n", 0xf0e0d0c0, htobe32(0xf0e0d0c0));
-printf("htole32(%08x) %08x\n", 0xf0e0d0c0, htole32(0xf0e0d0c0));
-
-printf("bswap64(%016llx) %016llx\n", 0xf0e0d0c0b0a09080ULL, bswap64(0xf0e0d0c0b0a09080ULL));
-printf("htobe64(%016llx) %016llx\n", 0xf0e0d0c0b0a09080ULL, htobe64(0xf0e0d0c0b0a09080ULL));
-printf("htole64(%016llx) %016llx\n", 0xf0e0d0c0b0a09080ULL, htole64(0xf0e0d0c0b0a09080ULL));
-}
-
-*/
 #endif

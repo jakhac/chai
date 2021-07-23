@@ -10,12 +10,13 @@
 //#include "io.h"
 
 #include <iterator>
+#include <sstream>
 
 //#include "board.h"
 #include "search.h"
 
 #ifndef VERSION
-#define VERSION "v2.5.5"
+#define VERSION "v2.6.3"
 #endif // !VERSION
 
 /**

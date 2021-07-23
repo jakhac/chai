@@ -255,13 +255,16 @@
     - [x] Delta Pruning
     - [x] Store/Probe ttable in quiescence search
   - v2.6.2
-  - [ ] Aspiration Windows
+    - [x] Aspiration Windows
   - v2.6.3
-  - [ ] EGTB Probing
+    - [ ] EGTB Probing
+  - v2.6.4
+    - [ ] Multi-Threading
 - Project
   - [ ] UCI fixes, e.g. q to quit current mode
   - [ ] UCI refactor parsing
   - [ ] Add syzygy tablebases
+  - ~~Set default TT size to 512MB~~
 - Bugfixes
 - Versions
   - v2.6.1: Added EGTB functionality, Delta Pruning

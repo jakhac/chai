@@ -6,6 +6,7 @@
 #include "eval.h"
 #include "moveOrdering.h"
 #include "tt.h"
+#include "syzygy.h"
 
 // Maximum ply reached in alphaBeta and quiescence search.
 static int selDepth;
@@ -18,10 +19,6 @@ static const int moveCountPruningDepth = 5;
 
 // MCP movecount according to all depths
 static int moveCountPruning[moveCountPruningDepth];
-
-// Maximum score before rescale in history heuristic. Max history score needs to be less than 10000
-// because move ordering scores "QUIET_SCORES=5000 + hist/10" before COUNTER_SCORE=6000.
-const int HISTORY_MAX = 1000 - 1;
 
 const value_t aspiration = 18;
 

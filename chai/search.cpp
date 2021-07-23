@@ -215,6 +215,8 @@ static void resetSearchParameters(board_t* b, search_t* s) {
 	b->pt->probed = 0;
 	b->pt->hit = 0;
 
+	s->tbHit = 0;
+
 	s->startTime = getTimeMs();
 	s->stopped = 0;
 	s->nodes = 0;
@@ -224,9 +226,6 @@ static void resetSearchParameters(board_t* b, search_t* s) {
 	s->futileFH = 0;
 	s->futileCnt = 0;
 }
-
-//TODO
-// UCI setoption not working in arena
 
 value_t search(board_t* b, search_t* s) {
 	value_t bestScore = VALUE_NONE;
@@ -304,7 +303,6 @@ value_t aspirationSearch(board_t* b, search_t* s, int d, value_t bestScore) {
 
 		// Alpha window was too high, decrease
 		if (score <= alpha) {
-			Assert(score == alpha);
 			newAlpha = alpha - aspirationWindows[researchCnt++];
 
 			alpha = max(-VALUE_INFTY, newAlpha);
@@ -312,7 +310,6 @@ value_t aspirationSearch(board_t* b, search_t* s, int d, value_t bestScore) {
 
 		// Beta window was too low, increase
 		if (score >= beta) {
-			Assert(score == beta);
 			newBeta = beta + aspirationWindows[researchCnt++];
 
 			beta = min(VALUE_INFTY, newBeta);
@@ -335,6 +332,10 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	bool improving = false;
 	int searchExt = 0;
 	int newDepth = depth - 1;
+
+	value_t value = -VALUE_INFTY;
+	value_t bestValue = -VALUE_INFTY;
+	value_t posValue;
 
 	move_t pvLine[MAX_DEPTH];
 	searchStack_t* ss = &sStack[b->ply];
@@ -409,11 +410,13 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 			}
 
 			if (hashFlag & TT_BETA && hashValue >= beta) {
+				//if (hashFlag & TT_BETA && hashValue <= alpha) {
 				b->tt->valueHit++;
 				return hashValue;
 			}
 
 			if (hashFlag & TT_ALPHA && hashValue <= alpha) {
+				//if (hashFlag & TT_ALPHA && hashValue >= beta) {
 				b->tt->valueHit++;
 				return hashValue;
 			}
@@ -423,17 +426,41 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 	// EGTB:
 	// Endgame-Tablebase probing.
-	// ... implementation ...
+	int ttFlag;
+	int tbResult = (rootNode) ? TB_RESULT_FAILED : probeTB(b);
+	value_t tbValue;
 
+	if (tbResult != TB_RESULT_FAILED) {
+		s->tbHit++;
+
+		if (tbResult == TB_WIN) {
+			tbValue = VALUE_TB_WIN - b->ply;
+			ttFlag = TT_ALPHA;
+
+		} else if (tbResult == TB_LOSS) {
+			tbValue = -VALUE_TB_WIN + b->ply;
+			ttFlag = TT_BETA;
+
+		} else {
+			tbValue = 0;
+			ttFlag = TT_VALUE;
+
+		}
+
+		// Try to cutoff based on TB result
+		if (ttFlag == TT_VALUE
+			|| (ttFlag == TT_ALPHA && tbValue <= alpha)
+			|| (ttFlag == TT_BETA && tbValue >= beta)) {
+
+			storeTT(b, MOVE_NULL, searchToHash(b, tbValue), VALUE_NONE, ttFlag, MAX_DEPTH - 1);
+		}
+
+		return tbValue;
+	}
 
 	// Static evaluation of position:
 	// Either use previos evaluations from TT hit / null-move or do calculate evaluation score.
-	value_t value = -VALUE_INFTY;
-	value_t bestValue = -VALUE_INFTY;
-	value_t posValue;
-
-	if (hashStored) {
-		Assert(abs(hashEval) < VALUE_IS_MATE_IN);
+	if (hashStored && abs(hashEval) < VALUE_IS_MATE_IN) {
 		ss->staticEval = posValue = hashEval;
 
 		// Try to improve static evaluation with hashValue from TT hit
@@ -451,11 +478,11 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		//storeTT(b, NULL_MOVE, NO_VALUE, ss->staticEval, TT_EVAL, MAX_DEPTH);
 	}
 	Assert(ss->staticEval != VALUE_NONE && abs(ss->staticEval) < VALUE_IS_MATE_IN);
-	Assert(ss->currentMove == getCurrentMove(b));
+	//Assert(ss->currentMove == getCurrentMove(b));
 
 	// Basic check extension
 	bool inCheck = ss->isCheck;
-	Assert(inCheck == isCheck(b, b->stm));
+	Assert3(inCheck == isCheck(b, b->stm), std::to_string(b->ply), getFEN(b));
 	if (inCheck) {
 		newDepth++;
 	}
@@ -539,7 +566,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	generateMoves(b, &moveList, inCheck);
 	scoreMoves(b, &moveList, hashMove);
 
-	move_t currentMove;
+	move_t currentMove = MOVE_NONE;
 	move_t bestMove = MOVE_NONE;
 	int moveNum = 0;
 	int legalMoves = 0;
@@ -549,17 +576,13 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	// and searching continues.
 	for (int i = 0; i < moveList.cnt; i++) {
 
+		Assert(currentMove != moveList.moves[i]);
+
 		getNextMove(&moveList, i);
 		currentMove = moveList.moves[i];
+
 		Assert(currentMove != MOVE_NONE);
 		Assert(moveList.scores[i] >= 0);
-
-		if (rootNode && getTimeMs() > s->startTime + 750) {
-			cout << "info"
-				<< " depth " << depth
-				<< " currmove " << getStringMove(b, currentMove)
-				<< " currmovenumber " << legalMoves << endl;
-		}
 
 		int lmrDepth = MAX_DEPTH + 1;
 		bool lmrSameDepth = false;
@@ -629,6 +652,15 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 		if (!push(b, currentMove)) {
 			Assert(!inCheck); // Position cannot be check: all check evasions are legal
 			continue;
+		}
+
+		if (rootNode
+			&& getTimeMs() > s->startTime + 750
+			) {
+			cout << "info"
+				<< " depth " << depth
+				<< " currmove " << getStringMove(b, currentMove)
+				<< " currmovenumber " << legalMoves << endl;
 		}
 
 		legalMoves++;
@@ -756,15 +788,16 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				histHeuristic[b->stm][from][to] += depth * depth;
 				histMax = max(histHeuristic[b->stm][from][to], histMax);
 
-				if (histMax > HISTORY_MAX) {
+				if (histMax >= HISTORY_MAX) {
 					for (int c = 0; c < 2; c++) {
 						for (int i = 0; i < NUM_SQUARES; i++) {
 							for (int j = 0; j < NUM_SQUARES; j++) {
-								histHeuristic[c][i][j] >>= 2;
+								histHeuristic[c][i][j] >>= 3;
 							}
 						}
 					}
-					histMax >>= 2;
+					histMax >>= 3;
+					Assert(histMax < HISTORY_MAX);
 				}
 			}
 
@@ -878,7 +911,8 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	}
 
 	//bool inCheck = ss->isCheck;
-	bool inCheck = (depth == 0) ? ss->isCheck : isCheck(b, b->stm);
+	//bool inCheck = (depth == 0) ? ss->isCheck : isCheck(b, b->stm);
+	bool inCheck = isCheck(b, b->stm);
 	int ttDepth = (inCheck) ? QS_DEPTH_CHECK : QS_DEPTH;
 	Assert(inCheck == isCheck(b, b->stm));
 
@@ -918,7 +952,7 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	}
 
 	// Static evaluation of the position
-	if (hashStored) {
+	if (hashStored && abs(hashEval) < VALUE_IS_MATE_IN) {
 		ss->staticEval = hashEval;
 
 	} else if (ss->currentMove == MOVE_NULL) {
@@ -1048,54 +1082,6 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	Assert(abs(bestValue) < VALUE_INFTY);
 
 	return bestValue;
-}
-
-//TODO
-value_t _search(board_t* b, search_t* s) {
-	move_t pvLine[MAX_DEPTH + 1]{};
-	int currentDepth = 1;
-	value_t score = -VALUE_INFTY;
-	move_t bestMove = 0;
-
-	resetSearchParameters(b, s);
-
-	sStack[b->ply].isCheck = isCheck(b, b->stm);
-	sStack[b->ply].staticEval = evaluation(b);
-	sStack[b->ply].currentMove = MOVE_NONE;
-	sStack[b->ply].pvLine = pvLine;
-
-
-	for (; currentDepth <= s->depth; currentDepth++) {
-		selDepth = 0;
-		b->ply = 0;
-
-		score = alphaBeta<PV>(-VALUE_INFTY, VALUE_INFTY, currentDepth, b, s);
-		Assert(abs(score) < VALUE_INFTY);
-
-		// forced stop, break and use pv line of previous iteration
-		if (s->stopped)
-			break;
-
-		printUCI(s, currentDepth, selDepth, score);
-		//printTTablePV(b, currentDepth, selDepth);
-		printPvLine(b, pvLine, currentDepth, score);
-		fflush(stdout);
-
-		bestMove = probePV(b);
-		//printSearchInfo(b, s);
-
-		if (abs(score) > VALUE_IS_MATE_IN) {
-			cout << "\n";
-			cout << "bestmove " << getStringMove(b, bestMove) << "\n";
-			return score;
-		}
-
-		cout << endl;
-	}
-
-	cout << "\n";
-	cout << "bestmove " << getStringMove(b, bestMove) << "\n";
-	return score;
 }
 
 void printSearchInfo(board_t* b, search_t* s) {

@@ -196,6 +196,8 @@ struct search_t {
 	int futileCnt;
 	int futileFH;
 
+	int tbHit;
+
 	// fail high heuristics
 	float fh;
 	float fhf;

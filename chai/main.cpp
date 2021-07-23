@@ -7,16 +7,31 @@ int main() {
 		<< "compiler=" << info_COMPILER
 		<< " date=" << __DATE__ << endl;
 
+	// Init all tables and parameters
 	init(&board);
 	initHashTables(b);
 
+	const char* tbPath = "F:/SmartGit-Repositories/chai/syzygy";
+	if (!tb_init(tbPath)) {
+		cerr << "TB init failed." << endl;
+		Assert(false);
+		exit(1);
+	}
+
 	parseFen(&board, STARTING_FEN);
-	//parseFen(&board, "8/1p2pp1k/6p1/p2P1n2/1K3Q1P/1P6/q1n5/3R4 w - - 0 1");
+	//parseFen(&board, "8/3qk3/8/8/8/2N5/2KB4/8 w - - 0 1");
+
+	// TODO gitid
+
+	cout << "TB max " << TB_LARGEST << endl;
 
 	printBoard(b);
 	cli(b, &perft, s);
 
+	// Free all hash tables before exit
 	freeHashTables(b->tt, b->pt);
+	tb_free();
+
 	return 0;
 }
 

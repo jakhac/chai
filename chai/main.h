@@ -20,10 +20,11 @@ static std::string info_COMPILER = "GCC";
 
 
 static board_t board;
+static board_t* b = &board;
+
 static Perft perft;
 static moveList_t move_s[1];
 static search_t s[1];
-static board_t* b = &board;
 
 /**
  * Main function to run chai in console.

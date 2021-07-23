@@ -2,7 +2,7 @@
 
 #include "windows.h" // used for getTimeMs()
 
-#include "types.h"
+#include "defs.h"
 
 #if defined(_MSC_VER)
 #include <intrin.h>
@@ -11,33 +11,53 @@
 #endif
 
 /**
- * Bit scan forward and return index. If board_t is 0 return -1. Uses compiler bitscan.
+ * Bit scan forward and return index. If board_t is 0 return 0. Uses compiler bitscan.
  *
  * @param  board board_t.
  *
  * @returns Index of first found bit.
  */
-inline int getLSB(bitboard_t board) {
-	if (board == 0ULL) return -1;
+inline unsigned int getLSB(bitboard_t bb) {
+	Assert(bb);
 
+#if defined(_MSC_VER)
 	unsigned long ret;
-	_BitScanForward64(&ret, board);
-	return (int)ret;
+	_BitScanForward64(&ret, bb);
+	return unsigned(ret);
+#else
+	return __builtin_ctzll(bb);
+#endif
+}
+
+inline unsigned int getLSB_tb(bitboard_t bb) {
+	Assert(bb);
+
+#if defined(_MSC_VER)
+	unsigned long ret;
+	_BitScanForward64(&ret, bb);
+	return unsigned(ret);
+#else
+	return __builtin_ctzll(bb);
+#endif
 }
 
 /**
- * Reversed bit scan reverse and return index. If board_t is 0 return -1.
+ * Reversed bit scan reverse and return index. If board_t is 0 return 0.
  *
  * @param  board board_t.
  *
  * @returns Index of first found bit.
  */
-inline int getMSB(bitboard_t board) {
-	if (board == 0ULL) return -1;
+inline unsigned int getMSB(bitboard_t bb) {
+	Assert(bb);
 
+#if defined(_MSC_VER)
 	unsigned long ret;
-	_BitScanReverse64(&ret, board);
-	return (int)ret;
+	_BitScanReverse64(&ret, bb);
+	return (unsigned)ret;
+#else
+	return __builtin_clzll(bb) ^ 63;
+#endif
 }
 
 /**
@@ -47,7 +67,7 @@ inline int getMSB(bitboard_t board) {
  *
  * @returns Amount of bits set to 1 in bb.
  */
-inline int popCount(bitboard_t bb) {
+inline unsigned int popCount(bitboard_t bb) {
 #if defined(_MSC_VER)
 	return (int)__popcnt64(bb);
 #elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
@@ -58,22 +78,32 @@ inline int popCount(bitboard_t bb) {
 /**
  * Pops least significant bit from bitboard and returns index.
  *
- * @param  bb Bitboard to pop lsb on.
+ * @param bb Bitboard to pop lsb on.
  *
  * @returns Index of popped bit.
  */
-inline int getPopLSB(bitboard_t* bb) {
-	unsigned long ret;
-	_BitScanForward64(&ret, *bb);
+inline unsigned int popLSB(bitboard_t* bb) {
+	Assert(*bb);
+	int lsb = getLSB(*bb);
 	*bb &= (*bb - 1);
-	return (int)ret;
+	return lsb;
 }
 
-// Pop lsb and return modified board
-inline bitboard_t popLSB(bitboard_t bb) {
-	if (!bb) return 0;
+inline unsigned int popLSB_tb(uint64_t* bb) {
+	Assert(*bb);
+	int lsb = getLSB_tb(*bb);
+	*bb &= (*bb - 1);
+	return lsb;
+}
 
-	return (bb & (bb - 1));
+inline int popMSB(uint64_t* bb) {
+	int msb = getMSB(*bb);
+	*bb ^= 1ull << msb;
+	return msb;
+}
+
+inline bool bitIsSet(uint64_t bb, int i) {
+	return bb & (1ull << i);
 }
 
 /**
@@ -83,7 +113,8 @@ inline bitboard_t popLSB(bitboard_t bb) {
  * @param  i  Index of bit that is set to 1.
  */
 inline void setBit(bitboard_t* bb, int i) {
-	*bb |= (1ULL << i);
+	Assert(bitIsSet(*bb, i));
+	*bb ^= (1ULL << i);
 }
 
 /**
@@ -93,7 +124,8 @@ inline void setBit(bitboard_t* bb, int i) {
  * @param  i  Index of bit that is set to 0.
  */
 inline void clearBit(bitboard_t* bb, int i) {
-	*bb &= ~(1ULL << i);
+	Assert(bitIsSet(*bb, i));
+	*bb ^= 1ULL << i;
 }
 
 /**

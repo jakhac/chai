@@ -1,10 +1,7 @@
 #pragma once
 
-//#include <stack>
 #include <bitset> // printBinary
-//#include <iostream>
 
-//#include "defs.h"
 #include "info.h"
 #include "attacks.h"
 #include "move.h"
@@ -81,6 +78,10 @@ extern int histHeuristic[2][64][64];
 * Stores maximum history score.
 */
 extern int histMax;
+
+// Maximum score before rescale in history heuristic. Max history score needs to be less than 10000
+// because move ordering scores "QUIET_SCORES=5000 + hist/10" before COUNTER_SCORE=6000.
+const int HISTORY_MAX = 1000 - 1;
 
 /**
 * Store counter moves for FROM and TO square of the previous move.

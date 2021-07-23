@@ -9,6 +9,8 @@ const value_t VALUE_IS_MATE_IN = VALUE_MATE - (MAX_DEPTH * 2);
 const value_t VALUE_NONE = VALUE_INFTY + 1;
 const value_t VALUE_WIN = 10000;
 
+const value_t VALUE_TB_WIN = VALUE_MATE - 1000;
+
 const value_t pieceValues[13] = {
 	0, 100, 325, 325, 550, 1000,
 	0, 100, 325, 325, 550, 1000, 0

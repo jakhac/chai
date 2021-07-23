@@ -3,4 +3,4 @@
 #include "egtb/tbprobe.h"
 #include "board.h"
 
-void probe(board_t* b);
+int probeTB(board_t* b);

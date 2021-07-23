@@ -129,7 +129,7 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 	Assert(depth >= QS_DEPTH && depth <= MAX_DEPTH);
 	Assert(flag >= TT_ALPHA && flag <= TT_EVAL);
 	Assert(abs(value) < VALUE_INFTY || value == VALUE_NONE);
-	Assert(abs(staticEval) < VALUE_INFTY);
+	Assert(abs(staticEval) < VALUE_IS_MATE_IN || staticEval == VALUE_NONE);
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
 	// Stats
@@ -220,7 +220,7 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 			Assert(e->flag >= TT_ALPHA && e->flag <= TT_EVAL);
 			Assert(e->move != MOVE_NONE);
 			Assert(abs(e->value) < VALUE_INFTY || e->value == VALUE_NONE);
-			Assert(abs(e->staticEval) < VALUE_IS_MATE_IN);
+			Assert(abs(e->staticEval) < VALUE_IS_MATE_IN || e->staticEval == VALUE_NONE);
 
 			*hashValue = hashToSearch(b, e->value);
 			*hashDepth = e->depth;

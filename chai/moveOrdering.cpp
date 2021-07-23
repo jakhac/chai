@@ -62,9 +62,10 @@ int see(board_t* b, const int move) {
 
 		side ^= 1;
 		from = getLeastValuablePiece(b, attadef, side, attackerPiece);
-		attackerPiece = pieceAt(b, getLSB(from));
+		attackerPiece = from ? pieceAt(b, getLSB(from)) : 0;
 
 	} while (from && attackerPiece);
+
 	while (--d) {
 		gain[d - 1] = -max(-gain[d - 1], gain[d]);
 	}
@@ -119,7 +120,7 @@ int lazySee(board_t* b, const int move) {
 
 		side ^= 1;
 		from = getLeastValuablePiece(b, attadef, side, attackerPiece);
-		attackerPiece = pieceAt(b, getLSB(from));
+		attackerPiece = from ? pieceAt(b, getLSB(from)) : 0;
 
 	} while (from && attackerPiece);
 	while (--d) {
@@ -189,6 +190,7 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 		}
 
 		// Remove least valuable attacker
+		Assert(nowAttacking & b->pieces[nextVictim]);
 		occ ^= (1ULL << getLSB(nowAttacking & b->pieces[nextVictim]));
 
 		if (nextVictim == chai::PAWN || nextVictim == chai::BISHOP || nextVictim == chai::QUEEN) {
@@ -312,8 +314,9 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 
 		// last resort: history heuristic
 		int histScore = histHeuristic[b->stm][fromSq(currentMove)][toSq(currentMove)];
-		Assert(histScore >= 0);
+		Assert(0 <= histScore && histScore <= HISTORY_MAX);
 		moveList->scores[i] = QUIET_SCORE + (histScore);
-		Assert(moveList->scores[i] < COUNTER_SCORE);
+		Assert3(moveList->scores[i] < COUNTER_SCORE,
+				std::to_string(moveList->scores[i]), std::to_string(COUNTER_SCORE));
 	}
 }

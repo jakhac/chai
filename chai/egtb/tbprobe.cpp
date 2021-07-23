@@ -1,55 +1,59 @@
 /*
-Copyright (c) 2013-2018 Ronald de Man
-Copyright (c) 2015 basil00
-Modifications Copyright (c) 2016-2020 by Jon Dart
+ * Copyright (c) 2013-2020 Ronald de Man
+ * Copyright (c) 2015 Basil, all rights reserved,
+ * Modifications Copyright (c) 2016-2019 by Jon Dart
+ * Modifications Copyright (c) 2020-2020 by Andrew Grant
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-#pragma warning(disable:4996) // disable _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable : 4996)
 
 #include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #ifdef __cplusplus
 #include <atomic>
 #else
 #include <stdatomic.h>
 #endif
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef TB_NO_STDBOOL
-#typedef uint8 bool
-#else
-#include <stdbool.h>
-#endif
+
 #include "tbprobe.h"
 
 #ifdef __cplusplus
 using namespace std;
 #endif
 
-#define TB_PIECES 7
+#define TB_PIECES    (7)
 #define TB_HASHBITS  (TB_PIECES < 7 ?  11 : 12)
 #define TB_MAX_PIECE (TB_PIECES < 7 ? 254 : 650)
 #define TB_MAX_PAWN  (TB_PIECES < 7 ? 256 : 861)
-#define TB_MAX_SYMS  4096
+#define TB_MAX_SYMS  (4096)
+
+#define TB_BEST_NONE            (0xFFFF)
+#define TB_SCORE_ILLEGAL        (0x7FFF)
+#define TB_MOVE_STALEMATE       (0xFFFF)
+#define TB_MOVE_CHECKMATE       (0xFFFE)
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -74,17 +78,13 @@ typedef HANDLE map_t;
 
 #define DECOMP64
 
-// Threading support
-#ifndef TB_NO_THREADS
 #if defined(__cplusplus) && (__cplusplus >= 201103L)
-
 #include <mutex>
 #define LOCK_T std::mutex
 #define LOCK_INIT(x)
 #define LOCK_DESTROY(x)
 #define LOCK(x) x.lock()
 #define UNLOCK(x) x.unlock()
-
 #else
 #ifndef _WIN32
 #define LOCK_T pthread_mutex_t
@@ -99,163 +99,27 @@ typedef HANDLE map_t;
 #define LOCK(x) WaitForSingleObject(x, INFINITE)
 #define UNLOCK(x) ReleaseMutex(x)
 #endif
-
-#endif
-#else /* TB_NO_THREADS */
-#define LOCK_T          int
-#define LOCK_INIT(x)    /* NOP */
-#define LOCK_DESTROY(x) /* NOP */
-#define LOCK(x)         /* NOP */
-#define UNLOCK(x)       /* NOP */
 #endif
 
-// population count implementation
-#undef TB_SOFTWARE_POP_COUNT
-
-#if defined(TB_CUSTOM_POP_COUNT)
-#define popcount(x) popCount(x)
-#elif defined(TB_NO_HW_POP_COUNT)
-#define TB_SOFTWARE_POP_COUNT
-#elif defined (__GNUC__) && defined(__x86_64__) && defined(__SSE4_2__)
-#include <popcntintrin.h>
-#define popcount(x)             (int)_mm_popcnt_u64((x))
-#elif defined(_MSC_VER) && (_MSC_VER >= 1500) && defined(_M_AMD64)
-#include <nmmintrin.h>
-#define popcount(x)             (int)_mm_popcnt_u64((x))
-#else
-#define TB_SOFTWARE_POP_COUNT
-#endif
-
-#ifdef TB_SOFTWARE_POP_COUNT
-// Not a recognized compiler/architecture that has popcount:
-// fall back to a software popcount. This one is still reasonably
-// fast.
-static inline unsigned tb_software_popcount(uint64_t x) {
-	x = x - ((x >> 1) & 0x5555555555555555ull);
-	x = (x & 0x3333333333333333ull) + ((x >> 2) & 0x3333333333333333ull);
-	x = (x + (x >> 4)) & 0x0f0f0f0f0f0f0f0full;
-	return (x * 0x0101010101010101ull) >> 56;
-}
-
-#define popcount(x) tb_software_popcount(x)
-#endif
-
-// LSB (least-significant bit) implementation
-#define TB_CUSTOM_LSB
-#ifdef TB_CUSTOM_LSB
-//#define lsb(b)
-#else
-#if defined(__GNUC__)
-static inline unsigned getLSB(uint64_t b) {
-	assert(b != 0);
-	return __builtin_ffsll(b) - 1;
-}
-#elif defined(_MSC_VER)
-static inline unsigned getLSB(uint64_t b) {
-	assert(b != 0);
-	DWORD index;
-#ifdef _WIN64
-	_BitScanForward64(&index, b);
-	return (unsigned)index;
-#else
-	if (b & 0xffffffffULL) {
-		_BitScanForward(&index, (unsigned long)(b & 0xffffffffULL));
-		return (unsigned)index;
-	} else {
-		_BitScanForward(&index, (unsigned long)(b >> 32));
-		return 32 + (unsigned)index;
-	}
-#endif
-}
-#else
-/* not a compiler/architecture with recognized builtins */
-static uint32_t get_bit32(uint64_t x) {
-	return (uint32_t)(((int32_t)(x)) & -((int32_t)(x)));
-}
-static const unsigned MAGIC32 = 0xe89b2be;
-static const uint32_t MagicTable32[32] = { 31,0,9,1,10,20,13,2,7,11,21,23,17,14,3,25,30,8,19,12,6,22,16,24,29,18,5,15,28,4,27,26 };
-static unsigned getLSB(uint64_t b) {
-	if (b & 0xffffffffULL)
-		return MagicTable32[(get_bit32(b & 0xffffffffULL) * MAGIC32) >> 27];
-	else
-		return MagicTable32[(get_bit32(b >> 32) * MAGIC32) >> 27] + 32;
-}
-#endif
-#endif
-
-#define max(a,b) a > b ? a : b
-#define min(a,b) a < b ? a : b
+#define TB_MAX(a,b)     ((a) > (b) ? (a) : (b))
+#define TB_MIN(a,b)     ((a) < (b) ? (a) : (b))
 
 #include "stdendian.h"
 
 #if _BYTE_ORDER == _BIG_ENDIAN
-
-/* (unused)
-static uint64_t from_le_u64(uint64_t input) {
-  return bswap64(input);
-}
-*/
-
-static uint32_t from_le_u32(uint32_t input) {
-	return bswap32(input);
-}
-
-static uint16_t from_le_u16(uint16_t input) {
-	return bswap16(input);
-}
-
-static uint64_t from_be_u64(uint64_t x) {
-	return x;
-}
-
-static uint32_t from_be_u32(uint32_t x) {
-	return x;
-}
-
-/* (unused)
-  static uint16_t from_be_u16(uint16_t x) {
-  return x;
- }*/
-
+static uint32_t from_le_u32(uint32_t x) { return bswap32(x); }
+static uint16_t from_le_u16(uint16_t x) { return bswap16(x); }
+static uint64_t from_be_u64(uint64_t x) { return x; }
+static uint32_t from_be_u32(uint32_t x) { return x; }
 #else
-
-/* (unused)
-static uint64_t from_le_u64(uint64_t x) {
-  return x;
-}
-*/
-
-static uint32_t from_le_u32(uint32_t x) {
-	return x;
-}
-
-static uint16_t from_le_u16(uint16_t x) {
-	return x;
-}
-
-static uint64_t from_be_u64(uint64_t input) {
-	return bswap64(input);
-}
-
-static uint32_t from_be_u32(uint32_t input) {
-	return bswap32(input);
-}
-
-/* (unused)
-static uint16_t from_be_u16(const uint16_t input) {
-  return bswap16(input);
-}
-*/
-
+static uint32_t from_le_u32(uint32_t x) { return x; }
+static uint16_t from_le_u16(uint16_t x) { return x; }
+static uint64_t from_be_u64(uint64_t x) { return bswap64(x); }
+static uint32_t from_be_u32(uint32_t x) { return bswap32(x); }
 #endif
 
-inline static uint32_t read_le_u32(void* p) {
-	return from_le_u32(*(uint32_t*)p);
-}
-
-inline static uint16_t read_le_u16(void* p) {
-	return from_le_u16(*(uint16_t*)p);
-}
+inline static uint32_t read_le_u32(void* p) { return from_le_u32(*(uint32_t*)p); }
+inline static uint16_t read_le_u16(void* p) { return from_le_u16(*(uint16_t*)p); }
 
 static size_t file_size(FD fd) {
 #ifdef _WIN32
@@ -274,9 +138,7 @@ static size_t file_size(FD fd) {
 #endif
 }
 
-#ifndef TB_NO_THREADS
 static LOCK_T tbMutex;
-#endif
 static int initialized = 0;
 static int numPaths = 0;
 static char* pathString = NULL;
@@ -380,11 +242,8 @@ static void unmap_file(void* data, map_t mapping) {
 }
 #endif
 
-#define poplsb(x)               ((x) & ((x) - 1))
-
 int TB_MaxCardinality = 0, TB_MaxCardinalityDTM = 0;
-unsigned TB_LARGEST = 0;
-//extern int TB_CardinalityDTM;
+int TB_LARGEST = 0;
 
 static const char* tbSuffix[] = { ".rtbw", ".rtbm", ".rtbz" };
 static uint32_t tbMagic[] = { 0x5d23e871, 0x88ac504b, 0xa50c66d7 };
@@ -393,7 +252,440 @@ enum { WDL, DTM, DTZ };
 enum { PIECE_ENC, FILE_ENC, RANK_ENC };
 
 // Attack and move generation code
-#include "tbchess.cpp"
+/*
+ * (c) 2015 basil, all rights reserved,
+ * Modifications Copyright (c) 2016-2019 by Jon Dart
+ * Modifications Copyright (c) 2020-2020 by Andrew Grant
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+ /****** BEGIN OF TBCHESS ******/
+
+enum {
+
+	PYRRHIC_BLACK = 0, PYRRHIC_WHITE = 1,
+	PYRRHIC_PAWN = 1, PYRRHIC_KNIGHT = 2,
+	PYRRHIC_BISHOP = 3, PYRRHIC_ROOK = 4,
+	PYRRHIC_QUEEN = 5, PYRRHIC_KING = 6,
+
+	PYRRHIC_WPAWN = 1, PYRRHIC_BPAWN = 9,
+	PYRRHIC_WKNIGHT = 2, PYRRHIC_BKNIGHT = 10,
+	PYRRHIC_WBISHOP = 3, PYRRHIC_BBISHOP = 11,
+	PYRRHIC_WROOK = 4, PYRRHIC_BROOK = 12,
+	PYRRHIC_WQUEEN = 5, PYRRHIC_BQUEEN = 13,
+	PYRRHIC_WKING = 6, PYRRHIC_BKING = 14,
+
+	PYRRHIC_PROMOTES_NONE = 0,
+	PYRRHIC_PROMOTES_QUEEN = 1,
+	PYRRHIC_PROMOTES_ROOK = 2,
+	PYRRHIC_PROMOTES_BISHOP = 3,
+	PYRRHIC_PROMOTES_KNIGHT = 4,
+};
+
+enum {
+
+	PYRRHIC_PROMOSQS = 0XFF000000000000FFULL,
+
+	PYRRHIC_PRIME_WKING = 00000000000000000000ULL,
+	PYRRHIC_PRIME_WQUEEN = 11811845319353239651ULL,
+	PYRRHIC_PRIME_WROOK = 10979190538029446137ULL,
+	PYRRHIC_PRIME_WBISHOP = 12311744257139811149ULL,
+	PYRRHIC_PRIME_WKNIGHT = 15202887380319082783ULL,
+	PYRRHIC_PRIME_WPAWN = 17008651141875982339ULL,
+	PYRRHIC_PRIME_BKING = 00000000000000000000ULL,
+	PYRRHIC_PRIME_BQUEEN = 15484752644942473553ULL,
+	PYRRHIC_PRIME_BROOK = 18264461213049635989ULL,
+	PYRRHIC_PRIME_BBISHOP = 15394650811035483107ULL,
+	PYRRHIC_PRIME_BKNIGHT = 13469005675588064321ULL,
+	PYRRHIC_PRIME_BPAWN = 11695583624105689831ULL,
+	PYRRHIC_PRIME_NONE = 00000000000000000000ULL,
+};
+
+typedef struct PyrrhicPosition {
+	uint64_t white, black;
+	uint64_t kings, queens, rooks;
+	uint64_t bishops, knights, pawns;
+	uint8_t rule50, ep; bool turn;
+} PyrrhicPosition;
+
+unsigned pyrrhic_move_from(PyrrhicMove move) { return (move >> 6) & 0x3F; }
+unsigned pyrrhic_move_to(PyrrhicMove move) { return (move >> 0) & 0x3F; }
+unsigned pyrrhic_move_promotes(PyrrhicMove move) { return (move >> 12) & 0x07; }
+
+int pyrrhic_colour_of_piece(uint8_t piece) { return !(piece >> 3); }
+int pyrrhic_type_of_piece(uint8_t piece) { return  (piece & 0x7); }
+
+bool pyrrhic_test_bit(uint64_t bb, int sq) { return (bb >> sq) & 0x1; }
+void pyrrhic_enable_bit(uint64_t* b, int sq) { *b |= (1ull << sq); }
+void pyrrhic_disable_bit(uint64_t* b, int sq) { *b &= ~(1ull << sq); }
+bool pyrrhic_promo_square(int sq) { return (PYRRHIC_PROMOSQS >> sq) & 0x1; }
+bool pyrrhic_pawn_start_square(int colour, int sq) { return (sq >> 3) == (colour ? 1 : 6); }
+
+// The only two forward-declarations that are needed
+bool pyrrhic_do_move(PyrrhicPosition* pos, const PyrrhicPosition* pos0, PyrrhicMove move);
+bool pyrrhic_legal_move(const PyrrhicPosition* pos, PyrrhicMove move);
+
+
+const char pyrrhic_piece_to_char[] = " PNBRQK  pnbrqk";
+
+uint64_t pyrrhic_pieces_by_type(const PyrrhicPosition* pos, int colour, int piece) {
+
+	assert(PYRRHIC_PAWN <= piece && piece <= PYRRHIC_KING);
+	assert(colour == PYRRHIC_WHITE || colour == PYRRHIC_BLACK);
+
+	uint64_t side = (colour == PYRRHIC_WHITE ? pos->white : pos->black);
+
+	switch (piece) {
+		case PYRRHIC_PAWN: return pos->pawns & side;
+		case PYRRHIC_KNIGHT: return pos->knights & side;
+		case PYRRHIC_BISHOP: return pos->bishops & side;
+		case PYRRHIC_ROOK: return pos->rooks & side;
+		case PYRRHIC_QUEEN: return pos->queens & side;
+		case PYRRHIC_KING: return pos->kings & side;
+		default: assert(0); return 0;
+	}
+}
+
+int pyrrhic_char_to_piece_type(char c) {
+
+	for (int i = PYRRHIC_PAWN; i <= PYRRHIC_KING; i++)
+		if (c == pyrrhic_piece_to_char[i])
+			return i;
+	return 0;
+}
+
+
+uint64_t pyrrhic_calc_key(const PyrrhicPosition* pos, int mirror) {
+
+	uint64_t white = mirror ? pos->black : pos->white;
+	uint64_t black = mirror ? pos->white : pos->black;
+
+	return PYRRHIC_POPCOUNT(white & pos->queens) * PYRRHIC_PRIME_WQUEEN
+		+ PYRRHIC_POPCOUNT(white & pos->rooks) * PYRRHIC_PRIME_WROOK
+		+ PYRRHIC_POPCOUNT(white & pos->bishops) * PYRRHIC_PRIME_WBISHOP
+		+ PYRRHIC_POPCOUNT(white & pos->knights) * PYRRHIC_PRIME_WKNIGHT
+		+ PYRRHIC_POPCOUNT(white & pos->pawns) * PYRRHIC_PRIME_WPAWN
+		+ PYRRHIC_POPCOUNT(black & pos->queens) * PYRRHIC_PRIME_BQUEEN
+		+ PYRRHIC_POPCOUNT(black & pos->rooks) * PYRRHIC_PRIME_BROOK
+		+ PYRRHIC_POPCOUNT(black & pos->bishops) * PYRRHIC_PRIME_BBISHOP
+		+ PYRRHIC_POPCOUNT(black & pos->knights) * PYRRHIC_PRIME_BKNIGHT
+		+ PYRRHIC_POPCOUNT(black & pos->pawns) * PYRRHIC_PRIME_BPAWN;
+}
+
+uint64_t pyrrhic_calc_key_from_pcs(int* pieces, int mirror) {
+
+	return pieces[PYRRHIC_WQUEEN ^ (mirror ? 8 : 0)] * PYRRHIC_PRIME_WQUEEN
+		+ pieces[PYRRHIC_WROOK ^ (mirror ? 8 : 0)] * PYRRHIC_PRIME_WROOK
+		+ pieces[PYRRHIC_WBISHOP ^ (mirror ? 8 : 0)] * PYRRHIC_PRIME_WBISHOP
+		+ pieces[PYRRHIC_WKNIGHT ^ (mirror ? 8 : 0)] * PYRRHIC_PRIME_WKNIGHT
+		+ pieces[PYRRHIC_WPAWN ^ (mirror ? 8 : 0)] * PYRRHIC_PRIME_WPAWN
+		+ pieces[PYRRHIC_BQUEEN ^ (mirror ? 8 : 0)] * PYRRHIC_PRIME_BQUEEN
+		+ pieces[PYRRHIC_BROOK ^ (mirror ? 8 : 0)] * PYRRHIC_PRIME_BROOK
+		+ pieces[PYRRHIC_BBISHOP ^ (mirror ? 8 : 0)] * PYRRHIC_PRIME_BBISHOP
+		+ pieces[PYRRHIC_BKNIGHT ^ (mirror ? 8 : 0)] * PYRRHIC_PRIME_BKNIGHT
+		+ pieces[PYRRHIC_BPAWN ^ (mirror ? 8 : 0)] * PYRRHIC_PRIME_BPAWN;
+}
+
+uint64_t pyrrhic_calc_key_from_pieces(uint8_t* pieces, int length) {
+
+	static const uint64_t PyrrhicPrimes[] = {
+		PYRRHIC_PRIME_NONE , PYRRHIC_PRIME_WPAWN , PYRRHIC_PRIME_WKNIGHT, PYRRHIC_PRIME_WBISHOP,
+		PYRRHIC_PRIME_WROOK, PYRRHIC_PRIME_WQUEEN, PYRRHIC_PRIME_WKING  , PYRRHIC_PRIME_NONE   ,
+		PYRRHIC_PRIME_NONE , PYRRHIC_PRIME_BPAWN , PYRRHIC_PRIME_BKNIGHT, PYRRHIC_PRIME_BBISHOP,
+		PYRRHIC_PRIME_BROOK, PYRRHIC_PRIME_BQUEEN, PYRRHIC_PRIME_BKING  , PYRRHIC_PRIME_NONE   ,
+	};
+
+	uint64_t key = 0;
+	for (int i = 0; i < length; i++)
+		key += PyrrhicPrimes[pieces[i]];
+
+	return key;
+}
+
+
+uint64_t pyrrhic_do_bb_move(uint64_t bb, unsigned from, unsigned to) {
+	return (((bb >> from) & 0x1) << to) | (bb & (~(1ull << from) & ~(1ull << to)));
+}
+
+PyrrhicMove pyrrhic_make_move(unsigned promote, unsigned from, unsigned to) {
+	return ((promote & 0x7) << 12) | ((from & 0x3F) << 6) | (to & 0x3F);
+}
+
+PyrrhicMove* pyrrhic_add_move(PyrrhicMove* moves, int promotes, unsigned from, unsigned to) {
+
+	if (!promotes)
+		*moves++ = pyrrhic_make_move(PYRRHIC_PROMOTES_NONE, from, to);
+
+	else {
+		*moves++ = pyrrhic_make_move(PYRRHIC_PROMOTES_QUEEN, from, to);
+		*moves++ = pyrrhic_make_move(PYRRHIC_PROMOTES_KNIGHT, from, to);
+		*moves++ = pyrrhic_make_move(PYRRHIC_PROMOTES_ROOK, from, to);
+		*moves++ = pyrrhic_make_move(PYRRHIC_PROMOTES_BISHOP, from, to);
+	}
+
+	return moves;
+}
+
+PyrrhicMove* pyrrhic_gen_captures(const PyrrhicPosition* pos, PyrrhicMove* moves) {
+
+	uint64_t us = pos->turn ? pos->white : pos->black;
+	uint64_t them = pos->turn ? pos->black : pos->white;
+	uint64_t b, att;
+
+	// Generate captures for the King
+	for (b = us & pos->kings; b; PYRRHIC_POPLSB(&b))
+		for (att = PYRRHIC_KING_ATTACKS(PYRRHIC_LSB(b)) & them; att; PYRRHIC_POPLSB(&att))
+			moves = pyrrhic_add_move(moves, false, PYRRHIC_LSB(b), PYRRHIC_LSB(att));
+
+	// Generate captures for the Rooks & Queens
+	for (b = us & (pos->rooks | pos->queens); b; PYRRHIC_POPLSB(&b))
+		for (att = PYRRHIC_ROOK_ATTACKS(PYRRHIC_LSB(b), us | them) & them; att; PYRRHIC_POPLSB(&att))
+			moves = pyrrhic_add_move(moves, false, PYRRHIC_LSB(b), PYRRHIC_LSB(att));
+
+	// Generate captures for the Bishops & Queens
+	for (b = us & (pos->bishops | pos->queens); b; PYRRHIC_POPLSB(&b))
+		for (att = PYRRHIC_BISHOP_ATTACKS(PYRRHIC_LSB(b), us | them) & them; att; PYRRHIC_POPLSB(&att))
+			moves = pyrrhic_add_move(moves, false, PYRRHIC_LSB(b), PYRRHIC_LSB(att));
+
+	// Generate captures for the Knights
+	for (b = us & pos->knights; b; PYRRHIC_POPLSB(&b))
+		for (att = PYRRHIC_KNIGHT_ATTACKS(PYRRHIC_LSB(b)) & them; att; PYRRHIC_POPLSB(&att))
+			moves = pyrrhic_add_move(moves, false, PYRRHIC_LSB(b), PYRRHIC_LSB(att));
+
+	// Generate captures for the Pawns
+	for (b = us & pos->pawns; b; PYRRHIC_POPLSB(&b)) {
+
+		// Generate Enpassant Captures
+		if (pos->ep && pyrrhic_test_bit(PYRRHIC_PAWN_ATTACKS(PYRRHIC_LSB(b), pos->turn), pos->ep))
+			moves = pyrrhic_add_move(moves, false, PYRRHIC_LSB(b), pos->ep);
+
+		// Generate non-Enpassant Captures
+		for (att = PYRRHIC_PAWN_ATTACKS(PYRRHIC_LSB(b), pos->turn) & them; att; PYRRHIC_POPLSB(&att))
+			moves = pyrrhic_add_move(moves, pyrrhic_promo_square(PYRRHIC_LSB(att)), PYRRHIC_LSB(b), PYRRHIC_LSB(att));
+	}
+
+	return moves;
+}
+
+PyrrhicMove* pyrrhic_gen_moves(const PyrrhicPosition* pos, PyrrhicMove* moves) {
+
+	const unsigned Forward = (pos->turn == PYRRHIC_WHITE ? 8 : -8);
+
+	uint64_t us = pos->turn ? pos->white : pos->black;
+	uint64_t them = pos->turn ? pos->black : pos->white;
+	uint64_t b, att;
+
+	// Generate moves for the King
+	for (b = us & pos->kings; b; PYRRHIC_POPLSB(&b))
+		for (att = PYRRHIC_KING_ATTACKS(PYRRHIC_LSB(b)) & ~us; att; PYRRHIC_POPLSB(&att))
+			moves = pyrrhic_add_move(moves, 0, PYRRHIC_LSB(b), PYRRHIC_LSB(att));
+
+	// Generate moves for the Rooks
+	for (b = us & (pos->rooks | pos->queens); b; PYRRHIC_POPLSB(&b))
+		for (att = PYRRHIC_ROOK_ATTACKS(PYRRHIC_LSB(b), us | them) & ~us; att; PYRRHIC_POPLSB(&att))
+			moves = pyrrhic_add_move(moves, 0, PYRRHIC_LSB(b), PYRRHIC_LSB(att));
+
+	// Generate moves for the Bishops
+	for (b = us & (pos->bishops | pos->queens); b; PYRRHIC_POPLSB(&b))
+		for (att = PYRRHIC_BISHOP_ATTACKS(PYRRHIC_LSB(b), us | them) & ~us; att; PYRRHIC_POPLSB(&att))
+			moves = pyrrhic_add_move(moves, 0, PYRRHIC_LSB(b), PYRRHIC_LSB(att));
+
+	// Generate moves for the Knights
+	for (b = us & pos->knights; b; PYRRHIC_POPLSB(&b))
+		for (att = PYRRHIC_KNIGHT_ATTACKS(PYRRHIC_LSB(b)) & ~us; att; PYRRHIC_POPLSB(&att))
+			moves = pyrrhic_add_move(moves, 0, PYRRHIC_LSB(b), PYRRHIC_LSB(att));
+
+	// Generate moves for the Pawns
+	for (b = us & pos->pawns; b; PYRRHIC_POPLSB(&b)) {
+
+		unsigned from = PYRRHIC_LSB(b);
+
+		// Generate Enpassant Captures
+		if (pos->ep && pyrrhic_test_bit(PYRRHIC_PAWN_ATTACKS(from, pos->turn), pos->ep))
+			moves = pyrrhic_add_move(moves, false, from, pos->ep);
+
+		// Generate any single pawn pushes
+		if (!pyrrhic_test_bit(us | them, from + Forward))
+			moves = pyrrhic_add_move(moves, pyrrhic_promo_square(from + Forward), from, from + Forward);
+
+		// Generate any double pawn pushes
+		if (pyrrhic_pawn_start_square(pos->turn, from)
+			&& !pyrrhic_test_bit(us | them, from + Forward)
+			&& !pyrrhic_test_bit(us | them, from + 2 * Forward))
+			moves = pyrrhic_add_move(moves, false, from, from + 2 * Forward);
+
+		// Generate non-Enpassant Captures
+		for (att = PYRRHIC_PAWN_ATTACKS(from, pos->turn) & them; att; PYRRHIC_POPLSB(&att))
+			moves = pyrrhic_add_move(moves, pyrrhic_promo_square(PYRRHIC_LSB(att)), from, PYRRHIC_LSB(att));
+	}
+
+	return moves;
+}
+
+PyrrhicMove* pyrrhic_gen_legal(const PyrrhicPosition* pos, PyrrhicMove* moves) {
+
+	PyrrhicMove _moves[TB_MAX_MOVES];
+	PyrrhicMove* end = pyrrhic_gen_moves(pos, _moves);
+	PyrrhicMove* results = moves;
+
+	for (PyrrhicMove* m = _moves; m < end; m++)
+		if (pyrrhic_legal_move(pos, *m))
+			*results++ = *m;
+	return results;
+}
+
+
+bool pyrrhic_is_pawn_move(const PyrrhicPosition* pos, PyrrhicMove move) {
+	uint64_t us = pos->turn ? pos->white : pos->black;
+	return pyrrhic_test_bit(us & pos->pawns, pyrrhic_move_from(move));
+}
+
+bool pyrrhic_is_en_passant(const PyrrhicPosition* pos, PyrrhicMove move) {
+	return pyrrhic_is_pawn_move(pos, move)
+		&& pyrrhic_move_to(move) == pos->ep && pos->ep;
+}
+
+bool pyrrhic_is_capture(const PyrrhicPosition* pos, PyrrhicMove move) {
+	uint64_t them = pos->turn ? pos->black : pos->white;
+	return pyrrhic_test_bit(them, pyrrhic_move_to(move))
+		|| pyrrhic_is_en_passant(pos, move);
+}
+
+bool pyrrhic_is_legal(const PyrrhicPosition* pos) {
+
+	uint64_t us = pos->turn ? pos->black : pos->white;
+	uint64_t them = pos->turn ? pos->white : pos->black;
+	unsigned sq = PYRRHIC_LSB(pos->kings & us);
+
+	return !(PYRRHIC_KING_ATTACKS(sq) & pos->kings & them)
+		&& !(PYRRHIC_ROOK_ATTACKS(sq, us | them) & (pos->rooks | pos->queens) & them)
+		&& !(PYRRHIC_BISHOP_ATTACKS(sq, us | them) & (pos->bishops | pos->queens) & them)
+		&& !(PYRRHIC_KNIGHT_ATTACKS(sq) & pos->knights & them)
+		&& !(PYRRHIC_PAWN_ATTACKS(sq, !pos->turn) & pos->pawns & them);
+}
+
+bool pyrrhic_is_check(const PyrrhicPosition* pos) {
+
+	uint64_t us = pos->turn ? pos->white : pos->black;
+	uint64_t them = pos->turn ? pos->black : pos->white;
+	unsigned sq = PYRRHIC_LSB(pos->kings & us);
+
+	return (PYRRHIC_ROOK_ATTACKS(sq, us | them) & ((pos->rooks | pos->queens) & them))
+		|| (PYRRHIC_BISHOP_ATTACKS(sq, us | them) & ((pos->bishops | pos->queens) & them))
+		|| (PYRRHIC_KNIGHT_ATTACKS(sq) & (pos->knights & them))
+		|| (PYRRHIC_PAWN_ATTACKS(sq, pos->turn) & (pos->pawns & them));
+}
+
+bool pyrrhic_is_mate(const PyrrhicPosition* pos) {
+
+	if (!pyrrhic_is_check(pos)) return 0;
+
+	PyrrhicPosition pos1;
+	PyrrhicMove moves0[TB_MAX_MOVES];
+	PyrrhicMove* moves = moves0;
+	PyrrhicMove* end = pyrrhic_gen_moves(pos, moves);
+
+	for (; moves < end; moves++)
+		if (pyrrhic_do_move(&pos1, pos, *moves))
+			return 0;
+	return 1;
+}
+
+
+bool pyrrhic_do_move(PyrrhicPosition* pos, const PyrrhicPosition* pos0, PyrrhicMove move) {
+
+	unsigned from = pyrrhic_move_from(move);
+	unsigned to = pyrrhic_move_to(move);
+	unsigned promotes = pyrrhic_move_promotes(move);
+
+	// Swap the turn and update every Bitboard as needed
+	pos->turn = !pos0->turn;
+	pos->white = pyrrhic_do_bb_move(pos0->white, from, to);
+	pos->black = pyrrhic_do_bb_move(pos0->black, from, to);
+	pos->kings = pyrrhic_do_bb_move(pos0->kings, from, to);
+	pos->queens = pyrrhic_do_bb_move(pos0->queens, from, to);
+	pos->rooks = pyrrhic_do_bb_move(pos0->rooks, from, to);
+	pos->bishops = pyrrhic_do_bb_move(pos0->bishops, from, to);
+	pos->knights = pyrrhic_do_bb_move(pos0->knights, from, to);
+	pos->pawns = pyrrhic_do_bb_move(pos0->pawns, from, to);
+	pos->ep = 0;
+
+	// Promotions reset the Fifty-Move Rule and add a piece
+	if (promotes != PYRRHIC_PROMOTES_NONE) {
+
+		pyrrhic_disable_bit(&pos->pawns, to);
+
+		switch (promotes) {
+			case PYRRHIC_PROMOTES_QUEEN:  pyrrhic_enable_bit(&pos->queens, to); break;
+			case PYRRHIC_PROMOTES_ROOK:   pyrrhic_enable_bit(&pos->rooks, to); break;
+			case PYRRHIC_PROMOTES_BISHOP: pyrrhic_enable_bit(&pos->bishops, to); break;
+			case PYRRHIC_PROMOTES_KNIGHT: pyrrhic_enable_bit(&pos->knights, to); break;
+		}
+
+		pos->rule50 = 0;
+	}
+
+	// Pawn moves can be Enpassant, or allow a future Enpassant
+	else if (pyrrhic_test_bit(pos0->pawns, from)) {
+
+		pos->rule50 = 0; // Pawn move
+
+		// Check for a double push by White
+		if ((from ^ to) == 16
+			&& pos0->turn == PYRRHIC_WHITE
+			&& (PYRRHIC_PAWN_ATTACKS(from + 8, PYRRHIC_WHITE) & pos0->pawns & pos0->black))
+			pos->ep = from + 8;
+
+		// Check for a double push by Black
+		if ((from ^ to) == 16
+			&& pos0->turn == PYRRHIC_BLACK
+			&& (PYRRHIC_PAWN_ATTACKS(from - 8, PYRRHIC_BLACK) & pos0->pawns & pos0->white))
+			pos->ep = from - 8;
+
+		// Check for an Enpassant being played
+		else if (to == pos0->ep) {
+			pyrrhic_disable_bit(&pos->white, pos0->turn ? to - 8 : to + 8);
+			pyrrhic_disable_bit(&pos->black, pos0->turn ? to - 8 : to + 8);
+			pyrrhic_disable_bit(&pos->pawns, pos0->turn ? to - 8 : to + 8);
+		}
+	}
+
+	// Any other sort of capture also resets the Fifty-Move Rule
+	else if (pyrrhic_test_bit(pos0->white | pos0->black, to))
+		pos->rule50 = 0;
+
+	// Otherwise, carry on as normal
+	else
+		pos->rule50 = pos0->rule50 + 1;
+
+	// Provider the caller information about legality
+	return pyrrhic_is_legal(pos);
+}
+
+bool pyrrhic_legal_move(const PyrrhicPosition* pos, PyrrhicMove move) {
+	PyrrhicPosition pos1;
+	return pyrrhic_do_move(&pos1, pos, move);
+}
+
+/****** END OF TBCHESS ******/
+
 
 struct PairsData {
 	uint8_t* indexTable;
@@ -471,200 +763,151 @@ static void init_indices(void);
 
 // Forward declarations. These functions without the tb_
 // prefix take a pos structure as input.
-static int probe_wdl(Pos* pos, int* success);
-static int probe_dtz(Pos* pos, int* success);
-static int root_probe_wdl(const Pos* pos, bool useRule50, struct TbRootMoves* rm);
-static int root_probe_dtz(const Pos* pos, bool hasRepeated, bool useRule50, struct TbRootMoves* rm);
-static uint16_t probe_root(Pos* pos, int* score, unsigned* results);
+static int probe_wdl(PyrrhicPosition* pos, int* success);
+static int probe_dtz(PyrrhicPosition* pos, int* success);
+int root_probe_wdl(const PyrrhicPosition* pos, bool useRule50, struct TbRootMoves* rm);
+int root_probe_dtz(const PyrrhicPosition* pos, bool hasRepeated, bool useRule50, struct TbRootMoves* rm);
+static uint16_t probe_root(PyrrhicPosition* pos, int* score, unsigned* results);
 
-unsigned tb_probe_wdl_impl(
-	uint64_t white,
-	uint64_t black,
-	uint64_t kings,
-	uint64_t queens,
-	uint64_t rooks,
-	uint64_t bishops,
-	uint64_t knights,
-	uint64_t pawns,
-	unsigned ep,
-	bool turn) {
-	Pos pos =
-	{
-		white,
-		black,
-		kings,
-		queens,
-		rooks,
-		bishops,
-		knights,
-		pawns,
-		0,
-		(uint8_t)ep,
-		turn
+static unsigned dtz_to_wdl(int cnt50, int dtz) {
+
+	int wdl = 0;
+	if (dtz > 0)      wdl = dtz + cnt50 <= 100 ? 2 : 1;
+	else if (dtz < 0) wdl = -dtz + cnt50 <= 100 ? -2 : -1;
+	return wdl + 2;
+}
+
+unsigned tb_probe_wdl(
+	uint64_t white, uint64_t black,
+	uint64_t kings, uint64_t queens,
+	uint64_t rooks, uint64_t bishops,
+	uint64_t knights, uint64_t pawns,
+	unsigned ep, bool turn) {
+
+	PyrrhicPosition pos = {
+		white, black, kings,
+		queens, rooks, bishops,
+		knights, pawns, 0,
+		(uint8_t)ep, turn
 	};
+
 	int success;
 	int v = probe_wdl(&pos, &success);
-
 	if (success == 0)
 		return TB_RESULT_FAILED;
 	return (unsigned)(v + 2);
 }
 
-static unsigned dtz_to_wdl(int cnt50, int dtz) {
-	int wdl = 0;
-	if (dtz > 0)
-		wdl = (dtz + cnt50 <= 100 ? 2 : 1);
-	else if (dtz < 0)
-		wdl = (-dtz + cnt50 <= 100 ? -2 : -1);
-	return wdl + 2;
-}
+unsigned tb_probe_root(
+	uint64_t white, uint64_t black,
+	uint64_t kings, uint64_t queens,
+	uint64_t rooks, uint64_t bishops,
+	uint64_t knights, uint64_t pawns,
+	unsigned rule50, unsigned ep,
+	bool turn, unsigned* results) {
 
-unsigned tb_probe_root_impl(
-	uint64_t white,
-	uint64_t black,
-	uint64_t kings,
-	uint64_t queens,
-	uint64_t rooks,
-	uint64_t bishops,
-	uint64_t knights,
-	uint64_t pawns,
-	unsigned rule50,
-	unsigned ep,
-	bool turn,
-	unsigned* results) {
-	Pos pos =
-	{
-		white,
-		black,
-		kings,
-		queens,
-		rooks,
-		bishops,
-		knights,
-		pawns,
-		(uint8_t)rule50,
-		(uint8_t)ep,
-		turn
+	PyrrhicPosition pos = {
+		white, black, kings,
+		queens, rooks, bishops,
+		knights, pawns, (uint8_t)rule50,
+		(uint8_t)ep, turn
 	};
+
 	int dtz;
-	if (!is_valid(&pos))
-		return TB_RESULT_FAILED;
-	TbMove move = probe_root(&pos, &dtz, results);
-	if (move == 0)
-		return TB_RESULT_FAILED;
-	if (move == MOVE_CHECKMATE)
-		return TB_RESULT_CHECKMATE;
-	if (move == MOVE_STALEMATE)
-		return TB_RESULT_STALEMATE;
+
+	PyrrhicMove move = probe_root(&pos, &dtz, results);
+	if (move == 0)                 return TB_RESULT_FAILED;
+	if (move == TB_MOVE_CHECKMATE) return TB_RESULT_CHECKMATE;
+	if (move == TB_MOVE_STALEMATE) return TB_RESULT_STALEMATE;
+
 	unsigned res = 0;
 	res = TB_SET_WDL(res, dtz_to_wdl(rule50, dtz));
-	res = TB_SET_DTZ(res, (dtz < 0 ? -dtz : dtz));
-	res = TB_SET_FROM(res, move_from(move));
-	res = TB_SET_TO(res, move_to(move));
-	res = TB_SET_PROMOTES(res, move_promotes(move));
-	res = TB_SET_EP(res, is_en_passant(&pos, move));
+	res = TB_SET_DTZ(res, dtz < 0 ? -dtz : dtz);
+	res = TB_SET_FROM(res, pyrrhic_move_from(move));
+	res = TB_SET_TO(res, pyrrhic_move_to(move));
+	res = TB_SET_PROMOTES(res, pyrrhic_move_promotes(move));
+	res = TB_SET_EP(res, pyrrhic_is_en_passant(&pos, move));
 	return res;
 }
 
 int tb_probe_root_dtz(
-	uint64_t white,
-	uint64_t black,
-	uint64_t kings,
-	uint64_t queens,
-	uint64_t rooks,
-	uint64_t bishops,
-	uint64_t knights,
-	uint64_t pawns,
-	unsigned rule50,
-	unsigned castling,
-	unsigned ep,
-	bool     turn,
-	bool     hasRepeated,
-	bool     useRule50,
-	struct TbRootMoves* results) {
-	Pos pos =
-	{
-		white,
-		black,
-		kings,
-		queens,
-		rooks,
-		bishops,
-		knights,
-		pawns,
-		(uint8_t)rule50,
-		(uint8_t)ep,
-		turn
+	uint64_t white, uint64_t black,
+	uint64_t kings, uint64_t queens,
+	uint64_t rooks, uint64_t bishops,
+	uint64_t knights, uint64_t pawns,
+	unsigned rule50, unsigned ep,
+	bool turn, bool hasRepeated,
+	bool useRule50, struct TbRootMoves* results) {
+
+	PyrrhicPosition pos = {
+		white, black, kings,
+		queens, rooks, bishops,
+		knights, pawns, (uint8_t)rule50,
+		(uint8_t)ep, turn
 	};
-	if (castling != 0) return 0;
+
 	return root_probe_dtz(&pos, hasRepeated, useRule50, results);
 }
 
 int tb_probe_root_wdl(
-	uint64_t white,
-	uint64_t black,
-	uint64_t kings,
-	uint64_t queens,
-	uint64_t rooks,
-	uint64_t bishops,
-	uint64_t knights,
-	uint64_t pawns,
-	unsigned rule50,
-	unsigned castling,
-	unsigned ep,
-	bool     turn,
-	bool     useRule50,
+	uint64_t white, uint64_t black,
+	uint64_t kings, uint64_t queens,
+	uint64_t rooks, uint64_t bishops,
+	uint64_t knights, uint64_t pawns,
+	unsigned rule50, unsigned ep,
+	bool turn, bool useRule50,
 	struct TbRootMoves* results) {
-	Pos pos =
-	{
-		white,
-		black,
-		kings,
-		queens,
-		rooks,
-		bishops,
-		knights,
-		pawns,
-		(uint8_t)rule50,
-		(uint8_t)ep,
-		turn
+
+	PyrrhicPosition pos = {
+		white, black, kings,
+		queens, rooks, bishops,
+		knights, pawns, (uint8_t)rule50,
+		(uint8_t)ep, turn
 	};
-	if (castling != 0) return 0;
+
 	return root_probe_wdl(&pos, useRule50, results);
 }
 
-// Given a position, produce a text string of the form KQPvKRP, where
-// "KQP" represents the white pieces if flip == false and the black pieces
-// if flip == true.
-static void prt_str(const Pos* pos, char* str, bool flip) {
-	int color = flip ? BLACK : WHITE;
+static void prt_str(const PyrrhicPosition* pos, char* str, int flip) {
 
-	for (int pt = KING; pt >= PAWN; pt--)
-		for (int i = popcount(pieces_by_type(pos, (Color)color, (PieceType)pt)); i > 0; i--)
-			*str++ = piece_to_char[pt];
+	// Given a position, produce a string of the form KQPvKRP.
+	// Allow flip to be set to swap White v Black to Black v White
+
+	int color = flip ? PYRRHIC_BLACK : PYRRHIC_WHITE;
+
+	for (int pt = PYRRHIC_KING; pt >= PYRRHIC_PAWN; pt--)
+		for (int i = PYRRHIC_POPCOUNT(pyrrhic_pieces_by_type(pos, color, pt)); i > 0; i--)
+			*str++ = pyrrhic_piece_to_char[pt];
+
 	*str++ = 'v';
-	color ^= 1;
-	for (int pt = KING; pt >= PAWN; pt--)
-		for (int i = popcount(pieces_by_type(pos, (Color)color, (PieceType)pt)); i > 0; i--)
-			*str++ = piece_to_char[pt];
+
+	for (int pt = PYRRHIC_KING; pt >= PYRRHIC_PAWN; pt--)
+		for (int i = PYRRHIC_POPCOUNT(pyrrhic_pieces_by_type(pos, color ^ 1, pt)); i > 0; i--)
+			*str++ = pyrrhic_piece_to_char[pt];
 	*str++ = 0;
 }
 
-static bool test_tb(const char* str, const char* suffix) {
+static int test_tb(const char* str, const char* suffix) {
+
 	FD fd = open_tb(str, suffix);
+
 	if (fd != FD_ERR) {
+
 		size_t size = file_size(fd);
 		close_tb(fd);
+
 		if ((size & 63) != 16) {
 			fprintf(stderr, "Incomplete tablebase file %s.%s\n", str, suffix);
 			printf("info string Incomplete tablebase file %s.%s\n", str, suffix);
 			fd = FD_ERR;
 		}
 	}
+
 	return fd != FD_ERR;
 }
 
 static void* map_tb(const char* name, const char* suffix, map_t* mapping) {
+
 	FD fd = open_tb(name, suffix);
 	if (fd == FD_ERR)
 		return NULL;
@@ -676,11 +919,11 @@ static void* map_tb(const char* name, const char* suffix, map_t* mapping) {
 	}
 
 	close_tb(fd);
-
 	return data;
 }
 
 static void add_to_hash(struct BaseEntry* ptr, uint64_t key) {
+
 	int idx;
 
 	idx = key >> (64 - TB_HASHBITS);
@@ -691,8 +934,8 @@ static void add_to_hash(struct BaseEntry* ptr, uint64_t key) {
 	tbHash[idx].ptr = ptr;
 }
 
-#define pchr(i) piece_to_char[QUEEN - (i)]
-#define Swap(a,b) {int tmp=a;a=b;b=tmp;}
+#define tb_pchr(i) pyrrhic_piece_to_char[PYRRHIC_QUEEN - (i)]
+#define PYRRHIC_SWAP(a,b) {int tmp=a;a=b;b=tmp;}
 
 static void init_tb(char* str) {
 	if (!test_tb(str, tbSuffix[WDL]))
@@ -706,17 +949,17 @@ static void init_tb(char* str) {
 		if (*s == 'v')
 			color = 8;
 		else {
-			int piece_type = char_to_piece_type(*s);
+			int piece_type = pyrrhic_char_to_piece_type(*s);
 			if (piece_type) {
 				assert((piece_type | color) < 16);
 				pcs[piece_type | color]++;
 			}
 		}
 
-	uint64_t key = calc_key_from_pcs(pcs, false);
-	uint64_t key2 = calc_key_from_pcs(pcs, true);
+	uint64_t key = pyrrhic_calc_key_from_pcs(pcs, 0);
+	uint64_t key2 = pyrrhic_calc_key_from_pcs(pcs, 1);
 
-	bool hasPawns = pcs[W_PAWN] || pcs[B_PAWN];
+	bool hasPawns = pcs[PYRRHIC_WPAWN] || pcs[PYRRHIC_BPAWN];
 
 	struct BaseEntry* be = hasPawns ? &pawnEntry[tbNumPawn++].be
 		: &pieceEntry[tbNumPiece++].be;
@@ -748,10 +991,10 @@ static void init_tb(char* str) {
 			if (pcs[i] == 1) j++;
 		be->kk_enc = j == 2;
 	} else {
-		be->pawns[0] = pcs[W_PAWN];
-		be->pawns[1] = pcs[B_PAWN];
-		if (pcs[B_PAWN] && (!pcs[W_PAWN] || pcs[W_PAWN] > pcs[B_PAWN]))
-			Swap(be->pawns[0], be->pawns[1]);
+		be->pawns[0] = pcs[PYRRHIC_WPAWN];
+		be->pawns[1] = pcs[PYRRHIC_BPAWN];
+		if (pcs[PYRRHIC_BPAWN] && (!pcs[PYRRHIC_WPAWN] || pcs[PYRRHIC_WPAWN] > pcs[PYRRHIC_BPAWN]))
+			PYRRHIC_SWAP(be->pawns[0], be->pawns[1]);
 	}
 
 	add_to_hash(be, key);
@@ -759,8 +1002,8 @@ static void init_tb(char* str) {
 		add_to_hash(be, key2);
 }
 
-#define PIECE(x) ((struct PieceEntry *)(x))
-#define PAWN(x) ((struct PawnEntry *)(x))
+#define PIECEENTRY(x) ((struct PieceEntry *)(x))
+#define PAWNENTRY(x) ((struct PawnEntry *)(x))
 
 int num_tables(struct BaseEntry* be, const int type) {
 	return be->hasPawns ? type == DTM ? 6 : 4 : 1;
@@ -768,8 +1011,8 @@ int num_tables(struct BaseEntry* be, const int type) {
 
 struct EncInfo* first_ei(struct BaseEntry* be, const int type) {
 	return  be->hasPawns
-		? &PAWN(be)->ei[type == WDL ? 0 : type == DTM ? 8 : 20]
-		: &PIECE(be)->ei[type == WDL ? 0 : type == DTM ? 2 : 4];
+		? &PAWNENTRY(be)->ei[type == WDL ? 0 : type == DTM ? 8 : 20]
+		: &PIECEENTRY(be)->ei[type == WDL ? 0 : type == DTM ? 2 : 4];
 }
 
 static void free_tb_entry(struct BaseEntry* be) {
@@ -791,13 +1034,10 @@ static void free_tb_entry(struct BaseEntry* be) {
 bool tb_init(const char* path) {
 	if (!initialized) {
 		init_indices();
-		king_attacks_init();
-		knight_attacks_init();
-		bishop_attacks_init();
-		rook_attacks_init();
-		pawn_attacks_init();
 		initialized = 1;
 	}
+
+	TB_LARGEST = 0;
 
 	// if pathString is set, we need to clean up first.
 	if (pathString) {
@@ -815,13 +1055,9 @@ bool tb_init(const char* path) {
 		numWdl = numDtm = numDtz = 0;
 	}
 
-	TB_LARGEST = 0;
-
 	// if path is an empty string or equals "<empty>", we are done.
 	const char* p = path;
-	if (strlen(p) == 0 || !strcmp(p, "<empty>")) {
-		return true;
-	}
+	if (strlen(p) == 0 || !strcmp(p, "<empty>")) return true;
 
 	pathString = (char*)malloc(strlen(p) + 1);
 	strcpy(pathString, p);
@@ -864,33 +1100,33 @@ bool tb_init(const char* path) {
 	int i, j, k, l, m;
 
 	for (i = 0; i < 5; i++) {
-		sprintf(str, "K%cvK", pchr(i));
+		sprintf(str, "K%cvK", tb_pchr(i));
 		init_tb(str);
 	}
 
 	for (i = 0; i < 5; i++)
 		for (j = i; j < 5; j++) {
-			sprintf(str, "K%cvK%c", pchr(i), pchr(j));
+			sprintf(str, "K%cvK%c", tb_pchr(i), tb_pchr(j));
 			init_tb(str);
 		}
 
 	for (i = 0; i < 5; i++)
 		for (j = i; j < 5; j++) {
-			sprintf(str, "K%c%cvK", pchr(i), pchr(j));
+			sprintf(str, "K%c%cvK", tb_pchr(i), tb_pchr(j));
 			init_tb(str);
 		}
 
 	for (i = 0; i < 5; i++)
 		for (j = i; j < 5; j++)
 			for (k = 0; k < 5; k++) {
-				sprintf(str, "K%c%cvK%c", pchr(i), pchr(j), pchr(k));
+				sprintf(str, "K%c%cvK%c", tb_pchr(i), tb_pchr(j), tb_pchr(k));
 				init_tb(str);
 			}
 
 	for (i = 0; i < 5; i++)
 		for (j = i; j < 5; j++)
 			for (k = j; k < 5; k++) {
-				sprintf(str, "K%c%c%cvK", pchr(i), pchr(j), pchr(k));
+				sprintf(str, "K%c%c%cvK", tb_pchr(i), tb_pchr(j), tb_pchr(k));
 				init_tb(str);
 			}
 
@@ -902,7 +1138,7 @@ bool tb_init(const char* path) {
 		for (j = i; j < 5; j++)
 			for (k = i; k < 5; k++)
 				for (l = (i == k) ? j : k; l < 5; l++) {
-					sprintf(str, "K%c%cvK%c%c", pchr(i), pchr(j), pchr(k), pchr(l));
+					sprintf(str, "K%c%cvK%c%c", tb_pchr(i), tb_pchr(j), tb_pchr(k), tb_pchr(l));
 					init_tb(str);
 				}
 
@@ -910,7 +1146,7 @@ bool tb_init(const char* path) {
 		for (j = i; j < 5; j++)
 			for (k = j; k < 5; k++)
 				for (l = 0; l < 5; l++) {
-					sprintf(str, "K%c%c%cvK%c", pchr(i), pchr(j), pchr(k), pchr(l));
+					sprintf(str, "K%c%c%cvK%c", tb_pchr(i), tb_pchr(j), tb_pchr(k), tb_pchr(l));
 					init_tb(str);
 				}
 
@@ -918,7 +1154,7 @@ bool tb_init(const char* path) {
 		for (j = i; j < 5; j++)
 			for (k = j; k < 5; k++)
 				for (l = k; l < 5; l++) {
-					sprintf(str, "K%c%c%c%cvK", pchr(i), pchr(j), pchr(k), pchr(l));
+					sprintf(str, "K%c%c%c%cvK", tb_pchr(i), tb_pchr(j), tb_pchr(k), tb_pchr(l));
 					init_tb(str);
 				}
 
@@ -930,7 +1166,7 @@ bool tb_init(const char* path) {
 			for (k = j; k < 5; k++)
 				for (l = k; l < 5; l++)
 					for (m = l; m < 5; m++) {
-						sprintf(str, "K%c%c%c%c%cvK", pchr(i), pchr(j), pchr(k), pchr(l), pchr(m));
+						sprintf(str, "K%c%c%c%c%cvK", tb_pchr(i), tb_pchr(j), tb_pchr(k), tb_pchr(l), tb_pchr(m));
 						init_tb(str);
 					}
 
@@ -939,7 +1175,7 @@ bool tb_init(const char* path) {
 			for (k = j; k < 5; k++)
 				for (l = k; l < 5; l++)
 					for (m = 0; m < 5; m++) {
-						sprintf(str, "K%c%c%c%cvK%c", pchr(i), pchr(j), pchr(k), pchr(l), pchr(m));
+						sprintf(str, "K%c%c%c%cvK%c", tb_pchr(i), tb_pchr(j), tb_pchr(k), tb_pchr(l), tb_pchr(m));
 						init_tb(str);
 					}
 
@@ -948,21 +1184,22 @@ bool tb_init(const char* path) {
 			for (k = j; k < 5; k++)
 				for (l = 0; l < 5; l++)
 					for (m = l; m < 5; m++) {
-						sprintf(str, "K%c%c%cvK%c%c", pchr(i), pchr(j), pchr(k), pchr(l), pchr(m));
+						sprintf(str, "K%c%c%cvK%c%c", tb_pchr(i), tb_pchr(j), tb_pchr(k), tb_pchr(l), tb_pchr(m));
 						init_tb(str);
 					}
 
 finished:
-	/* TBD - assumes UCI
-	printf("info string Found %d WDL, %d DTM and %d DTZ tablebase files.\n",
-		numWdl, numDtm, numDtz);
-	fflush(stdout);
-	*/
+
 	// Set TB_LARGEST, for backward compatibility with pre-7-man Fathom
-	TB_LARGEST = (unsigned)TB_MaxCardinality;
-	if ((unsigned)TB_MaxCardinalityDTM > TB_LARGEST) {
+	TB_LARGEST = TB_MaxCardinality;
+	if (TB_MaxCardinalityDTM > TB_LARGEST) {
 		TB_LARGEST = TB_MaxCardinalityDTM;
 	}
+
+	printf("info string Found %d WDL, %d DTM and %d DTZ tablebase files. Largest %d-men\n",
+		   numWdl, numDtm, numDtz, TB_LARGEST);
+	fflush(stdout);
+
 	return true;
 }
 
@@ -1200,7 +1437,7 @@ static void init_indices(void) {
 int leading_pawn(int* p, struct BaseEntry* be, const int enc) {
 	for (int i = 1; i < be->pawns[0]; i++)
 		if (Flap[enc - 1][p[0]] > Flap[enc - 1][p[i]])
-			Swap(p[0], p[i]);
+			PYRRHIC_SWAP(p[0], p[i]);
 
 	return enc == FILE_ENC ? FileToFile[p[0] & 7] : (p[0] - 8) >> 3;
 }
@@ -1250,7 +1487,7 @@ size_t encode(int* p, struct EncInfo* ei, struct BaseEntry* be,
 		for (int i = 1; i < be->pawns[0]; i++)
 			for (int j = i + 1; j < be->pawns[0]; j++)
 				if (PawnTwist[enc - 1][p[i]] < PawnTwist[enc - 1][p[j]])
-					Swap(p[i], p[j]);
+					PYRRHIC_SWAP(p[i], p[j]);
 
 		k = be->pawns[0];
 		idx = PawnIdx[enc - 1][k - 1][Flap[enc - 1][p[0]]];
@@ -1263,7 +1500,7 @@ size_t encode(int* p, struct EncInfo* ei, struct BaseEntry* be,
 			int t = k + be->pawns[1];
 			for (int i = k; i < t; i++)
 				for (int j = i + 1; j < t; j++)
-					if (p[i] > p[j]) Swap(p[i], p[j]);
+					if (p[i] > p[j]) PYRRHIC_SWAP(p[i], p[j]);
 			size_t s = 0;
 			for (int i = k; i < t; i++) {
 				int sq = p[i];
@@ -1281,7 +1518,7 @@ size_t encode(int* p, struct EncInfo* ei, struct BaseEntry* be,
 		int t = k + ei->norm[k];
 		for (int i = k; i < t; i++)
 			for (int j = i + 1; j < t; j++)
-				if (p[i] > p[j]) Swap(p[i], p[j]);
+				if (p[i] > p[j]) PYRRHIC_SWAP(p[i], p[j]);
 		size_t s = 0;
 		for (int i = k; i < t; i++) {
 			int sq = p[i];
@@ -1479,9 +1716,9 @@ static bool init_table(struct BaseEntry* be, const char* str, int type) {
 		ei[t].precomp = setup_pairs(&data, tb_size[t][0], size[t][0], &flags, type);
 		if (type == DTZ) {
 			if (!be->hasPawns)
-				PIECE(be)->dtzFlags = flags;
+				PIECEENTRY(be)->dtzFlags = flags;
 			else
-				PAWN(be)->dtzFlags[t] = flags;
+				PAWNENTRY(be)->dtzFlags[t] = flags;
 		}
 		if (split)
 			ei[num + t].precomp = setup_pairs(&data, tb_size[t][1], size[t][1], &flags, type);
@@ -1491,9 +1728,9 @@ static bool init_table(struct BaseEntry* be, const char* str, int type) {
 
 	if (type == DTM && !be->dtmLossOnly) {
 		uint16_t* map = (uint16_t*)data;
-		*(be->hasPawns ? &PAWN(be)->dtmMap : &PIECE(be)->dtmMap) = map;
-		uint16_t(*mapIdx)[2][2] = be->hasPawns ? &PAWN(be)->dtmMapIdx[0]
-			: &PIECE(be)->dtmMapIdx;
+		*(be->hasPawns ? &PAWNENTRY(be)->dtmMap : &PIECEENTRY(be)->dtmMap) = map;
+		uint16_t(*mapIdx)[2][2] = be->hasPawns ? &PAWNENTRY(be)->dtmMapIdx[0]
+			: &PIECEENTRY(be)->dtmMapIdx;
 		for (int t = 0; t < num; t++) {
 			for (int i = 0; i < 2; i++) {
 				mapIdx[t][0][i] = (uint16_t)(data + 1 - (uint8_t*)map);
@@ -1510,11 +1747,11 @@ static bool init_table(struct BaseEntry* be, const char* str, int type) {
 
 	if (type == DTZ) {
 		void* map = data;
-		*(be->hasPawns ? &PAWN(be)->dtzMap : &PIECE(be)->dtzMap) = map;
-		uint16_t(*mapIdx)[4] = be->hasPawns ? &PAWN(be)->dtzMapIdx[0]
-			: &PIECE(be)->dtzMapIdx;
-		uint8_t* flags = be->hasPawns ? &PAWN(be)->dtzFlags[0]
-			: &PIECE(be)->dtzFlags;
+		*(be->hasPawns ? &PAWNENTRY(be)->dtzMap : &PIECEENTRY(be)->dtzMap) = map;
+		uint16_t(*mapIdx)[4] = be->hasPawns ? &PAWNENTRY(be)->dtzMapIdx[0]
+			: &PIECEENTRY(be)->dtzMapIdx;
+		uint8_t* flags = be->hasPawns ? &PAWNENTRY(be)->dtzFlags[0]
+			: &PIECEENTRY(be)->dtzFlags;
 		for (int t = 0; t < num; t++) {
 			if (flags[t] & 2) {
 				if (!(flags[t] & 16)) {
@@ -1564,8 +1801,8 @@ static bool init_table(struct BaseEntry* be, const char* str, int type) {
 	}
 
 	if (type == DTM && be->hasPawns)
-		PAWN(be)->dtmSwitched =
-		calc_key_from_pieces(ei[0].pieces, be->num) != be->key;
+		PAWNENTRY(be)->dtmSwitched =
+		pyrrhic_calc_key_from_pieces(ei[0].pieces, be->num) != be->key;
 
 	return true;
 }
@@ -1642,7 +1879,7 @@ static uint8_t* decompress_pairs(struct PairsData* d, size_t idx) {
 		code |= (next >> (32 - l));
 		next <<= l;
 		bitCnt -= l;
-	}
+		}
 #endif
 	uint8_t* symPat = d->symPat;
 	while (symLen[sym] != 0) {
@@ -1657,29 +1894,32 @@ static uint8_t* decompress_pairs(struct PairsData* d, size_t idx) {
 	}
 
 	return &symPat[3 * sym];
-}
+	}
 
 // p[i] is to contain the square 0-63 (A1-H8) for a piece of type
 // pc[i] ^ flip, where 1 = white pawn, ..., 14 = black king and pc ^ flip
 // flips between white and black if flip == true.
 // Pieces of the same type are guaranteed to be consecutive.
-inline static int fill_squares(const Pos* pos, uint8_t* pc, bool flip, int mirror, int* p,
+inline static int fill_squares(const PyrrhicPosition* pos, uint8_t* pc, bool flip, int mirror, int* p,
 							   int i) {
-	Color color = ColorOfPiece(pc[i]);
-	if (flip) color = (Color)(!(int)color);
-	uint64_t bb = pieces_by_type(pos, color, TypeOfPiece(pc[i]));
+	int color = pyrrhic_colour_of_piece(pc[i]);
+	if (flip) color = !color;
+	uint64_t bb = pyrrhic_pieces_by_type(pos, color, pyrrhic_type_of_piece(pc[i]));
 	unsigned sq;
+
+	// Check
+	Assert(bb);
+
 	do {
-		sq = getLSB(bb);
+		sq = PYRRHIC_POPLSB(&bb);
 		p[i++] = sq ^ mirror;
-		bb = poplsb(bb);
 	} while (bb);
 	return i;
 }
 
-int probe_table(const Pos* pos, int s, int* success, const int type) {
+int probe_table(const PyrrhicPosition* pos, int s, int* success, const int type) {
 	// Obtain the position's material-signature key
-	uint64_t key = calc_key(pos, false);
+	uint64_t key = pyrrhic_calc_key(pos, false);
 
 	// Test for KvK
 	// Note: Cfish has key == 2ULL for KvK but we have 0
@@ -1720,13 +1960,13 @@ int probe_table(const Pos* pos, int s, int* success, const int type) {
 	bool bside, flip;
 	if (!be->symmetric) {
 		flip = key != be->key;
-		bside = (pos->turn == WHITE) == flip;
-		if (type == DTM && be->hasPawns && PAWN(be)->dtmSwitched) {
+		bside = (pos->turn == PYRRHIC_WHITE) == flip;
+		if (type == DTM && be->hasPawns && PAWNENTRY(be)->dtmSwitched) {
 			flip = !flip;
 			bside = !bside;
 		}
 	} else {
-		flip = pos->turn != WHITE;
+		flip = pos->turn != PYRRHIC_WHITE;
 		bside = false;
 	}
 
@@ -1738,7 +1978,7 @@ int probe_table(const Pos* pos, int s, int* success, const int type) {
 
 	if (!be->hasPawns) {
 		if (type == DTZ) {
-			flags = PIECE(be)->dtzFlags;
+			flags = PIECEENTRY(be)->dtzFlags;
 			if ((flags & 1) != bside && !be->symmetric) {
 				*success = -1;
 				return 0;
@@ -1752,7 +1992,7 @@ int probe_table(const Pos* pos, int s, int* success, const int type) {
 		int i = fill_squares(pos, ei->pieces, flip, flip ? 0x38 : 0, p, 0);
 		t = leading_pawn(p, be, type != DTM ? FILE_ENC : RANK_ENC);
 		if (type == DTZ) {
-			flags = PAWN(be)->dtzFlags[t];
+			flags = PAWNENTRY(be)->dtzFlags[t];
 			if ((flags & 1) != bside && !be->symmetric) {
 				*success = -1;
 				return 0;
@@ -1775,19 +2015,19 @@ int probe_table(const Pos* pos, int s, int* success, const int type) {
 	if (type == DTM) {
 		if (!be->dtmLossOnly)
 			v = (int)from_le_u16(be->hasPawns
-								 ? PAWN(be)->dtmMap[PAWN(be)->dtmMapIdx[t][bside][s] + v]
-								 : PIECE(be)->dtmMap[PIECE(be)->dtmMapIdx[bside][s] + v]);
+								 ? PAWNENTRY(be)->dtmMap[PAWNENTRY(be)->dtmMapIdx[t][bside][s] + v]
+								 : PIECEENTRY(be)->dtmMap[PIECEENTRY(be)->dtmMapIdx[bside][s] + v]);
 	} else {
 		if (flags & 2) {
 			int m = WdlToMap[s + 2];
 			if (!(flags & 16))
 				v = be->hasPawns
-				? ((uint8_t*)PAWN(be)->dtzMap)[PAWN(be)->dtzMapIdx[t][m] + v]
-				: ((uint8_t*)PIECE(be)->dtzMap)[PIECE(be)->dtzMapIdx[m] + v];
+				? ((uint8_t*)PAWNENTRY(be)->dtzMap)[PAWNENTRY(be)->dtzMapIdx[t][m] + v]
+				: ((uint8_t*)PIECEENTRY(be)->dtzMap)[PIECEENTRY(be)->dtzMapIdx[m] + v];
 			else
 				v = (int)from_le_u16(be->hasPawns
-									 ? ((uint16_t*)PAWN(be)->dtzMap)[PAWN(be)->dtzMapIdx[t][m] + v]
-									 : ((uint16_t*)PIECE(be)->dtzMap)[PIECE(be)->dtzMapIdx[m] + v]);
+									 ? ((uint16_t*)PAWNENTRY(be)->dtzMap)[PAWNENTRY(be)->dtzMapIdx[t][m] + v]
+									 : ((uint16_t*)PIECEENTRY(be)->dtzMap)[PIECEENTRY(be)->dtzMapIdx[m] + v]);
 		}
 		if (!(flags & PAFlags[s + 2]) || (s & 1))
 			v *= 2;
@@ -1796,33 +2036,29 @@ int probe_table(const Pos* pos, int s, int* success, const int type) {
 	return v;
 }
 
-static int probe_wdl_table(const Pos* pos, int* success) {
+static int probe_wdl_table(const PyrrhicPosition* pos, int* success) {
 	return probe_table(pos, 0, success, WDL);
 }
 
-static int probe_dtm_table(const Pos* pos, int won, int* success) {
-	return probe_table(pos, won, success, DTM);
-}
-
-static int probe_dtz_table(const Pos* pos, int wdl, int* success) {
+static int probe_dtz_table(const PyrrhicPosition* pos, int wdl, int* success) {
 	return probe_table(pos, wdl, success, DTZ);
 }
 
 // probe_ab() is not called for positions with en passant captures.
-static int probe_ab(const Pos* pos, int alpha, int beta, int* success) {
+static int probe_ab(const PyrrhicPosition* pos, int alpha, int beta, int* success) {
 	assert(pos->ep == 0);
 
-	TbMove moves0[TB_MAX_CAPTURES];
-	TbMove* m = moves0;
+	PyrrhicMove moves0[TB_MAX_CAPTURES];
+	PyrrhicMove* m = moves0;
 	// Generate (at least) all legal captures including (under)promotions.
 	// It is OK to generate more, as long as they are filtered out below.
-	TbMove* end = gen_captures(pos, m);
+	PyrrhicMove* end = pyrrhic_gen_captures(pos, m);
 	for (; m < end; m++) {
-		Pos pos1;
-		TbMove move = *m;
-		if (!is_capture(pos, move))
+		PyrrhicPosition pos1;
+		PyrrhicMove move = *m;
+		if (!pyrrhic_is_capture(pos, move))
 			continue;
-		if (!do_move(&pos1, pos, move))
+		if (!pyrrhic_do_move(&pos1, pos, move))
 			continue; // illegal move
 		int v = -probe_ab(&pos1, -beta, -alpha, success);
 		if (*success == 0) return 0;
@@ -1853,13 +2089,13 @@ static int probe_ab(const Pos* pos, int alpha, int beta, int* success) {
 //  0 : draw
 //  1 : win, but draw under 50-move rule
 //  2 : win
-int probe_wdl(Pos* pos, int* success) {
+int probe_wdl(PyrrhicPosition* pos, int* success) {
 	*success = 1;
 
 	// Generate (at least) all legal captures including (under)promotions.
-	TbMove moves0[TB_MAX_CAPTURES];
-	TbMove* m = moves0;
-	TbMove* end = gen_captures(pos, m);
+	PyrrhicMove moves0[TB_MAX_CAPTURES];
+	PyrrhicMove* m = moves0;
+	PyrrhicMove* end = pyrrhic_gen_captures(pos, m);
 	int bestCap = -3, bestEp = -3;
 
 	// We do capture resolution, letting bestCap keep track of the best
@@ -1867,11 +2103,11 @@ int probe_wdl(Pos* pos, int* success) {
 	// better ep captures if they exist.
 
 	for (; m < end; m++) {
-		Pos pos1;
-		TbMove move = *m;
-		if (!is_capture(pos, move))
+		PyrrhicPosition pos1;
+		PyrrhicMove move = *m;
+		if (!pyrrhic_is_capture(pos, move))
 			continue;
-		if (!do_move(&pos1, pos, move))
+		if (!pyrrhic_do_move(&pos1, pos, move))
 			continue; // illegal move
 		int v = -probe_ab(&pos1, -2, -bestCap, success);
 		if (*success == 0) return 0;
@@ -1880,7 +2116,7 @@ int probe_wdl(Pos* pos, int* success) {
 				*success = 2;
 				return 2;
 			}
-			if (!is_en_passant(pos, move))
+			if (!pyrrhic_is_en_passant(pos, move))
 				bestCap = v;
 			else if (v > bestEp)
 				bestEp = v;
@@ -1916,13 +2152,13 @@ int probe_wdl(Pos* pos, int* success) {
 
 	// Now handle the stalemate case.
 	if (bestEp > -3 && v == 0) {
-		TbMove moves[TB_MAX_MOVES];
-		TbMove* end = gen_moves(pos, moves);
+		PyrrhicMove moves[TB_MAX_MOVES];
+		PyrrhicMove* end2 = pyrrhic_gen_moves(pos, moves);
 		// Check for stalemate in the position with ep captures.
-		for (m = moves; m < end; m++) {
-			if (!is_en_passant(pos, *m) && legal_move(pos, *m)) break;
+		for (m = moves; m < end2; m++) {
+			if (!pyrrhic_is_en_passant(pos, *m) && pyrrhic_legal_move(pos, *m)) break;
 		}
-		if (m == end && !is_check(pos)) {
+		if (m == end2 && !pyrrhic_is_check(pos)) {
 			// stalemate score from tb (w/o e.p.), but an en-passant capture
 			// is possible.
 			*success = 2;
@@ -1933,177 +2169,6 @@ int probe_wdl(Pos* pos, int* success) {
 
 	return v;
 }
-
-#if 0
-// This will not be called for positions with en passant captures
-static Value probe_dtm_dc(const Pos* pos, int won, int* success) {
-	assert(ep_square() == 0);
-
-	Value v, bestCap = -TB_VALUE_INFINITE;
-
-	TbMove moves0[TB_MAX_CAPTURES];
-	TbMove* end, * m = moves0;
-
-	// Generate at least all legal captures including (under)promotions
-	end = gen_captures(pos, m);
-	Pos pos1;
-	for (; m < end; m++) {
-		TbMove move = m->move;
-		if (!is_capture(pos, move))
-			continue;
-		if (!do_move(&pos1, pos, move))
-			continue;
-		if (!won)
-			v = -probe_dtm_dc(&pos1, 1, success) + 1;
-		else if (probe_ab(&pos1, -1, 0, success) < 0 && *success)
-			v = -probe_dtm_dc(&pos1, 0, success) - 1;
-		else
-			v = -TB_VALUE_INFINITE;
-		bestCap = max(bestCap, v);
-		if (*success == 0) return 0;
-	}
-
-	int dtm = probe_dtm_table(pos, won, success);
-	v = won ? TB_VALUE_MATE - 2 * dtm + 1 : -TB_VALUE_MATE + 2 * dtm;
-
-	return max(bestCap, v);
-}
-#endif
-
-static Value probe_dtm_win(const Pos* pos, int* success);
-
-// Probe a position known to lose by probing the DTM table and looking
-// at captures.
-static Value probe_dtm_loss(const Pos* pos, int* success) {
-	Value v, best = -TB_VALUE_INFINITE, numEp = 0;
-
-	TbMove moves0[TB_MAX_CAPTURES];
-	// Generate at least all legal captures including (under)promotions
-	TbMove* end, * m = moves0;
-	end = gen_captures(pos, m);
-
-	Pos pos1;
-	for (; m < end; m++) {
-		TbMove move = *m;
-		if (!is_capture(pos, move) || !legal_move(pos, move))
-			continue;
-		if (is_en_passant(pos, move))
-			numEp++;
-		do_move(&pos1, pos, move);
-		v = -probe_dtm_win(&pos1, success) + 1;
-		if (v > best) {
-			best = v;
-		}
-		if (*success == 0)
-			return 0;
-	}
-
-	// If there are en passant captures, the position without ep rights
-	// may be a stalemate. If it is, we must avoid probing the DTM table.
-	if (numEp != 0 && gen_legal(pos, m) == m + numEp)
-		return best;
-
-	v = -TB_VALUE_MATE + 2 * probe_dtm_table(pos, 0, success);
-	return best > v ? best : v;
-}
-
-static Value probe_dtm_win(const Pos* pos, int* success) {
-	Value v, best = -TB_VALUE_INFINITE;
-
-	// Generate all moves
-	TbMove moves0[TB_MAX_CAPTURES];
-	TbMove* m = moves0;
-	TbMove* end = gen_moves(pos, m);
-	// Perform a 1-ply search
-	Pos pos1;
-	for (; m < end; m++) {
-		TbMove move = *m;
-		if (do_move(&pos1, pos, move)) {
-			// not legal
-			continue;
-		}
-		if ((pos1.ep > 0 ? probe_wdl(&pos1, success)
-			 : probe_ab(&pos1, -1, 0, success)) < 0
-			&& *success)
-			v = -probe_dtm_loss(&pos1, success) - 1;
-		else
-			v = -TB_VALUE_INFINITE;
-		if (v > best) {
-			best = v;
-		}
-		if (*success == 0) return 0;
-	}
-
-	return best;
-}
-
-Value TB_probe_dtm(const Pos* pos, int wdl, int* success) {
-	assert(wdl != 0);
-
-	*success = 1;
-
-	return wdl > 0 ? probe_dtm_win(pos, success)
-		: probe_dtm_loss(pos, success);
-}
-
-#if 0
-// To be called only for non-drawn positions.
-Value TB_probe_dtm2(const Pos* pos, int wdl, int* success) {
-	assert(wdl != 0);
-
-	*success = 1;
-	Value v, bestCap = -TB_VALUE_INFINITE, bestEp = -TB_VALUE_INFINITE;
-
-	TbMove moves0[TB_MAX_CAPTURES];
-	TbMove* end, * m = moves0;
-
-	// Generate at least all legal captures including (under)promotions
-	end = gen_captures(pos, m);
-	Pos pos0 = *pos;
-
-	// Resolve captures, letting bestCap keep track of the best non-ep
-	// capture and letting bestEp keep track of the best ep capture.
-	Pos pos1;
-	for (; m < end; m++) {
-		TbMove move = *m;
-		if (!is_capture(pos, move))
-			continue;
-		if (!do_move(&pos1, pos, move))
-			continue;
-		if (wdl < 0)
-			v = -probe_dtm_dc(&pos1, 1, success) + 1;
-		else if (probe_ab(&pos1, -1, 0, success) < 0 && *success)
-			v = -probe_dtm_dc(&pos1, 0, success) - 1;
-		else
-			v = -TB_VALUE_MATE;
-		if (is_en_passant(&pos1, move))
-			bestEp = max(bestEp, v);
-		else
-			bestCap = max(bestCap, v);
-		if (*success == 0)
-			return 0;
-	}
-
-	// If there are en passant captures, we have to determine the WDL value
-	// for the position without ep rights if it might be different.
-	if (bestEp > -TB_VALUE_INFINITE && (bestEp < 0 || bestCap < 0)) {
-		assert(ep_square() != 0);
-		uint8_t s = pos->st->epSquare;
-		pos->st->epSquare = 0;
-		wdl = probe_ab(pos, -2, 2, success);
-		pos->st->epSquare = s;
-		if (*success == 0)
-			return 0;
-		if (wdl == 0)
-			return bestEp;
-	}
-
-	bestCap = max(bestCap, v);
-	int dtm = probe_dtm_table(pos, wdl > 0, success);
-	v = wdl > 0 ? TB_VALUE_MATE - 2 * dtm + 1 : -TB_VALUE_MATE + 2 * dtm;
-	return max(bestCap, v);
-}
-#endif
 
 static int WdlToDtz[] = { -1, -101, 0, 101, 1 };
 
@@ -2135,7 +2200,7 @@ static int WdlToDtz[] = { -1, -101, 0, 101, 1 };
 // In short, if a move is available resulting in dtz + 50-move-counter <= 99,
 // then do not accept moves leading to dtz + 50-move-counter == 100.
 //
-int probe_dtz(Pos* pos, int* success) {
+int probe_dtz(PyrrhicPosition* pos, int* success) {
 	int wdl = probe_wdl(pos, success);
 	if (*success == 0) return 0;
 
@@ -2146,22 +2211,22 @@ int probe_dtz(Pos* pos, int* success) {
 	if (*success == 2)
 		return WdlToDtz[wdl + 2];
 
-	TbMove moves[TB_MAX_MOVES];
-	TbMove* m = moves, * end = NULL;
-	Pos pos1;
+	PyrrhicMove moves[TB_MAX_MOVES];
+	PyrrhicMove* m = moves, * end = NULL;
+	PyrrhicPosition pos1;
 
 	// If winning, check for a winning pawn move.
 	if (wdl > 0) {
 		// Generate at least all legal non-capturing pawn moves
 		// including non-capturing promotions.
 		// (The following call in fact generates all moves.)
-		end = gen_legal(pos, moves);
+		end = pyrrhic_gen_legal(pos, moves);
 
 		for (m = moves; m < end; m++) {
-			TbMove move = *m;
-			if (type_of_piece_moved(pos, move) != PAWN || is_capture(pos, move))
+			PyrrhicMove move = *m;
+			if (!pyrrhic_is_pawn_move(pos, move) || pyrrhic_is_capture(pos, move))
 				continue;
-			if (!do_move(&pos1, pos, move))
+			if (!pyrrhic_do_move(&pos1, pos, move))
 				continue; // not legal
 			int v = -probe_wdl(&pos1, success);
 			if (*success == 0) return 0;
@@ -2191,24 +2256,24 @@ int probe_dtz(Pos* pos, int* success) {
 		// In case of mate, this will cause -1 to be returned.
 		best = WdlToDtz[wdl + 2];
 		// If wdl < 0, we still have to generate all moves.
-		end = gen_moves(pos, m);
+		end = pyrrhic_gen_moves(pos, m);
 	}
 	assert(end != NULL);
 
 	for (m = moves; m < end; m++) {
-		TbMove move = *m;
+		PyrrhicMove move = *m;
 		// We can skip pawn moves and captures.
 		// If wdl > 0, we already caught them. If wdl < 0, the initial value
 		// of best already takes account of them.
-		if (is_capture(pos, move) || type_of_piece_moved(pos, move) == PAWN)
+		if (pyrrhic_is_capture(pos, move) || pyrrhic_is_pawn_move(pos, move))
 			continue;
-		if (!do_move(&pos1, pos, move)) {
+		if (!pyrrhic_do_move(&pos1, pos, move)) {
 			// move was not legal
 			continue;
 		}
 		int v = -probe_dtz(&pos1, success);
 		// Check for the case of mate in 1
-		if (v == 1 && is_mate(&pos1))
+		if (v == 1 && pyrrhic_is_mate(&pos1))
 			best = 1;
 		else if (wdl > 0) {
 			if (v > 0 && v + 1 < best)
@@ -2224,7 +2289,7 @@ int probe_dtz(Pos* pos, int* success) {
 
 // Use the DTZ tables to rank and score all root moves in the list.
 // A return value of 0 means that not all probes were successful.
-static int root_probe_dtz(const Pos* pos, bool hasRepeated, bool useRule50, struct TbRootMoves* rm) {
+int root_probe_dtz(const PyrrhicPosition* pos, bool hasRepeated, bool useRule50, struct TbRootMoves* rm) {
 	int v, success;
 
 	// Obtain 50-move counter for the root position.
@@ -2235,14 +2300,14 @@ static int root_probe_dtz(const Pos* pos, bool hasRepeated, bool useRule50, stru
 	int bound = useRule50 ? 900 : 1;
 
 	// Probe, rank and score each move.
-	TbMove rootMoves[TB_MAX_MOVES];
-	TbMove* end = gen_legal(pos, rootMoves);
+	PyrrhicMove rootMoves[TB_MAX_MOVES];
+	PyrrhicMove* end = pyrrhic_gen_legal(pos, rootMoves);
 	rm->size = (unsigned)(end - rootMoves);
-	Pos pos1;
+	PyrrhicPosition pos1;
 	for (unsigned i = 0; i < rm->size; i++) {
 		struct TbRootMove* m = &(rm->moves[i]);
 		m->move = rootMoves[i];
-		do_move(&pos1, pos, m->move);
+		pyrrhic_do_move(&pos1, pos, m->move);
 
 		// Calculate dtz for the current move counting from the root position.
 		if (pos1.rule50 == 0) {
@@ -2257,7 +2322,7 @@ static int root_probe_dtz(const Pos* pos, bool hasRepeated, bool useRule50, stru
 			else if (v < 0) v--;
 		}
 		// Make sure that a mating move gets value 1.
-		if (v == 2 && is_mate(&pos1)) {
+		if (v == 2 && pyrrhic_is_mate(&pos1)) {
 			v = 1;
 		}
 
@@ -2276,11 +2341,11 @@ static int root_probe_dtz(const Pos* pos, bool hasRepeated, bool useRule50, stru
 		// Determine the score to be displayed for this move. Assign at least
 		// 1 cp to cursed wins and let it grow to 49 cp as the position gets
 		// closer to a real win.
-		m->tbScore = r >= bound ? TB_VALUE_MATE - TB_MAX_MATE_PLY - 1
-			: r > 0 ? max(3, r - 800) * TB_VALUE_PAWN / 200
-			: r == 0 ? TB_VALUE_DRAW
-			: r > -bound ? min(-3, r + 800) * TB_VALUE_PAWN / 200
-			: -TB_VALUE_MATE + TB_MAX_MATE_PLY + 1;
+		m->tbScore = r >= bound ? PYRRHIC_VALUE_MATE - PYRRHIC_MAX_MATE_PLY - 1
+			: r > 0 ? TB_MAX(3, r - 800) * PYRRHIC_VALUE_PAWN / 200
+			: r == 0 ? PYRRHIC_VALUE_DRAW
+			: r > -bound ? TB_MIN(-3, r + 800) * PYRRHIC_VALUE_PAWN / 200
+			: -PYRRHIC_VALUE_MATE + PYRRHIC_MAX_MATE_PLY + 1;
 	}
 	return 1;
 }
@@ -2288,27 +2353,27 @@ static int root_probe_dtz(const Pos* pos, bool hasRepeated, bool useRule50, stru
 // Use the WDL tables to rank all root moves in the list.
 // This is a fallback for the case that some or all DTZ tables are missing.
 // A return value of 0 means that not all probes were successful.
-int root_probe_wdl(const Pos* pos, bool useRule50, struct TbRootMoves* rm) {
+int root_probe_wdl(const PyrrhicPosition* pos, bool useRule50, struct TbRootMoves* rm) {
 	static int WdlToRank[] = { -1000, -899, 0, 899, 1000 };
-	static Value WdlToValue[] = {
-	  -TB_VALUE_MATE + TB_MAX_MATE_PLY + 1,
-	  TB_VALUE_DRAW - 2,
-	  TB_VALUE_DRAW,
-	  TB_VALUE_DRAW + 2,
-	  TB_VALUE_MATE - TB_MAX_MATE_PLY - 1
+	static int WdlToValue[] = {
+	  -PYRRHIC_VALUE_MATE + PYRRHIC_MAX_MATE_PLY + 1,
+	  PYRRHIC_VALUE_DRAW - 2,
+	  PYRRHIC_VALUE_DRAW,
+	  PYRRHIC_VALUE_DRAW + 2,
+	  PYRRHIC_VALUE_MATE - PYRRHIC_MAX_MATE_PLY - 1
 	};
 
 	int v, success;
 
 	// Probe, rank and score each move.
-	TbMove moves[TB_MAX_MOVES];
-	TbMove* end = gen_legal(pos, moves);
+	PyrrhicMove moves[TB_MAX_MOVES];
+	PyrrhicMove* end = pyrrhic_gen_legal(pos, moves);
 	rm->size = (unsigned)(end - moves);
-	Pos pos1;
+	PyrrhicPosition pos1;
 	for (unsigned i = 0; i < rm->size; i++) {
 		struct TbRootMove* m = &rm->moves[i];
 		m->move = moves[i];
-		do_move(&pos1, pos, m->move);
+		pyrrhic_do_move(&pos1, pos, m->move);
 		v = -probe_wdl(&pos1, &success);
 		if (!success) return 0;
 		if (!useRule50)
@@ -2320,96 +2385,6 @@ int root_probe_wdl(const Pos* pos, bool useRule50, struct TbRootMoves* rm) {
 	return 1;
 }
 
-// Use the DTM tables to find mate scores.
-// Either DTZ or WDL must have been probed successfully earlier.
-// A return value of 0 means that not all probes were successful.
-int root_probe_dtm(const Pos* pos, struct TbRootMoves* rm) {
-	int success;
-	Value tmpScore[TB_MAX_MOVES];
-
-	// Probe each move.
-	for (unsigned i = 0; i < rm->size; i++) {
-		Pos pos1;
-		struct TbRootMove* m = &rm->moves[i];
-
-		// Use tbScore to find out if the position is won or lost.
-		int wdl = m->tbScore > TB_VALUE_PAWN ? 2
-			: m->tbScore < -TB_VALUE_PAWN ? -2 : 0;
-
-		if (wdl == 0)
-			tmpScore[i] = 0;
-		else {
-			// Probe and adjust mate score by 1 ply.
-			do_move(&pos1, pos, m->pv[0]);
-			Value v = -TB_probe_dtm(&pos1, -wdl, &success);
-			tmpScore[i] = wdl > 0 ? v - 1 : v + 1;
-			if (success == 0)
-				return 0;
-		}
-	}
-
-	// All probes were successful. Now adjust TB scores and ranks.
-	for (unsigned i = 0; i < rm->size; i++) {
-		struct TbRootMove* m = &rm->moves[i];
-
-		m->tbScore = tmpScore[i];
-
-		// Let rank correspond to mate score, except for critical moves
-		// ranked 900, which we rank below all other mates for safety.
-		// By ranking mates above 1000 or below -1000, we let the search
-		// know it need not search those moves.
-		m->tbRank = m->tbRank == 900 ? 1001 : m->tbScore;
-	}
-
-	return 1;
-}
-
-// Use the DTM tables to complete a PV with mate score.
-void tb_expand_mate(Pos* pos, struct TbRootMove* move, Value moveScore, unsigned cardinalityDTM) {
-	int success = 1, chk = 0;
-	Value v = moveScore, w = 0;
-	int wdl = v > 0 ? 2 : -2;
-
-	if (move->pvSize == TB_MAX_PLY)
-		return;
-
-	Pos root = *pos;
-	// First get to the end of the incomplete PV.
-	for (unsigned i = 0; i < move->pvSize; i++) {
-		v = v > 0 ? -v - 1 : -v + 1;
-		wdl = -wdl;
-		Pos pos0 = *pos;
-		do_move(pos, &pos0, move->pv[i]);
-	}
-
-	// Now try to expand until the actual mate.
-	if (popcount(pos->white | pos->black) <= cardinalityDTM) {
-		while (v != -TB_VALUE_MATE && move->pvSize < TB_MAX_PLY) {
-			v = v > 0 ? -v - 1 : -v + 1;
-			wdl = -wdl;
-			TbMove moves[TB_MAX_MOVES];
-			TbMove* end = gen_legal(pos, moves);
-			TbMove* m = moves;
-			for (; m < end; m++) {
-				Pos pos1;
-				do_move(&pos1, pos, *m);
-				if (wdl < 0)
-					chk = probe_wdl(&pos1, &success); // verify that move wins
-				w = success && (wdl > 0 || chk < 0)
-					? TB_probe_dtm(&pos1, wdl, &success)
-					: 0;
-				if (!success || v == w) break;
-			}
-			if (!success || v != w)
-				break;
-			move->pv[move->pvSize++] = *m;
-			Pos pos0 = *pos;
-			do_move(pos, &pos0, *m);
-		}
-	}
-	// Get back to the root position.
-	*pos = root;
-}
 
 static const int wdl_to_dtz[] =
 {
@@ -2417,28 +2392,27 @@ static const int wdl_to_dtz[] =
 };
 
 // This supports the original Fathom root probe API
-static uint16_t probe_root(Pos* pos, int* score, unsigned* results) {
+static uint16_t probe_root(PyrrhicPosition* pos, int* score, unsigned* results) {
 	int success;
 	int dtz = probe_dtz(pos, &success);
 	if (!success)
 		return 0;
 
-	int16_t scores[MAX_MOVES];
-	uint16_t moves0[MAX_MOVES];
+	int16_t scores[TB_MAX_MOVES];
+	uint16_t moves0[TB_MAX_MOVES];
 	uint16_t* moves = moves0;
-	uint16_t* end = gen_moves(pos, moves);
+	uint16_t* end = pyrrhic_gen_moves(pos, moves);
 	size_t len = end - moves;
 	size_t num_draw = 0;
 	unsigned j = 0;
 	for (unsigned i = 0; i < len; i++) {
-		Pos pos1;
-		if (!do_move(&pos1, pos, moves[i])) {
-			scores[i] = SCORE_ILLEGAL;
+		PyrrhicPosition pos1;
+		if (!pyrrhic_do_move(&pos1, pos, moves[i])) {
+			scores[i] = TB_SCORE_ILLEGAL;
 			continue;
 		}
 		int v = 0;
-		//        print_move(pos,moves[i]);
-		if (dtz > 0 && is_mate(&pos1))
+		if (dtz > 0 && pyrrhic_is_mate(&pos1))
 			v = 1;
 		else {
 			if (pos1.rule50 != 0) {
@@ -2459,10 +2433,10 @@ static uint16_t probe_root(Pos* pos, int* score, unsigned* results) {
 		if (results != NULL) {
 			unsigned res = 0;
 			res = TB_SET_WDL(res, dtz_to_wdl(pos->rule50, v));
-			res = TB_SET_FROM(res, move_from(moves[i]));
-			res = TB_SET_TO(res, move_to(moves[i]));
-			res = TB_SET_PROMOTES(res, move_promotes(moves[i]));
-			res = TB_SET_EP(res, is_en_passant(pos, moves[i]));
+			res = TB_SET_FROM(res, pyrrhic_move_from(moves[i]));
+			res = TB_SET_TO(res, pyrrhic_move_to(moves[i]));
+			res = TB_SET_PROMOTES(res, pyrrhic_move_promotes(moves[i]));
+			res = TB_SET_EP(res, pyrrhic_is_en_passant(pos, moves[i]));
 			res = TB_SET_DTZ(res, (v < 0 ? -v : v));
 			results[j++] = res;
 		}
@@ -2475,44 +2449,44 @@ static uint16_t probe_root(Pos* pos, int* score, unsigned* results) {
 	// Now be a bit smart about filtering out moves.
 	if (dtz > 0)        // winning (or 50-move rule draw)
 	{
-		int best = BEST_NONE;
+		int best = TB_BEST_NONE;
 		uint16_t best_move = 0;
 		for (unsigned i = 0; i < len; i++) {
 			int v = scores[i];
-			if (v == SCORE_ILLEGAL)
+			if (v == TB_SCORE_ILLEGAL)
 				continue;
 			if (v > 0 && v < best) {
 				best = v;
 				best_move = moves[i];
 			}
 		}
-		return (best == BEST_NONE ? 0 : best_move);
+		return (best == TB_BEST_NONE ? 0 : best_move);
 	} else if (dtz < 0)   // losing (or 50-move rule draw)
 	{
 		int best = 0;
 		uint16_t best_move = 0;
 		for (unsigned i = 0; i < len; i++) {
 			int v = scores[i];
-			if (v == SCORE_ILLEGAL)
+			if (v == TB_SCORE_ILLEGAL)
 				continue;
 			if (v < best) {
 				best = v;
 				best_move = moves[i];
 			}
 		}
-		return (best == 0 ? MOVE_CHECKMATE : best_move);
+		return (best == 0 ? TB_MOVE_CHECKMATE : best_move);
 	} else                // drawing
 	{
 		// Check for stalemate:
 		if (num_draw == 0)
-			return MOVE_STALEMATE;
+			return TB_MOVE_STALEMATE;
 
 		// Select a "random" move that preserves the draw.
 		// Uses calc_key as the PRNG.
-		size_t count = calc_key(pos, !pos->turn) % num_draw;
+		size_t count = pyrrhic_calc_key(pos, !pos->turn) % num_draw;
 		for (unsigned i = 0; i < len; i++) {
 			int v = scores[i];
-			if (v == SCORE_ILLEGAL)
+			if (v == TB_SCORE_ILLEGAL)
 				continue;
 			if (v == 0) {
 				if (count == 0)
@@ -2524,42 +2498,3 @@ static uint16_t probe_root(Pos* pos, int* score, unsigned* results) {
 	}
 }
 
-#ifndef TB_NO_HELPER_API
-
-unsigned tb_pop_count(uint64_t bb) {
-	return popcount(bb);
-}
-
-unsigned tb_lsb(uint64_t bb) {
-	return getLSB(bb);
-}
-
-uint64_t tb_pop_lsb(uint64_t bb) {
-	return poplsb(bb);
-}
-
-uint64_t tb_king_attacks(unsigned sq) {
-	return king_attacks(sq);
-}
-
-uint64_t tb_queen_attacks(unsigned sq, uint64_t occ) {
-	return queen_attacks(sq, occ);
-}
-
-uint64_t tb_rook_attacks(unsigned sq, uint64_t occ) {
-	return rook_attacks(sq, occ);
-}
-
-uint64_t tb_bishop_attacks(unsigned sq, uint64_t occ) {
-	return bishop_attacks(sq, occ);
-}
-
-uint64_t tb_knight_attacks(unsigned sq) {
-	return knight_attacks(sq);
-}
-
-uint64_t tb_pawn_attacks(unsigned sq, bool color) {
-	return pawn_attacks(sq, color);
-}
-
-#endif      /* TB_NO_HELPER_API */

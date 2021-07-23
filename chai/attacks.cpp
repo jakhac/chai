@@ -30,7 +30,8 @@ bitboard_t getBlockers(bitboard_t mask, int idx) {
 	bitboard_t m = mask;
 	int bits = popCount(m);
 	for (int i = 0; i < bits; i++) {
-		int bitPos = getPopLSB(&m);
+		Assert(m);
+		int bitPos = popLSB(&m);
 		if (idx & (1 << i)) {
 			blockers |= (1ULL << bitPos);
 		}

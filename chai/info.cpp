@@ -55,7 +55,7 @@ void printMove(board_t* b, const move_t move) {
 	cout << ret << promChar << endl;
 }
 
-std::string getStringMove(board_t* b, const int move) {
+std::string getStringMove(board_t* b, const move_t move) {
 	if (move == MOVE_NULL) {
 		return "0000";
 	}
@@ -151,6 +151,7 @@ void printUCI(search_t* s, int d, int selDpt, int score) {
 		<< " seldepth " << selDpt
 		<< scoreStr
 		<< " nodes " << (s->nodes + s->qnodes)
+		<< " tbhits " << s->tbHit
 		<< " time " << (getTimeMs() - s->startTime);
 }
 

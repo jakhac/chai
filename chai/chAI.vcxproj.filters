@@ -65,6 +65,9 @@
     <ClInclude Include="bitUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="syzygy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="egtb\stdendian.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -72,9 +75,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="egtb\tbprobe.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="syzygy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -124,13 +124,13 @@
     <ClCompile Include="search.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="syzygy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="egtb\tbchess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="egtb\tbprobe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="syzygy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

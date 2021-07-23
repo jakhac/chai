@@ -96,7 +96,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>attacks.obj;board.obj;defs.obj;move.obj;moveGenerator.obj;perft.obj;validate.obj;search.obj;eval.obj;tt.obj;uci.obj;moveOrdering.obj;info.obj;mask.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>attacks.obj;board.obj;defs.obj;move.obj;moveGenerator.obj;perft.obj;validate.obj;search.obj;eval.obj;tt.obj;uci.obj;moveOrdering.obj;info.obj;mask.obj;syzygy.obj;tbchess.obj;tbprobe.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>F:\SmartGit-Repositories\chai\chai\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
