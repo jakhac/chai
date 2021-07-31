@@ -137,7 +137,7 @@ struct board_t {
 	// Ply Counter for undoHistory array.
 	int undoPly;
 
-	// Fifty-move rule counter. Resets after captures.
+	// Fifty-move rule counter. Resets after captures or pawn moves.
 	int fiftyMove;
 
 	// Count half moves. Increment when push or pushNull, decrement when pop.

@@ -266,6 +266,7 @@ int hashToSearch(board_t* b, value_t score) {
 	return score;
 }
 
+//TODO use ply as only param
 int searchToHash(board_t* b, value_t score) {
 	if (score > VALUE_IS_MATE_IN) {
 		return score + b->ply;

@@ -11,15 +11,20 @@ int main() {
 	init(&board);
 	initHashTables(b);
 
-	const char* tbPath = "F:/SmartGit-Repositories/chai/syzygy";
+	const char* tbPath = "C:/egtb_files";
 	if (!tb_init(tbPath)) {
-		cerr << "TB init failed." << endl;
+		cout << "TB init failed." << endl;
 		Assert(false);
 		exit(1);
 	}
 
+	// TODO use with time uci comd
+	//position startpos moves e2e4 c7c5 g1f3 b8c6 b1c3 e7e6 d2d4 c5d4 f3d4 d8c7 f2f4 f8c5 d4b3 c5e7 c1e3 b7b6 c3b5 c7b8 e4e5 g8h6 f1d3 e8g8 b5d6 e7d6 e5d6 f7f5 d3b5 c6b4 e1g1 h6g4 e3c1 b4d5 d1d4 b8d6 h2h3 g4f6 c2c4 a7a6 b5a4 b6b5 c4b5 a8b8 b3c5 a6b5 a4b3 d6b6 f1e1 b5b4 a2a4 b4a3 a1a3 d5c7 b3c4 b6c6 a3c3 d7d5 c4f1 c6d6 c3c2 c7b5 d4a4 c8d7 c5d7 d6d7 c2c5 b5d6 a4d7 f6d7 c5c6 d6e4 c6e6 g7g6 e1d1 d7f6 e6c6 b8c8 c6c8 f8c8 c1e3 c8b8 e3d4 g8f7 d4e5 b8b3 f1d3 f7e6 d3c2 b3b6 c2b1 h7h5 e5d4 b6b4 g1h2 h5h4 b1a2 e6e7 d1d3 b4a4 a2b1 e7d6 b1c2 a4c4 c2b3 c4b4 b3a2 b4a4 d4e5 d6c6 a2b3 a4b4 b3d1 f6d7 d3d4 b4d4 e5d4 d7c5 d4g7 c5d3 d1a4 c6b6 g7h6 d3b2 a4e8 d5d4 h6g7 b6c5 e8g6 e4d6 g7f6 b2d3 f6g5 c5c6 h2h1 c6d5 g6h7 d5e4 g5e7 d6c4 e7h4 d3f4 g2g4 d4d3 g4f5 d3d2 f5f6 e4f3 h7c2 c4e3 c2b3 d2d1r b3d1 e3d1 h4e1 f4e6 h1h2 e6d8 h3h4
+
+	// TODO: use stacksize attr in gcc build
+
 	parseFen(&board, STARTING_FEN);
-	//parseFen(&board, "8/3qk3/8/8/8/2N5/2KB4/8 w - - 0 1");
+	//parseFen(&board, "R7/6k1/P7/6p1/r5P1/3K4/8/8 w - - 0 1");
 
 	// TODO gitid
 

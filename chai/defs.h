@@ -32,7 +32,7 @@ if(!(n)) { \
 	std::string errMsg = "Failed assert \"" + TOSTRING(n) + "\"\n" \
 		+ "in " + TOSTRING(__FILE__) + ":" + TOSTRING(__LINE__) + "\n" \
 		+ "at " + getTime() +"\n\n"; \
-	cerr << errMsg; \
+	cout << errMsg; \
 	logDebug(errMsg); \
 	exit(1); \
 }

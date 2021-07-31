@@ -245,6 +245,7 @@ value_t search(board_t* b, search_t* s) {
 
 	// Iterative deepening
 	int d = 1;
+	Assert(s->depth <= MAX_DEPTH);
 	while (d <= s->depth && !s->stopped) {
 
 		// Open window for small depths, then aspiration window
@@ -291,7 +292,7 @@ value_t aspirationSearch(board_t* b, search_t* s, int d, value_t bestScore) {
 	int64_t beta = min(VALUE_INFTY, bestScore + aspiration);
 
 	// Research, until score is within bounds
-	while (1) {
+	while (!s->stopped) {
 
 		//cout << "d=" << d << " " << alpha << " " << beta << endl;
 		score = alphaBeta<PV>(alpha, beta, d, b, s);
@@ -342,10 +343,17 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 	Assert(pvNode || (alpha == beta - 1));
 
-	// Check if position is immediate draw at a non-root node
-	if (!rootNode) {
+	if (insufficientMaterial(b)) {
+		return 0;
+	}
 
-		if (isRepetition(b) || insufficientMaterial(b)) {
+	if (b->ply >= MAX_DEPTH) {
+		return evaluation(b);
+	}
+
+	// Check if position is draw at a non-root node
+	if (!rootNode) {
+		if (isRepetition(b)) {
 			return contemptFactor(b);
 		}
 
@@ -357,7 +365,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	}
 
 	// Drop into quiescence if maximum depth is reached
-	if (depth <= 0 || b->ply > MAX_DEPTH) {
+	if (depth <= 0) {
 		value_t quietScore = quiescence<nodeType>(alpha, beta, 0, b, s);
 		Assert(abs(quietScore) < VALUE_INFTY);
 
@@ -426,36 +434,25 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 	// EGTB:
 	// Endgame-Tablebase probing.
-	int ttFlag;
-	int tbResult = (rootNode) ? TB_RESULT_FAILED : probeTB(b);
-	value_t tbValue;
-
+	int tbFlag;
+	int tbResult = probeTB(b);
 	if (tbResult != TB_RESULT_FAILED) {
 		s->tbHit++;
 
-		if (tbResult == TB_WIN) {
-			tbValue = VALUE_TB_WIN - b->ply;
-			ttFlag = TT_ALPHA;
+		value_t tbValue = tbResult == TB_LOSS ? -VALUE_TB_WIN + b->ply
+			: tbResult == TB_WIN ? VALUE_TB_WIN - b->ply : 0;
 
-		} else if (tbResult == TB_LOSS) {
-			tbValue = -VALUE_TB_WIN + b->ply;
-			ttFlag = TT_BETA;
+		tbFlag = tbResult == TB_LOSS ? TT_BETA
+			: tbResult == TB_WIN ? TT_ALPHA : TT_VALUE;
 
-		} else {
-			tbValue = 0;
-			ttFlag = TT_VALUE;
+		if (tbFlag == TT_VALUE
+			|| (tbFlag == TT_ALPHA && tbValue >= beta)
+			|| (tbFlag == TT_BETA && tbValue <= alpha)) {
 
+			Assert(abs(searchToHash(b, tbValue)) != VALUE_INFTY);
+			storeTT(b, MOVE_NULL, searchToHash(b, tbValue), VALUE_NONE, tbFlag, depth);
+			return tbValue;
 		}
-
-		// Try to cutoff based on TB result
-		if (ttFlag == TT_VALUE
-			|| (ttFlag == TT_ALPHA && tbValue <= alpha)
-			|| (ttFlag == TT_BETA && tbValue >= beta)) {
-
-			storeTT(b, MOVE_NULL, searchToHash(b, tbValue), VALUE_NONE, ttFlag, MAX_DEPTH - 1);
-		}
-
-		return tbValue;
 	}
 
 	// Static evaluation of position:

@@ -17,7 +17,7 @@
  *
  * @returns Index of first found bit.
  */
-inline unsigned int getLSB(bitboard_t bb) {
+inline int getLSB(bitboard_t bb) {
 	Assert(bb);
 
 #if defined(_MSC_VER)
@@ -29,7 +29,7 @@ inline unsigned int getLSB(bitboard_t bb) {
 #endif
 }
 
-inline unsigned int getLSB_tb(bitboard_t bb) {
+inline int getLSB_tb(bitboard_t bb) {
 	Assert(bb);
 
 #if defined(_MSC_VER)
@@ -48,7 +48,7 @@ inline unsigned int getLSB_tb(bitboard_t bb) {
  *
  * @returns Index of first found bit.
  */
-inline unsigned int getMSB(bitboard_t bb) {
+inline int getMSB(bitboard_t bb) {
 	Assert(bb);
 
 #if defined(_MSC_VER)
@@ -67,7 +67,7 @@ inline unsigned int getMSB(bitboard_t bb) {
  *
  * @returns Amount of bits set to 1 in bb.
  */
-inline unsigned int popCount(bitboard_t bb) {
+inline int popCount(bitboard_t bb) {
 #if defined(_MSC_VER)
 	return (int)__popcnt64(bb);
 #elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
@@ -82,14 +82,14 @@ inline unsigned int popCount(bitboard_t bb) {
  *
  * @returns Index of popped bit.
  */
-inline unsigned int popLSB(bitboard_t* bb) {
+inline int popLSB(bitboard_t* bb) {
 	Assert(*bb);
 	int lsb = getLSB(*bb);
 	*bb &= (*bb - 1);
 	return lsb;
 }
 
-inline unsigned int popLSB_tb(uint64_t* bb) {
+inline int popLSB_tb(uint64_t* bb) {
 	Assert(*bb);
 	int lsb = getLSB_tb(*bb);
 	*bb &= (*bb - 1);
