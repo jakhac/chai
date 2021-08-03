@@ -257,8 +257,13 @@
   - v2.6.2
     - [x] Aspiration Windows
   - v2.6.3
-    - [ ] EGTB Probing
+    - [x] EGTB Probing
   - v2.6.4
+    - [ ] makefile and g++ code adjustments
+    - [ ] make gtest
+    - [ ] archive repository in msvc_branch
+    - [ ] g++\_branch with githooks test assertion
+  - v2.6.5
     - [ ] Multi-Threading
 - Project
   - [ ] UCI fixes, e.g. q to quit current mode
