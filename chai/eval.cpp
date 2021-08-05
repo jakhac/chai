@@ -33,7 +33,7 @@ value_t evalPST(board_t* b, int side, float* t) {
 		sq = (side == WHITE) ? sq : mirror64[sq];
 		score += (int)interpolate(PAWN_OPEN[sq], PAWN_ENDGAME[sq], *t);
 	}
-	kingPawnDistance /= max(1, pawnSum);
+	kingPawnDistance /= std::max(1, pawnSum);
 	score += (int)interpolate(kingPawnDistance, kingPawnDistance * 2, *t);
 
 	// KNIGHTS
@@ -313,7 +313,7 @@ value_t evaluatePawns(board_t* b, float* t) {
 
 value_t evaluation(board_t* b) {
 	value_t eval = 0;
-	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
+	float interpolFactor = std::min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
 
 	prefetchPT(b);
 
@@ -362,7 +362,7 @@ value_t evaluation(board_t* b) {
 
 value_t lazyEvaluation(board_t* b) {
 	value_t eval = 0;
-	float interpolFactor = min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
+	float interpolFactor = std::min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
 
 	b->pt->probed++;
 	value_t pawnEval = 0;

@@ -46,7 +46,7 @@ int see(board_t* b, const int move) {
 		d++; // next depth and side
 		gain[d] = -gain[d - 1] + pieceValues[attackerPiece]; // speculative store, if defended
 
-		if (max(-gain[d - 1], gain[d]) < 0)
+		if (std::max(-gain[d - 1], gain[d]) < 0)
 			break; // pruning does not influence the result
 
 		attadef ^= from; // reset bit in set to traverse
@@ -67,7 +67,7 @@ int see(board_t* b, const int move) {
 	} while (from && attackerPiece);
 
 	while (--d) {
-		gain[d - 1] = -max(-gain[d - 1], gain[d]);
+		gain[d - 1] = -std::max(-gain[d - 1], gain[d]);
 	}
 
 	if (isEnPassant(move))
@@ -104,7 +104,7 @@ int lazySee(board_t* b, const int move) {
 		d++; // next depth and side
 		gain[d] = -gain[d - 1] + pieceValues[attackerPiece]; // speculative store, if defended
 
-		if (max(-gain[d - 1], gain[d]) < 0)
+		if (std::max(-gain[d - 1], gain[d]) < 0)
 			break; // pruning does not influence the result
 
 		attadef ^= from; // reset bit in set to traverse
@@ -124,7 +124,7 @@ int lazySee(board_t* b, const int move) {
 
 	} while (from && attackerPiece);
 	while (--d) {
-		gain[d - 1] = -max(-gain[d - 1], gain[d]);
+		gain[d - 1] = -std::max(-gain[d - 1], gain[d]);
 	}
 
 	if (isEnPassant(move))

@@ -1,13 +1,7 @@
 #pragma once
 
-//#include <iostream>
-//#include <bitset>
 #include "io.h" // _read()
-//#include <fstream>
-//#include <ctime>   // localtime
-//#include "windows.h"
 
-//#include "defs.h"
 #include "mask.h"
 #include "board.h"
 #include "tt.h"

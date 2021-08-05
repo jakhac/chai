@@ -19,7 +19,7 @@ void checkSearchInfo(search_t* s) {
 }
 
 bool isRepetition(board_t* b) {
-	for (int index = max(0, b->undoPly - b->fiftyMove); index < b->undoPly - 1; ++index) {
+	for (int index = std::max(0, b->undoPly - b->fiftyMove); index < b->undoPly - 1; ++index) {
 		Assert(index >= 0 && index < MAX_GAME_MOVES);
 
 		if (b->zobristKey == b->undoHistory[index].zobKey) {
@@ -288,8 +288,8 @@ value_t aspirationSearch(board_t* b, search_t* s, int d, value_t bestScore) {
 	Assert(abs(bestScore) < VALUE_INFTY);
 
 	// Determine initial alpha/beta values
-	int64_t alpha = max(-VALUE_INFTY, bestScore - aspiration);
-	int64_t beta = min(VALUE_INFTY, bestScore + aspiration);
+	int64_t alpha = std::max(-VALUE_INFTY, bestScore - aspiration);
+	int64_t beta = std::min(VALUE_INFTY, (const value_t)(bestScore + aspiration));
 
 	// Research, until score is within bounds
 	while (!s->stopped) {
@@ -306,14 +306,14 @@ value_t aspirationSearch(board_t* b, search_t* s, int d, value_t bestScore) {
 		if (score <= alpha) {
 			newAlpha = alpha - aspirationWindows[researchCnt++];
 
-			alpha = max(-VALUE_INFTY, newAlpha);
+			alpha = std::max((int64_t)-VALUE_INFTY, newAlpha);
 		}
 
 		// Beta window was too low, increase
 		if (score >= beta) {
 			newBeta = beta + aspirationWindows[researchCnt++];
 
-			beta = min(VALUE_INFTY, newBeta);
+			beta = std::min((int64_t)VALUE_INFTY, newBeta);
 		}
 	}
 
@@ -385,8 +385,8 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	// If alpha or beta are already mate scores, bounds can be adjusted to prune irrelevant subtrees.
 	// Mates are delivered faster, but does not speed up search in general.
 	if (!rootNode) {
-		alpha = max(alpha, (value_t)(-VALUE_MATE + b->ply));
-		beta = min(beta, (value_t)(VALUE_MATE - b->ply - 1));
+		alpha = std::max(alpha, (value_t)(-VALUE_MATE + b->ply));
+		beta = std::min(beta, (value_t)(VALUE_MATE - b->ply - 1));
 		if (alpha >= beta)
 			return alpha;
 	}
@@ -711,7 +711,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 					lmrDepth++;
 
 				// Minimum depth is 1 and maximum depth is newDepth
-				lmrDepth = min(newDepth, max(1, lmrDepth));
+				lmrDepth = std::min(newDepth, std::max(1, lmrDepth));
 				lmrSameDepth = newDepth == lmrDepth;
 
 				value = -alphaBeta<NoPV>(-(alpha + 1), -alpha, lmrDepth, b, s);
@@ -783,7 +783,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				int to = toSq(currentMove);
 
 				histHeuristic[b->stm][from][to] += depth * depth;
-				histMax = max(histHeuristic[b->stm][from][to], histMax);
+				histMax = std::max(histHeuristic[b->stm][from][to], histMax);
 
 				if (histMax >= HISTORY_MAX) {
 					for (int c = 0; c < 2; c++) {
@@ -883,7 +883,7 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
 	}
 
 	s->qnodes++;
-	selDepth = max(selDepth, b->ply);
+	selDepth = std::max(selDepth, b->ply);
 
 	bool pvNode = nodeType == PV;
 	move_t currPvLine[MAX_DEPTH + 1];

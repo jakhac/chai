@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif // !NOMINMAX
 #include "windows.h" // used for getTimeMs()
 
 #include "defs.h"

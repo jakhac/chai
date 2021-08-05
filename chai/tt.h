@@ -1,5 +1,7 @@
 #pragma once
 
+#include <math.h> // pow
+
 #include "moveGenerator.h"
 
 #ifdef __GNUC__
