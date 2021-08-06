@@ -1,5 +1,8 @@
 #include "tt.h"
 
+int indexMask = 0;
+
+
 
 void initHashTables(board_t* b) {
 	if (!resizeHashTables(b->tt, b->pt, DEFAULT_TT_SIZE)) {
@@ -104,7 +107,7 @@ bool resizeHashTables(ttable_t* tt, pawntable_t* pt, size_t newMbSize) {
 }
 
 void clearTT(ttable_t* tt) {
-	memset(tt->bucketList, 0, (tt->buckets * sizeof(bucket_t)));
+	memset((void*)tt->bucketList, 0, (tt->buckets * BUCKETS * sizeof(ttable_entry_t)));
 }
 
 void clearPT(pawntable_t* pt) {

@@ -10,7 +10,7 @@ void initMVV_LVA() {
 	}
 }
 
-bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkDef, int side, int attackerPiece) {
+bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkDef, int side) {
 	atkDef &= b->color[side];
 	if (!atkDef) {
 		return 0ULL;
@@ -31,7 +31,6 @@ bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkDef, int side, int at
 int see(board_t* b, const int move) {
 	int to = toSq(move);
 	int attackerPiece = pieceAt(b, fromSq(move));
-	int movingPiece = attackerPiece;
 	int gain[32]{}, d = 0, side = b->stm;
 
 	bitboard_t occ = b->occupied;
@@ -61,7 +60,7 @@ int see(board_t* b, const int move) {
 		}
 
 		side ^= 1;
-		from = getLeastValuablePiece(b, attadef, side, attackerPiece);
+		from = getLeastValuablePiece(b, attadef, side);
 		attackerPiece = from ? pieceAt(b, getLSB(from)) : 0;
 
 	} while (from && attackerPiece);
@@ -82,7 +81,6 @@ int lazySee(board_t* b, const int move) {
 
 	int to = toSq(move);
 	int attackerPiece = pieceAt(b, fromSq(move));
-	int movingPiece = attackerPiece;
 	int gain[32]{}, d = 0, side = b->stm;
 
 	bitboard_t occ = b->occupied;
@@ -119,7 +117,7 @@ int lazySee(board_t* b, const int move) {
 		}
 
 		side ^= 1;
-		from = getLeastValuablePiece(b, attadef, side, attackerPiece);
+		from = getLeastValuablePiece(b, attadef, side);
 		attackerPiece = from ? pieceAt(b, getLSB(from)) : 0;
 
 	} while (from && attackerPiece);
@@ -222,7 +220,6 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 
 void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 	move_t currentMove;
-	int seeScore = 0;
 	int mvvLvaScore = 0;
 	int capturedPiece = 0;
 
@@ -244,7 +241,8 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		}
 
 		// capture moves
-		if (capturedPiece = capPiece(b, currentMove)) {
+		capturedPiece = capPiece(b, currentMove);
+		if (capturedPiece) {
 			Assert(pieceValid(capturedPiece));
 
 			if (promPiece(b, currentMove)) {

@@ -7,7 +7,7 @@ static bool strStartsWith(std::string str, std::string start) {
 void uciMode(board_t* b, search_t* s) {
 	std::string cmd;
 
-	cout << "id name chai_" << VERSION << "\n";
+	cout << "id name chai_" << TOSTRING(VERSION) << "\n";
 	cout << "id author Jakob Hackstein\n";
 	cout << "option name Hash type spin default 256 min 2 max 8192" << endl;
 	cout << "uciok\n";
@@ -22,14 +22,14 @@ void uciMode(board_t* b, search_t* s) {
 		}
 
 		if (!cmd.compare("uci")) {
-			cout << "id name chai_" << VERSION << "\n";
+			cout << "id name chai_" << TOSTRING(VERSION) << "\n";
 			cout << "id author Jakob Hackstein\n";
 			cout << "option name Hash type spin default 256 min 2 max 8192" << endl;
 			cout << "uciok\n";
 		}
 
 		if (!cmd.compare("isready")) {
-			init(b);
+			init();
 			initHashTables(b);
 
 			uciParsePosition(b, "position startpos");
@@ -113,7 +113,7 @@ void uciParseGo(board_t* b, search_t* s, std::string cmd) {
 	std::vector<std::string> tokens{ std::istream_iterator<std::string>{iss},
 					 std::istream_iterator<std::string>{} };
 
-	for (int i = 0; i < tokens.size() - 1; i++) {
+	for (int i = 0; i < (int)tokens.size() - 1; i++) {
 		if (tokens[i] == "infinite") continue;
 		if (tokens[i] == "binc" && b->stm == chai::BLACK) inc = stoi(tokens[i + 1]);
 		if (tokens[i] == "winc" && b->stm == chai::WHITE) inc = stoi(tokens[i + 1]);
@@ -162,7 +162,7 @@ void uciParseGo(board_t* b, search_t* s, std::string cmd) {
 	search(b, s);
 }
 
-void init(board_t* b) {
+void init() {
 #ifdef INFO
 	auto start = std::chrono::high_resolution_clock::now();
 #endif //INFO

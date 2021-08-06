@@ -1,15 +1,15 @@
 #include "main.h"
 
 int main() {
-	cout << "CHAI " << VERSION << endl
+	cout << "chai " << TOSTRING(VERSION) << endl
 		<< "assert=" << info_ASSERT
 		<< " buckets=" << BUCKETS << endl
 		<< "compiler=" << info_COMPILER
 		<< " date=" << __DATE__ << endl;
 
 	// Init all tables and parameters
-	init(&board);
-	initHashTables(b);
+	init();
+	initHashTables(p_board);
 
 	const char* tbPath = "C:/egtb_files";
 	if (!tb_init(tbPath)) {
@@ -18,26 +18,26 @@ int main() {
 		exit(1);
 	}
 
+	cout << "TB max=" << TB_LARGEST << endl;
+
 	// TODO: use stacksize attr in gcc build
 
-	parseFen(&board, STARTING_FEN);
+	parseFen(p_board, STARTING_FEN);
 	//parseFen(&board, "R7/6k1/P7/6p1/r5P1/3K4/8/8 w - - 0 1");
 
 	// TODO gitid
 
-	cout << "TB max " << TB_LARGEST << endl;
-
-	printBoard(b);
-	cli(b, &perft, s);
+	printBoard();
+	cli();
 
 	// Free all hash tables before exit
-	freeHashTables(b->tt, b->pt);
+	freeHashTables(p_board->tt, p_board->pt);
 	tb_free();
 
 	return 0;
 }
 
-void cli(board_t* b, Perft* p, search_t* s) {
+void cli() {
 	std::string userInput;
 
 	while (1) {
@@ -45,7 +45,7 @@ void cli(board_t* b, Perft* p, search_t* s) {
 
 		// start UCI protocol
 		if (userInput == "uci") {
-			uciMode(b, s);
+			uciMode(p_board, s);
 			continue;
 		}
 
@@ -59,9 +59,9 @@ void cli(board_t* b, Perft* p, search_t* s) {
 
 		// POP MOVE FROM BOARD
 		if (userInput == "pop") {
-			undo_t undoPop = pop(b);
-			cout << "Popped " << getStringMove(b, undoPop.move) << " from stack." << endl;
-			printBoard(b);
+			undo_t undoPop = pop(p_board);
+			cout << "Popped " << getStringMove(p_board, undoPop.move) << " from stack." << endl;
+			printBoard();
 			continue;
 		}
 
@@ -73,7 +73,7 @@ void cli(board_t* b, Perft* p, search_t* s) {
 
 			s->timeSet = false;
 			s->depthSet = true;
-			search(b, s);
+			search(p_board, s);
 			continue;
 		}
 
@@ -84,7 +84,7 @@ void cli(board_t* b, Perft* p, search_t* s) {
 			cin >> perftDepth;
 
 			if (stoi(perftDepth) >= 1 && stoi(perftDepth) <= 15) {
-				dividePerft(b, stoi(perftDepth));
+				dividePerft(p_board, stoi(perftDepth));
 			} else {
 				cerr << "Enter an integer between in [1, 15]." << endl;
 			}
@@ -94,8 +94,8 @@ void cli(board_t* b, Perft* p, search_t* s) {
 
 		if (userInput == "movegen") {
 			moveList_t moveList[1];
-			generateMoves(&board, moveList, isCheck(&board, board.stm));
-			printGeneratedMoves(b, moveList);
+			generateMoves(p_board, moveList, isCheck(p_board, p_board->stm));
+			printGeneratedMoves(p_board, moveList);
 			continue;
 		}
 
@@ -104,23 +104,23 @@ void cli(board_t* b, Perft* p, search_t* s) {
 			cin.ignore();
 			getline(cin, userInput);
 			cout << "Parsed FEN \"" << userInput << "\" into board." << endl;
-			parseFen(b, userInput);
-			printBoard(b);
+			parseFen(p_board, userInput);
+			printBoard();
 			continue;
 		}
 
 		if (userInput == "print") {
-			printBoard(b);
+			printBoard();
 			continue;
 		}
 
 		if (userInput == "0000") {
-			pushNull(b);
+			pushNull(p_board);
 		}
 
 		// Assume userInput is a move
-		generateMoves(b, move_s, isCheck(b, b->stm));
-		int parsedMove = parseMove(b, userInput);
+		generateMoves(p_board, move_s, isCheck(p_board, p_board->stm));
+		int parsedMove = parseMove(p_board, userInput);
 		bool inputIsMove = false;
 		for (int i = 0; i < move_s->cnt; i++) {
 			if (parsedMove == move_s->moves[i]) {
@@ -130,8 +130,8 @@ void cli(board_t* b, Perft* p, search_t* s) {
 		}
 
 		if (inputIsMove) {
-			push(b, parsedMove);
-			printBoard(b);
+			push(p_board, parsedMove);
+			printBoard();
 			continue;
 		}
 
@@ -148,7 +148,7 @@ void cli(board_t* b, Perft* p, search_t* s) {
 	}
 }
 
-void dividePerft(board_t* b, int depth) {
+void dividePerft(board_t* pBoard, int depth) {
 
 	std::string move = "";
 	Perft p;
@@ -156,12 +156,12 @@ void dividePerft(board_t* b, int depth) {
 	while (depth) {
 
 		if (move != "") {
-			int parsedMove = parseMove(b, move);
-			push(b, parsedMove);
+			int parsedMove = parseMove(pBoard, move);
+			push(pBoard, parsedMove);
 			depth--;
 		}
 
-		p.perftRoot(b, depth);
+		p.perftRoot(pBoard, depth);
 
 		cout << "\nDivide at move ";
 		cin >> move;

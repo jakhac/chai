@@ -1,29 +1,32 @@
-### Meta data
+#######################################
+# 1. META DATA
+#######################################
+
 VERSION = v2.6.4
 
-### Exe name
 EXE = chai_$(VERSION).exe
 
-### Source and object files
-SRCS = attacks.cpp defs.cpp eval.cpp info.cpp main.cpp mask.cpp move.cpp \
+SRCS = main.cpp tt.cpp attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
-	syzygy.cpp tt.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp
-
-SRCS_TEST = ../test/pch.cpp ../test/testMoves.cpp ../test/testCheckers.cpp ../test/testSee.cpp \
-	../test/testSearch.cpp ../test/testPerft.cpp ../test/testZugzwang.cpp
+	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp
 
 OBJ_DIR = ./obj
-
 OBJS = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(notdir $(SRCS)))
 
-VPATH = egtb:../test
+VPATH = egtb:
 
-### Options for custom build
+
+#######################################
+# 2. Configure architecture & type
+#######################################
+
+# build type
 assert=no
 debug=no
 info=yes
 test=no
 
+# architecture
 optimize=yes
 bits=64
 prefetch=yes
@@ -36,12 +39,29 @@ avx2=yes
 pext=yes
 bits=64
 
-CXXFLAGS += -Wcast-qual -fno-exceptions
-DEPENDFLAGS += -std=c++17
 
-# Set flags according to optimzization settings
+ifeq ($(TYPE),)
+	TYPE = release
+endif
+ifeq ($(TYPE),release)
+	assert=no
+	debug=no
+	info=no
+	test=no
+endif
+ifeq ($(TYPE),debug)
+	assert=yes
+	debug=yes
+	info=yes
+	test=yes
+
+	LDFLAGS += -fsanitize=address
+	CXXFLAGS += -fsanitize=address
+endif
+
+
 ifeq ($(info),yes)
-	CXXFLAGS += -DINFO
+	CXXFLAGS += -DINFO=
 endif
 
 ifeq ($(assert),yes)
@@ -52,9 +72,9 @@ ifeq ($(test),yes)
 	CXXFLAGS += -DTESTING=
 endif
 
-# ifeq ($(DEBUG),yes)
-# 	CXXFLAGS+= -DINFO=
-# endif
+ifeq ($(DEBUG),yes)
+	CXXFLAGS+= -DINFO=
+endif
 
 ifeq ($(optimize),yes)
 	CXXFLAGS += -O3
@@ -91,16 +111,26 @@ ifeq ($(pext),yes)
 	CXXFLAGS += -mbmi -mbmi2
 endif
 
-### Compiler
-CXX = g++
 
-### Standard flags
+# Always add standard flags
 CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m$(bits)
+
+# Warning flags for cleaner code
+CXXFLAGS += -pedantic -Wextra -Wshadow
+
+# Add version flag for info in target exe
+CXXFLAGS += -DVERSION=$(VERSION)
+
 DEPENDFLAGS += -std=c++17
 LDFLAGS += -m$(bits)
 
-### Warning flags
-CXXFLAGS += -pedantic -Wextra -Wshadow
+
+#######################################
+# 3. Compiler and link to target
+#######################################
+
+# Use GNU compiler
+CXX = g++
 
 $(EXE): $(OBJS)
 	+$(CXX) -o $@ $(OBJS) $(LDFLAGS)
@@ -109,34 +139,38 @@ $(OBJ_DIR)/%.o: %.cpp
 	g++ $(CXXFLAGS) -c -o $@ $<
 
 
-### Public targets
+#######################################
+# 4. Public targets
+#######################################
 
-chai:
-	$(MAKE) $(EXE) .depend
+debug:
+	$(MAKE) $(EXE) TYPE=debug .depend
+
+release: 
+	$(MAKE) $(EXE) TYPE=release .depend
+
+# strip
+
+test:
+	cd .. & cd test & $(MAKE) TYPE=debug
 
 clean:
-	del /Q .\obj\ 2>nul
+	$(MAKE) objclean
 	del /Q $(EXE) 2>nul
 
-# release: 
-# 	info = no
-# 	debug = no
-# 	assert = no
-# 	test = no
-# 	$(MAKE) $(EXE) .depend
+objclean:
+	del /Q .\obj\ 2>nul
 
-# debug: 
-# 	info = yes
-# 	debug = yes
-# 	assert = yes
-# 	test = no
-# 	$(MAKE) $(EXE) .depend
-
-#test
+help:
+	@echo "Build chai_$(VERSION) with "make [target]"
+	@echo "Possible targets are:"
+	@echo "debug     > build with asserts and debug information"
+	@echo "release   > build fastest version of engine"
+	@echo "test      > copmile engine files and build test program in root/test"
 
 .depend:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null
 
 -include .depend
 
-.PHONY: help build objclean
+.PHONY: all test clean objclean help

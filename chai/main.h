@@ -18,9 +18,8 @@ static std::string info_COMPILER = "GCC";
 #endif
 
 
-
-static board_t board;
-static board_t* b = &board;
+// static board_t board;
+// static board_t* b = &board;
 
 static Perft perft;
 static moveList_t move_s[1];
@@ -35,12 +34,8 @@ int main();
 
 /**
  * Start a game in console.
- *
- * @param  b board_t instance.
- * @param  p MoveGenrator instance.
- * @param  s A search_t to process.
  */
-void cli(board_t* b, Perft* p, search_t* s);
+void cli();
 
 /**
  * Function to divide with cmd-line move after each perft.

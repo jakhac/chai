@@ -101,10 +101,6 @@ void printBinary(bitboard_t x) {
 	cout << b << endl;
 }
 
-void printSearchInfo(board_t* b) {
-	cout << "\n";
-}
-
 void log(std::string logMsg) {
 	std::ofstream ofs("log.txt", std::ios_base::out | std::ios_base::app);
 	ofs << getTime() << "\t" << logMsg << '\n';
@@ -182,7 +178,7 @@ void printPV(board_t* b, move_t* moves, int len) {
 	//#endif // STRUCT_PV
 }
 
-void printTTablePV(board_t* b, int depth, int selDepth) {
+void printTTablePV(board_t* b, int depth) {
 	int cnt = 0;
 	cout << " pv ";
 
@@ -204,7 +200,6 @@ void printTTablePV(board_t* b, int depth, int selDepth) {
 }
 
 void printPvLine(board_t* b, move_t* pvLine, int d, int score) {
-	int pvLen = d;
 	if (score >= VALUE_IS_MATE_IN)
 		d = VALUE_MATE - score;
 

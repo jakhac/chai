@@ -1,22 +1,12 @@
 #pragma once
 
-
-//#include <iostream>
-//#include <string>
-//#include <algorithm>
-//#include <chrono>
-//#include <string>
-//#include <sstream>
-//#include "io.h"
-
 #include <iterator>
 #include <sstream>
 
-//#include "board.h"
 #include "search.h"
 
 #ifndef VERSION
-#define VERSION "v2.6.3"
+#define VERSION 0
 #endif // !VERSION
 
 /**
@@ -48,7 +38,5 @@ void uciParseGo(board_t* b, search_t* s, std::string cmd);
 
 /**
  * Complete initialization for chess engine. Called once at startup.
- *
- * @param  b board_t.
  */
-void init(board_t* b);
+void init();

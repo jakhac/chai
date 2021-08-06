@@ -22,8 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma warning(disable:4996)
-
 #include <assert.h>
 #ifdef __cplusplus
 #include <atomic>
@@ -1354,7 +1352,7 @@ static TbMove* gen_legal(const Pos* pos, TbMove* moves) {
 }
 
 #ifdef __cplusplus
-};
+}
 #endif
 
 
@@ -2824,14 +2822,14 @@ int probe_wdl(Pos* pos, int* success) {
 	// Generate (at least) all legal captures including (under)promotions.
 	TbMove moves0[TB_MAX_CAPTURES];
 	TbMove* m = moves0;
-	TbMove* end = gen_captures(pos, m);
+	TbMove* end_ = gen_captures(pos, m);
 	int bestCap = -3, bestEp = -3;
 
 	// We do capture resolution, letting bestCap keep track of the best
 	// capture without ep rights and letting bestEp keep track of still
 	// better ep captures if they exist.
 
-	for (; m < end; m++) {
+	for (; m < end_; m++) {
 		Pos pos1;
 		TbMove move = *m;
 		if (!is_capture(pos, move))
@@ -3002,14 +3000,14 @@ static Value probe_dtm_win(const Pos* pos, int* success) {
 	return best;
 }
 
-Value TB_probe_dtm(const Pos* pos, int wdl, int* success) {
-	assert(wdl != 0);
+// Value TB_probe_dtm(const Pos* pos, int wdl, int* success) {
+// 	assert(wdl != 0);
 
-	*success = 1;
+// 	*success = 1;
 
-	return wdl > 0 ? probe_dtm_win(pos, success)
-		: probe_dtm_loss(pos, success);
-}
+// 	return wdl > 0 ? probe_dtm_win(pos, success)
+// 		: probe_dtm_loss(pos, success);
+// }
 
 #if 0
 // To be called only for non-drawn positions.
@@ -3288,93 +3286,93 @@ int root_probe_wdl(const Pos* pos, bool useRule50, struct TbRootMoves* rm) {
 // Use the DTM tables to find mate scores.
 // Either DTZ or WDL must have been probed successfully earlier.
 // A return value of 0 means that not all probes were successful.
-int root_probe_dtm(const Pos* pos, struct TbRootMoves* rm) {
-	int success;
-	Value tmpScore[TB_MAX_MOVES];
+// int root_probe_dtm(const Pos* pos, struct TbRootMoves* rm) {
+// 	int success;
+// 	Value tmpScore[TB_MAX_MOVES];
 
-	// Probe each move.
-	for (unsigned i = 0; i < rm->size; i++) {
-		Pos pos1;
-		struct TbRootMove* m = &rm->moves[i];
+// 	// Probe each move.
+// 	for (unsigned i = 0; i < rm->size; i++) {
+// 		Pos pos1;
+// 		struct TbRootMove* m = &rm->moves[i];
 
-		// Use tbScore to find out if the position is won or lost.
-		int wdl = m->tbScore > TB_VALUE_PAWN ? 2
-			: m->tbScore < -TB_VALUE_PAWN ? -2 : 0;
+// 		// Use tbScore to find out if the position is won or lost.
+// 		int wdl = m->tbScore > TB_VALUE_PAWN ? 2
+// 			: m->tbScore < -TB_VALUE_PAWN ? -2 : 0;
 
-		if (wdl == 0)
-			tmpScore[i] = 0;
-		else {
-			// Probe and adjust mate score by 1 ply.
-			do_move(&pos1, pos, m->pv[0]);
-			Value v = -TB_probe_dtm(&pos1, -wdl, &success);
-			tmpScore[i] = wdl > 0 ? v - 1 : v + 1;
-			if (success == 0)
-				return 0;
-		}
-	}
+// 		if (wdl == 0)
+// 			tmpScore[i] = 0;
+// 		else {
+// 			// Probe and adjust mate score by 1 ply.
+// 			do_move(&pos1, pos, m->pv[0]);
+// 			Value v = -TB_probe_dtm(&pos1, -wdl, &success);
+// 			tmpScore[i] = wdl > 0 ? v - 1 : v + 1;
+// 			if (success == 0)
+// 				return 0;
+// 		}
+// 	}
 
-	// All probes were successful. Now adjust TB scores and ranks.
-	for (unsigned i = 0; i < rm->size; i++) {
-		struct TbRootMove* m = &rm->moves[i];
+// 	// All probes were successful. Now adjust TB scores and ranks.
+// 	for (unsigned i = 0; i < rm->size; i++) {
+// 		struct TbRootMove* m = &rm->moves[i];
 
-		m->tbScore = tmpScore[i];
+// 		m->tbScore = tmpScore[i];
 
-		// Let rank correspond to mate score, except for critical moves
-		// ranked 900, which we rank below all other mates for safety.
-		// By ranking mates above 1000 or below -1000, we let the search
-		// know it need not search those moves.
-		m->tbRank = m->tbRank == 900 ? 1001 : m->tbScore;
-	}
+// 		// Let rank correspond to mate score, except for critical moves
+// 		// ranked 900, which we rank below all other mates for safety.
+// 		// By ranking mates above 1000 or below -1000, we let the search
+// 		// know it need not search those moves.
+// 		m->tbRank = m->tbRank == 900 ? 1001 : m->tbScore;
+// 	}
 
-	return 1;
-}
+// 	return 1;
+// }
 
-// Use the DTM tables to complete a PV with mate score.
-void tb_expand_mate(Pos* pos, struct TbRootMove* move, Value moveScore, unsigned cardinalityDTM) {
-	int success = 1, chk = 0;
-	Value v = moveScore, w = 0;
-	int wdl = v > 0 ? 2 : -2;
+// // Use the DTM tables to complete a PV with mate score.
+// void tb_expand_mate(Pos* pos, struct TbRootMove* move, Value moveScore, unsigned cardinalityDTM) {
+// 	int success = 1, chk = 0;
+// 	Value v = moveScore, w = 0;
+// 	int wdl = v > 0 ? 2 : -2;
 
-	if (move->pvSize == TB_MAX_PLY)
-		return;
+// 	if (move->pvSize == TB_MAX_PLY)
+// 		return;
 
-	Pos root = *pos;
-	// First get to the end of the incomplete PV.
-	for (unsigned i = 0; i < move->pvSize; i++) {
-		v = v > 0 ? -v - 1 : -v + 1;
-		wdl = -wdl;
-		Pos pos0 = *pos;
-		do_move(pos, &pos0, move->pv[i]);
-	}
+// 	Pos root = *pos;
+// 	// First get to the end of the incomplete PV.
+// 	for (unsigned i = 0; i < move->pvSize; i++) {
+// 		v = v > 0 ? -v - 1 : -v + 1;
+// 		wdl = -wdl;
+// 		Pos pos0 = *pos;
+// 		do_move(pos, &pos0, move->pv[i]);
+// 	}
 
-	// Now try to expand until the actual mate.
-	if (popcount(pos->white | pos->black) <= cardinalityDTM) {
-		while (v != -TB_VALUE_MATE && move->pvSize < TB_MAX_PLY) {
-			v = v > 0 ? -v - 1 : -v + 1;
-			wdl = -wdl;
-			TbMove moves[TB_MAX_MOVES];
-			TbMove* end = gen_legal(pos, moves);
-			TbMove* m = moves;
-			for (; m < end; m++) {
-				Pos pos1;
-				do_move(&pos1, pos, *m);
-				if (wdl < 0)
-					chk = probe_wdl(&pos1, &success); // verify that move wins
-				w = success && (wdl > 0 || chk < 0)
-					? TB_probe_dtm(&pos1, wdl, &success)
-					: 0;
-				if (!success || v == w) break;
-			}
-			if (!success || v != w)
-				break;
-			move->pv[move->pvSize++] = *m;
-			Pos pos0 = *pos;
-			do_move(pos, &pos0, *m);
-		}
-	}
-	// Get back to the root position.
-	*pos = root;
-}
+// 	// Now try to expand until the actual mate.
+// 	if ((unsigned) popcount(pos->white | pos->black) <= cardinalityDTM) {
+// 		while (v != -TB_VALUE_MATE && move->pvSize < TB_MAX_PLY) {
+// 			v = v > 0 ? -v - 1 : -v + 1;
+// 			wdl = -wdl;
+// 			TbMove moves[TB_MAX_MOVES];
+// 			TbMove* end = gen_legal(pos, moves);
+// 			TbMove* m = moves;
+// 			for (; m < end; m++) {
+// 				Pos pos1;
+// 				do_move(&pos1, pos, *m);
+// 				if (wdl < 0)
+// 					chk = probe_wdl(&pos1, &success); // verify that move wins
+// 				w = success && (wdl > 0 || chk < 0)
+// 					? TB_probe_dtm(&pos1, wdl, &success)
+// 					: 0;
+// 				if (!success || v == w) break;
+// 			}
+// 			if (!success || v != w)
+// 				break;
+// 			move->pv[move->pvSize++] = *m;
+// 			Pos pos0 = *pos;
+// 			do_move(pos, &pos0, *m);
+// 		}
+// 	}
+// 	// Get back to the root position.
+// 	*pos = root;
+// }
 
 static const int wdl_to_dtz[] =
 {

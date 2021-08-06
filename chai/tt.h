@@ -17,8 +17,6 @@ const size_t MIN_TT_SIZE = 2;
 const size_t MAX_TT_SIZE = 8192;
 const size_t MAX_PT_SIZE = 16;
 
-static int indexMask = 0;
-
 const int QS_DEPTH = -1;
 const int QS_DEPTH_CHECK = 0;
 

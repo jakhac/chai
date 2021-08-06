@@ -79,6 +79,11 @@ extern int histHeuristic[2][64][64];
 */
 extern int histMax;
 
+/**
+ * board instance used for complete program
+ */
+extern board_t* p_board;
+
 // Maximum score before rescale in history heuristic. Max history score needs to be less than 10000
 // because move ordering scores "QUIET_SCORES=5000 + hist/10" before COUNTER_SCORE=6000.
 const int HISTORY_MAX = 1000 - 1;
@@ -249,16 +254,14 @@ move_t parseMove(board_t* b, std::string move);
 /**
  * Print board with piece chars, rank and file indices.
  */
-void printBoard(board_t* b);
+void printBoard();
 
 /**
  * Check board for valid bitboard entries and board variables.
- *
- * @param  b board_t to call function.
- *
+ * 
  * @returns True if no issues have been found, else false.
  */
-bool checkBoard(board_t* b);
+bool checkBoard();
 
 /**
  * Push move onto board. Update castle rights, enPas square, zobristKey and promotions. Pushes

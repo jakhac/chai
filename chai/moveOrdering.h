@@ -38,12 +38,12 @@ const int CASTLE_SCORE = QUIET_SCORE + 500;
 // No MVV-LVA score is greater than this upper bound.
 const int MVV_LVA_UBOUND = 1000;
 
-static int MVV_LVA[13][13];
+static int volatile MVV_LVA[13][13];
 
 // victim scores used to calculate mvv lva score
 const int victimScore[13] = { 0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 };
 
-static const int SEEPieceValues[13] = {
+const int SEEPieceValues[13] = {
 	0, 100, 325, 325, 550, 1100, 0, 100, 325, 325, 550, 1100, 0
 };
 
@@ -64,7 +64,7 @@ void initMVV_LVA();
  *
  * @returns The bitboard with least valuable piece.
  */
-bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkSet, int side, int atkPiece);
+bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkSet, int side);
 
 /**
  * Calculates static exchange evaluation starting with given move. Fully calculates all
@@ -110,13 +110,3 @@ bool see_ge(board_t* b, move_t move, int threshHold);
  * @param  hashMove Hash move found in pvLine or ttable.
  */
 void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove);
-
-/**
- * Update the index of the move with highest score yet. Used to swap best move to the end after
- * all moves are scored.
- *
- * @param  scores  Reference to scores in moveList_t.
- * @param  bestIdx Reference to bestIdx of move with highest score yet.
- * @param  curIdx  Current index of loop.
- */
-static void updateBestMove(int* scores, int* bestIdx, int curIdx);

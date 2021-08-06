@@ -44,8 +44,6 @@ void initSquareToRankFile() {
 }
 
 void initAttackerMasks() {
-	int offSet = 0;
-
 	// pawns
 	for (int i = 0; i < 64; i++) {
 		pawnAtkMask[chai::WHITE][i] = (setMask[i] << 7 & ~FILE_H_HEX) | (setMask[i] << 9 & ~FILE_A_HEX);

@@ -8,12 +8,14 @@ move_t counterHeuristic[64][64][2];
 int histHeuristic[2][64][64];
 int histMax = 0;
 
-bool checkBoard(board_t* b) {
-	Assert(b->castlePermission >= 0 && b->castlePermission <= 15);
-	Assert(popCount(b->occupied) >= 2 && popCount(b->occupied) <= 32);
-	Assert(validEnPasSq(b->enPas) || b->enPas == DEFAULT_EP_SQ);
-	Assert(b->zobristKey == generateZobristKey(b));
-	Assert(b->zobristPawnKey == generatePawnHashKey(b));
+board_t* p_board = new board_t();
+
+bool checkBoard() {
+	Assert(p_board->castlePermission >= 0 && p_board->castlePermission <= 15);
+	Assert(popCount(p_board->occupied) >= 2 && popCount(p_board->occupied) <= 32);
+	Assert(validEnPasSq(p_board->enPas) || p_board->enPas == DEFAULT_EP_SQ);
+	Assert(p_board->zobristKey == generateZobristKey(p_board));
+	Assert(p_board->zobristPawnKey == generatePawnHashKey(p_board));
 	return true;
 }
 
@@ -131,11 +133,11 @@ bitboard_t getPieces(board_t* b, int piece, int side) {
 	return b->pieces[pieceType[piece]] & b->color[side];
 }
 
-bitboard_t getDiagPieces(board_t* b, int side) {
+bitboard_t getDiagPieces(board_t* b) {
 	return getPieces(b, chai::BISHOP, b->stm) | getPieces(b, chai::QUEEN, b->stm);
 }
 
-bitboard_t getVerticalPieces(board_t* b, int side) { //TODO side stm
+bitboard_t getVerticalPieces(board_t* b) {
 	return getPieces(b, chai::ROOK, b->stm) | getPieces(b, chai::QUEEN, b->stm);
 }
 
@@ -158,7 +160,7 @@ int countMajorPieces(board_t* b, int side) {
 	return cnt;
 }
 
-void printBoard(board_t* b) {
+void printBoard() {
 #ifdef INFO
 	int sq, file, rank, piece;
 
@@ -167,7 +169,7 @@ void printBoard(board_t* b) {
 		printf("%d  ", rank + 1);
 		for (file = FILE_A; file <= FILE_H; file++) {
 			sq = fileRankToSq(file, rank);
-			piece = pieceAt(b, sq);
+			piece = pieceAt(p_board, sq);
 			printf("%2c", pieceChar[piece]);
 		}
 		printf("\n");
@@ -178,18 +180,18 @@ void printBoard(board_t* b) {
 		printf("%2c", 'a' + file);
 	}
 
-	cout << "\n\nPlayer to move: " << b->stm << endl;
-	printf("Zobrist key: %llX\n", b->zobristKey);
-	printf("Pawn key: %llX\n", b->zobristPawnKey);
-	cout << "En passant square: " << b->enPas << endl;
-	cout << "Halfmoves " << b->halfMoves << ", undoPly " << b->undoPly
-		<< ", ply " << b->ply << ", fiftyMoves " << b->fiftyMove << endl;
+	cout << "\n\nPlayer to move: " << p_board->stm << endl;
+	printf("Zobrist key: %llX\n", p_board->zobristKey);
+	printf("Pawn key: %llX\n", p_board->zobristPawnKey);
+	cout << "En passant square: " << p_board->enPas << endl;
+	cout << "Halfmoves " << p_board->halfMoves << ", undoPly " << p_board->undoPly
+		<< ", ply " << p_board->ply << ", fiftyMoves " << p_board->fiftyMove << endl;
 
 	printf("Castle permission: %c%c%c%c\n",
-		   b->castlePermission & K_CASTLE ? 'K' : ' ',
-		   b->castlePermission & Q_CASTLE ? 'Q' : ' ',
-		   b->castlePermission & k_CASTLE ? 'k' : ' ',
-		   b->castlePermission & q_CASTLE ? 'q' : ' '
+		   p_board->castlePermission & K_CASTLE ? 'K' : ' ',
+		   p_board->castlePermission & Q_CASTLE ? 'Q' : ' ',
+		   p_board->castlePermission & k_CASTLE ? 'k' : ' ',
+		   p_board->castlePermission & q_CASTLE ? 'q' : ' '
 	);
 
 	cout << endl;
@@ -309,7 +311,7 @@ bool parseFen(board_t* board, std::string fen) {
 	board->zobristPawnKey = generatePawnHashKey(board);
 	board->zobristKey = generateZobristKey(board);
 
-	checkBoard(board);
+	checkBoard();
 
 	return false;
 }
@@ -384,12 +386,10 @@ move_t parseMove(board_t* b, std::string move) {
 
 	// set possible pawn flags
 	if (piecePawn[movingPiece]) {
-		int moveDistance = abs(from - to);
-
 		// set ep flag if to square is en passant (ep capture)
 		if (b->enPas != DEFAULT_EP_SQ
 			&& to == b->enPas) {
-			Assert(moveDistance == 7 || moveDistance == 9);
+			Assert(abs(from - to) == 7 || abs(from - to) == 9);
 			MOVE_FLAG = EP_MOVE;
 
 		} else if (squareToRank[to] == RANK_1 || squareToRank[to] == RANK_8) {
@@ -481,7 +481,7 @@ void pushPromotion(board_t* b, move_t move) {
 void pushCastle(board_t* b, move_t move) {
 	int fromSquare = fromSq(move);
 	int toSquare = toSq(move);
-	int rClearSq, rSetSq;
+	int rClearSq = NO_SQ, rSetSq = NO_SQ;
 
 	int movingRook = stmPiece[chai::ROOK][b->stm];
 	int movingKing = stmPiece[chai::KING][b->stm];
@@ -753,7 +753,7 @@ undo_t pop(board_t* b) {
 
 	Assert(b->undoPly >= 0);
 	Assert(validEnPasSq(b->enPas) || b->enPas == DEFAULT_EP_SQ);
-	Assert(checkBoard(b));
+	Assert(checkBoard());
 	return *undo;
 }
 
@@ -991,14 +991,13 @@ bool isCheck(board_t* b, int side) {
 
 bool sqIsBlockerForKing(board_t* b, int kSq, int movingSide, int potBlockerSq) {
 	bitboard_t pinner = 0;
-	bitboard_t blocker = 0;
 
 	int sq;
 	bitboard_t kingSlider = lookUpRookMoves(kSq, b->occupied);
 	bitboard_t potBlocker = kingSlider & b->color[movingSide];
 	bitboard_t xrays = kingSlider ^ lookUpRookMoves(kSq, b->occupied ^ potBlocker);
 
-	pinner |= xrays & (getVerticalPieces(b, movingSide));
+	pinner |= xrays & (getVerticalPieces(b));
 	while (pinner) {
 		sq = popLSB(&pinner);
 		if (obstructed(kSq, sq) & (1ULL << potBlockerSq)) return true;
@@ -1008,7 +1007,7 @@ bool sqIsBlockerForKing(board_t* b, int kSq, int movingSide, int potBlockerSq) {
 	potBlocker = kingSlider & b->color[movingSide];
 	xrays = kingSlider ^ lookUpBishopMoves(kSq, b->occupied ^ potBlocker);
 
-	pinner |= xrays & (getDiagPieces(b, movingSide));
+	pinner |= xrays & (getDiagPieces(b));
 	while (pinner) {
 		sq = popLSB(&pinner);
 		if (obstructed(kSq, sq) & (1ULL << potBlockerSq)) return true;
@@ -1025,23 +1024,34 @@ bool checkingMove(board_t* b, move_t move) {
 	bitboard_t kingMask = (1ULL << kingSq);
 
 	// 1. Direct check: atkMask hits kingSq
+	Assert(pieceValid(movingPiece))
 	switch (movingPiece) {
 		case Pieces::P:
 		case Pieces::p:
-			if (pawnAtkMask[b->stm][to] & kingMask) return true; break;
+			if (pawnAtkMask[b->stm][to] & kingMask) 
+				return true;
+			break;
 		case Pieces::N:
 		case Pieces::n:
-			if (knightAtkMask[to] & kingMask) return true; break;
+			if (knightAtkMask[to] & kingMask) 
+				return true; 
+			break;
 		case Pieces::B:
 		case Pieces::b:
-			if (lookUpBishopMoves(to, b->occupied) & kingMask) return true; break;
+			if (lookUpBishopMoves(to, b->occupied) & kingMask) 
+				return true; 
+			break;
 		case Pieces::R:
 		case Pieces::r:
-			if (lookUpRookMoves(to, b->occupied) & kingMask) return true; break;
+			if (lookUpRookMoves(to, b->occupied) & kingMask) 
+				return true; 
+			break;
 		case Pieces::Q:
 		case Pieces::q:
 			if (lookUpBishopMoves(to, b->occupied) & kingMask
-				|| lookUpRookMoves(to, b->occupied) & kingMask) return true; break;
+				|| lookUpRookMoves(to, b->occupied) & kingMask) 
+				return true; 
+			break;
 	}
 
 	// 2. Discovered attack: Slider can hit kingSq

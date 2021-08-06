@@ -209,7 +209,7 @@ void generateQuietCheckers(board_t* b, moveList_t* moveList) {
 
 	int sq, atk_sq;
 	int oppkSq = getKingSquare(b, b->stm ^ 1);
-	int ownkSq = getKingSquare(b, b->stm);
+
 	bitboard_t pieces;
 	bitboard_t kingBoard = (1ULL << oppkSq);
 
@@ -353,7 +353,7 @@ void whiteSinglePawnPush(board_t* board, moveList_t* moveList) {
 	bitboard_t pushedPawns = (getPieces(board, PAWN, WHITE) << 8) & ~board->occupied;
 
 	// divide proms and normal pushes
-	bitboard_t promPawns = pushedPawns & RANK_8_HEX;
+	// bitboard_t promPawns = pushedPawns & RANK_8_HEX;
 	pushedPawns = pushedPawns & ~RANK_8_HEX;
 
 	// normal pawn pushes
@@ -368,7 +368,7 @@ void blackSinglePawnPush(board_t* board, moveList_t* moveList) {
 	bitboard_t pushedPawns = (getPieces(board, PAWN, BLACK) >> 8) & ~board->occupied;
 
 	// divide proms and normal pushes
-	bitboard_t promPawns = pushedPawns & RANK_1_HEX;
+	// bitboard_t promPawns = pushedPawns & RANK_1_HEX;
 	pushedPawns = pushedPawns & ~RANK_1_HEX;
 
 	// normal pawn pushes
@@ -536,7 +536,6 @@ void blackPawnCaptures(board_t* board, moveList_t* moveList) {
 
 void addKnightMoves(board_t* b, moveList_t* moveList) {
 	int sq, atk_sq;
-	int piece = (b->stm == color_t::WHITE) ? KNIGHT : KNIGHT;
 	bitboard_t knights = getPieces(b, KNIGHT, b->stm);
 	bitboard_t atks;
 
@@ -552,7 +551,6 @@ void addKnightMoves(board_t* b, moveList_t* moveList) {
 
 void addKnightCaptures(board_t* b, moveList_t* moveList) {
 	int sq, atk_sq;
-	int piece = (b->stm == color_t::WHITE) ? KNIGHT : KNIGHT;
 	bitboard_t knights = getPieces(b, KNIGHT, b->stm);
 	bitboard_t atks;
 
@@ -568,7 +566,6 @@ void addKnightCaptures(board_t* b, moveList_t* moveList) {
 
 void addKingMoves(board_t* b, moveList_t* moveList) {
 	int sq, kSq = getKingSquare(b, b->stm);
-	int piece = (b->stm == WHITE) ? Pieces::K : Pieces::k;
 	bitboard_t kingMoves = kingAtkMask[kSq] & ~moveList->attackedSquares & ~b->occupied;
 
 	while (kingMoves) {

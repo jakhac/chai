@@ -66,7 +66,7 @@ void printUCIBestMove(board_t* b, move_t bestMove);
  */
 void printPV(board_t* b, move_t* moves, int len);
 
-void printTTablePV(board_t* b, int depth, int selDepth);
+void printTTablePV(board_t* b, int depth);
 
 void printPvLine(board_t* b, move_t* pvLine, int d, int score);
 /**
@@ -79,8 +79,6 @@ void log(std::string logMsg);
 /**
  * Read input from command line during search. Sets stop to true,
  * if search has to be aborted.
- *
- * @param  s The search info.
  */
 void readInput(search_t* s);
 

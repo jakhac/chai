@@ -8,18 +8,6 @@
 #include "tt.h"
 #include "syzygy.h"
 
-// Maximum ply reached in alphaBeta and quiescence search.
-static int selDepth;
-
-// Search stack used for all searches
-static searchStack_t sStack[MAX_GAME_MOVES];
-
-// MCP depth limit
-static const int moveCountPruningDepth = 5;
-
-// MCP movecount according to all depths
-static int moveCountPruning[moveCountPruningDepth];
-
 const value_t aspiration = 18;
 
 const unsigned long long aspirationWindows[] = {

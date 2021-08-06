@@ -187,7 +187,7 @@ value_t kingSafety(board_t* b, int side, float* t) {
 	// punish attacked squares around king 
 	result += 8 - popCount(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
 
-	int openFilePenalty = 0;
+	// int openFilePenalty = 0; TODO
 	// if not endgame
 	if (!(popCount(b->occupied) <= 7 || countMajorPieces(b, side) <= 6)) {
 		int file;
@@ -247,7 +247,7 @@ value_t mobility(board_t* b, bool side, float* t) {
 	mobility += (int)interpolate(move_s->cnt / 6, move_s->cnt, *t);
 	move_s->cnt = 0;
 
-	int pieceMoves = 0;
+	// int pieceMoves = 0;
 	addBishopCaptures(b, move_s);
 	addBishopMoves(b, move_s);
 	mobility += move_s->cnt;

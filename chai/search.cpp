@@ -3,6 +3,21 @@
 using namespace chai;
 
 
+// Maximum ply reached in alphaBeta and quiescence search.
+int selDepth;
+
+// Search stack used for all searches
+searchStack_t sStack[MAX_GAME_MOVES];
+
+// MCP depth limit
+const int moveCountPruningDepth = 5;
+// MCP movecount according to all depths
+int volatile moveCountPruning[moveCountPruningDepth];
+
+
+
+
+
 void initSearch() {
 	// Calculate MCP depths
 	for (int depth = 1; depth < moveCountPruningDepth; depth++) {
@@ -282,14 +297,14 @@ value_t search(board_t* b, search_t* s) {
 }
 
 value_t aspirationSearch(board_t* b, search_t* s, int d, value_t bestScore) {
-	value_t score;
+	value_t score = -VALUE_INFTY;
 	int64_t newAlpha, newBeta;
 	int researchCnt = 0;
 	Assert(abs(bestScore) < VALUE_INFTY);
 
 	// Determine initial alpha/beta values
 	int64_t alpha = std::max(-VALUE_INFTY, bestScore - aspiration);
-	int64_t beta = std::min(VALUE_INFTY, (const value_t)(bestScore + aspiration));
+	int64_t beta = std::min(VALUE_INFTY, (value_t)(bestScore + aspiration));
 
 	// Research, until score is within bounds
 	while (!s->stopped) {
@@ -323,7 +338,7 @@ value_t aspirationSearch(board_t* b, search_t* s, int d, value_t bestScore) {
 
 template <nodeType_t nodeType>
 value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s) {
-	Assert(checkBoard(b));
+	Assert(checkBoard());
 	Assert(alpha < beta);
 
 	// Initialize node
@@ -331,7 +346,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	bool pvNode = nodeType == PV;
 	bool mateThreat = false;
 	bool improving = false;
-	int searchExt = 0;
 	int newDepth = depth - 1;
 
 	value_t value = -VALUE_INFTY;
@@ -435,7 +449,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 	// EGTB:
 	// Endgame-Tablebase probing.
 	int tbFlag;
-	int tbResult = probeTB(b);
+	unsigned int tbResult = probeTB(b);
 	if (tbResult != TB_RESULT_FAILED) {
 		s->tbHit++;
 
@@ -565,7 +579,6 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 	move_t currentMove = MOVE_NONE;
 	move_t bestMove = MOVE_NONE;
-	int moveNum = 0;
 	int legalMoves = 0;
 	int oldAlpha = alpha;
 
@@ -786,10 +799,10 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 				histMax = std::max(histHeuristic[b->stm][from][to], histMax);
 
 				if (histMax >= HISTORY_MAX) {
-					for (int c = 0; c < 2; c++) {
-						for (int i = 0; i < NUM_SQUARES; i++) {
-							for (int j = 0; j < NUM_SQUARES; j++) {
-								histHeuristic[c][i][j] >>= 3;
+					for (int x = 0; x < 2; x++) {
+						for (int y = 0; y < NUM_SQUARES; y++) {
+							for (int z = 0; z < NUM_SQUARES; z++) {
+								histHeuristic[x][y][z] >>= 3;
 							}
 						}
 					}
@@ -872,7 +885,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
 
 template <nodeType_t nodeType>
 value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t* s) {
-	Assert(checkBoard(b));
+	Assert(checkBoard());
 
 	// Early TT prefetch 
 	prefetchTT(b);
