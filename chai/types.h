@@ -166,12 +166,6 @@ struct board_t {
 
 	// Stack stores pushed moves as Undo objects.
 	undo_t undoHistory[MAX_GAME_MOVES];
-
-	// Transposition table.
-	ttable_t tt[1];
-
-	// Pawn hash table.
-	pawntable_t pt[1];
 };
 
 /**
@@ -205,6 +199,44 @@ struct search_t {
 	// pv hits
 	int pvHits = 0;
 };
+
+// struct threadState_t {
+// 	int id;
+
+// 	// Thread status
+// 	bool searching;
+
+// 	// Always false. If set to true, this thread terminates.
+// 	// bool terminateThread = false;
+
+// 	// Each thread has its own board to push/pop moves
+// 	// and store positional state variables
+// 	board_t b;
+
+// 	// Own search_t as thread searches may vary from main search
+// 	search_t s;
+
+// 	// Search heuristics for each thread
+// 	move_t killer[2][MAX_GAME_MOVES];
+// 	move_t mateKiller[MAX_GAME_MOVES];
+// 	move_t counterHeuristic[64][64][2];
+// 	int histHeuristic[2][64][64];
+// 	int histMax = 0;
+
+// 	// Search parameters
+// 	value_t bestScore;
+// 	move_t bestMove;
+// 	move_t pvLine[MAX_DEPTH + 1];
+// 	searchStack_t ss[MAX_DEPTH + 1];
+
+// 	int selDepth;
+
+
+// 	// bool stopThread;
+// 	int nodeCount;
+
+
+// };
 
 namespace Pieces {
 	typedef enum PIECE {

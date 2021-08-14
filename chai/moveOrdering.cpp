@@ -218,7 +218,10 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 	return b->stm != color;
 }
 
-void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
+void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove, 
+				move_t killer[][512], move_t mKiller[512], 
+				move_t counterHeur[][64][2], int histHeur[][64][64]) {
+
 	move_t currentMove;
 	int mvvLvaScore = 0;
 	int capturedPiece = 0;
@@ -273,7 +276,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		}
 
 		// mate killer
-		if (currentMove == mateKiller[b->ply]) {
+		if (currentMove == mKiller[b->ply]) {
 			moveList->scores[i] = MATE_KILLER;
 			continue;
 		}
@@ -295,7 +298,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		// counter move
 		if (b->ply > 0) {
 			move_t prevMove = b->undoHistory[b->ply - 1].move;
-			move_t counterMove = counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->stm];
+			move_t counterMove = counterHeur[fromSq(prevMove)][toSq(prevMove)][b->stm];
 
 			if (currentMove == counterMove) {
 				moveList->scores[i] = COUNTER_SCORE;
@@ -311,7 +314,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove) {
 		}
 
 		// last resort: history heuristic
-		int histScore = histHeuristic[b->stm][fromSq(currentMove)][toSq(currentMove)];
+		int histScore = histHeur[b->stm][fromSq(currentMove)][toSq(currentMove)];
 		Assert(0 <= histScore && histScore <= HISTORY_MAX);
 		moveList->scores[i] = QUIET_SCORE + (histScore);
 		Assert3(moveList->scores[i] < COUNTER_SCORE,

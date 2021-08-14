@@ -6,6 +6,7 @@
 #include "eval.h"
 #include "moveOrdering.h"
 #include "tt.h"
+#include "thread.h"
 #include "syzygy.h"
 
 const value_t aspiration = 18;
@@ -31,7 +32,7 @@ void initSearch();
  * @returns Best score found in search.
  */
 template <chai::nodeType_t nodeType>
-value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* s);
+value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth);
 
 /**
  * Quiescence search pushes all captures to evaluate a stable and quiet position. AlphaBeta
@@ -46,7 +47,7 @@ value_t alphaBeta(value_t alpha, value_t beta, int depth, board_t* b, search_t* 
  * @returns Best score found in quiescences search.
  */
 template <chai::nodeType_t nodeType>
-value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t* s);
+value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth);
 
 /**
  * Root function that starts alphaBeta search in iterative deepening framework.
@@ -57,6 +58,9 @@ value_t quiescence(value_t alpha, value_t beta, int depth, board_t* b, search_t*
  * @returns value_t Best value found search.
  */
 value_t search(board_t* b, search_t* s);
+
+// TODO doc
+// void iid(ThreadWrapper* thread);
 
 /**
  * Apply offset of aspiration windows in alphaBeta call and try to score inside alpha and beta.
@@ -69,7 +73,7 @@ value_t search(board_t* b, search_t* s);
  *
  * @returns Best score found in alphaBeta search.
  */
-value_t aspirationSearch(board_t* b, search_t* s, int depth, value_t bestScore);
+value_t aspirationSearch(Thread thread, int depth, value_t bestScore);
 
 /**
  * Tries to find a single(!) repetition in undoPly array. Used in search to find upcoming draws.

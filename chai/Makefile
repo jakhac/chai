@@ -4,14 +4,19 @@
 
 VERSION = v2.6.4
 
-EXE = chai_$(VERSION).exe
+EXE_RELEASE = chai_$(VERSION)_release.exe
+EXE_DEBUG = chai_$(VERSION)_debug.exe
 
 SRCS = main.cpp tt.cpp attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
-	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp
+	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
+	thread.cpp
 
-OBJ_DIR = ./obj
-OBJS = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(notdir $(SRCS)))
+OBJ_RELEASE_DIR = ./obj_release
+OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
+
+OBJ_DEBUG_DIR = ./obj_debug
+OBJS_DEBUG = $(patsubst %.cpp, $(OBJ_DEBUG_DIR)/%.o, $(notdir $(SRCS)))
 
 VPATH = egtb:
 
@@ -41,13 +46,14 @@ bits=64
 
 
 ifeq ($(TYPE),)
-	TYPE = release
+	TPE = release
 endif
 ifeq ($(TYPE),release)
 	assert=no
 	debug=no
 	info=no
 	test=no
+
 endif
 ifeq ($(TYPE),debug)
 	assert=yes
@@ -55,8 +61,7 @@ ifeq ($(TYPE),debug)
 	info=yes
 	test=yes
 
-	LDFLAGS += -fsanitize=address
-	CXXFLAGS += -fsanitize=address
+	optimize=no
 endif
 
 
@@ -121,8 +126,11 @@ CXXFLAGS += -pedantic -Wextra -Wshadow
 # Add version flag for info in target exe
 CXXFLAGS += -DVERSION=$(VERSION)
 
+# Set 4MB stack size
+CXXFLAGS += -Wl,--stack,4194304
+
 DEPENDFLAGS += -std=c++17
-LDFLAGS += -m$(bits)
+LDFLAGS += -m$(bits) -Wl,--stack,4194304
 
 
 #######################################
@@ -132,11 +140,18 @@ LDFLAGS += -m$(bits)
 # Use GNU compiler
 CXX = g++
 
-$(EXE): $(OBJS)
-	+$(CXX) -o $@ $(OBJS) $(LDFLAGS)
+$(EXE_DEBUG): $(OBJS_DEBUG)
+	+$(CXX) -o $@ $(OBJS_DEBUG) $(LDFLAGS)
 
-$(OBJ_DIR)/%.o: %.cpp
+$(OBJ_DEBUG_DIR)/%.o: %.cpp
 	g++ $(CXXFLAGS) -c -o $@ $<
+
+$(EXE_RELEASE): $(OBJS_RELEASE)
+	+$(CXX) -o $@ $(OBJS_RELEASE) $(LDFLAGS)
+
+$(OBJ_RELEASE_DIR)/%.o: %.cpp
+	g++ $(CXXFLAGS) -c -o $@ $<
+
 
 
 #######################################
@@ -144,10 +159,10 @@ $(OBJ_DIR)/%.o: %.cpp
 #######################################
 
 debug:
-	$(MAKE) $(EXE) TYPE=debug .depend
+	$(MAKE) $(EXE_DEBUG) TYPE=debug .depend
 
-release: 
-	$(MAKE) $(EXE) TYPE=release .depend
+release:
+	$(MAKE) $(EXE_RELEASE) TYPE=release .depend
 
 # strip
 
@@ -156,10 +171,12 @@ test:
 
 clean:
 	$(MAKE) objclean
-	del /Q $(EXE) 2>nul
+	del /Q $(EXE_DEBUG) 2>nul
+	del /Q $(EXE_RELEASE) 2>nul
 
 objclean:
-	del /Q .\obj\ 2>nul
+	del /Q .\obj_release\ 2>nul
+	del /Q .\obj_debug\ 2>nul
 
 help:
 	@echo "Build chai_$(VERSION) with "make [target]"

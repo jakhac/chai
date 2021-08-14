@@ -9,9 +9,11 @@
 # all executables
 **.exe
 
+
 # custom build
-/build/**/*.o
-/build/**/*.d
+**.o
+**.d
+**.depend
 
 # syzygy egtb
 

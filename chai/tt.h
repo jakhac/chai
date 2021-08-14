@@ -21,6 +21,12 @@ const int QS_DEPTH = -1;
 const int QS_DEPTH_CHECK = 0;
 
 
+// Transposition table used for whole program.
+extern ttable_t tt[1];
+
+// Pawn hash table used for whole program.
+extern pawntable_t pt[1];
+
 /**
  * Initialize both TT and PT with default MB size.
  */
@@ -31,28 +37,28 @@ void initHashTables(board_t* b);
  *
  * @param  b The board with both hash tables.
  */
-void freeHashTables(ttable_t* tt, pawntable_t* pt);
+void freeHashTables();
 
 /**
  * Initialize transposition table: Clear used or allocated memory and re-allocate.
  *
  * @param  pvTable_s Transposition table.
  */
-bool resizeHashTables(ttable_t* tt, pawntable_t* pt, size_t newMbSize);
+bool resizeHashTables(size_t newMbSize);
 
 /**
  * Reset all variables in transposition table. Only used in initialization or new game.
  *
  * @param  pvTable_s Transposition table.
  */
-void clearTT(ttable_t* pvTable_s);
+void clearTT();
 
 /**
  * Reset all variables used in pawn table. Only used before new game.
  *
  * @param  pawnTable Pawn table to clear.
  */
-void clearPT(pawntable_t* pawnTable);
+void clearPT();
 
 /**
  * Store a transposition entry containing score, score flag, move and depth in in transposition

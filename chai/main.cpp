@@ -3,36 +3,45 @@
 int main() {
 	cout << "chai " << TOSTRING(VERSION) << endl
 		<< "assert=" << info_ASSERT
-		<< " buckets=" << BUCKETS << endl
+		<< " buckets=" << BUCKETS
+		<< " threads=" << NUM_THREADS << endl
 		<< "compiler=" << info_COMPILER
 		<< " date=" << __DATE__ << endl;
+
+	// TODO: use stacksize attr in gcc build
+	// TODO gitid
 
 	// Init all tables and parameters
 	init();
 	initHashTables(p_board);
 
+#ifdef EGTB
 	const char* tbPath = "C:/egtb_files";
 	if (!tb_init(tbPath)) {
 		cout << "TB init failed." << endl;
 		Assert(false);
 		exit(1);
 	}
-
 	cout << "TB max=" << TB_LARGEST << endl;
-
-	// TODO: use stacksize attr in gcc build
+#endif // DEBUG
 
 	parseFen(p_board, STARTING_FEN);
 	//parseFen(&board, "R7/6k1/P7/6p1/r5P1/3K4/8/8 w - - 0 1");
 
-	// TODO gitid
-
 	printBoard();
+
+	initThreadPool();
+
 	cli();
 
 	// Free all hash tables before exit
-	freeHashTables(p_board->tt, p_board->pt);
+	freeHashTables();
+	
+#ifdef EGTB
 	tb_free();
+#endif // DEBUG
+
+	deleteThreadPool();
 
 	return 0;
 }
@@ -50,7 +59,7 @@ void cli() {
 		}
 
 		if (userInput == "quit") {
-			return;
+			break;
 		}
 
 		if (userInput == "test") {

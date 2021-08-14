@@ -17,8 +17,7 @@ void uciMode(board_t* b, search_t* s) {
 		fflush(stdout);
 
 		if (!cmd.compare("quit")) {
-			exit(0);
-			return;
+			break;
 		}
 
 		if (!cmd.compare("uci")) {
@@ -55,13 +54,15 @@ void uciMode(board_t* b, search_t* s) {
 		fflush(stdout);
 	}
 
+	cout << "Left uci mode." << endl;
+
 }
 
 void uciSetOption(board_t* b, std::string cmd) {
 
 	if (strStartsWith(cmd, "setoption name Hash value ")) {
 		int newMbSize = stoi(cmd.substr(strlen("setoption name Hash value "), std::string::npos));
-		if (resizeHashTables(b->tt, b->pt, newMbSize)) {
+		if (resizeHashTables(newMbSize)) {
 			cout << "info string set Hash to " << newMbSize << "MB" << endl;
 		}
 	}

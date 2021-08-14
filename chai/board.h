@@ -59,25 +59,25 @@ const std::string sideChar = "wb-";
 const std::string rankChar = "12345678";
 const std::string fileChar = "abcdefgh";
 
-/**
-* Stores up to 2 killer moves for each ply.
-*/
-extern move_t killer[2][MAX_GAME_MOVES];
+// /**
+// * Stores up to 2 killer moves for each ply.
+// */
+// extern move_t killer[2][MAX_GAME_MOVES];
 
-/**
-* Stores up mate killer moves for each ply.
-*/
-extern move_t mateKiller[MAX_GAME_MOVES];
+// /**
+// * Stores up mate killer moves for each ply.
+// */
+// extern move_t mateKiller[MAX_GAME_MOVES];
 
-/**
-* Stores history heuristic for both sides with [PIECE][TO] indices.
-*/
-extern int histHeuristic[2][64][64];
+// /**
+// * Stores history heuristic for both sides with [PIECE][TO] indices.
+// */
+// extern int histHeuristic[2][64][64];
 
-/**
-* Stores maximum history score.
-*/
-extern int histMax;
+// /**
+// * Stores maximum history score.
+// */
+// extern int histMax;
 
 /**
  * board instance used for complete program

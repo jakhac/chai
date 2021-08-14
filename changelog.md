@@ -259,23 +259,15 @@
   - v2.6.3
     - [x] EGTB Probing
   - v2.6.4
-    - [ ] makefile and g++ code adjustments
-    - [ ] make gtest
-    - [ ] archive repository in msvc_branch
-    - [ ] g++\_branch with githooks test assertion
-  - v2.6.5
+    - [x] archive repository in msvc_branch
+    - [x] makefile and g++ code adjustments
     - [ ] Multi-Threading
 - Project
   - [ ] UCI fixes, e.g. q to quit current mode
   - [ ] UCI refactor parsing
   - [ ] Add syzygy tablebases
-  - ~~Set default TT size to 512MB~~
 - Bugfixes
-- Versions
-  - v2.6.1: Added EGTB functionality, Delta Pruning
-  - v2.6.2: Store/Probe in quiescence
-  - v2.6.3: Aspiration Windows
-  - v2.6.4: EGTB probing (Opening book?)
+- Opening book?
 
 # Todo
 
@@ -294,7 +286,7 @@
 - Project
 
   - ~~detect endgames (knight, bishop endgame, light/dark squared bishop)~~
-  - ~~update typedefs, src, structs, key_t, ...~~
+  - ~~update typedefs, src, structs, hashhashKey_t, ...~~
   - Timeman.c: dynamic time management
   - Time management (rapid, blitz, bullet mode for lichess)
   - Opening book

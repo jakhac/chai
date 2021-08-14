@@ -109,4 +109,6 @@ bool see_ge(board_t* b, move_t move, int threshHold);
  * @param  moveList Reference to moveList to score moves in.
  * @param  hashMove Hash move found in pvLine or ttable.
  */
-void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove);
+void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove, 
+				move_t killer[][512], move_t mKiller[512], 
+				move_t counterHeur[][64][2], int histHeur[][64][64]);

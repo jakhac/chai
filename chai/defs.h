@@ -19,6 +19,8 @@ using std::fixed;
 // #define TESTING
 // #define INFO
 
+// #define EGTB
+
 #define STRINGIFY(x) #x
 #define TOSTRING(x) std::string(STRINGIFY(x))
 #define AT __FILE__ ":" TOSTRING(__LINE__)
