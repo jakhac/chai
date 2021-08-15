@@ -1,5 +1,23 @@
 #include "syzygy.h"
 
+void initEGTB() {
+#ifdef EGTB
+	const char* tbPath = "C:/egtb_files";
+	if (!tb_init(tbPath)) {
+		cout << "TB init failed." << endl;
+		Assert(false);
+		exit(1);
+	}
+	cout << "TB max=" << TB_LARGEST << endl;
+#endif // EGTB
+}
+
+void freeEGTB() {
+#ifdef USE_EGTB
+	tb_free();
+#endif // USE_EGTB
+}
+
 int probeTB(board_t* b) {
 	// Do not allow TB probing in root nodes
 	// TB only works if both players have no castling rights

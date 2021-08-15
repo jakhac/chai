@@ -1,6 +1,8 @@
 #include "main.h"
 
 int main() {
+	// Print meta information in every build
+	NUM_THREADS = std::thread::hardware_concurrency() - 1;
 	cout << "chai " << TOSTRING(VERSION) << endl
 		<< "assert=" << info_ASSERT
 		<< " buckets=" << BUCKETS
@@ -8,41 +10,22 @@ int main() {
 		<< "compiler=" << info_COMPILER
 		<< " date=" << __DATE__ << endl;
 
-	// TODO: use stacksize attr in gcc build
-	// TODO gitid
-
 	// Init all tables and parameters
 	init();
 	initHashTables(p_board);
-
-#ifdef EGTB
-	const char* tbPath = "C:/egtb_files";
-	if (!tb_init(tbPath)) {
-		cout << "TB init failed." << endl;
-		Assert(false);
-		exit(1);
-	}
-	cout << "TB max=" << TB_LARGEST << endl;
-#endif // DEBUG
-
-	parseFen(p_board, STARTING_FEN);
-	//parseFen(&board, "R7/6k1/P7/6p1/r5P1/3K4/8/8 w - - 0 1");
-
-	printBoard();
-
+	initEGTB();
 	initThreadPool();
 
+	// Print status and drop into cli protocol
+	parseFen(p_board, STARTING_FEN);
+	printBoard();
 	cli();
+
 
 	// Free all hash tables before exit
 	freeHashTables();
-	
-#ifdef EGTB
-	tb_free();
-#endif // DEBUG
-
+	freeEGTB();
 	deleteThreadPool();
-
 	return 0;
 }
 

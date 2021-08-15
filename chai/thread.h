@@ -52,8 +52,8 @@ public:
 	// Search parameters
 	value_t bestScore;
 	move_t bestMove;
-	move_t pvLine[MAX_DEPTH + 1];
 	searchStack_t ss[MAX_DEPTH + 1];
+	move_t pvLine[MAX_DEPTH + 1];
 
     void startIdle() {
         t = std::thread(&ThreadWrapper::idle, this);

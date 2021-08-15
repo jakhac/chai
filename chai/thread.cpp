@@ -27,6 +27,8 @@ void ThreadWrapper::resetThreadStates(board_t* board, search_t* search) {
         }
     }
 
+    std::fill_n(pvLine, MAX_DEPTH + 1, MOVE_NONE);
+
     histMax = 0;
 }
 
@@ -36,7 +38,7 @@ void ThreadWrapper::idle() {
         {
             std::unique_lock<std::mutex> lock(mtx);
             searching = false;
-            cout << "T" << id << ": conditionally blocked." << endl;
+            // cout << "T" << id << ": conditionally blocked." << endl;
             cond.notify_one();
             cond.wait(lock, [&] {
                 return searching;
@@ -47,11 +49,11 @@ void ThreadWrapper::idle() {
             break;
         
         // Returned from conditional wait: Start searching
-        cout << "T" << id << " searches." << endl;
+        // cout << "T" << id << " searches." << endl;
         searching = true;
         iid(threadPool[this->id]);
         searching = false;
-        cout << "T" << id << " finished search." << endl;
+        // cout << "T" << id << " finished search." << endl;
     }
 
     // cout << "T" << id << " break from idle" << endl;
@@ -128,3 +130,5 @@ void waitAllThreads() {
         threadPool[i]->waitThread();
     }
 }
+
+Thread selectBestThread() { }

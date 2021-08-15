@@ -20,6 +20,7 @@ using std::fixed;
 // #define INFO
 
 // #define EGTB
+#define USE_THREADS
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) std::string(STRINGIFY(x))

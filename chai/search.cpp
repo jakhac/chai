@@ -3,8 +3,8 @@
 using namespace chai;
 
 
-// Maximum ply reached in alphaBeta and quiescence search.
-int selDepth;
+// // Maximum ply reached in alphaBeta and quiescence search.
+// int selDepth;
 
 // MCP depth limit
 const int moveCountPruningDepth = 5;
@@ -182,10 +182,12 @@ static void updatePvLine(move_t* pv, move_t move, move_t* childPv) {
 }
 
 
-static void resetSearchParameters(board_t* b, search_t* s) {
+static void resetSearchParameters(Thread thread) {
+	board_t* b = &thread->b;
+	search_t* s = &thread->s;
 	b->ply = 0;
 
-	selDepth = 0;
+	thread->selDepth = 0;
 
 	// Reset stats
 	tt->probed = 0;
@@ -218,6 +220,7 @@ value_t search(board_t* b, search_t* s) {
 	resetAllThreadStates(b, s);
 
 	// 2. Start helper threads
+    ABORT_SEARCH = false;
 	startAllThreads();
 
 	// 3. Start main thread (process)
@@ -259,10 +262,8 @@ void iid(Thread thread) {
 	thread->bestScore = VALUE_NONE;
  	thread->bestMove = MOVE_NONE;
 
-	//  cout << "IID started with thread ID=" << thread->id << endl;
-
 	// Search setup 
-	resetSearchParameters(b, s);
+	resetSearchParameters(thread);
 
 	// Set up variables used before first recursive call
 	searchStack_t* ss = &thread->ss[b->ply];
@@ -297,8 +298,8 @@ void iid(Thread thread) {
 		}
 
 		// Update best move after every complete search iteration
-		thread->bestMove = probePV(b);
-		// thread->bestMove = thread->pvLine[0];
+		// thread->bestMove = probePV(b);
+		thread->bestMove = thread->pvLine[0];
 		Assert(thread->bestMove != MOVE_NONE);
 
 		// Leave IID when mate is found
@@ -923,7 +924,7 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 	}
 
 	s->qnodes++;
-	selDepth = std::max(selDepth, b->ply);
+	thread->selDepth = std::max(thread->selDepth, b->ply);
 
 	bool pvNode = nodeType == PV;
 	move_t currPvLine[MAX_DEPTH + 1];

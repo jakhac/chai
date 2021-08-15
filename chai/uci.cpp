@@ -67,6 +67,13 @@ void uciSetOption(board_t* b, std::string cmd) {
 		}
 	}
 
+	if (strStartsWith(cmd, "setoption name Hash value ")) {
+		int newMbSize = stoi(cmd.substr(strlen("setoption name Hash value "), std::string::npos));
+		if (resizeHashTables(newMbSize)) {
+			cout << "info string set Hash to " << newMbSize << "MB" << endl;
+		}
+	}
+
 }
 
 void uciParsePosition(board_t* b, std::string cmd) {
