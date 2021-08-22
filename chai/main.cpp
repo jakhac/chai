@@ -12,8 +12,8 @@ int main() {
 
 	// Init all tables and parameters
 	init();
-	initHashTables(p_board);
-	initEGTB();
+	initHashTables();
+	initEGTB(""); // C:/egtb_files
 	initThreadPool();
 
 	// Print status and drop into cli protocol

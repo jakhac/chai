@@ -1,22 +1,13 @@
 #include "board.h"
 
-// TODO exclude here, now in threadState
-// Include extern vars declared in board.h
-// move_t killer[2][MAX_GAME_MOVES];
-// move_t mateKiller[MAX_GAME_MOVES];
-// move_t counterHeuristic[64][64][2];
-
-// int histHeuristic[2][64][64];
-// int histMax = 0;
-
 board_t* p_board = new board_t();
 
-bool checkBoard() {
-	Assert(p_board->castlePermission >= 0 && p_board->castlePermission <= 15);
-	Assert(popCount(p_board->occupied) >= 2 && popCount(p_board->occupied) <= 32);
-	Assert(validEnPasSq(p_board->enPas) || p_board->enPas == DEFAULT_EP_SQ);
-	Assert(p_board->zobristKey == generateZobristKey(p_board));
-	Assert(p_board->zobristPawnKey == generatePawnHashKey(p_board));
+bool checkBoard(board_t* board) {
+	Assert(board->castlePermission >= 0 && board->castlePermission <= 15);
+	Assert(popCount(board->occupied) >= 2 && popCount(board->occupied) <= 32);
+	Assert(validEnPasSq(board->enPas) || board->enPas == DEFAULT_EP_SQ);
+	Assert(board->zobristKey == generateZobristKey(board));
+	Assert(board->zobristPawnKey == generatePawnHashKey(board));
 	return true;
 }
 
@@ -144,8 +135,7 @@ bitboard_t getVerticalPieces(board_t* b) {
 int pieceAt(board_t* b, int square) {
 	for (int i = 0; i < 7; i++) {
 		if (b->pieces[i] & (1ULL << square)) {
-			return i + (b->color[chai::BLACK] & (1ULL << square) ?
-						6 : 0);
+			return i + (b->color[chai::BLACK] & (1ULL << square) ? 6 : 0);
 		}
 	}
 	return 0;
@@ -261,7 +251,8 @@ bool parseFen(board_t* board, std::string fen) {
 
 	// assert for correct position
 	Assert(fen[index] == 'w' || fen[index] == 'b');
-	board->stm = (fen[index] == 'w') ? chai::WHITE : chai::BLACK;
+	board->stm = (fen[index] == 'w') ? chai::WHITE 
+									 : chai::BLACK;
 	index += 2;
 
 	// castle permission
@@ -311,8 +302,7 @@ bool parseFen(board_t* board, std::string fen) {
 	board->zobristPawnKey = generatePawnHashKey(board);
 	board->zobristKey = generateZobristKey(board);
 
-	checkBoard();
-
+	checkBoard(board);
 	return false;
 }
 
@@ -557,7 +547,8 @@ void pushNormal(board_t* b, move_t move) {
 	// Pawn start changes enPas square
 	b->enPas = DEFAULT_EP_SQ;
 	if (piecePawn[fromPiece] && (toSquare ^ fromSquare) == 16) {
-		b->enPas = b->stm == chai::WHITE ? toSquare - 8 : toSquare + 8;
+		b->enPas = b->stm == chai::WHITE ? toSquare - 8 
+										 : toSquare + 8;
 	}
 
 	// Pawn moves reset 50-Move-Rule and change pawnKey
@@ -753,7 +744,7 @@ undo_t pop(board_t* b) {
 
 	Assert(b->undoPly >= 0);
 	Assert(validEnPasSq(b->enPas) || b->enPas == DEFAULT_EP_SQ);
-	Assert(checkBoard());
+	Assert(checkBoard(b));
 	return *undo;
 }
 
@@ -786,7 +777,7 @@ undo_t popNull(board_t* b) {
 
 move_t getCurrentMove(board_t* b) {
 	return b->undoPly > 0 ? b->undoHistory[b->undoPly - 1].move
-		: MOVE_NONE;
+						  : MOVE_NONE;
 }
 
 bitboard_t getPinner(board_t* b, int kSq, int kSide) {

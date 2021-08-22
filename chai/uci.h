@@ -17,7 +17,7 @@
  */
 void uciMode(board_t* b, search_t* s);
 
-void uciSetOption(board_t* b, std::string cmd);
+void uciSetOption(std::string cmd);
 
 /**
  * Parse a position from UCI command.

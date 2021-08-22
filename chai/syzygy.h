@@ -3,7 +3,7 @@
 #include "egtb/tbprobe.h"
 #include "board.h"
 
-void initEGTB();
+void initEGTB(const char*);
 
 void freeEGTB();
 

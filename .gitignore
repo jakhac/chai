@@ -9,6 +9,8 @@
 # all executables
 **.exe
 
+/archive
+
 
 # custom build
 **.o

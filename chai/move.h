@@ -63,9 +63,8 @@ inline bool isPromotion(move_t move) {
 }
 
 inline int promPiece(board_t* b, move_t move) {
-	return isPromotion(move) ?
-		(move >> 14) + 2 + (b->stm == chai::BLACK ? 6 : 0)
-		: chai::NO_TYPE;
+	return isPromotion(move) ? (move >> 14) + 2 + (b->stm == chai::BLACK ? 6 : 0)
+							 : chai::NO_TYPE;
 }
 
 inline int promPieceType(move_t move) {

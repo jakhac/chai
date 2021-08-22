@@ -1,7 +1,7 @@
 #include "perft.h"
 
 long long Perft::perftRoot(board_t* b, int depth) {
-	Assert(checkBoard());
+	Assert(checkBoard(b));
 	printf("\nPerft to depth %d\n", depth);
 	auto start = std::chrono::high_resolution_clock::now();
 
@@ -42,7 +42,7 @@ long long Perft::perftRoot(board_t* b, int depth) {
 }
 
 void Perft::perft(board_t* b, int depth) {
-	Assert(checkBoard());
+	Assert(checkBoard(b));
 
 	if (depth == 0) {
 		leafNodes++;

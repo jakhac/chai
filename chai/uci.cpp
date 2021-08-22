@@ -29,7 +29,7 @@ void uciMode(board_t* b, search_t* s) {
 
 		if (!cmd.compare("isready")) {
 			init();
-			initHashTables(b);
+			initHashTables();
 
 			uciParsePosition(b, "position startpos");
 			cout << "readyok\n";
@@ -48,7 +48,7 @@ void uciMode(board_t* b, search_t* s) {
 		}
 
 		if (strStartsWith(cmd, "setoption")) {
-			uciSetOption(b, cmd);
+			uciSetOption(cmd);
 		}
 
 		fflush(stdout);
@@ -58,7 +58,7 @@ void uciMode(board_t* b, search_t* s) {
 
 }
 
-void uciSetOption(board_t* b, std::string cmd) {
+void uciSetOption(std::string cmd) {
 
 	if (strStartsWith(cmd, "setoption name Hash value ")) {
 		int newMbSize = stoi(cmd.substr(strlen("setoption name Hash value "), std::string::npos));
@@ -67,12 +67,28 @@ void uciSetOption(board_t* b, std::string cmd) {
 		}
 	}
 
-	if (strStartsWith(cmd, "setoption name Hash value ")) {
-		int newMbSize = stoi(cmd.substr(strlen("setoption name Hash value "), std::string::npos));
-		if (resizeHashTables(newMbSize)) {
-			cout << "info string set Hash to " << newMbSize << "MB" << endl;
+	if (strStartsWith(cmd, "setoption name SyzygyPath value ")) {
+		std::string syzygyPath = cmd.substr(strlen("setoption name SyzygyPath value "), std::string::npos);
+		tb_free();
+        if (!syzygyPath.compare("<empty>")) {
+        	cout << "info string Error: SyzygyPath is <empty>" << syzygyPath << endl;
+			return;
 		}
-	}
+		initEGTB(syzygyPath.c_str());
+        cout << "info string set SyzygyPath to " << syzygyPath << endl;
+    }
+
+	if (strStartsWith(cmd, "setoption name Threads value ")) {
+		int numThreads = stoi(cmd.substr(strlen("setoption name Threads value "), std::string::npos));
+		
+		if (!resizeThreadPool(numThreads)) {
+			cout << "info string Threads value is invalid. (Range := [1, 64])" << endl;
+			return;
+		}
+		Assert(numThreads == NUM_THREADS);
+
+        cout << "info string set total Threads to " << numThreads << endl;
+    }
 
 }
 

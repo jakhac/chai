@@ -54,7 +54,7 @@ void printBinary(bitboard_t x);
  * @param selDpt selDepth.
  * @param score bestScore returned by search.
  */
-void printUCI(search_t* s, int d, int selDpt, int score);
+void printUCI(search_t* s, int d, int selDpt, int score, long totalNodes);
 
 void printUCIBestMove(board_t* b, move_t bestMove);
 

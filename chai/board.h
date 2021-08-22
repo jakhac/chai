@@ -261,7 +261,7 @@ void printBoard();
  * 
  * @returns True if no issues have been found, else false.
  */
-bool checkBoard();
+bool checkBoard(board_t* board);
 
 /**
  * Push move onto board. Update castle rights, enPas square, zobristKey and promotions. Pushes

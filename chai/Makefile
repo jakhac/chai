@@ -6,6 +6,7 @@ VERSION = v2.6.4
 
 EXE_RELEASE = chai_$(VERSION)_release.exe
 EXE_DEBUG = chai_$(VERSION)_debug.exe
+EXE_TEST = test.exe
 
 SRCS = main.cpp tt.cpp attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
@@ -45,21 +46,17 @@ pext=yes
 bits=64
 
 
-ifeq ($(TYPE),)
-	TPE = release
-endif
 ifeq ($(TYPE),release)
 	assert=no
 	debug=no
 	info=no
 	test=no
-
 endif
 ifeq ($(TYPE),debug)
 	assert=yes
 	debug=yes
 	info=yes
-	test=yes
+	test=no
 
 	optimize=no
 endif
@@ -173,6 +170,13 @@ clean:
 	$(MAKE) objclean
 	del /Q $(EXE_DEBUG) 2>nul
 	del /Q $(EXE_RELEASE) 2>nul
+	del /Q $(EXE_TEST) 2>nul
+
+cleantest:
+	del /Q .\obj_debug\ 2>nul
+	del /Q $(EXE_DEBUG) 2>nul
+	del /Q $(EXE_TEST) 2>nul
+	del /Q test.exe 2>nul
 
 objclean:
 	del /Q .\obj_release\ 2>nul
@@ -183,11 +187,11 @@ help:
 	@echo "Possible targets are:"
 	@echo "debug     > build with asserts and debug information"
 	@echo "release   > build fastest version of engine"
-	@echo "test      > copmile engine files and build test program in root/test"
+	@echo "test      > compile engine files and build test program in root/test"
 
 .depend:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null
 
 -include .depend
 
-.PHONY: all test clean objclean help
+.PHONY: all test clean objclean help cleantest release debug

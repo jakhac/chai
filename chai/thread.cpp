@@ -26,10 +26,9 @@ void ThreadWrapper::resetThreadStates(board_t* board, search_t* search) {
             }
         }
     }
+    histMax = 0;
 
     std::fill_n(pvLine, MAX_DEPTH + 1, MOVE_NONE);
-
-    histMax = 0;
 }
 
 void ThreadWrapper::idle() {
@@ -106,10 +105,15 @@ void deleteThreadPool() {
     // cout << "Joined all threads" << endl;
 }
 
-void resizeThreadPool(size_t numWorkers) {
+bool resizeThreadPool(size_t numWorkers) {
+    if (numWorkers < 1 || numWorkers > 64) {
+        return false;
+    }
+
     deleteThreadPool();
     NUM_THREADS = numWorkers;
     initThreadPool();
+    return true;
 }
 
 void resetAllThreadStates(board_t* b, search_t* s) {
@@ -129,6 +133,14 @@ void waitAllThreads() {
     for (int i = 1; i < NUM_THREADS; i++) {
         threadPool[i]->waitThread();
     }
+}
+
+int totalNodeCount() {
+    int n = 0;
+    for (auto t : threadPool) {
+        n += t->nodes + t->qnodes;
+    }
+    return n;
 }
 
 Thread selectBestThread() { }

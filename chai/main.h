@@ -17,10 +17,6 @@ static std::string info_COMPILER = "MSVC";
 static std::string info_COMPILER = "GCC";
 #endif
 
-
-// static board_t board;
-// static board_t* b = &board;
-
 static Perft perft;
 static moveList_t move_s[1];
 static search_t s[1];

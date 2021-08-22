@@ -30,7 +30,7 @@ extern pawntable_t pt[1];
 /**
  * Initialize both TT and PT with default MB size.
  */
-void initHashTables(board_t* b);
+void initHashTables();
 
 /**
  * Free memory allocated for ttable and ptable.

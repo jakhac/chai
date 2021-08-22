@@ -22,7 +22,7 @@ void initSearch() {
 void checkTime(Thread thread) {
 
 	// Only check remaining time/depth for main thread
-	if (thread->s.timeSet 
+	if (thread->s.timeSet
 		&& thread->id == 0
 		&& getTimeMs() > thread->s.stopTime) {
 
@@ -188,6 +188,9 @@ static void resetSearchParameters(Thread thread) {
 	b->ply = 0;
 
 	thread->selDepth = 0;
+	thread->depth = 0;
+	thread->nodes = 0;
+	thread->qnodes = 0;
 
 	// Reset stats
 	tt->probed = 0;
@@ -206,8 +209,6 @@ static void resetSearchParameters(Thread thread) {
 
 	s->startTime = getTimeMs();
 	s->stopped = 0;
-	s->nodes = 0;
-	s->qnodes = 0;
 	s->fhf = 0;
 	s->fh = 0;
 	s->futileFH = 0;
@@ -228,38 +229,36 @@ value_t search(board_t* b, search_t* s) {
 	ABORT_SEARCH = true;
 
 	// 4. Wait for threads to return
-	// cout << "Wait for thread pool" << endl;
 	waitAllThreads();
 	cout << "All threads returned from search" << endl;
 
-	// Compare thread data:
+	// // Compare thread data
 	// for (int t = 0; t < NUM_THREADS; t++) {
-	// 	cout << "T" << t << " nodes = " << threadPool[t]->s.nodes << endl;
-	// 	// cout << "T" << t << " ttHit = " << threadStates[t].s. << endl;
+	// 	cout << "T" << t << " (q+)nodes = " << (threadPool[t]->nodes + threadPool[t]->qnodes) << endl;
 	// 	cout << "T" << t << " bestScore = " << threadPool[t]->bestScore << endl;
 	// 	cout << "T" << t << " bestMove = " << getStringMove(b, threadPool[t]->bestMove) << endl;
 	// 	cout << endl;
 	// }
 
-	// Select best thread and return data
-	Thread bestThread = threadPool[0];
-
-	// cout << "Select best thread." << endl;
+	// Select "best" thread and return data
+	Thread t = threadPool[0];
+	int totalNodes = totalNodeCount();
 
 	// UCI commands
-	printUCI(s, bestThread->depth, bestThread->selDepth, bestThread->bestScore);
-	printPvLine(b, bestThread->pvLine, bestThread->s.depth, bestThread->bestScore);
+	printUCI(&t->s, t->depth, t->selDepth, t->bestScore, totalNodes);
+	printPvLine(b, t->pvLine, t->depth, t->bestScore);
 	cout << endl;
 
-	printUCIBestMove(b, bestThread->bestMove);
-	return bestThread->bestScore;
+	printUCIBestMove(b, t->bestMove);
+	return t->bestScore;
 }
 
 void iid(Thread thread) {
 	board_t* b = &thread->b;
 	search_t* s = &thread->s;
 
-	thread->bestScore = VALUE_NONE;
+	value_t tempBestScore = VALUE_NONE;
+	thread->bestScore = tempBestScore;
  	thread->bestMove = MOVE_NONE;
 
 	// Search setup 
@@ -279,20 +278,22 @@ void iid(Thread thread) {
 
 		// Open window for small depths, then aspiration window
 		if (d > 3) {
-			thread->bestScore = aspirationSearch(thread, d, thread->bestScore);
+			tempBestScore = aspirationSearch(thread, d, thread->bestScore);
 		} else {
-			thread->bestScore = alphaBeta<PV>(thread, -VALUE_INFTY, VALUE_INFTY, d);
+			tempBestScore = alphaBeta<PV>(thread, -VALUE_INFTY, VALUE_INFTY, d);
 		}
-
-		Assert(abs(thread->bestScore) < VALUE_INFTY);
 
 		// Use previous bestMove if forced stop mid-search
 		if (ABORT_SEARCH)
 			break;
 
+		// If search was within limits, update thread variables
+		thread->bestScore = tempBestScore;
 		thread->depth = d;
+
 		if (thread->id == 0) {
-			printUCI(s, thread->depth, thread->selDepth, thread->bestScore);
+			printUCI(s, thread->depth, thread->selDepth, thread->bestScore, 
+				thread->nodes + thread->qnodes);
 			printPvLine(b, thread->pvLine, thread->depth, thread->bestScore);
 			cout << endl;
 		}
@@ -303,8 +304,9 @@ void iid(Thread thread) {
 		Assert(thread->bestMove != MOVE_NONE);
 
 		// Leave IID when mate is found
-		if (abs(thread->bestScore) > VALUE_IS_MATE_IN)
+		if (abs(thread->bestScore) > VALUE_IS_MATE_IN) {
 			break;
+		}
 
 		d++;
 	}
@@ -369,7 +371,7 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 	move_t pvLine[MAX_DEPTH];
 	searchStack_t* ss = &thread->ss[b->ply];
 
-	Assert(checkBoard());
+	Assert(checkBoard(&thread->b));
 	Assert(alpha < beta);
 	Assert(pvNode || (alpha == beta - 1));
 
@@ -389,8 +391,10 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 
 		// 50-move rule might checkmate / stalemate
 		if (b->fiftyMove >= 100) {
-			return (b->fiftyMove == 100 && isCheck(b, b->stm) && !hasEvadingMove(b)) ? -VALUE_MATE + b->ply
-				: contemptFactor(b);
+			return (b->fiftyMove == 100 
+					&& isCheck(b, b->stm) 
+					&& !hasEvadingMove(b)) ? -VALUE_MATE + b->ply
+										   : contemptFactor(b);
 		}
 	}
 
@@ -406,10 +410,10 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 	prefetchTT(b);
 
 	// check for time and depth
-	if (mainThread && (s->nodes & 2047) == 0) {
+	if (mainThread && (thread->nodes & 2047) == 0) {
 		checkTime(thread);
 	}
-	s->nodes++;
+	thread->nodes++;
 
 	// Mate Distance Pruning:
 	// If alpha or beta are already mate scores, bounds can be adjusted to prune irrelevant subtrees.
@@ -448,13 +452,11 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 			}
 
 			if (hashFlag & TT_BETA && hashValue >= beta) {
-				//if (hashFlag & TT_BETA && hashValue <= alpha) {
 				tt->valueHit++;
 				return hashValue;
 			}
 
 			if (hashFlag & TT_ALPHA && hashValue <= alpha) {
-				//if (hashFlag & TT_ALPHA && hashValue >= beta) {
 				tt->valueHit++;
 				return hashValue;
 			}
@@ -462,7 +464,6 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 		}
 	}
 
-#ifdef EGTB
 	// EGTB:
 	// Endgame-Tablebase probing.
 	int tbFlag;
@@ -485,10 +486,9 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 			return tbValue;
 		}
 	}
-#endif // EGTB
 
 	// Static evaluation of position:
-	// Either use previos evaluations from TT hit / null-move or do calculate evaluation score.
+	// Either use previos evaluations from TT hit / null-move or calculate evaluation score.
 	if (hashStored && abs(hashEval) < VALUE_IS_MATE_IN) {
 		ss->staticEval = posValue = hashEval;
 
@@ -507,7 +507,6 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 		//storeTT(b, NULL_MOVE, NO_VALUE, ss->staticEval, TT_EVAL, MAX_DEPTH);
 	}
 	Assert(ss->staticEval != VALUE_NONE && abs(ss->staticEval) < VALUE_IS_MATE_IN);
-	//Assert(ss->currentMove == getCurrentMove(b));
 
 	// Basic check extension
 	bool inCheck = ss->isCheck;
@@ -517,15 +516,13 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 	}
 
 	if (!inCheck && b->ply > 2) {
-		improving = !(ss - 2)->isCheck ?
-			ss->staticEval > (ss - 2)->staticEval
-			: ((b->ply > 4) ?
-			   ss->staticEval > (ss - 4)->staticEval
-			   : false);
+		improving = !(ss - 2)->isCheck ? ss->staticEval > (ss - 2)->staticEval
+									   : ((b->ply > 4) ? ss->staticEval > (ss - 4)->staticEval
+													   : false);
 	}
 
 	// Reverse Futility Pruning:
-	// Similar idea like NMP, but eval-margin is acting as the lower bound.
+	// Similar idea like NMP, but (eval - margin) is acting as the lower bound.
 	if (!pvNode
 		&& !inCheck
 		&& depth < 5
@@ -905,7 +902,7 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 
 template <nodeType_t nodeType>
 value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
-	Assert(checkBoard());
+	Assert(checkBoard(&thread->b));
 	board_t* b = &thread->b;
 	search_t* s = &thread->s;
 	bool mainThread = thread->id == 0;
@@ -915,7 +912,7 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 
 	// Check for remaining time and depth. Helper threads have no constraints
 	// as they are stopped as soon as the main thread returns.
-	if (mainThread && (s->qnodes & 2047) == 0) {
+	if (mainThread && (thread->qnodes & 2047) == 0) {
 		checkTime(thread);
 	}
 
@@ -923,7 +920,7 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 		return 0;
 	}
 
-	s->qnodes++;
+	thread->qnodes++;
 	thread->selDepth = std::max(thread->selDepth, b->ply);
 
 	bool pvNode = nodeType == PV;
@@ -940,9 +937,8 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 		return contemptFactor(b);
 	} else if (b->fiftyMove >= 100) {
 		// 50-move rule might checkmate / stalemate
-		return (b->fiftyMove == 100 && isCheck(b, b->stm) && !hasEvadingMove(b)) ? 
-			-VALUE_MATE + b->ply
-			: contemptFactor(b);
+		return (b->fiftyMove == 100 && isCheck(b, b->stm) && !hasEvadingMove(b)) ? -VALUE_MATE + b->ply
+																				 : contemptFactor(b);
 	}
 
 	if (b->ply > MAX_DEPTH - 1) {
@@ -1124,7 +1120,7 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 	return bestValue;
 }
 
-void printSearchInfo(board_t* b, search_t* s) {
+void printSearchInfo(search_t* s) {
 	cout << "\n";
 	//cout << "AlphaBeta-Nodes: " << s->nodes << " Q-Nodes: " << s->qnodes << endl;
 	cout << "Ordering percentage: \t\t" << std::setprecision(4) << fixed << (float)(s->fhf / s->fh) << endl;

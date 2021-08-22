@@ -1,15 +1,12 @@
 #include "syzygy.h"
 
-void initEGTB() {
-#ifdef EGTB
-	const char* tbPath = "C:/egtb_files";
+void initEGTB(const char* tbPath) {
 	if (!tb_init(tbPath)) {
 		cout << "TB init failed." << endl;
 		Assert(false);
 		exit(1);
 	}
 	cout << "TB max=" << TB_LARGEST << endl;
-#endif // EGTB
 }
 
 void freeEGTB() {

@@ -12,19 +12,18 @@ namespace SearchTest {
 		search_t* pSearch;
 	
 	public:
-		SearchTest() {
+		virtual void SetUp() {
 			pBoard = new board_t();
 			pSearch = new search_t();
 			
 			init();
-			if (!resizeHashTables(DEFAULT_TT_SIZE)) {
-				cout << "Error in memory allocation for TT." << endl;
-				exit(1);
-			}
+			initHashTables();
+			initThreadPool();
 		}
 
-		~SearchTest() override { 
+		virtual void TearDown() {
 			freeHashTables();
+			deleteThreadPool();
 			delete pBoard;
 			delete pSearch;
 		}
@@ -56,25 +55,6 @@ namespace PerftTest {
 
 namespace SeeTest {
 	class SeeTest : public ::testing::Test {
-
-	protected:
-		board_t* pBoard;
-
-		virtual void SetUp() {
-			pBoard = new board_t();
-
-			init();
-		}
-
-		virtual void TearDown() {
-			delete pBoard;
-		}
-
-	};
-}
-
-namespace Zugzwang {
-	class Zugzwang : public ::testing::Test {
 
 	protected:
 		board_t* pBoard;

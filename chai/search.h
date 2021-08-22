@@ -114,7 +114,6 @@ void swapMove(moveList_t* move_s, int id1, int id2);
 /**
  * Print search information to console.
  *
- * @param  b Current board.
  * @param  s This search info printed to console.
  */
-void printSearchInfo(board_t* b, search_t* s);
+void printSearchInfo(search_t* s);

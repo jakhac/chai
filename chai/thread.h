@@ -33,9 +33,12 @@ public:
 
     int id;
 	bool searching;
+    
     int depth;
     int selDepth;
-	int nodeCount;
+
+	long nodes;
+	long qnodes;
 
     std::thread t;
 
@@ -76,9 +79,13 @@ extern std::vector<Thread> threadPool;
 void iid(Thread thread);
 
 void initThreadPool();
-void resizeThreadPool(size_t numThreads);
 void deleteThreadPool();
+
+// Return true if numThreads is valid, else false
+bool resizeThreadPool(size_t numThreads);
 
 void resetAllThreadStates(board_t* b, search_t* s);
 void startAllThreads();
 void waitAllThreads();
+
+int totalNodeCount();

@@ -181,8 +181,8 @@ struct search_t {
 	bool depthSet;
 	bool timeSet;
 
-	long nodes;
-	long qnodes;
+	// long nodes;
+	// long qnodes;
 
 	bool quit = false;
 	bool stopped = false;

@@ -8,7 +8,7 @@ ttable_t tt[1];
 pawntable_t pt[1];
 
 
-void initHashTables(board_t* b) {
+void initHashTables() {
 	if (!resizeHashTables(DEFAULT_TT_SIZE)) {
 		cerr << "Error in memory allocation for TT." << endl;
 		exit(1);
