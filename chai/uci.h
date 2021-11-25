@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "search.h"
+#include "timeMan.h"
 
 #ifndef VERSION
 #define VERSION 0

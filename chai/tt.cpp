@@ -94,7 +94,7 @@ bool resizeHashTables(size_t newMbSize) {
 
 #ifdef INFO
 	if ((newMbSize & (newMbSize - 1)) != 0) {
-		cout << "TT only allocates MB sizes if power of 2. "
+		cout << "TT only allocates MB sizes to the power of 2. "
 			<< newMbSize << "MB is adjusted to "
 			<< ((possibleBytes - remainingBytes) >> 20) << "MB"
 			<< endl << endl;

@@ -2,7 +2,7 @@
 # 1. META DATA
 #######################################
 
-VERSION = v2.6.4
+VERSION = v2.6.5
 
 EXE_RELEASE = chai_$(VERSION)_release.exe
 EXE_DEBUG = chai_$(VERSION)_debug.exe
@@ -11,7 +11,7 @@ EXE_TEST = test.exe
 SRCS = main.cpp tt.cpp attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp
+	thread.cpp timeMan.cpp
 
 OBJ_RELEASE_DIR = ./obj_release
 OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
@@ -45,6 +45,10 @@ avx2=yes
 pext=yes
 bits=64
 
+# custom build configs
+threads=0
+hashMb=265
+
 
 ifeq ($(TYPE),release)
 	assert=no
@@ -59,6 +63,14 @@ ifeq ($(TYPE),debug)
 	test=no
 
 	optimize=no
+endif
+
+
+ifneq ($(threads),0)
+	CXXFLAGS += -DCUSTOM_THREADS=$(threads)
+endif
+ifneq ($(hashMb),265)
+	CXXFLAGS += -DCUSTOM_HASHSIZE=$(hashMb)
 endif
 
 
@@ -124,9 +136,9 @@ CXXFLAGS += -pedantic -Wextra -Wshadow
 CXXFLAGS += -DVERSION=$(VERSION)
 
 # Set 4MB stack size
-CXXFLAGS += -Wl,--stack,4194304
+CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 
-DEPENDFLAGS += -std=c++17
+DEPENDFLAGS += -std=c++17 -fexceptions
 LDFLAGS += -m$(bits) -Wl,--stack,4194304
 
 
@@ -155,10 +167,14 @@ $(OBJ_RELEASE_DIR)/%.o: %.cpp
 # 4. Public targets
 #######################################
 
+.DEFAULT_GOAL=help
+
 debug:
+	if not exist ".\obj_debug" mkdir ".\obj_debug"
 	$(MAKE) $(EXE_DEBUG) TYPE=debug .depend
 
 release:
+	if not exist ".\obj_release" mkdir ".\obj_release"
 	$(MAKE) $(EXE_RELEASE) TYPE=release .depend
 
 # strip
@@ -183,11 +199,11 @@ objclean:
 	del /Q .\obj_debug\ 2>nul
 
 help:
-	@echo "Build chai_$(VERSION) with "make [target]"
+	@echo "Build chai_$(VERSION) with "make target [threads=#threads] [hashMb=#hashMb]"
 	@echo "Possible targets are:"
 	@echo "debug     > build with asserts and debug information"
 	@echo "release   > build fastest version of engine"
-	@echo "test      > compile engine files and build test program in root/test"
+	@echo "test      > compile engine files and build test suite in ../test"
 
 .depend:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null

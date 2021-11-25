@@ -71,6 +71,7 @@ value_t evalPST(board_t* b, int side, float* t) {
 	return score;
 }
 
+
 value_t materialScore(board_t* b, int side) {
 	int score = 0;
 	for (int i = 1; i < 7; i++) {
@@ -270,11 +271,11 @@ value_t mobility(board_t* b, bool side, float* t) {
 int scale(int scaler, int pressure) {
 	int scaledPressure;
 	switch (scaler) {
-		case 0: scaledPressure = 0; break;
-		case 1: scaledPressure = 1; break;
-		case 2: scaledPressure = pressure; break;
-		case 3: scaledPressure = (pressure * 4) / 3; break;
-		case 4: scaledPressure = (pressure * 3) / 2; break;
+		case 0: scaledPressure  = 0; break;
+		case 1: scaledPressure  = 1; break;
+		case 2: scaledPressure  = pressure; break;
+		case 3: scaledPressure  = (pressure * 4) / 3; break;
+		case 4: scaledPressure  = (pressure * 3) / 2; break;
 		default: scaledPressure = pressure * 2; break;
 	}
 

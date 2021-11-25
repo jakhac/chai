@@ -2,11 +2,11 @@
 
 int main() {
 	// Print meta information in every build
-	NUM_THREADS = std::thread::hardware_concurrency() - 1;
 	cout << "chai " << TOSTRING(VERSION) << endl
 		<< "assert=" << info_ASSERT
 		<< " buckets=" << BUCKETS
-		<< " threads=" << NUM_THREADS << endl
+		<< " threads=" << NUM_THREADS 
+		<< " hashMb=" << DEFAULT_TT_SIZE << endl
 		<< "compiler=" << info_COMPILER
 		<< " date=" << __DATE__ << endl;
 
@@ -20,7 +20,6 @@ int main() {
 	parseFen(p_board, STARTING_FEN);
 	printBoard();
 	cli();
-
 
 	// Free all hash tables before exit
 	freeHashTables();
@@ -60,11 +59,8 @@ void cli() {
 		// start searching this position
 		if (userInput == "s") {
 			s->depth = 15;
-			s->startTime = getTimeMs();
-			s->stopTime = getTimeMs() + 10000;
-
 			s->timeSet = false;
-			s->depthSet = true;
+
 			search(p_board, s);
 			continue;
 		}

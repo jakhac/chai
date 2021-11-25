@@ -6,6 +6,7 @@
 #include "board.h"
 #include "tt.h"
 #include "eval.h"
+#include "thread.h"
 
 //using namespace std;
 
@@ -15,6 +16,11 @@
  * @param  bb Bitboard.
  */
 void printBitBoard(bitboard_t* bb);
+
+/**
+ * Print initial UCI info (Author, options, ...).
+ */
+void printUCI_Info();
 
 /**
  * Print move in algebraic notation and promotions if possible

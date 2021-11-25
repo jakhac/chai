@@ -21,17 +21,28 @@ void initSearch() {
 
 void checkTime(Thread thread) {
 
-	// Only check remaining time/depth for main thread
-	if (thread->s.timeSet
-		&& thread->id == 0
-		&& getTimeMs() > thread->s.stopTime) {
-
-		// If mainThread stops, all others are signaled 
-		// to stop as well.
+	if (thread->id == 0
+		&& thread->s.timeSet
+		&& !isTimeLeft(&thread->s)) {
+		
+		// Time is up: Set abort flag to signal other 
+		// threads to stop searching immediatly.
 		ABORT_SEARCH = true;
-
-		readInput(&thread->s);
 	}
+
+	// readInput(&thread->s); TODO NEEDED????
+
+	// Only check remaining time/depth for main thread
+	// if (thread->s.timeSet
+	// 	&& thread->id == 0
+	// 	&& getTimeMs() > thread->s.stopTime) {
+
+	// 	// If mainThread stops, all others are signaled 
+	// 	// to stop as well.
+	// 	ABORT_SEARCH = true;
+
+	// 	readInput(&thread->s);
+	// }
 }
 
 bool isRepetition(board_t* b) {
@@ -254,22 +265,23 @@ value_t search(board_t* b, search_t* s) {
 }
 
 void iid(Thread thread) {
-	board_t* b = &thread->b;
+	board_t* b  = &thread->b;
 	search_t* s = &thread->s;
 
-	value_t tempBestScore = VALUE_NONE;
-	thread->bestScore = tempBestScore;
- 	thread->bestMove = MOVE_NONE;
+	value_t previousBestScore = VALUE_NONE;
+	value_t tempBestScore     = VALUE_NONE;
+	thread->bestScore         = tempBestScore;
+ 	thread->bestMove          = MOVE_NONE;
 
 	// Search setup 
 	resetSearchParameters(thread);
 
 	// Set up variables used before first recursive call
 	searchStack_t* ss = &thread->ss[b->ply];
-	ss->currentMove = MOVE_NONE;
-	ss->isCheck = isCheck(b, b->stm);
-	ss->staticEval = evaluation(b);
-	ss->pvLine = thread->pvLine;
+	ss->currentMove   = MOVE_NONE;
+	ss->isCheck       = isCheck(b, b->stm);
+	ss->staticEval    = evaluation(b);
+	ss->pvLine        = thread->pvLine;
 
 	// Iterative deepening
 	int d = 1;
@@ -283,23 +295,37 @@ void iid(Thread thread) {
 			tempBestScore = alphaBeta<PV>(thread, -VALUE_INFTY, VALUE_INFTY, d);
 		}
 
-		// Use previous bestMove if forced stop mid-search
+		// Use previous bestMove if forced stop in ongoing search
 		if (ABORT_SEARCH)
 			break;
 
-		// If search was within limits, update thread variables
+		// Search was within limits, thus update thread variables
 		thread->bestScore = tempBestScore;
-		thread->depth = d;
+		thread->depth     = d;
+		previousBestScore = thread->bestScore;
 
+		// Main thread has two extra tasks:
+		// 		1) Print UCI information since this is the main search thread.
+		// 		2) Adjust time if there was a jump between previous 
+		// 		   and current bestScore.
 		if (thread->id == 0) {
+
+			// 1)
 			printUCI(s, thread->depth, thread->selDepth, thread->bestScore, 
 				thread->nodes + thread->qnodes);
 			printPvLine(b, thread->pvLine, thread->depth, thread->bestScore);
 			cout << endl;
+
+			// 2)
+			value_t scoreDifference = abs(thread->bestScore - previousBestScore);
+			if (d > 1 
+				&& s->timeSet
+				&& scoreDifference > 30) {
+				s->allocatedTime = std::min(s->timeLeft - 50., s->allocatedTime * 1.075);
+			}
 		}
 
 		// Update best move after every complete search iteration
-		// thread->bestMove = probePV(b);
 		thread->bestMove = thread->pvLine[0];
 		Assert(thread->bestMove != MOVE_NONE);
 
@@ -355,16 +381,16 @@ value_t aspirationSearch(Thread thread, int d, value_t bestScore) {
 template <nodeType_t nodeType>
 value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 	// Initialize node
-	board_t* b = &thread->b;
-	search_t* s = &thread->s;
+	board_t* b      = &thread->b;
+	search_t* s     = &thread->s;
 	bool mainThread = thread->id == 0;
-	bool rootNode = b->ply == 0;
-	bool pvNode = nodeType == PV;
+	bool rootNode   = b->ply == 0;
+	bool pvNode     = nodeType == PV;
 	bool mateThreat = false;
-	bool improving = false;
-	int newDepth = depth - 1;
+	bool improving  = false;
+	int newDepth    = depth - 1;
 
-	value_t value = -VALUE_INFTY;
+	value_t value     = -VALUE_INFTY;
 	value_t bestValue = -VALUE_INFTY;
 	value_t posValue;
 
@@ -429,10 +455,10 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 	// Probe the TTable and look for useful information from previous transpositions. Return hashScore if hash table
 	// stored a better score at same or greater depth. Do not return if close to 50-move draw.
 	value_t hashValue = -VALUE_INFTY;
-	value_t hashEval = -VALUE_INFTY;
-	int8_t hashDepth = -1;
-	uint8_t hashFlag = TT_NONE;
-	move_t hashMove = MOVE_NONE;
+	value_t hashEval  = -VALUE_INFTY;
+	int8_t hashDepth  = -1;
+	uint8_t hashFlag  = TT_NONE;
+	move_t hashMove   = MOVE_NONE;
 
 	bool hashStored = probeTT(b, &hashMove, &hashValue, &hashEval, &hashFlag, &hashDepth);
 	if (hashStored

@@ -7,10 +7,7 @@ static bool strStartsWith(std::string str, std::string start) {
 void uciMode(board_t* b, search_t* s) {
 	std::string cmd;
 
-	cout << "id name chai_" << TOSTRING(VERSION) << "\n";
-	cout << "id author Jakob Hackstein\n";
-	cout << "option name Hash type spin default 256 min 2 max 8192" << endl;
-	cout << "uciok\n";
+	printUCI_Info();
 
 	while (true) {
 		getline(std::cin, cmd);
@@ -21,12 +18,9 @@ void uciMode(board_t* b, search_t* s) {
 		}
 
 		if (!cmd.compare("uci")) {
-			cout << "id name chai_" << TOSTRING(VERSION) << "\n";
-			cout << "id author Jakob Hackstein\n";
-			cout << "option name Hash type spin default 256 min 2 max 8192" << endl;
-			cout << "uciok\n";
+			printUCI_Info();
 		}
-
+ 
 		if (!cmd.compare("isready")) {
 			init();
 			initHashTables();
@@ -48,7 +42,11 @@ void uciMode(board_t* b, search_t* s) {
 		}
 
 		if (strStartsWith(cmd, "setoption")) {
-			uciSetOption(cmd);
+ 			try {
+				uciSetOption(cmd);
+			} catch(const std::invalid_argument& ia) {
+				std::cerr << ia.what() << " error. Invalid user input." << endl;
+			}
 		}
 
 		fflush(stdout);
@@ -69,25 +67,25 @@ void uciSetOption(std::string cmd) {
 
 	if (strStartsWith(cmd, "setoption name SyzygyPath value ")) {
 		std::string syzygyPath = cmd.substr(strlen("setoption name SyzygyPath value "), std::string::npos);
-		tb_free();
-        if (!syzygyPath.compare("<empty>")) {
-        	cout << "info string Error: SyzygyPath is <empty>" << syzygyPath << endl;
+		// freeEGTB(); error if used to reset path
+        if (!syzygyPath.compare("")) {
+        	cout << "info string Error: SyzygyPath is empty." << endl;
 			return;
 		}
 		initEGTB(syzygyPath.c_str());
-        cout << "info string set SyzygyPath to " << syzygyPath << endl;
+        cout << "info string set SyzygyPath to " 
+			 << syzygyPath << ". Max TB=" << TB_LARGEST << endl;
     }
 
 	if (strStartsWith(cmd, "setoption name Threads value ")) {
-		int numThreads = stoi(cmd.substr(strlen("setoption name Threads value "), std::string::npos));
+		int requestedThreads = stoi(cmd.substr(strlen("setoption name Threads value "), std::string::npos));
 		
-		if (!resizeThreadPool(numThreads)) {
-			cout << "info string Threads value is invalid. (Range := [1, 64])" << endl;
+		if (!resizeThreadPool(requestedThreads)) {
+			cout << "info string Threads value is invalid." << endl;
 			return;
 		}
-		Assert(numThreads == NUM_THREADS);
 
-        cout << "info string set total Threads to " << numThreads << endl;
+        cout << "info string set total Threads to " << NUM_THREADS << endl;
     }
 
 }
@@ -127,10 +125,18 @@ void uciParsePosition(board_t* b, std::string cmd) {
 
 	fflush(stdout);
 }
-
+/*
 void uciParseGo(board_t* b, search_t* s, std::string cmd) {
-	int depth = -1, movesLeft = 30, moveTime = -1;
-	int time = -1, inc = 0;
+	s->startTime = getTimeMs();
+
+	int depth = -1;
+
+	// int movesLeft = 30;
+	int movesLeft = -1;
+
+	int moveTime = -1;
+	int time = -1;
+	int inc = 0;
 	s->timeSet = false;
 
 	std::istringstream iss(cmd);
@@ -157,9 +163,12 @@ void uciParseGo(board_t* b, search_t* s, std::string cmd) {
 	//cout << "Parsed wbtime:" << time << " wbinc:" << inc << " movetime:" << moveTime << endl;
 
 	// if stop is set
-	s->startTime = getTimeMs();
+	// s->startTime = getTimeMs();
 	if (time != -1) {
-		if (movesLeft < 1 || movesLeft > 30) movesLeft = 30;
+		// if (movesLeft < 1 || movesLeft > 30) movesLeft = 30;
+		movesLeft = (movesLeft == -1) ? remainingHalfMoves(b)
+									  : movesLeft;
+
 		s->timeSet = true;
 
 		// catch low time (ok for tc 20/0.3)
@@ -181,6 +190,40 @@ void uciParseGo(board_t* b, search_t* s, std::string cmd) {
 		s->depth = MAX_DEPTH;
 	} else {
 		s->depth = depth;
+	}
+
+	search(b, s);
+}
+*/
+
+void uciParseGo(board_t* b, search_t* s, std::string cmd) {
+	s->startTime = getTimeMs();
+
+	int depth         = 0; // search to this depth
+	int timeLeft      = 0; // time left on (our) clock
+	int inc;  			// increment
+
+	std::istringstream iss(cmd);
+	std::vector<std::string> tokens{ std::istream_iterator<std::string>{iss},
+					 std::istream_iterator<std::string>{} };
+
+	for (int i = 0; i < (int)tokens.size() - 1; i++) {
+		if (tokens[i] == "infinite") continue;
+		if (tokens[i] == "binc" && b->stm == chai::BLACK) inc = stoi(tokens[i + 1]);
+		if (tokens[i] == "winc" && b->stm == chai::WHITE) inc = stoi(tokens[i + 1]);
+		if (tokens[i] == "btime" && b->stm == chai::BLACK) timeLeft = stoi(tokens[i + 1]);
+		if (tokens[i] == "wtime" && b->stm == chai::WHITE) timeLeft = stoi(tokens[i + 1]);
+		if (tokens[i] == "depth") depth = stoi(tokens[i + 1]);
+	}
+
+	// Depth is either set as go depth command or MAX_DEPTH of engine
+	s->depth = (depth != 0) ? depth : MAX_DEPTH;
+
+	// If timeLeft is provided, search with time constraints
+	if (timeLeft) {
+		s->timeSet       = true;
+		s->timeLeft      = timeLeft;
+		s->allocatedTime = allocateTime(b, timeLeft, inc);
 	}
 
 	search(b, s);

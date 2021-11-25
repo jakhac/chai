@@ -10,12 +10,20 @@
 #define prefetch(x) _m_prefetch(x);
 #endif
 
-const size_t DEFAULT_TT_SIZE = 256;
-const size_t DEFAULT_PT_SIZE = 8;
-
+// Bound sizes for Hashable.
 const size_t MIN_TT_SIZE = 2;
 const size_t MAX_TT_SIZE = 8192;
 const size_t MAX_PT_SIZE = 16;
+
+// Default sizes for Hashtable.
+#ifdef CUSTOM_HASHSIZE
+const size_t DEFAULT_TT_SIZE = std::min(MAX_TT_SIZE, 
+                                        std::max(MIN_TT_SIZE, (size_t)CUSTOM_HASHSIZE));
+#else
+const size_t DEFAULT_TT_SIZE = 256;
+#endif // CUSTOM_HASHSIZE
+
+const size_t DEFAULT_PT_SIZE = 8;
 
 const int QS_DEPTH = -1;
 const int QS_DEPTH_CHECK = 0;

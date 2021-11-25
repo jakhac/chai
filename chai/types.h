@@ -128,7 +128,7 @@ struct board_t {
 	// Current side, 0 for black and 1 for white. Use enums for debug purpose.
 	bool stm;
 
-	// Current en passant square. 0, if not set.
+	// Current en passant square. DEFAULT_EP_SQ, if not set.
 	int enPas;
 
 	// Ply Counter.
@@ -170,14 +170,18 @@ struct board_t {
 
 /**
  * Store search parameters set by UCI commands.
+ * // TODO Split into statistics // time
  */
 struct search_t {
-	int startTime;
-	int stopTime;
-	int depth;
-	int movesLeft;
 
-	bool infinite;
+	int startTime;
+	int allocatedTime;
+	// int stopTime;
+	int depth;
+	int timeLeft;
+	// int movesLeft;
+
+	// bool infinite;
 	bool depthSet;
 	bool timeSet;
 

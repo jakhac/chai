@@ -5,12 +5,12 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall -I h -I$(GTEST_PATH) -c
 LXXFLAGS = -std=c++17 -I h -pthread
 LXXFLAGS += -m64 -Wl,--stack,4194304
-DEPENDFLAGS += -std=c++17
+DEPENDFLAGS += -std=c++17 -fexceptions
 
 CXXFLAGS += -DINFO= -DASSERT= -DTESTING=
 CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m64
 CXXFLAGS += -pedantic -Wextra -Wshadow
-CXXFLAGS += -Wl,--stack,4194304
+CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 
 
 EXE = ../chai/test.exe
@@ -18,7 +18,7 @@ EXE = ../chai/test.exe
 CHAI_SRCS = attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp tt.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp
+	thread.cpp timeMan.cpp
 
 SRCS = $(addprefix ../chai/, $(CHAI_SRCS))
 

@@ -153,10 +153,16 @@
     - [x] Multi-Threading
   - v2.6.5
     - [ ] Time Management
+    - [ ] Test-Suite for funcionality check (Benchmark-Test?)
+    - [ ] Run exe on laptop / missing lib files?
 - Project
   - [x] UCI fixes, e.g. quit current mode
   - [x] UCI refactor parsing
-  - [x] Fix testing in makefile
+  - [x] Makefile supports #threads and #hashMb parameters
+  - ToDo
+  - [ ] Build exhaustive test-suite: Search and Functionality
+  - [ ] Refactor code towards C++17 (align, C++17 features, clarity in code)
+  - [ ] Test complete build/run/strip/test process
   - [ ] Update README.md to new build process
 
 # Todo
@@ -170,7 +176,7 @@
   - ~~generate quiet checks~~
   - ~~special see function with early exit for captures like PxQ~~
   - ~~Early return inCheck function is fastest and most reliable, do not use isLegal or leaesKingInCheck~~
-    - ~~faster isCheck method? instead of inCheck() -> only check pinned pieces / king attacks of last move~~
+  - ~~faster isCheck method? instead of inCheck() -> only check pinned pieces / king attacks of last move~~
 
 - Project
 

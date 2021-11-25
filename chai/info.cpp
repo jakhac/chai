@@ -6,6 +6,16 @@ void logDebug(std::string errMsg) {
     ofs.close();
 }
 
+void printUCI_Info() {
+    cout << "id name chai_" << TOSTRING(VERSION) << "\n";
+	cout << "id author Jakob Hackstein\n";
+	cout << "option name Hash type spin default 256 min 2 max 8192" << endl;
+	cout << "option name Threads type spin default " 
+		 << NUM_THREADS << " min 1 max " << MAX_THREADS << endl;
+	cout << "option name SyzygyPath type string default \"\"" << endl;
+	cout << "uciok\n";
+}
+
 void printBitBoard(bitboard_t* bb) {
     bitboard_t shiftBit = 1ULL;
     int sq;

@@ -1,10 +1,19 @@
 #include "thread.h"
 
-int NUM_THREADS = 3; // Number of threads includes the main process
+// Makefile might set number of threads. If not, set to maximum.
+#ifdef CUSTOM_THREADS
+int NUM_THREADS = std::min(CUSTOM_THREADS, (int)std::thread::hardware_concurrency() - 1);
+#else
+int NUM_THREADS = MAX_THREADS; 
+#endif // CUSTOM_THREADS
+
+
 bool TERMINATE_THREADS = false;
 bool ABORT_SEARCH = false;
 
+
 std::vector<Thread> threadPool;
+
 
 void ThreadWrapper::resetThreadStates(board_t* board, search_t* search) {
     b = *board;
@@ -71,6 +80,7 @@ void ThreadWrapper::waitThread() {
 }
 
 void initThreadPool() {
+
     threadPool.clear();
     TERMINATE_THREADS = false;
     ABORT_SEARCH = false;
@@ -106,12 +116,12 @@ void deleteThreadPool() {
 }
 
 bool resizeThreadPool(size_t numWorkers) {
-    if (numWorkers < 1 || numWorkers > 64) {
+    if (numWorkers < 1) {
         return false;
     }
 
     deleteThreadPool();
-    NUM_THREADS = numWorkers;
+    NUM_THREADS = std::min(numWorkers, (size_t)MAX_THREADS);
     initThreadPool();
     return true;
 }

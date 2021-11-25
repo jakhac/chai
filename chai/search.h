@@ -8,6 +8,8 @@
 #include "tt.h"
 #include "thread.h"
 #include "syzygy.h"
+#include "timeMan.h"
+
 
 const value_t aspiration = 18;
 
