@@ -152,13 +152,14 @@
     - [x] makefile and g++ code adjustments
     - [x] Multi-Threading
   - v2.6.5
-    - [ ] Time Management
+    - [x] Time Management
+    - [x] Makefile supports #threads and #hashMb parameters
+  - v2.6.6
     - [ ] Test-Suite for funcionality check (Benchmark-Test?)
     - [ ] Run exe on laptop / missing lib files?
 - Project
   - [x] UCI fixes, e.g. quit current mode
   - [x] UCI refactor parsing
-  - [x] Makefile supports #threads and #hashMb parameters
   - ToDo
   - [ ] Build exhaustive test-suite: Search and Functionality
   - [ ] Refactor code towards C++17 (align, C++17 features, clarity in code)

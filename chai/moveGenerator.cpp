@@ -129,27 +129,32 @@ void generateCheckEvasions(board_t* b, moveList_t* moveList) {
 			moveList->moves[moveList->cnt++] = serializeMove(defenderSq, attackerSq, PROM_MOVE, PROM_TO_KNIGHT);
 		}
 
-		// if pawn is threatening check but can be captured en passant
+		// If a pawn is threatening check but can be captured en passant
 		if (b->enPas != DEFAULT_EP_SQ) {
 			if (b->stm == WHITE) {
 				if (b->enPas == attackerSq + 8
 					&& pieceAt(b, attackerSq - 1) == Pieces::P
+					&& (1ULL << (attackerSq - 1)) & RANK_5_HEX
 					&& (setMask[attackerSq - 1] & ~pinnedDefender)) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq - 1, b->enPas, EP_MOVE, Pieces::NO_PIECE);
 				}
 				if (b->enPas == attackerSq + 8
 					&& pieceAt(b, attackerSq + 1) == Pieces::P
+					&& (1ULL << (attackerSq + 1)) & RANK_5_HEX
 					&& (setMask[attackerSq + 1] & ~pinnedDefender)) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq + 1, b->enPas, EP_MOVE, Pieces::NO_PIECE);
 				}
 			} else {
 				if (b->enPas == attackerSq - 8
 					&& pieceAt(b, attackerSq - 1) == Pieces::p
+					&& (1ULL << (attackerSq - 1)) & RANK_4_HEX
 					&& (setMask[attackerSq - 1] & ~pinnedDefender)) {
+					cout << "no here" << endl;
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq - 1, b->enPas, EP_MOVE, Pieces::NO_PIECE);
 				}
 				if (b->enPas == attackerSq - 8
 					&& pieceAt(b, attackerSq + 1) == Pieces::p
+					&& (1ULL << (attackerSq + 1)) & RANK_4_HEX
 					&& (setMask[attackerSq + 1] & ~pinnedDefender)) {
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq + 1, b->enPas, EP_MOVE, Pieces::NO_PIECE);
 				}
