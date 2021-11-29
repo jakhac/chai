@@ -22,8 +22,8 @@ void initSearch() {
 void checkTime(Thread thread) {
 
 	if (thread->id == 0
-		&& thread->s.timeSet
-		&& !isTimeLeft(&thread->s)) {
+		&& thread->instr.timeSet
+		&& !isTimeLeft(&thread->instr)) {
 		
 		// Time is up: Set abort flag to signal other 
 		// threads to stop searching immediatly.
@@ -195,7 +195,8 @@ static void updatePvLine(move_t* pv, move_t move, move_t* childPv) {
 
 static void resetSearchParameters(Thread thread) {
 	board_t* b = &thread->b;
-	search_t* s = &thread->s;
+	stats_t* s = &thread->s;
+	instr_t* instr = &thread->instr;
 	b->ply = 0;
 
 	thread->selDepth = 0;
@@ -218,18 +219,19 @@ static void resetSearchParameters(Thread thread) {
 
 	s->tbHit = 0;
 
-	s->startTime = getTimeMs();
-	s->stopped = 0;
+	instr->startTime = getTimeMs();
+	instr->stopped = false;
+
 	s->fhf = 0;
 	s->fh = 0;
 	s->futileFH = 0;
 	s->futileCnt = 0;
 }
 
-value_t search(board_t* b, search_t* s) {
+value_t search(board_t* b, stats_t* s, instr_t* i) {
 	
 	// 1. Prepare each thread for search:
-	resetAllThreadStates(b, s);
+	resetAllThreadStates(b, s, i);
 
 	// 2. Start helper threads
     ABORT_SEARCH = false;
@@ -241,22 +243,24 @@ value_t search(board_t* b, search_t* s) {
 
 	// 4. Wait for threads to return
 	waitAllThreads();
-	cout << "All threads returned from search" << endl;
+	cout << "All " << NUM_THREADS << " threads returned from search" << endl;
 
 	// // Compare thread data
 	// for (int t = 0; t < NUM_THREADS; t++) {
 	// 	cout << "T" << t << " (q+)nodes = " << (threadPool[t]->nodes + threadPool[t]->qnodes) << endl;
 	// 	cout << "T" << t << " bestScore = " << threadPool[t]->bestScore << endl;
 	// 	cout << "T" << t << " bestMove = " << getStringMove(b, threadPool[t]->bestMove) << endl;
+	// 	cout << "T" << t << " depth reached = " << threadPool[t]->depth << endl;
 	// 	cout << endl;
 	// }
 
 	// Select "best" thread and return data
-	Thread t = threadPool[0];
+	Thread t = threadPool[selectBestThreadIndex()];
+	// Thread t = threadPool[0];
 	int totalNodes = totalNodeCount();
 
 	// UCI commands
-	printUCI(&t->s, t->depth, t->selDepth, t->bestScore, totalNodes);
+	printUCI(&t->instr, &t->s, t->depth, t->selDepth, t->bestScore, totalNodes);
 	printPvLine(b, t->pvLine, t->depth, t->bestScore);
 	cout << endl;
 
@@ -266,7 +270,8 @@ value_t search(board_t* b, search_t* s) {
 
 void iid(Thread thread) {
 	board_t* b  = &thread->b;
-	search_t* s = &thread->s;
+	stats_t* s = &thread->s;
+	instr_t* instr = &thread->instr;
 
 	value_t previousBestScore = VALUE_NONE;
 	value_t tempBestScore     = VALUE_NONE;
@@ -285,8 +290,8 @@ void iid(Thread thread) {
 
 	// Iterative deepening
 	int d = 1;
-	Assert(s->depth <= MAX_DEPTH);
-	while (d <= s->depth) {
+	Assert(instr->depth <= MAX_DEPTH);
+	while (d <= instr->depth) {
 
 		// Open window for small depths, then aspiration window
 		if (d > 3) {
@@ -311,7 +316,7 @@ void iid(Thread thread) {
 		if (thread->id == 0) {
 
 			// 1)
-			printUCI(s, thread->depth, thread->selDepth, thread->bestScore, 
+			printUCI(instr, s, thread->depth, thread->selDepth, thread->bestScore, 
 				thread->nodes + thread->qnodes);
 			printPvLine(b, thread->pvLine, thread->depth, thread->bestScore);
 			cout << endl;
@@ -319,9 +324,9 @@ void iid(Thread thread) {
 			// 2)
 			value_t scoreDifference = abs(thread->bestScore - previousBestScore);
 			if (d > 1 
-				&& s->timeSet
+				&& instr->timeSet
 				&& scoreDifference > 30) {
-				s->allocatedTime = std::min(s->timeLeft - 50., s->allocatedTime * 1.075);
+				instr->allocatedTime = std::min(instr->timeLeft - 50., instr->allocatedTime * 1.075);
 			}
 		}
 
@@ -339,14 +344,14 @@ void iid(Thread thread) {
 }
 
 value_t aspirationSearch(Thread thread, int d, value_t bestScore) {
-	value_t score = -VALUE_INFTY;
 	int64_t newAlpha, newBeta;
+	value_t score = -VALUE_INFTY;
 	int researchCnt = 0;
 	Assert(abs(bestScore) < VALUE_INFTY);
 
 	// Determine initial alpha/beta values
 	int64_t alpha = std::max(-VALUE_INFTY, bestScore - aspiration);
-	int64_t beta = std::min(VALUE_INFTY, (value_t)(bestScore + aspiration));
+	int64_t beta  = std::min(VALUE_INFTY, (value_t)(bestScore + aspiration));
 
 	// Research, until score is within bounds
 	while (!ABORT_SEARCH) {
@@ -382,7 +387,8 @@ template <nodeType_t nodeType>
 value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 	// Initialize node
 	board_t* b      = &thread->b;
-	search_t* s     = &thread->s;
+	stats_t* s     = &thread->s;
+	instr_t* instr  = &thread->instr;
 	bool mainThread = thread->id == 0;
 	bool rootNode   = b->ply == 0;
 	bool pvNode     = nodeType == PV;
@@ -507,8 +513,8 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 			|| (tbFlag == TT_ALPHA && tbValue >= beta)
 			|| (tbFlag == TT_BETA && tbValue <= alpha)) {
 
-			Assert(abs(searchToHash(b, tbValue)) != VALUE_INFTY);
-			storeTT(b, MOVE_NULL, searchToHash(b, tbValue), VALUE_NONE, tbFlag, depth);
+			Assert(abs(searchToHash(b->ply, tbValue)) != VALUE_INFTY);
+			storeTT(b, MOVE_NULL, searchToHash(b->ply, tbValue), VALUE_NONE, tbFlag, depth);
 			return tbValue;
 		}
 	}
@@ -593,7 +599,7 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 
 			// nullScore acts as lower bound to this position
 			if (depth - 1 - reduction > 0) {
-				storeTT(b, MOVE_NULL, searchToHash(b, nullValue),
+				storeTT(b, MOVE_NULL, searchToHash(b->ply, nullValue),
 						ss->staticEval, TT_ALPHA, depth - 1 - reduction);
 			}
 			return nullValue;
@@ -620,9 +626,9 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 		thread->counterHeuristic, thread->histHeuristic);
 
 	move_t currentMove = MOVE_NONE;
-	move_t bestMove = MOVE_NONE;
-	int legalMoves = 0;
-	int oldAlpha = alpha;
+	move_t bestMove    = MOVE_NONE;
+	int legalMoves     = 0;
+	int oldAlpha       = alpha;
 
 	// This position could not be refuted yet. All moves are generated
 	// and searching continues.
@@ -708,7 +714,7 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 
 		if (mainThread
 			&& rootNode
-			&& getTimeMs() > s->startTime + 750
+			&& getTimeMs() > instr->startTime + 750
 			) {
 			cout << "info"
 				<< " depth " << depth
@@ -873,7 +879,7 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 			Assert(abs(beta) <= VALUE_INFTY);
 
 			// Store position with bestMove and beta flag
-			storeTT(b, currentMove, searchToHash(b, beta), ss->staticEval, TT_BETA, depth);
+			storeTT(b, currentMove, searchToHash(b->ply, beta), ss->staticEval, TT_BETA, depth);
 			return beta;
 		}
 
@@ -915,12 +921,12 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 		Assert(bestMove != MOVE_NONE);
 		Assert(abs(bestValue) <= VALUE_INFTY);
 
-		storeTT(b, bestMove, searchToHash(b, bestValue), ss->staticEval, TT_VALUE, depth);
+		storeTT(b, bestMove, searchToHash(b->ply, bestValue), ss->staticEval, TT_VALUE, depth);
 	} else if (bestMove) {
 		Assert(bestMove != MOVE_NONE);
 		Assert(abs(alpha) <= VALUE_INFTY);
 
-		storeTT(b, bestMove, searchToHash(b, alpha), ss->staticEval, TT_ALPHA, depth);
+		storeTT(b, bestMove, searchToHash(b->ply, alpha), ss->staticEval, TT_ALPHA, depth);
 	}
 
 	return alpha;
@@ -930,7 +936,7 @@ template <nodeType_t nodeType>
 value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 	Assert(checkBoard(&thread->b));
 	board_t* b = &thread->b;
-	search_t* s = &thread->s;
+	stats_t* s = &thread->s;
 	bool mainThread = thread->id == 0;
 
 	// Early TT prefetch 
@@ -963,8 +969,10 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 		return contemptFactor(b);
 	} else if (b->fiftyMove >= 100) {
 		// 50-move rule might checkmate / stalemate
-		return (b->fiftyMove == 100 && isCheck(b, b->stm) && !hasEvadingMove(b)) ? -VALUE_MATE + b->ply
-																				 : contemptFactor(b);
+		return (b->fiftyMove == 100 
+				&& isCheck(b, b->stm) 
+				&& !hasEvadingMove(b)) ? -VALUE_MATE + b->ply
+									   : contemptFactor(b);
 	}
 
 	if (b->ply > MAX_DEPTH - 1) {
@@ -1125,7 +1133,7 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 			}
 			s->fh++;
 
-			storeTT(b, currentMove, searchToHash(b, beta), ss->staticEval, TT_BETA, ttDepth);
+			storeTT(b, currentMove, searchToHash(b->ply, beta), ss->staticEval, TT_BETA, ttDepth);
 			return beta;
 		}
 	}
@@ -1133,11 +1141,11 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 	if (alpha > oldAlpha) {
 		Assert(bestMove != MOVE_NONE);
 		Assert(abs(bestValue) <= VALUE_INFTY);
-		storeTT(b, bestMove, searchToHash(b, bestValue), ss->staticEval, TT_VALUE, ttDepth);
+		storeTT(b, bestMove, searchToHash(b->ply, bestValue), ss->staticEval, TT_VALUE, ttDepth);
 	} else if (bestMove) {
 		Assert(bestMove != MOVE_NONE);
 		Assert(abs(alpha) <= VALUE_INFTY);
-		storeTT(b, bestMove, searchToHash(b, alpha), ss->staticEval, TT_ALPHA, ttDepth);
+		storeTT(b, bestMove, searchToHash(b->ply, alpha), ss->staticEval, TT_ALPHA, ttDepth);
 	}
 
 	Assert(alpha >= oldAlpha);
@@ -1146,7 +1154,7 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 	return bestValue;
 }
 
-void printSearchInfo(search_t* s) {
+void printSearchInfo(stats_t* s) {
 	cout << "\n";
 	//cout << "AlphaBeta-Nodes: " << s->nodes << " Q-Nodes: " << s->qnodes << endl;
 	cout << "Ordering percentage: \t\t" << std::setprecision(4) << fixed << (float)(s->fhf / s->fh) << endl;

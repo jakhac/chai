@@ -1,14 +1,8 @@
 #include "main.h"
 
 int main() {
-	// Print meta information in every build
-	cout << "chai " << TOSTRING(VERSION) << endl
-		<< "assert=" << info_ASSERT
-		<< " buckets=" << BUCKETS
-		<< " threads=" << NUM_THREADS 
-		<< " hashMb=" << DEFAULT_TT_SIZE << endl
-		<< "compiler=" << info_COMPILER
-		<< " date=" << __DATE__ << endl;
+	// Print meta information at every startup
+	printEngineMeta(info_ASSERT, info_COMPILER);
 
 	// Init all tables and parameters
 	init();
@@ -17,54 +11,47 @@ int main() {
 	initThreadPool();
 
 	// Print status and drop into cli protocol
-	parseFen(p_board, "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
-	printBoard();
-	cli();
+	parseFen(&_board, STARTING_FEN);
+	printBoard(&_board);
+	cli(&_board, &_instr, &_stats, &_perft);
 
-	// Free all hash tables before exit
+	// Free hash tables and allocated memory before exit
 	freeHashTables();
 	freeEGTB();
 	deleteThreadPool();
-	return 0;
+
+	return EXIT_SUCCESS;
 }
 
-void cli() {
+void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
+	moveList_t moveList;
+	move_t parsedMove;
 	std::string userInput;
 
 	while (1) {
 		cin >> userInput;
 
-		// start UCI protocol
+		// Start UCI protocol.
 		if (userInput == "uci") {
-			uciMode(p_board, s);
+			uciMode(b, s, i);
 			continue;
 		}
 
+		// Exit program.
 		if (userInput == "quit") {
 			break;
 		}
 
-		if (userInput == "test") {
-			continue;
-		}
-
-		// POP MOVE FROM BOARD
-		if (userInput == "pop") {
-			undo_t undoPop = pop(p_board);
-			cout << "Popped " << getStringMove(p_board, undoPop.move) << " from stack." << endl;
-			printBoard();
-			continue;
-		}
-
-		// start searching this position
+		// Start searching this position.
 		if (userInput == "s") {
-			s->depth = 15;
-			s->timeSet = false;
+			i->depth = 15;
+			i->timeSet = false;
 
-			search(p_board, s);
+			search(b, s, i);
 			continue;
 		}
 
+		// Perft current position.
 		if (userInput == "perft") {
 			cout << "Enter Perft depth: ";
 
@@ -72,7 +59,7 @@ void cli() {
 			cin >> perftDepth;
 
 			if (stoi(perftDepth) >= 1 && stoi(perftDepth) <= 15) {
-				dividePerft(p_board, stoi(perftDepth));
+				dividePerft(p, b, stoi(perftDepth));
 			} else {
 				cerr << "Enter an integer between in [1, 15]." << endl;
 			}
@@ -80,76 +67,69 @@ void cli() {
 			continue;
 		}
 
+		// Generate and print all moves for current position.
 		if (userInput == "movegen") {
-			moveList_t moveList[1];
-			generateMoves(p_board, moveList, isCheck(p_board, p_board->stm));
-			printGeneratedMoves(p_board, moveList);
+			generateMoves(b, &moveList, isCheck(b, b->stm));
+			printGeneratedMoves(b, &moveList);
 			continue;
 		}
 
+		// Parse fen into board variables.
 		if (userInput == "fen") {
 			cout << "Enter FEN: ";
 			cin.ignore();
 			getline(cin, userInput);
 			cout << "Parsed FEN \"" << userInput << "\" into board." << endl;
-			parseFen(p_board, userInput);
-			printBoard();
+			parseFen(b, userInput);
+			printBoard(b);
 			continue;
 		}
 
+		// Print board all game state variables.
 		if (userInput == "print") {
-			printBoard();
+			printBoard(b);
 			continue;
 		}
 
+		// Pop move from board.
+		if (userInput == "pop") {
+			undo_t undoPop = pop(b);
+			cout << "Popped " << getStringMove(b, undoPop.move) 
+				 << " from stack." << endl;
+			printBoard(b);
+			continue;
+		}
+
+		// Push null move.
 		if (userInput == "0000") {
-			pushNull(p_board);
-		}
-
-		// Assume userInput is a move
-		generateMoves(p_board, move_s, isCheck(p_board, p_board->stm));
-		int parsedMove = parseMove(p_board, userInput);
-		bool inputIsMove = false;
-		for (int i = 0; i < move_s->cnt; i++) {
-			if (parsedMove == move_s->moves[i]) {
-				inputIsMove = true;
-				break;
-			}
-		}
-
-		if (inputIsMove) {
-			push(p_board, parsedMove);
-			printBoard();
+			pushNull(b);
 			continue;
 		}
 
-		cout << "Command does not exist. Valid commands are:" << endl
-			<< "\tuci\t(start uci protocol)" << endl
-			<< "\ts\t(search current position)" << endl
-			<< "\t[e2e4]\t(apply move)" << endl
-			<< "\tpop\t(undo move)" << endl
-			<< "\tfen\t(parse fen)" << endl
-			<< "\tprint\t(print board status)" << endl
-			<< "\tperft\t(perft this position)" << endl
-			<< "\tquit\t(exit program)" << endl
-			<< endl;
+		// Check if a valid move was entered by user. If so, push move.
+		if (stringIsValidMove(b, userInput, &parsedMove)) {
+			cout << endl;
+			push(b, parsedMove);
+			printBoard(b);
+			continue;
+		}
+
+		printCliHelp();
 	}
 }
 
-void dividePerft(board_t* pBoard, int depth) {
-
+void dividePerft(Perft* p, board_t* b, int depth) {
 	std::string move = "";
-	Perft p;
 
 	while (depth) {
 
 		if (move != "") {
-			int parsedMove = parseMove(pBoard, move);
-			push(pBoard, parsedMove);
+			int parsedMove = parseMove(b, move);
+			push(b, parsedMove);
 			depth--;
 		}
 
-		p.perftRoot(pBoard, depth);
+		p->perftRoot(b, depth);
 
 		cout << "\nDivide at move ";
 		cin >> move;

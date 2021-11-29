@@ -43,7 +43,8 @@ public:
     std::thread t;
 
 	board_t b;
-	search_t s;
+	stats_t s;
+    instr_t instr;
 
 	// Search heuristics for each thread
 	move_t killer[2][MAX_GAME_MOVES];
@@ -64,7 +65,7 @@ public:
 
     void idle();
 
-    void resetThreadStates(board_t* b, search_t* s);
+    void resetThreadStates(board_t* board, stats_t* search, instr_t* instructions);
 
     void startThread();
     void waitThread();
@@ -84,8 +85,10 @@ void deleteThreadPool();
 // Return true if numThreads is valid, else false
 bool resizeThreadPool(size_t numThreads);
 
-void resetAllThreadStates(board_t* b, search_t* s);
+void resetAllThreadStates(board_t* b, stats_t* s, instr_t* i);
 void startAllThreads();
 void waitAllThreads();
+
+int selectBestThreadIndex();
 
 int totalNodeCount();

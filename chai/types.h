@@ -168,29 +168,8 @@ struct board_t {
 	undo_t undoHistory[MAX_GAME_MOVES];
 };
 
-/**
- * Store search parameters set by UCI commands.
- * // TODO Split into statistics // time
- */
-struct search_t {
-
-	int startTime;
-	int allocatedTime;
-	// int stopTime;
-	int depth;
-	int timeLeft;
-	// int movesLeft;
-
-	// bool infinite;
-	bool depthSet;
-	bool timeSet;
-
-	// long nodes;
-	// long qnodes;
-
-	bool quit = false;
-	bool stopped = false;
-
+/// Holds various pruning and counting statistics.
+struct stats_t {
 	int futileCnt;
 	int futileFH;
 
@@ -204,43 +183,21 @@ struct search_t {
 	int pvHits = 0;
 };
 
-// struct threadState_t {
-// 	int id;
+/// Contains instructions about time management parsed from
+/// UCI protocol command.
+struct instr_t {
+	int startTime;
+	int allocatedTime;
+	int depth;
+	int timeLeft;
 
-// 	// Thread status
-// 	bool searching;
+	// bool infinite;
+	bool depthSet;
+	bool timeSet;
 
-// 	// Always false. If set to true, this thread terminates.
-// 	// bool terminateThread = false;
-
-// 	// Each thread has its own board to push/pop moves
-// 	// and store positional state variables
-// 	board_t b;
-
-// 	// Own search_t as thread searches may vary from main search
-// 	search_t s;
-
-// 	// Search heuristics for each thread
-// 	move_t killer[2][MAX_GAME_MOVES];
-// 	move_t mateKiller[MAX_GAME_MOVES];
-// 	move_t counterHeuristic[64][64][2];
-// 	int histHeuristic[2][64][64];
-// 	int histMax = 0;
-
-// 	// Search parameters
-// 	value_t bestScore;
-// 	move_t bestMove;
-// 	move_t pvLine[MAX_DEPTH + 1];
-// 	searchStack_t ss[MAX_DEPTH + 1];
-
-// 	int selDepth;
-
-
-// 	// bool stopThread;
-// 	int nodeCount;
-
-
-// };
+	bool quit = false;
+	bool stopped = false;
+};
 
 namespace Pieces {
 	typedef enum PIECE {

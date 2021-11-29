@@ -6,6 +6,31 @@ void logDebug(std::string errMsg) {
     ofs.close();
 }
 
+void printCliHelp() {
+    cout << "Command does not exist. Valid commands are:" << endl
+    << "\tuci\t(start uci protocol)" << endl
+    << "\ts\t(search current position)" << endl
+    << "\t[e2e4]\t(apply move)" << endl
+    << "\tpop\t(undo move)" << endl
+    << "\tfen\t(parse fen)" << endl
+#ifdef INFO
+    << "\tprint\t(print board status)" << endl
+#endif // INFO
+    << "\tperft\t(perft this position)" << endl
+    << "\tquit\t(exit program)" << endl
+    << endl;
+}
+
+void printEngineMeta(std::string assert, std::string compiler) {
+    	cout << "chai " << TOSTRING(VERSION) << endl
+		<< "assert=" << assert
+		<< " buckets=" << BUCKETS
+		<< " threads=" << NUM_THREADS 
+		<< " hashMb=" << DEFAULT_TT_SIZE << endl
+		<< "compiler=" << compiler
+		<< " date=" << __DATE__ << endl << endl;
+}
+
 void printUCI_Info() {
     cout << "id name chai_" << TOSTRING(VERSION) << "\n";
 	cout << "id author Jakob Hackstein\n";
@@ -122,33 +147,33 @@ void log(std::string logMsg) {
     ofs.close();
 }
 
-void readInput(search_t* s) {
-    // read input causes tests to wait for cin and does not terminate
-#ifndef TESTING
-    int bytes;
-    char input[256] = "", * endc;
+// void readInput(instr_t* instr) {
+//     // read input causes tests to wait for cin and does not terminate
+// #ifndef TESTING
+//     int bytes;
+//     char input[256] = "", * endc;
 
-    if (inputWaiting()) {
-        s->stopped = true;
-        do {
-            bytes = _read(_fileno(stdin), input, 256);
-        } while (bytes < 0);
-        endc = strchr(input, '\n');
-        if (endc)
-            *endc = 0;
+//     if (inputWaiting()) {
+//         instr->stopped = true;
+//         do {
+//             bytes = _read(_fileno(stdin), input, 256);
+//         } while (bytes < 0);
+//         endc = strchr(input, '\n');
+//         if (endc)
+//             *endc = 0;
 
-        if (strlen(input) > 0) {
-            if (!strncmp(input, "quit", 4)) {
-                cout << "READ INPUT: quit" << endl;
-                s->quit = true;
-            }
-        }
-        return;
-    }
-#endif
-}
+//         if (strlen(input) > 0) {
+//             if (!strncmp(input, "quit", 4)) {
+//                 cout << "READ INPUT: quit" << endl;
+//                 instr->quit = true;
+//             }
+//         }
+//         return;
+//     }
+// #endif
+// }
 
-void printUCI(search_t* s, int d, int selDpt, int score, long totalNodes) {
+void printUCI(instr_t* instr, stats_t* s, int d, int selDpt, int score, long totalNodes) {
     std::string scoreStr = " score ";
 
     if (abs(score) >= VALUE_IS_MATE_IN) {
@@ -164,7 +189,7 @@ void printUCI(search_t* s, int d, int selDpt, int score, long totalNodes) {
         << scoreStr
         << " nodes " << totalNodes
         << " tbhits " << s->tbHit
-        << " time " << (getTimeMs() - s->startTime);
+        << " time " << (getTimeMs() - instr->startTime);
 }
 
 void printUCIBestMove(board_t* b, move_t bestMove) {

@@ -1,6 +1,5 @@
 #pragma once
 
-//#include <chrono>
 #include <iomanip> // setprecision
 
 #include "eval.h"
@@ -55,14 +54,10 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth);
  * Root function that starts alphaBeta search in iterative deepening framework.
  *
  * @param  b Reference to current board.
- * @param  s Search info containing search parameters.
  *
  * @returns value_t Best value found search.
  */
-value_t search(board_t* b, search_t* s);
-
-// TODO doc
-// void iid(ThreadWrapper* thread);
+value_t search(board_t* b, stats_t* s, instr_t* i);
 
 /**
  * Apply offset of aspiration windows in alphaBeta call and try to score inside alpha and beta.
@@ -118,4 +113,4 @@ void swapMove(moveList_t* move_s, int id1, int id2);
  *
  * @param  s This search info printed to console.
  */
-void printSearchInfo(search_t* s);
+void printSearchInfo(stats_t* s);

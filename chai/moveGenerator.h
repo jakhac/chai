@@ -242,6 +242,12 @@ void addQueenCaptures(board_t* b, moveList_t* moveList);
  */
 void printGeneratedMoves(board_t* b, moveList_t* moveList);
 
-
-
+/**
+ * Check if this string is a valid move in this position.
+ *
+ * @param  b	        board_t.
+ * @param  stringMove   string, we assume a move.
+ * @param  move         if string move is valid, the move is copied here.
+ */
+bool stringIsValidMove(board_t* b, std::string stringMove, move_t* move);
 

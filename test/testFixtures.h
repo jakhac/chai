@@ -9,12 +9,14 @@ namespace SearchTest {
 
 	protected:
 		board_t* pBoard;
-		search_t* pSearch;
+		stats_t* pSearch;
+		instr_t* pInstr;
 	
 	public:
 		virtual void SetUp() {
 			pBoard = new board_t();
-			pSearch = new search_t();
+			pSearch = new stats_t();
+			pInstr = new instr_t();
 			
 			init();
 			initHashTables();
@@ -26,6 +28,7 @@ namespace SearchTest {
 			deleteThreadPool();
 			delete pBoard;
 			delete pSearch;
+			delete pInstr;
 		}
 
 	};

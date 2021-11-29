@@ -52,6 +52,8 @@ std::string getStringMove(board_t* b, const move_t move);
  */
 void printBinary(bitboard_t x);
 
+void printEngineMeta(std::string assert, std::string compiler);
+
 /**
  * Print UCI info to console.
  *
@@ -60,9 +62,11 @@ void printBinary(bitboard_t x);
  * @param selDpt selDepth.
  * @param score bestScore returned by search.
  */
-void printUCI(search_t* s, int d, int selDpt, int score, long totalNodes);
+void printUCI(instr_t* instr, stats_t* s, int d, int selDpt, int score, long totalNodes);
 
 void printUCIBestMove(board_t* b, move_t bestMove);
+
+void printCliHelp();
 
 /**
  * Print pv line to console. Either hash-line form ttable probing or pvline struct.
@@ -86,7 +90,7 @@ void log(std::string logMsg);
  * Read input from command line during search. Sets stop to true,
  * if search has to be aborted.
  */
-void readInput(search_t* s);
+// void readInput(stats_t* s);
 
 /**
  * Determines if we can input waiting

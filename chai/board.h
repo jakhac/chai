@@ -8,29 +8,17 @@
 #include "pieceKeys.h"
 #include "validate.h"
 
-const int pieceKnight[13] = {
-	0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0
-};
+const int pieceKnight[13] = { 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 };
 
-const int pieceKing[13] = {
-	0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1
-};
+const int pieceKing[13] = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 };
 
-const int pieceRookQueen[13] = {
-	0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0
-};
+const int pieceRookQueen[13] = { 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0 };
 
-const int pieceRook[13] = {
-	0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0
-};
+const int pieceRook[13] = { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0 };
 
-const int pieceBishopQueen[13] = {
-	0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0
-};
+const int pieceBishopQueen[13] = { 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0 };
 
-const int piecePawn[13] = {
-	0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0
-};
+const int piecePawn[13] = { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
 
 const int stmPiece[7][2] = {
 	{},
@@ -254,7 +242,7 @@ move_t parseMove(board_t* b, std::string move);
 /**
  * Print board with piece chars, rank and file indices.
  */
-void printBoard();
+void printBoard(board_t* b);
 
 /**
  * Check board for valid bitboard entries and board variables.

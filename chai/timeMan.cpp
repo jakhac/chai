@@ -35,8 +35,6 @@ int allocateTime(board_t* b, int timeLeft, int inc) {
 		} else if (timeLeft <= 3500) {
             return (inc / 4);
         }
-// position startpos moves d2d4 g8f6 c2c4 g7g6 b1c3 f8g7 e2e4 d7d6 g1f3 e8g8 c1e3 e7e5 d4e5 d6e5 d1d8 f8d8 c3d5 d8d7 f1d3 b8a6 d5f6
-// go wtime 20921 btime 22041 winc 300 binc 300
 
         // 1)
         int movesLeft = remainingHalfMoves(b) / 2;
@@ -47,17 +45,19 @@ int allocateTime(board_t* b, int timeLeft, int inc) {
         // 3)
         timeToAllocate *= (1 + middleGameFactor(b->halfMoves/2));
 
+#ifdef INFO
         cout << "TimeLeft=" << timeLeft 
              << " estMovesLeft=" << movesLeft 
              << " halfMovesPlayer=" << (b->halfMoves/2)
              << " middleGameFactor=" << 1 + middleGameFactor(b->halfMoves/2)
              << " allocatedTime " << timeToAllocate
              << endl;
+#endif // INFO
         
 		Assert(timeToAllocate > 0);
         return std::min(timeToAllocate, timeLeft - 100);
 }
 
-bool isTimeLeft(search_t* s) {
-    return getTimeMs() < (s->startTime + s->allocatedTime);
+bool isTimeLeft(instr_t* instr) {
+    return getTimeMs() < (instr->startTime + instr->allocatedTime);
 }

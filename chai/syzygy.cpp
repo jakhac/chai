@@ -6,7 +6,9 @@ void initEGTB(const char* tbPath) {
 		Assert(false);
 		exit(1);
 	}
-	cout << "TB max=" << TB_LARGEST << endl;
+#ifdef INFO
+	cout << "TB " << std::setw(5) << TB_LARGEST << endl << endl;
+#endif // INFO
 }
 
 void freeEGTB() {

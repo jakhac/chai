@@ -1,6 +1,7 @@
 #pragma once
 
 #include <math.h> // pow
+#include <iomanip> // setw
 
 #include "moveGenerator.h"
 
@@ -142,17 +143,17 @@ move_t probePV(board_t* b);
  * Checks if score from ttable is mate score. Update score according with ply to
  * make engine visible to checkmate paths.
  *
- * @param  b	 The current board.
+ * @param  ply	 Current ply.
  * @param  score The score to check.
  */
-int hashToSearch(board_t* b, value_t score);
+int hashToSearch(int ply, value_t score);
 
 /**
  * Checks if score from search is mate score. Update score according with ply to
  * make engine visible to checkmate paths.
  *
- * @param  b	 The current board.
+ * @param  ply	 Current ply.
  * @param  score The score to check.
  */
-int searchToHash(board_t* b, value_t score);
+int searchToHash(int ply, value_t score);
 

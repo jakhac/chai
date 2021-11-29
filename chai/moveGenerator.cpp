@@ -149,7 +149,6 @@ void generateCheckEvasions(board_t* b, moveList_t* moveList) {
 					&& pieceAt(b, attackerSq - 1) == Pieces::p
 					&& (1ULL << (attackerSq - 1)) & RANK_4_HEX
 					&& (setMask[attackerSq - 1] & ~pinnedDefender)) {
-					cout << "no here" << endl;
 					moveList->moves[moveList->cnt++] = serializeMove(attackerSq - 1, b->enPas, EP_MOVE, Pieces::NO_PIECE);
 				}
 				if (b->enPas == attackerSq - 8
@@ -747,4 +746,23 @@ void addKingCheckEvasions(board_t* b, moveList_t* moveList) {
 		to = popLSB(&capSquares);
 		moveList->moves[moveList->cnt++] = serializeMove(kSq, to, NORMAL_MOVE, Pieces::NO_PIECE);
 	}
+}
+
+bool stringIsValidMove(board_t* b, std::string stringMove, move_t* move) {
+	if (stringMove.size() > 5 || stringMove.size() < 4) {
+		return false;
+	}
+
+	moveList_t moveList;
+	generateMoves(b, &moveList, isCheck(b, b->stm));
+
+	int parsedMove = parseMove(b, stringMove);
+	for (int i = 0; i < moveList.cnt; i++) {
+		if (parsedMove == moveList.moves[i]) {
+			*move = parsedMove;
+			return true;
+		}
+	}
+
+	return false;
 }

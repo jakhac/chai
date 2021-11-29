@@ -155,13 +155,14 @@
     - [x] Time Management
     - [x] Makefile supports #threads and #hashMb parameters
   - v2.6.6
-    - [ ] Test-Suite for funcionality check (Benchmark-Test?)
+    - [ ] Select best thread
     - [ ] Run exe on laptop / missing lib files?
 - Project
   - [x] UCI fixes, e.g. quit current mode
   - [x] UCI refactor parsing
   - ToDo
   - [ ] Build exhaustive test-suite: Search and Functionality
+  - [ ] Refactor CLI code, clean CLI prints
   - [ ] Refactor code towards C++17 (align, C++17 features, clarity in code)
   - [ ] Test complete build/run/strip/test process
   - [ ] Update README.md to new build process

@@ -1,6 +1,6 @@
 #include "board.h"
 
-board_t* p_board = new board_t();
+// board_t* p_board = new board_t();
 
 bool checkBoard(board_t* board) {
 	Assert(board->castlePermission >= 0 && board->castlePermission <= 15);
@@ -28,43 +28,15 @@ int fileRankToSq(int f, int r) {
 }
 
 void reset(board_t* b) {
-	b->stm = chai::WHITE;
-	b->enPas = DEFAULT_EP_SQ;
-	b->halfMoves = 0;
-	b->ply = 0;
-	b->undoPly = 0;
-	b->fiftyMove = 0;
-	b->zobristKey = 0x0;
-	b->zobristPawnKey = 0x0;
+	b->stm              = chai::WHITE;
+	b->enPas            = DEFAULT_EP_SQ;
+	b->halfMoves        = 0;
+	b->ply              = 0;
+	b->undoPly          = 0;
+	b->fiftyMove        = 0;
+	b->zobristKey       = 0x0;
+	b->zobristPawnKey   = 0x0;
 	b->castlePermission = 0;
-
-	// Reset all heuristics used to order moves during search.
-	// for (int i = 0; i < MAX_GAME_MOVES; i++) {
-	// 	mateKiller[i] = MOVE_NONE;
-	// }
-
-	// for (int i = 0; i < 64; i++) {
-	// 	for (int j = 0; j < 64; j++) {
-	// 		for (int k = 0; k < 2; k++) {
-	// 			counterHeuristic[i][j][k] = MOVE_NONE;
-	// 		}
-	// 	}
-	// }
-
-	// for (int i = 0; i < 2; i++) {
-	// 	for (int j = 0; j < NUM_SQUARES; j++) {
-	// 		for (int k = 0; k < NUM_SQUARES; k++) {
-	// 			histHeuristic[i][j][k] = 0;
-	// 		}
-	// 	}
-	// }
-	// histMax = 0;
-
-	// for (int i = 0; i < 2; i++) {
-	// 	for (int j = 0; j < MAX_DEPTH; j++) {
-	// 		killer[i][j] = MOVE_NONE;
-	// 	}
-	// }
 
 	for (int i = chai::NO_TYPE; i <= chai::KING; i++) b->pieces[i] = 0ULL;
 
@@ -150,7 +122,7 @@ int countMajorPieces(board_t* b, int side) {
 	return cnt;
 }
 
-void printBoard() {
+void printBoard(board_t* board) {
 #ifdef INFO
 	int sq, file, rank, piece;
 
@@ -159,7 +131,7 @@ void printBoard() {
 		printf("%d  ", rank + 1);
 		for (file = FILE_A; file <= FILE_H; file++) {
 			sq = fileRankToSq(file, rank);
-			piece = pieceAt(p_board, sq);
+			piece = pieceAt(board, sq);
 			printf("%2c", pieceChar[piece]);
 		}
 		printf("\n");
@@ -170,20 +142,12 @@ void printBoard() {
 		printf("%2c", 'a' + file);
 	}
 
-	cout << "\n\nPlayer to move: " << p_board->stm << endl;
-	printf("Zobrist key: %llX\n", p_board->zobristKey);
-	printf("Pawn key: %llX\n", p_board->zobristPawnKey);
-	cout << "En passant square: " << p_board->enPas << endl;
-	cout << "Halfmoves " << p_board->halfMoves << ", undoPly " << p_board->undoPly
-		<< ", ply " << p_board->ply << ", fiftyMoves " << p_board->fiftyMove << endl;
-
-	printf("Castle permission: %c%c%c%c\n",
-		   p_board->castlePermission & K_CASTLE ? 'K' : ' ',
-		   p_board->castlePermission & Q_CASTLE ? 'Q' : ' ',
-		   p_board->castlePermission & k_CASTLE ? 'k' : ' ',
-		   p_board->castlePermission & q_CASTLE ? 'q' : ' '
-	);
-
+	cout << "\n\nSide to move\t\t= " 
+		 << ((board->stm == chai::WHITE) ? "WHITE" : "BLACK") << endl;
+	cout << "Position-Hashkey\t= 0x" << std::hex << board->zobristKey << std::dec << endl;
+	cout << "Pawn-Hashkey\t\t= 0x" << std::hex << board->zobristPawnKey << std::dec << endl;
+	cout << "EP Square\t\t= " << board->enPas << endl;
+	cout << "FEN\t\t\t= " << getFEN(board) << endl;
 	cout << endl;
 #endif // INFO
 }
@@ -479,19 +443,19 @@ void pushCastle(board_t* b, move_t move) {
 	switch (toSquare) {
 		case C1:
 			rClearSq = A1;
-			rSetSq = D1;
+			rSetSq   = D1;
 			break;
 		case G1:
 			rClearSq = H1;
-			rSetSq = F1;
+			rSetSq   = F1;
 			break;
 		case C8:
 			rClearSq = A8;
-			rSetSq = D8;
+			rSetSq   = D8;
 			break;
 		case G8:
 			rClearSq = H8;
-			rSetSq = F8;
+			rSetSq   = F8;
 			break;
 		default:
 			Assert(false);
@@ -499,9 +463,9 @@ void pushCastle(board_t* b, move_t move) {
 	}
 
 	b->zobristKey ^= pieceKeys[movingRook][rClearSq]
-		^ pieceKeys[movingRook][rSetSq]
-		^ pieceKeys[movingKing][fromSquare]
-		^ pieceKeys[movingKing][toSquare];
+				  ^  pieceKeys[movingRook][rSetSq]
+				  ^  pieceKeys[movingKing][fromSquare]
+				  ^  pieceKeys[movingKing][toSquare];
 
 	clearPiece(b, chai::ROOK, rClearSq, b->stm);
 	setPiece(b, chai::ROOK, rSetSq, b->stm);
@@ -539,7 +503,7 @@ void pushNormal(board_t* b, move_t move) {
 
 	// Update normal move
 	b->zobristKey ^= pieceKeys[fromPiece][fromSquare]
-		^ pieceKeys[fromPiece][toSquare];
+				  ^  pieceKeys[fromPiece][toSquare];
 
 	clearPiece(b, fromPiece, fromSquare, b->stm);
 	setPiece(b, fromPiece, toSquare, b->stm);
@@ -585,13 +549,13 @@ bool push(board_t* b, move_t move) {
 	Assert(b->undoPly >= 0 && b->undoPly <= MAX_GAME_MOVES);
 
 	// Store data that is not worth recomputing
-	undo_t* undo = &b->undoHistory[b->undoPly];
-	undo->enPas = b->enPas;
-	undo->castle = b->castlePermission;
-	undo->zobKey = b->zobristKey;
-	undo->pawnKey = b->zobristPawnKey;
-	undo->move = move;
-	undo->cap = Pieces::NO_PIECE; // Might get updated by push[MoveType]
+	undo_t* undo    = &b->undoHistory[b->undoPly];
+	undo->enPas     = b->enPas;
+	undo->castle    = b->castlePermission;
+	undo->zobKey    = b->zobristKey;
+	undo->pawnKey   = b->zobristPawnKey;
+	undo->move      = move;
+	undo->cap       = Pieces::NO_PIECE;
 	undo->fiftyMove = b->fiftyMove;
 
 	// Always let helper functions determine next ep square
@@ -651,13 +615,13 @@ bool push(board_t* b, move_t move) {
 void pushNull(board_t* b) {
 	Assert(!isCheck(b, b->stm));
 
-	undo_t* undo = &b->undoHistory[b->undoPly];
-	undo->enPas = b->enPas;
-	undo->castle = b->castlePermission;
-	undo->zobKey = b->zobristKey;
+	undo_t* undo  = &b->undoHistory[b->undoPly];
+	undo->enPas   = b->enPas;
+	undo->castle  = b->castlePermission;
+	undo->zobKey  = b->zobristKey;
 	undo->pawnKey = b->zobristPawnKey;
-	undo->move = MOVE_NULL;
-	undo->cap = chai::NO_TYPE;
+	undo->move    = MOVE_NULL;
+	undo->cap     = chai::NO_TYPE;
 
 	b->zobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas]; // ep out
 	b->enPas = DEFAULT_EP_SQ;
@@ -667,7 +631,7 @@ void pushNull(board_t* b) {
 	b->stm ^= 1;
 	b->zobristKey ^= sideKey;
 
-	Assert(b->zobristKey == generateZobristKey(b));
+	Assert(b->zobristKey     == generateZobristKey(b));
 	Assert(b->zobristPawnKey == generatePawnHashKey(b));
 
 	// update gameState variable and store in undo struct
@@ -698,16 +662,16 @@ undo_t pop(board_t* b) {
 	b->stm ^= 1;
 
 	// reset board variables
-	undo_t* undo = &b->undoHistory[b->undoPly];
+	undo_t* undo        = &b->undoHistory[b->undoPly];
 	b->castlePermission = undo->castle;
-	b->fiftyMove = undo->fiftyMove;
-	b->zobristKey = undo->zobKey;
-	b->zobristPawnKey = undo->pawnKey;
-	b->enPas = undo->enPas;
+	b->fiftyMove        = undo->fiftyMove;
+	b->zobristKey       = undo->zobKey;
+	b->zobristPawnKey   = undo->pawnKey;
+	b->enPas            = undo->enPas;
 
-	int from_square = fromSq(undo->move);
-	int to_square = toSq(undo->move);
-	int movingPiece = pieceAt(b, to_square);
+	int from_square   = fromSq(undo->move);
+	int to_square     = toSq(undo->move);
+	int movingPiece   = pieceAt(b, to_square);
 	int capturedPiece = undo->cap;
 
 	// Move back moving piece
@@ -764,12 +728,12 @@ undo_t popNull(board_t* b) {
 	b->stm ^= 1;
 
 	// Reset board variables
-	undo_t* undo = &b->undoHistory[b->undoPly];
+	undo_t* undo        = &b->undoHistory[b->undoPly];
 	b->castlePermission = undo->castle;
-	b->fiftyMove = undo->fiftyMove;
-	b->zobristKey = undo->zobKey;
-	b->zobristPawnKey = undo->pawnKey;
-	b->enPas = undo->enPas;
+	b->fiftyMove        = undo->fiftyMove;
+	b->zobristKey       = undo->zobKey;
+	b->zobristPawnKey   = undo->pawnKey;
+	b->enPas            = undo->enPas;
 	Assert(undo->move == MOVE_NULL);
 
 	return *undo;
@@ -782,8 +746,8 @@ move_t getCurrentMove(board_t* b) {
 
 bitboard_t getPinner(board_t* b, int kSq, int kSide) {
 	bitboard_t kingSlider = lookUpRookMoves(kSq, b->occupied);
-	bitboard_t potPinned = kingSlider & b->color[kSide];
-	bitboard_t xrays = kingSlider ^ lookUpRookMoves(kSq, b->occupied ^ potPinned);
+	bitboard_t potPinned  = kingSlider & b->color[kSide];
+	bitboard_t xrays      = kingSlider ^ lookUpRookMoves(kSq, b->occupied ^ potPinned);
 
 	bitboard_t pinner = xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::ROOK, kSide ^ 1)));
 
@@ -799,9 +763,9 @@ bitboard_t getPinned(board_t* b, int kSq, int kSide) {
 	bitboard_t pinned = 0;
 
 	bitboard_t kingSlider = lookUpRookMoves(kSq, b->occupied);
-	bitboard_t potPinned = kingSlider & b->color[kSide];
-	bitboard_t xrays = kingSlider ^ lookUpRookMoves(kSq, b->occupied ^ potPinned);
-	bitboard_t pinner = xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::ROOK, kSide ^ 1)));
+	bitboard_t potPinned  = kingSlider & b->color[kSide];
+	bitboard_t xrays      = kingSlider ^ lookUpRookMoves(kSq, b->occupied ^ potPinned);
+	bitboard_t pinner     = xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::ROOK, kSide ^ 1)));
 
 	while (pinner) {
 		int sq = popLSB(&pinner);
@@ -809,9 +773,9 @@ bitboard_t getPinned(board_t* b, int kSq, int kSide) {
 	}
 
 	kingSlider = lookUpBishopMoves(kSq, b->occupied);
-	potPinned = kingSlider & b->color[kSide];
-	xrays = kingSlider ^ lookUpBishopMoves(kSq, b->occupied ^ potPinned);
-	pinner = xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::BISHOP, kSide ^ 1)));
+	potPinned  = kingSlider & b->color[kSide];
+	xrays      = kingSlider ^ lookUpBishopMoves(kSq, b->occupied ^ potPinned);
+	pinner     = xrays & (getPieces(b, chai::QUEEN, kSide ^ 1) | (getPieces(b, chai::BISHOP, kSide ^ 1)));
 
 	while (pinner) {
 		int sq = popLSB(&pinner);

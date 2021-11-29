@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iomanip> // setw
+
 #include "egtb/tbprobe.h"
 #include "board.h"
 

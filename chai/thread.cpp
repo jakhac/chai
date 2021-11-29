@@ -15,9 +15,10 @@ bool ABORT_SEARCH = false;
 std::vector<Thread> threadPool;
 
 
-void ThreadWrapper::resetThreadStates(board_t* board, search_t* search) {
+void ThreadWrapper::resetThreadStates(board_t* board, stats_t* search, instr_t* instructions) {
     b = *board;
     s = *search;
+    instr = *instructions;
 
     // Reset heuristics: Matekiller, Killer, Counter, History
     std::fill_n(mateKiller, 
@@ -126,9 +127,9 @@ bool resizeThreadPool(size_t numWorkers) {
     return true;
 }
 
-void resetAllThreadStates(board_t* b, search_t* s) {
+void resetAllThreadStates(board_t* board, stats_t* search, instr_t* instructions) {
     for (int i = 0; i < NUM_THREADS; i++) {
-        threadPool[i]->resetThreadStates(b, s);
+        threadPool[i]->resetThreadStates(board, search, instructions);
     }
 }
 
@@ -153,4 +154,22 @@ int totalNodeCount() {
     return n;
 }
 
-Thread selectBestThread() { }
+int selectBestThreadIndex() {
+    int bestIdx = 0;
+    value_t bestScore = threadPool[bestIdx]->bestScore;
+    int bestDepth = threadPool[bestIdx]->depth;
+
+    for (size_t i = 1; i < threadPool.size(); i++) {
+        if (threadPool[i]->depth > bestDepth
+            && threadPool[i]->bestScore > bestScore) {
+            
+            // Found a thread with at least equal 
+            // depth but better score
+            bestIdx = i;
+            bestDepth = threadPool[i]->depth;
+            bestScore = threadPool[i]->bestScore;
+        }
+    }
+
+    return bestIdx;
+}

@@ -14,12 +14,15 @@ static std::string info_ASSERT = "0";
 #if defined(_MSC_VER)
 static std::string info_COMPILER = "MSVC";
 #elif defined(__GNUC__)
-static std::string info_COMPILER = "GCC";
+static std::string info_COMPILER = "GNU";
 #endif
 
-static Perft perft;
-static moveList_t move_s[1];
-static search_t s[1];
+
+// These are the main variables used in the engine.
+static board_t _board;
+static Perft _perft;
+static instr_t _instr;
+static stats_t _stats;
 
 /**
  * Main function to run chai in console.
@@ -31,7 +34,7 @@ int main();
 /**
  * Start a game in console.
  */
-void cli();
+void cli(board_t* b, instr_t* i, stats_t* s, Perft* p);
 
 /**
  * Function to divide with cmd-line move after each perft.
@@ -40,5 +43,5 @@ void cli();
  * @param  fen   The fen.
  * @param  depth The initial depth.
  */
-void dividePerft(board_t* b, int depth);
+void dividePerft(Perft* p, board_t* b, int depth);
 

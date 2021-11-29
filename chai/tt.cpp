@@ -78,8 +78,6 @@ static size_t allocatePT(size_t remainingByte) {
 
 bool resizeHashTables(size_t newMbSize) {
 	if (newMbSize < MIN_TT_SIZE || newMbSize > MAX_TT_SIZE) {
-		cerr << "Request MB is too small / large. Choose from interval ["
-			<< MIN_TT_SIZE << ", " << MAX_TT_SIZE << "]" << endl;
 		return false;
 	}
 
@@ -101,11 +99,11 @@ bool resizeHashTables(size_t newMbSize) {
 	}
 
 	cout
-		<< "TT " << ((possibleBytes - remainingBytes) >> 20) << "MB"
-		<< " initialized with " << tt->buckets
+		<< "TT " << std::setw(5) << ((possibleBytes - remainingBytes) >> 20) << "MB"
+		<< " initialized with " << std::setw(10) << tt->buckets
 		<< " buckets. (" << (tt->buckets * BUCKETS) << " entries)" << endl
-		<< "PT " << (usedBytes >> 20) << "MB"
-		<< " initialized with " << pt->entries << " entries." << endl;
+		<< "PT " << std::setw(5) << (usedBytes >> 20) << "MB"
+		<< " initialized with " << std::setw(10) << pt->entries << " entries." << endl;
 #endif // !INFO
 
 	return true;
@@ -230,7 +228,7 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 			Assert(abs(e->value) < VALUE_INFTY || e->value == VALUE_NONE);
 			Assert(abs(e->staticEval) < VALUE_IS_MATE_IN || e->staticEval == VALUE_NONE);
 
-			*hashValue = hashToSearch(b, e->value);
+			*hashValue = hashToSearch(b->ply, e->value);
 			*hashDepth = e->depth;
 			*move = e->move;
 			*hashFlag = e->flag;
@@ -265,21 +263,20 @@ void prefetchPT(board_t* b) {
 	prefetch(&pt->table[index]);
 }
 
-int hashToSearch(board_t* b, value_t score) {
+int hashToSearch(int ply, value_t score) {
 	if (score > VALUE_IS_MATE_IN) {
-		return score - b->ply;
+		return score - ply;
 	} else if (score < -VALUE_IS_MATE_IN) {
-		return score + b->ply;
+		return score + ply;
 	}
 	return score;
 }
 
-//TODO use ply as only param
-int searchToHash(board_t* b, value_t score) {
+int searchToHash(int ply, value_t score) {
 	if (score > VALUE_IS_MATE_IN) {
-		return score + b->ply;
+		return score + ply;
 	} else if (score < -VALUE_IS_MATE_IN) {
-		return score - b->ply;
+		return score - ply;
 	}
 	return score;
 }
