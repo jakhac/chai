@@ -387,7 +387,7 @@ template <nodeType_t nodeType>
 value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 	// Initialize node
 	board_t* b      = &thread->b;
-	stats_t* s     = &thread->s;
+	stats_t* s      = &thread->s;
 	instr_t* instr  = &thread->instr;
 	bool mainThread = thread->id == 0;
 	bool rootNode   = b->ply == 0;

@@ -134,7 +134,7 @@
   - [x] Disabled `pvLine_t` structs on stack due to memory issues on call-stack
   - [x] `parseFen()` now assigns halfMoves to `fiftyMove`, `isRepetition()` was adapted to this change
   - [x] Bigger margin for `ISMATE` to include long checking sequences from quiescence mate detection
-  - [x] Not finding mates: Unforced Draw in winning endgame (fixed with new quiescence mate detection und reordering alphaBeta)
+  - [x] Not finding mates: Unforced Draw in winning endgame (fixed with new quiescence mate detection and reordering alphaBeta)
   - [x] Redordered alphaBeta functions till move loop
 
 **Changes in v2.6**
@@ -146,7 +146,7 @@
   - v2.6.2
     - [x] Aspiration Windows
   - v2.6.3
-    - [x] EGTB Probing
+    - [x] Support for EGTB Probing
   - v2.6.4
     - [x] archive repository in msvc_branch
     - [x] makefile and g++ code adjustments
@@ -155,17 +155,11 @@
     - [x] Time Management
     - [x] Makefile supports #threads and #hashMb parameters
   - v2.6.6
-    - [ ] Select best thread
-    - [ ] Run exe on laptop / missing lib files?
+    - [x] Select best thread
 - Project
   - [x] UCI fixes, e.g. quit current mode
   - [x] UCI refactor parsing
-  - ToDo
-  - [ ] Build exhaustive test-suite: Search and Functionality
-  - [ ] Refactor CLI code, clean CLI prints
-  - [ ] Refactor code towards C++17 (align, C++17 features, clarity in code)
-  - [ ] Test complete build/run/strip/test process
-  - [ ] Update README.md to new build process
+  - [x] Update README.md to new build process
 
 # Todo
 

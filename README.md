@@ -1,86 +1,86 @@
 # chai - Chess Engine
 
-_chai_ is an open source UCI compatible chess engine playing at estimated ~2000 elo.
+chai is a free, open source [UCI](http://wbec-ridderkerk.nl/html/UCIProtocol.html) compatible chess engine playing at estimated ~2300 elo. In order to play or test this engine, a GUI like [Arena](http://www.playwitharena.de/), [Lucas Chess](https://lucaschess.pythonanywhere.com/) or a command-line interface like [c-chess-cli](https://github.com/lucasart/c-chess-cli) recommended.
 
-## Install
+---
+
+## Installation
 
 ### Prebuild Binaries
 
-Latest prebuild binaries compiled with GCC or MSVC can be found under [releases](https://github.com/jakhac/chai/releases).
+Latest prebuild binaries compiled for Win64 operating systems are provided under [releases](https://github.com/jakhac/chai/releases).
 
-### Building From Source (Windows 64Bit)
+###  Building From Source
 
-Either use makefile as explained in the following or compile with MSVC-Compiler via .sln-file.
+When building from source, it is recommended to use the [master branch](https://github.com/jakhac/chai/tree/master) only.
 
+The Makefile supports a customizable number of threads and hashtable size as *threads* and *hashMb* parameters. The default values are *hashMb=256Mb* and *threads=available_cores - 1* to allow a spare core for OS tasks. Note that threads are limited by the number of available cores on the current system and number of threads include the main process.
+
+**Build commands:**
 ```
 $ git clone https://github.com/jakhac/chai
 $ cd chai
-$ make
+$ make help
+$ make release [threads=#threads] [hashMb=#hashtableSize]
 ```
 
-## Usage
+---
 
-Since _chai_ implements the [UCI protocol](http://wbec-ridderkerk.nl/html/UCIProtocol.html), the engine could be used like this
+## Testing and Strength
+
+The latest version (v2.6.6) is mainly tested with self-play and occasionally with additional engines provided by [CCRL](https://ccrl.chessdom.com/ccrl/4040/) for better reference. The time controls are mostly 20/0.3 and 40/0.4.
+
+Version 2.6.6 is playing at estimated ~2300 on 20/0.3 time controls using a 3-core setup and *256Mb* for the hashtable.
+
+---
+
+## Features
+
+### UCI Options
+
+The engine implements the UCI protocol and contains the following options:
+
+- Adjust the size of the hashtable in Mb
 
 ```
-> uci
-id name chai Chess Engine
-id author chai
-uciok
-> isready
-... init logging
-readyok
-> ucinewgame
-... set up new game from starting position
-> go depth 10
-... search starts here
+setoption name Hash value <value>
 ```
 
-## Strength
+- Set number of threads
 
-Version 2.4 is playing at estimated 2000 elo according to multiple test runs with engines from [CCRL](https://ccrl.chessdom.com/ccrl/4040/). Time controls vary from 40/0.4 to 20/0.3 for quicker results.
+```
+setoption name Threads value <value>
+```
 
-## Search Features
+- Enable EGTB by providing path to Syzygy EG-Files: 
 
-_chai_ uses following techniques and heuristics
+```
+setoption name SyzygyPath value <path/to/egtb_files>
+```
+
+### Engine Features
+
+An excerpt of techniques and heuristics is listed in the following:
 
 - Search
-  - PVS alpha-beta search and quiescence search
-  - Late move reductions (included in upcoming release)
-  - Iterative deepening framework
-  - Internal iterative deepening
-  - Null move pruning
-  - SEE pruning with depth-dependent threshold
-  - Futility Pruning at child and parent node
-  - Transposition table (4 buckets, replace entry with lowest depth)
-  - Pawn hashtable
-  - Mate distance pruning
-  - Stand-Pat pruning
-- MoveGen
-  - Bitboard based move generation with magic bitboards
-  - Move encoding in 16 bits
-  - Special move generator for quiescence (captures and promotions only)
-  - Check evasion generator
+  - Multi-threaded iterative deepening framework based on [Lazy SMP](https://www.chessprogramming.org/Lazy_SMP)
+  - Principal variation search
+  - Late move Reductions
+  - Transposition Table (4 buckets: replace entry with lowest depth)
+- Move Generation
+  - Bitboard based move generation with [Magic-Bitboards](http://pradu.us/old/Nov27_2008/Buzz/research/magic/Bitboards.pdf)
+  - Special generators for quiescence and check evasions
   - Checker generator (generates all checking moves for first ply of quiescence)
-  - Move ordering:
-    - Hash Move
-    - Good captures (SEE >= 0) with MVV-LVA
-    - Promoting Captures
-    - Promotions
-    - Mate killer moves
-    - 2 killer moves
-    - Quiet moves (ordered by history heuristic)
-    - Losing captures
   - Contains `dividePerft()` option to debug move generator
-- Evaluation (only rudimentary, planned to rewrite in version 3.x)
-  - Interpolated piece-square-table
-  - piece count
-  - Basic king safety
-  - Evaluation of pawn structure
+- Endgame Tablebase Probing ([Fathom](https://github.com/jdart1/Fathom) probing tool)
+- Test-Suite based on GoogleTest-Framework (for usage see [here](https://github.com/google/googletest))
+
+---
 
 ## Acknowledgement
 
-Following sources supported and influenced development of _chai_ chess engine
+Following sources supported and influenced development:
 
 - [Stockfish](https://github.com/official-stockfish/Stockfish), [Ethereal](https://github.com/AndyGrant/Ethereal), [Jazz](https://www.chessprogramming.org/Jazz)
 - [Chess Programming Wiki](https://www.chessprogramming.org/Main_Page)
+- [CCRL reference engines](http://ccrl.chessdom.com/ccrl/404/)

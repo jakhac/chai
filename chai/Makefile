@@ -177,37 +177,41 @@ release:
 	if not exist ".\obj_release" mkdir ".\obj_release"
 	$(MAKE) $(EXE_RELEASE) TYPE=release .depend
 
-# strip
+strip:
+	$(MAKE) release
+	$(MAKE) objClean
 
 test:
-	cd .. & cd test & $(MAKE) TYPE=debug
+	cd ../test & $(MAKE) TYPE=debug
 
 clean:
-	$(MAKE) objclean
+	$(MAKE) cleanExe
+	$(MAKE) objClean
+	$(MAKE) cleanTest
+
+cleanExe:
 	del /Q $(EXE_DEBUG) 2>nul
 	del /Q $(EXE_RELEASE) 2>nul
 	del /Q $(EXE_TEST) 2>nul
 
-cleantest:
+cleanTest:
 	del /Q .\obj_debug\ 2>nul
-	del /Q $(EXE_DEBUG) 2>nul
 	del /Q $(EXE_TEST) 2>nul
-	del /Q test.exe 2>nul
 
-objclean:
+objClean:
 	del /Q .\obj_release\ 2>nul
 	del /Q .\obj_debug\ 2>nul
 
 help:
 	@echo "Build chai_$(VERSION) with "make target [threads=#threads] [hashMb=#hashMb]"
 	@echo "Possible targets are:"
-	@echo "debug     > build with asserts and debug information"
-	@echo "release   > build fastest version of engine"
-	@echo "test      > compile engine files and build test suite in ../test"
+	@echo "make debug     > Build includes assertions, extra checks and information."
+	@echo "make release   > Build optimized on performance and speed."
+	@echo "make test      > Build test-suite."
 
 .depend:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null
 
 -include .depend
 
-.PHONY: all test clean objclean help cleantest release debug
+.PHONY: all test strip clean objclean help cleantest release debug
