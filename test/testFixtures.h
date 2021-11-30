@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
-#include "../chai/uci.h"
-#include "../chai/perft.h"
+#include "../src/uci.h"
+#include "../src/perft.h"
 
 
 namespace SearchTest {

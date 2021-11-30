@@ -13,7 +13,7 @@ CXXFLAGS += -pedantic -Wextra -Wshadow
 CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 
 
-EXE = ../chai/test.exe
+EXE = ../src/test.exe
 
 CHAI_SRCS = attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
@@ -24,10 +24,10 @@ SRCS = $(addprefix ../chai/, $(CHAI_SRCS))
 
 SRCS += testMain.cpp testSearch.cpp testPerft.cpp testSee.cpp
 
-OBJ_DIR = ../chai/obj_debug
+OBJ_DIR = ../src/obj_debug
 OBJS = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(notdir $(SRCS)))
 
-VPATH = ../chai:../chai/egtb:
+VPATH = ../src:../src/egtb:
 
 $(EXE): $(OBJS)
 	$(CXX) $(LXXFLAGS) -o $(EXE) $(OBJS) $(GTEST)

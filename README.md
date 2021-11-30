@@ -17,7 +17,7 @@ The Makefile supports a customizable number of threads and hashtable size as *th
 **Build commands:**
 ```
 $ git clone https://github.com/jakhac/chai
-$ cd chai/chai
+$ cd chai/src
 $ make help
 $ make release [threads=#threads] [hashMb=#hashtableSize]
 ```
