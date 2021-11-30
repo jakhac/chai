@@ -34,7 +34,7 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 		// Start UCI protocol.
 		if (userInput == "uci") {
 			uciMode(b, s, i);
-			continue;
+			break;
 		}
 
 		// Exit program.
