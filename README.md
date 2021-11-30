@@ -1,6 +1,6 @@
 # chai - Chess Engine
 
-chai is a free, open source [UCI](http://wbec-ridderkerk.nl/html/UCIProtocol.html) compatible chess engine playing at estimated ~2300 elo. In order to play or test this engine, a GUI like [Arena](http://www.playwitharena.de/), [Lucas Chess](https://lucaschess.pythonanywhere.com/) or a command-line interface like [c-chess-cli](https://github.com/lucasart/c-chess-cli) recommended.
+chai is a free [UCI](http://wbec-ridderkerk.nl/html/UCIProtocol.html) compatible chess engine playing at estimated ~2300 elo. In order to play or test this engine, a GUI like [Arena](http://www.playwitharena.de/), [Lucas Chess](https://lucaschess.pythonanywhere.com/) or a command-line interface like [c-chess-cli](https://github.com/lucasart/c-chess-cli) is recommended.
 
 ---
 
@@ -12,14 +12,12 @@ Latest prebuild binaries compiled for Win64 operating systems are provided under
 
 ###  Building From Source
 
-When building from source, it is recommended to use the [master branch](https://github.com/jakhac/chai/tree/master) only.
-
-The Makefile supports a customizable number of threads and hashtable size as *threads* and *hashMb* parameters. The default values are *hashMb=256Mb* and *threads=available_cores - 1* to allow a spare core for OS tasks. Note that threads are limited by the number of available cores on the current system and number of threads include the main process.
+The Makefile supports a customizable number of threads and hashtable size as *threads* and *hashMb* parameters. The default values are *hashMb=256* and *threads=available_cores - 1* to allow a spare core for os-related tasks. Note that the number of threads include the main process and is limited by the number of available cores on the current system.
 
 **Build commands:**
 ```
 $ git clone https://github.com/jakhac/chai
-$ cd chai
+$ cd chai/chai
 $ make help
 $ make release [threads=#threads] [hashMb=#hashtableSize]
 ```
@@ -28,9 +26,9 @@ $ make release [threads=#threads] [hashMb=#hashtableSize]
 
 ## Testing and Strength
 
-The latest version (v2.6.6) is mainly tested with self-play and occasionally with additional engines provided by [CCRL](https://ccrl.chessdom.com/ccrl/4040/) for better reference. The time controls are mostly 20/0.3 and 40/0.4.
+The latest version (v2.6.6) is mainly tested with self-play and occasionally with additional engines provided by [CCRL](https://ccrl.chessdom.com/ccrl/404/) for better reference. The time controls are mostly 20/0.3 and 40/0.4.
 
-Version 2.6.6 is playing at estimated ~2300 on 20/0.3 time controls using a 3-core setup and *256Mb* for the hashtable.
+Version 2.6.6 is playing at estimated ~2300 on 20/0.3 time controls using a 3-core setup and *256Mb* for the hashtable. A build using 4-cores and *1024Mb* increases elo by a small margin.
 
 ---
 
@@ -60,7 +58,7 @@ setoption name SyzygyPath value <path/to/egtb_files>
 
 ### Engine Features
 
-An excerpt of techniques and heuristics is listed in the following:
+An excerpt of applied techniques and heuristics is listed in the following:
 
 - Search
   - Multi-threaded iterative deepening framework based on [Lazy SMP](https://www.chessprogramming.org/Lazy_SMP)
@@ -71,7 +69,7 @@ An excerpt of techniques and heuristics is listed in the following:
   - Bitboard based move generation with [Magic-Bitboards](http://pradu.us/old/Nov27_2008/Buzz/research/magic/Bitboards.pdf)
   - Special generators for quiescence and check evasions
   - Checker generator (generates all checking moves for first ply of quiescence)
-  - Contains `dividePerft()` option to debug move generator
+  - Contains Perft option to debug move generator
 - Endgame Tablebase Probing ([Fathom](https://github.com/jdart1/Fathom) probing tool)
 - Test-Suite based on GoogleTest-Framework (for usage see [here](https://github.com/google/googletest))
 
