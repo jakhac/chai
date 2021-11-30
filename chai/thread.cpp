@@ -11,9 +11,7 @@ int NUM_THREADS = MAX_THREADS;
 bool TERMINATE_THREADS = false;
 bool ABORT_SEARCH = false;
 
-
 std::vector<Thread> threadPool;
-
 
 void ThreadWrapper::resetThreadStates(board_t* board, stats_t* search, instr_t* instructions) {
     b = *board;

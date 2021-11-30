@@ -30,19 +30,7 @@ void checkTime(Thread thread) {
 		ABORT_SEARCH = true;
 	}
 
-	// readInput(&thread->s); TODO NEEDED????
-
-	// Only check remaining time/depth for main thread
-	// if (thread->s.timeSet
-	// 	&& thread->id == 0
-	// 	&& getTimeMs() > thread->s.stopTime) {
-
-	// 	// If mainThread stops, all others are signaled 
-	// 	// to stop as well.
-	// 	ABORT_SEARCH = true;
-
-	// 	readInput(&thread->s);
-	// }
+	// readInput(&thread->s); TODO not required?
 }
 
 bool isRepetition(board_t* b) {

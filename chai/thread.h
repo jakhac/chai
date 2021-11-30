@@ -7,7 +7,8 @@
 
 #include "move.h"
 
-const int MAX_THREADS = std::thread::hardware_concurrency() - 1;
+#define MAX_THREADS std::max((unsigned int)1, std::thread::hardware_concurrency() - 1)
+
 
 extern int NUM_THREADS;
 extern bool TERMINATE_THREADS;
