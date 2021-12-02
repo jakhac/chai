@@ -12,70 +12,89 @@ bitboard_t pawnShield[2][64];
 bitboard_t xMask[64];
 int manhattenDistance[64][64];
 
+const value_t* PSQT_ENDGAME[7] = {
+	{},
+	PAWN_ENDGAME,
+	KNIGHT_ENDGAME,
+	BISHOP_ENDGAME,
+	ROOK_ENDGAME,
+	QUEEN_ENDGAME,
+	KING_ENDGAME
+};
+
+const value_t* PSQT_OPENING[7] = {
+	{},
+	PAWN_OPENING,
+	KNIGHT_OPENING,
+	BISHOP_OPENING,
+	ROOK_OPENING,
+	QUEEN_OPENING,
+	KING_OPENING
+};
+
 // 0 == a / 1 == b
 float interpolate(int a, int b, float t) {
 	return (float)a + t * ((float)b - (float)a); // TODO this aint right?
 }
 
-value_t evalPST(board_t* b, int side, float* t) {
-	bitboard_t pieces;
-	int score = 0, kSq = getKingSquare(b, side), sq;
-
-	// PAWNS
-	pieces = getPieces(b, PAWN, side);
-	int kingPawnDistance = 0, pawnSum = popCount(pieces);
-	while (pieces) {
-		sq = popLSB(&pieces);
-
-		// king pawn tropism, average distance to own pawns
-		kingPawnDistance += manhattenDistance[kSq][sq];
-
-		sq = (side == WHITE) ? sq : mirror64[sq];
-		score += (int)interpolate(PAWN_OPEN[sq], PAWN_ENDGAME[sq], *t);
-	}
-	kingPawnDistance /= std::max(1, pawnSum);
-	score += (int)interpolate(kingPawnDistance, kingPawnDistance * 2, *t);
-
-	// KNIGHTS
-	pieces = getPieces(b, KNIGHT, side);
-	while (pieces) {
-		sq = popLSB(&pieces);
-		sq = (side == WHITE) ? sq : mirror64[sq];
-		score += (int)interpolate(KNIGHT_OPEN[sq], KNIGHT_ENDGAME[sq], *t);
-	}
-
-	pieces = getPieces(b, BISHOP, side);
-	while (pieces) {
-		sq = popLSB(&pieces);
-		sq = (side == WHITE) ? sq : mirror64[sq];
-		score += (int)interpolate(BISHOP_OPEN[sq], BISHOP_ENDGAME[sq], *t);
-	}
-
-	pieces = getPieces(b, ROOK, side);
-	while (pieces) {
-		sq = popLSB(&pieces);
-		sq = (side == WHITE) ? sq : mirror64[sq];
-		score += (int)interpolate(ROOK_OPEN[sq], ROOK_ENDGAME[sq], *t);
-	}
-
-	pieces = getPieces(b, QUEEN, side);
-	while (pieces) {
-		sq = popLSB(&pieces);
-		sq = (side == WHITE) ? sq : mirror64[sq];
-		score += (int)interpolate(QUEEN_OPEN[sq], QUEEN_ENDGAME[sq], *t);
-	}
-
-	sq = (side == WHITE) ? kSq : mirror64[kSq];
-	score += (int)interpolate(KING_OPENING[sq], KING_ENDGAME[sq], *t);
-
-	return score;
+/**
+ * @brief Interpolates between two evaluations.
+ * 
+ * @param s1 Opening value
+ * @param s2 Endgame value
+ * @param w1 Weight of opening; implicitly determines w2 = 1 - w1
+ * @return float The weighted sum
+ */
+static float weightedSum(float s1, float s2, float w1) {
+	Assert(0 <= w1 && w1 <= 1);
+	return (w1 * s1) + ((1 - w1) * s2);
 }
 
+/**
+ * @brief This coefficient is used to interpolate between opening-endgame evaluations 
+ * based on the amount of material left on the board.
+ * 
+ * @param b 
+ * @return Return coefficient value w1
+ */
+static float interpolCoeff(board_t* b) {
+	// 1) Evaluate first 15 moves with opening PSQT
+	if (b->halfMoves <= 30) {
+		return 1;
+	}
 
-value_t materialScore(board_t* b, int side) {
+	int mat = totalMaterial(b);
+
+	// 2) Material below 20 is endgame
+	if (mat <= 20) {
+		return 0;
+	}
+	
+	// 3) The less material is left, the more we head into an endgame.
+	// => (remaining-material + puffer) / (maximum-material)
+	return std::min(1.f, (mat + 10.f) / (maximumMaterial));
+}
+
+// check if non-pawn material exists on board for given side
+int nonPawnPieces(board_t* b, int side) {
+	bitboard_t pieces = getPieces(b, chai::BISHOP, side)
+		| getPieces(b, chai::KNIGHT, side)
+		| getPieces(b, chai::ROOK, side)
+		| getPieces(b, chai::QUEEN, side);
+
+	return popCount(pieces);
+}
+
+// check if there are non-king non-pawn pieces on the board
+bool nonPawnPieces(board_t* b) {
+	return b->occupied & ~b->pieces[chai::PAWN] & ~b->pieces[chai::KING];
+}
+
+value_t materialScore(board_t* b) {
 	int score = 0;
 	for (int i = 1; i < 7; i++) {
-		score += popCount(getPieces(b, i, side)) * pieceValues[i];
+		score += popCount(getPieces(b, i, WHITE)) * pieceValues[i];
+		score -= popCount(getPieces(b, i, BLACK)) * pieceValues[i];
 	}
 
 	return score;
@@ -347,8 +366,14 @@ value_t evaluation(board_t* b) {
 
 	eval += surroundingSquares + 2 * centerSquares + 3 * kingSquares;
 	eval += pawnEval;
-	eval += evalPST(b, WHITE, &interpolFactor) - evalPST(b, BLACK, &interpolFactor);
-	eval += materialScore(b, WHITE) - materialScore(b, BLACK);
+
+
+	// eval += evalPST(b, WHITE, &interpolFactor) - evalPST(b, BLACK, &interpolFactor);
+	float w1 = interpolCoeff(b);
+	eval += weightedSum(b->psqtOpening, b->psqtEndgame, w1);
+
+
+	eval += materialScore(b);
 	eval += openFilesRQ(b, WHITE) - openFilesRQ(b, BLACK);
 	eval += bishopPair(b, WHITE) - bishopPair(b, BLACK);
 	eval += kingSafety(b, WHITE, &interpolFactor) - kingSafety(b, BLACK, &interpolFactor);
@@ -363,7 +388,6 @@ value_t evaluation(board_t* b) {
 
 value_t lazyEvaluation(board_t* b) {
 	value_t eval = 0;
-	float interpolFactor = std::min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
 
 	pt->probed++;
 	value_t pawnEval = 0;
@@ -373,8 +397,11 @@ value_t lazyEvaluation(board_t* b) {
 		eval += pawnEval;
 	}
 
-	eval += evalPST(b, WHITE, &interpolFactor) - evalPST(b, BLACK, &interpolFactor);
-	eval += materialScore(b, WHITE) - materialScore(b, BLACK);
+	// eval += evalPST(b, WHITE, &interpolFactor) - evalPST(b, BLACK, &interpolFactor);
+	float w1 = interpolCoeff(b);
+	eval += weightedSum(b->psqtOpening, b->psqtEndgame, w1);
+
+	eval += materialScore(b);
 
 	Assert(abs(eval) < VALUE_IS_MATE_IN);
 
@@ -444,3 +471,74 @@ bool insufficientMaterial(board_t* b) {
 	return false;
 }
 
+value_t calcPSQT(board_t* b, const value_t* psqtTable[64]) {
+	bitboard_t pieces;
+	int sq, sign, value = 0;
+
+	// PAWNS
+	pieces = b->pieces[PAWN];
+	while (pieces) {
+		sq = popLSB(&pieces);
+
+		sign = 1;
+		if (b->color[BLACK] & (1ULL << sq)) {
+			sq = mirror64[sq];
+			sign = -1;
+		}
+		value += sign * psqtTable[PAWN][sq];
+	}
+
+	// KNIGHTS
+	pieces = b->pieces[KNIGHT];
+	while (pieces) {
+		sq = popLSB(&pieces);
+
+		sign = 1;
+		if (b->color[BLACK] & (1ULL << sq)) {
+			sq = mirror64[sq];
+			sign = -1;
+		}
+		value += sign * psqtTable[KNIGHT][sq];
+	}
+
+	pieces = b->pieces[BISHOP];
+	while (pieces) {
+		sq = popLSB(&pieces);
+
+		sign = 1;
+		if (b->color[BLACK] & (1ULL << sq)) {
+			sq = mirror64[sq];
+			sign = -1;
+		}
+		value += sign * psqtTable[BISHOP][sq];
+	}
+
+	pieces = b->pieces[ROOK];
+	while (pieces) {
+		sq = popLSB(&pieces);
+
+		sign = 1;
+		if (b->color[BLACK] & (1ULL << sq)) {
+			sq = mirror64[sq];
+			sign = -1;
+		}
+		value += sign * psqtTable[ROOK][sq];
+	}
+
+	pieces = b->pieces[QUEEN];
+	while (pieces) {
+		sq = popLSB(&pieces);
+
+		sign = 1;
+		if (b->color[BLACK] & (1ULL << sq)) {
+			sq = mirror64[sq];
+			sign = -1;
+		}
+		value += sign * psqtTable[QUEEN][sq];
+	}
+
+	value += psqtTable[KING][getKingSquare(b, WHITE)];
+	value -= psqtTable[KING][mirror64[getKingSquare(b, BLACK)]];
+
+	return value;
+}

@@ -1,7 +1,5 @@
 #include "board.h"
 
-// board_t* p_board = new board_t();
-
 bool checkBoard(board_t* board) {
 	Assert(board->castlePermission >= 0 && board->castlePermission <= 15);
 	Assert(popCount(board->occupied) >= 2 && popCount(board->occupied) <= 32);
@@ -27,6 +25,10 @@ int fileRankToSq(int f, int r) {
 	return 8 * r + f;
 }
 
+unsigned int relativeSq(int sq, int color) {
+	return (color == chai::WHITE) ? sq : mirror64[sq];
+}
+
 void reset(board_t* b) {
 	b->stm              = chai::WHITE;
 	b->enPas            = DEFAULT_EP_SQ;
@@ -37,6 +39,9 @@ void reset(board_t* b) {
 	b->zobristKey       = 0x0;
 	b->zobristPawnKey   = 0x0;
 	b->castlePermission = 0;
+	b->psqtEndgame      = 0;
+	b->psqtOpening      = 0;
+	b->material         = 0;
 
 	for (int i = chai::NO_TYPE; i <= chai::KING; i++) b->pieces[i] = 0ULL;
 
@@ -83,11 +88,15 @@ key_t generatePawnHashKey(board_t* b) {
 		sq = popLSB(&whitePawns);
 		finalPawnKey ^= pieceKeys[Pieces::P][sq];
 	}
+	sq = getKingSquare(b, chai::WHITE);
+	finalPawnKey ^= pieceKeys[Pieces::K][sq];
 
 	while (blackPawns) {
 		sq = popLSB(&blackPawns);
 		finalPawnKey ^= pieceKeys[Pieces::p][sq];
 	}
+	sq = getKingSquare(b, chai::BLACK);
+	finalPawnKey ^= pieceKeys[Pieces::k][sq];
 
 	return finalPawnKey;
 }
@@ -266,6 +275,10 @@ bool parseFen(board_t* board, std::string fen) {
 	board->zobristPawnKey = generatePawnHashKey(board);
 	board->zobristKey = generateZobristKey(board);
 
+	board->psqtOpening = calcPSQT(board, PSQT_OPENING);
+	board->psqtEndgame = calcPSQT(board, PSQT_ENDGAME);
+	board->material = materialScore(board);
+
 	checkBoard(board);
 	return false;
 }
@@ -376,6 +389,82 @@ void clearCastleRights(board_t* b, int stm) {
 	}
 }
 
+/**
+ * @brief Updates the PSQT values according to a piece moving fromSq -> toSq.
+ * 
+ * @param b 
+ * @param fromSq 
+ * @param toSq 
+ * @param piece 
+ * @param pieceColor
+ */
+static void updatePSQTValue(board_t* b, int fromSq, int toSq, int piece, int pieceColor) {
+	int relativeFromSq = relativeSq(fromSq, pieceColor);
+	int relativeToSq = relativeSq(toSq, pieceColor);
+	int type = pieceType[piece];
+	int sign = (pieceColor == chai::WHITE) ? 1 : -1;
+
+	// Opening PSQT update
+	b->psqtOpening -= sign * PSQT_OPENING[type][relativeFromSq];
+	b->psqtOpening += sign * PSQT_OPENING[type][relativeToSq];
+
+	// Endgame PSQT update
+	b->psqtEndgame -= sign * PSQT_ENDGAME[type][relativeFromSq];
+	b->psqtEndgame += sign * PSQT_ENDGAME[type][relativeToSq];
+}
+
+/**
+ * @brief Removes the PSQT value from piece on sq.
+ * 
+ * @param b 
+ * @param sq 
+ * @param piece 
+ * @param pieceColor
+ */
+static void clearPSQTValue(board_t* b, int sq, int piece, int pieceColor) {
+	int type = pieceType[piece];
+	int relativeFromSq = relativeSq(sq, pieceColor);
+	int sign = (pieceColor == chai::WHITE) ? 1 : -1;
+
+	// Opening PSQT update
+	b->psqtOpening -= sign * PSQT_OPENING[type][relativeFromSq];
+
+	// Endgame PSQT update
+	b->psqtEndgame -= sign * PSQT_ENDGAME[type][relativeFromSq];
+}
+
+/**
+ * @brief Adds the PSQT value on sq from piece.
+ * 
+ * @param b 
+ * @param sq 
+ * @param piece 
+ * @param pieceColor 
+ */
+static void addPSQTValue(board_t* b, int sq, int piece, int pieceColor) {
+	int type = pieceType[piece];
+	int relativeFromSq = relativeSq(sq, pieceColor);
+	int sign = (pieceColor == chai::WHITE) ? 1 : -1;
+
+	// Opening PSQT update
+	b->psqtOpening += sign * PSQT_OPENING[type][relativeFromSq];
+
+	// Endgame PSQT update
+	b->psqtEndgame += sign * PSQT_ENDGAME[type][relativeFromSq];
+}
+
+static void clearMaterial(board_t* b, int piece, int pieceColor) {
+	int sign = (pieceColor == chai::WHITE) ? 1 : -1;
+
+	b->material -= sign * pieceValues[piece];
+}
+
+static void addMaterial(board_t* b, int piece, int pieceColor) {
+	int sign = (pieceColor == chai::WHITE) ? 1 : -1;
+
+	b->material += sign * pieceValues[piece];
+}
+
 void pushEnPas(board_t* b, move_t move) {
 	Assert(b->enPas == toSq(move));
 	int fromSquare = fromSq(move);
@@ -386,20 +475,25 @@ void pushEnPas(board_t* b, move_t move) {
 	int enPasPiece = stmPiece[chai::PAWN][b->stm ^ 1];
 
 	// Update pawn key
-	b->zobristPawnKey ^=
-		pieceKeys[fromPiece][fromSquare]       // Remove fromSq
-		^ pieceKeys[fromPiece][toSquare]       // Add toSq
-		^ pieceKeys[enPasPiece][clearSquare];  // Clear captured pawn
+	b->zobristPawnKey ^= 
+		  pieceKeys[fromPiece][fromSquare]		// Remove fromSq
+		^ pieceKeys[fromPiece][toSquare]		// Add toSq
+		^ pieceKeys[enPasPiece][clearSquare];	// Clear captured pawn
 
 	// Update zobrist key
 	b->zobristKey ^=
-		pieceKeys[fromPiece][fromSquare]
+		  pieceKeys[fromPiece][fromSquare]
 		^ pieceKeys[fromPiece][toSquare]
 		^ pieceKeys[enPasPiece][clearSquare];
 
 	clearPiece(b, chai::PAWN, clearSquare, b->stm ^ 1);
 	clearPiece(b, chai::PAWN, fromSquare, b->stm);
 	setPiece(b, chai::PAWN, b->enPas, b->stm);
+
+	// Calculate PSQT values on-the-fly
+	updatePSQTValue(b, fromSquare, toSquare, fromPiece, b->stm);
+	clearPSQTValue(b, clearSquare, enPasPiece, b->stm ^ 1);
+	clearMaterial(b, enPasPiece, b->stm ^ 1);
 
 	b->fiftyMove = 0;
 	b->enPas = DEFAULT_EP_SQ;
@@ -423,10 +517,20 @@ void pushPromotion(board_t* b, move_t move) {
 		b->undoHistory[b->undoPly].cap = toPiece;
 		b->zobristKey ^= pieceKeys[toPiece][toSquare];
 		clearPiece(b, toPiece, toSquare, b->stm ^ 1);
+
+		// Clear from PSQT values
+		clearPSQTValue(b, toSquare, toPiece, b->stm ^ 1);
+		clearMaterial(b, toPiece, b->stm ^ 1);
 	}
 
 	clearPiece(b, fromPiece, fromSquare, b->stm);
 	setPiece(b, promotedPiece, toSquare, b->stm);
+
+	// Calculate PSQT values on-the-fly
+	clearPSQTValue(b, fromSquare, fromPiece, b->stm);
+	addPSQTValue(b, toSquare, promotedPiece, b->stm);
+	clearMaterial(b, fromPiece, b->stm);
+	addMaterial(b, promotedPiece, b->stm);
 
 	b->fiftyMove = 0;
 	b->enPas = DEFAULT_EP_SQ;
@@ -467,6 +571,9 @@ void pushCastle(board_t* b, move_t move) {
 				  ^  pieceKeys[movingKing][fromSquare]
 				  ^  pieceKeys[movingKing][toSquare];
 
+	b->zobristPawnKey ^= pieceKeys[movingKing][fromSquare]
+					  ^  pieceKeys[movingKing][toSquare];
+
 	clearPiece(b, chai::ROOK, rClearSq, b->stm);
 	setPiece(b, chai::ROOK, rSetSq, b->stm);
 
@@ -477,6 +584,10 @@ void pushCastle(board_t* b, move_t move) {
 	b->zobristKey ^= castleKeys[b->castlePermission];
 	clearCastleRights(b, b->stm);
 	b->zobristKey ^= castleKeys[b->castlePermission];
+
+	// Update PSQT values on-the-fly
+	updatePSQTValue(b, fromSquare, toSquare, movingKing, b->stm);	// King update
+	updatePSQTValue(b, rClearSq, rSetSq, movingRook, b->stm);		// Rook update
 
 	b->enPas = DEFAULT_EP_SQ;
 }
@@ -499,6 +610,10 @@ void pushNormal(board_t* b, move_t move) {
 
 		b->undoHistory[b->undoPly].cap = capturedPiece;
 		b->fiftyMove = 0;
+
+		// Remove captured piece from PSQT values and update material
+		clearPSQTValue(b, toSquare, capturedPiece, b->stm ^ 1);
+		clearMaterial(b, capturedPiece, b->stm ^ 1);
 	}
 
 	// Update normal move
@@ -540,8 +655,13 @@ void pushNormal(board_t* b, move_t move) {
 		b->zobristKey ^= castleKeys[b->castlePermission];
 		clearCastleRights(b, b->stm);
 		b->zobristKey ^= castleKeys[b->castlePermission];
+
+		b->zobristPawnKey ^= pieceKeys[fromPiece][fromSquare]
+						  ^  pieceKeys[fromPiece][toSquare];
 	}
 
+	// Update PSQT on-the-fly
+	updatePSQTValue(b, fromSquare, toSquare, fromPiece, b->stm);
 }
 
 bool push(board_t* b, move_t move) {
@@ -558,6 +678,10 @@ bool push(board_t* b, move_t move) {
 	undo->cap       = Pieces::NO_PIECE;
 	undo->fiftyMove = b->fiftyMove;
 
+	undo->psqtOpening = b->psqtOpening;
+	undo->psqtEndgame = b->psqtEndgame;
+	undo->material    = b->material;
+	
 	// Always let helper functions determine next ep square
 	b->zobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas];
 
@@ -589,19 +713,11 @@ bool push(board_t* b, move_t move) {
 	b->undoPly++;
 	b->ply++;
 
-#if defined(Assert)
-	if (b->zobristPawnKey != generatePawnHashKey(b)) {
-		logDebug("Pawn key wrong.\n");
-		logDebug(getFEN(b) + "\n");
-		pop(b);
-		logDebug(getFEN(b) + "\n");
-		logDebug("Move pushed " + getStringMove(b, move) + "\n");
-		logDebug("MoveType " + std::to_string(moveType) + "\n");
-	}
-#endif
-
 	Assert3(b->zobristPawnKey == generatePawnHashKey(b), getStringMove(b, move), getFEN(b));
 	Assert(b->zobristKey == generateZobristKey(b));
+	Assert(b->material == materialScore(b));
+	Assert(b->psqtOpening == calcPSQT(b, PSQT_OPENING));
+	Assert(b->psqtEndgame == calcPSQT(b, PSQT_ENDGAME));
 
 	// Check if move leaves king in check
 	if (isCheck(b, b->stm ^ 1)) {
@@ -622,6 +738,10 @@ void pushNull(board_t* b) {
 	undo->pawnKey = b->zobristPawnKey;
 	undo->move    = MOVE_NULL;
 	undo->cap     = chai::NO_TYPE;
+
+	undo->psqtOpening = b->psqtOpening;
+	undo->psqtEndgame = b->psqtEndgame;
+	undo->material    = b->material;
 
 	b->zobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas]; // ep out
 	b->enPas = DEFAULT_EP_SQ;
@@ -669,6 +789,10 @@ undo_t pop(board_t* b) {
 	b->zobristPawnKey   = undo->pawnKey;
 	b->enPas            = undo->enPas;
 
+	b->psqtOpening = undo->psqtOpening;
+	b->psqtEndgame = undo->psqtEndgame;
+	b->material    = undo->material;
+
 	int from_square   = fromSq(undo->move);
 	int to_square     = toSq(undo->move);
 	int movingPiece   = pieceAt(b, to_square);
@@ -709,6 +833,10 @@ undo_t pop(board_t* b) {
 	Assert(b->undoPly >= 0);
 	Assert(validEnPasSq(b->enPas) || b->enPas == DEFAULT_EP_SQ);
 	Assert(checkBoard(b));
+	Assert(b->material == materialScore(b));
+	Assert(b->psqtOpening == calcPSQT(b, PSQT_OPENING));
+	Assert(b->psqtEndgame == calcPSQT(b, PSQT_ENDGAME));
+
 	return *undo;
 }
 

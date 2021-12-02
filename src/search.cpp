@@ -106,21 +106,6 @@ bool zugzwang(board_t* b) {
 	return false;
 }
 
-// check if non-pawn material exists on board for given side
-static int nonPawnPieces(board_t* b, int side) {
-	bitboard_t pieces = getPieces(b, chai::BISHOP, side)
-		| getPieces(b, chai::KNIGHT, side)
-		| getPieces(b, chai::ROOK, side)
-		| getPieces(b, chai::QUEEN, side);
-
-	return popCount(pieces);
-}
-
-// check if there are non-king non-pawn pieces on the board
-static bool nonPawnPieces(board_t* b) {
-	return b->occupied & ~b->pieces[chai::PAWN] & ~b->pieces[chai::KING];
-}
-
 // following moves are tactical: caps, proms, eps
 static bool moveIsTactical(board_t* b, move_t move) {
 	return isCapture(b, move)

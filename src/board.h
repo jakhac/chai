@@ -82,8 +82,7 @@ const int HISTORY_MAX = 1000 - 1;
 extern move_t counterHeuristic[64][64][2];
 
 /**
- * Count major pieces (
- * ::n, b, Piece::r, Piece::q, Piece::k) on current board
+ * Count major pieces (knight, bishop, rook, queen, king) on current board
  *
  * @param  b board_t to call function.
  * @param  side Side of pieces.
@@ -117,10 +116,19 @@ void clearPiece(board_t* b, int piece, int square, int side);
  */
 void setPiece(board_t* b, int piece, int square, int side);
 
-#/*
+/*
 Converts a file and a rank into the corresponding square.
 */
 int fileRankToSq(int f, int r);
+
+/**
+ * @brief Converts the square to the square-index as if piece is white.
+ * 
+ * @param sq 
+ * @param color 
+ * @return unsigned int relative square
+ */
+unsigned int relativeSq(int sq, int color);
 
 /**
  * Reset board variables to default values.

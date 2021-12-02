@@ -161,6 +161,19 @@
   - [x] UCI refactor parsing
   - [x] Update README.md to new build process
 
+
+**Changes in v3.0**
+
+Evaluation
+- v3.0.1
+  - [x] Include king position in pawnKey
+  - [x] Update PSQT valueand materialBalance on-the-fly
+  - [ ] Sophisticated evaluation of king/pawn structure
+- Project
+  - [ ] Use color_t type
+  - [ ] Strong distinguishment between piece (1 .. 13) and pieceType (1 .. 7)
+
+
 # Todo
 
 - Move Generation

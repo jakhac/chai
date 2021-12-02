@@ -50,6 +50,10 @@ struct undo_t {
 	uint8_t cap;
 	key_t zobKey;
 	key_t pawnKey;
+
+	value_t psqtOpening;
+	value_t psqtEndgame;
+	value_t material;
 };
 
 struct searchStack_t {
@@ -166,6 +170,11 @@ struct board_t {
 
 	// Stack stores pushed moves as Undo objects.
 	undo_t undoHistory[MAX_GAME_MOVES];
+
+	// PSQT values and material for calculation on-the-fly
+	value_t psqtOpening = 0;
+	value_t psqtEndgame = 0;
+	value_t material    = 0;
 };
 
 /// Holds various pruning and counting statistics.
