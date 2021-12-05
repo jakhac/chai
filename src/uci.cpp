@@ -1,5 +1,7 @@
 #include "uci.h"
 
+using namespace chai;
+
 
 static bool strStartsWith(std::string str, std::string start) {
 	return str.rfind(start, 0) == 0;
@@ -12,6 +14,8 @@ void init() {
 	initMVV_LVA();
 	initEvalMasks();
 	initManhattenMask();
+
+	initHorizontalNeighbors();
 
 	initObstructed();
 	initLine();
@@ -139,10 +143,10 @@ void uciParseGo(board_t* b, stats_t* s, instr_t* instr, std::string cmd) {
 
 	for (int i = 0; i < (int)tokens.size() - 1; i++) {
 		if (tokens[i] == "infinite") continue;
-		if (tokens[i] == "binc" && b->stm == chai::BLACK) inc = stoi(tokens[i + 1]);
-		if (tokens[i] == "winc" && b->stm == chai::WHITE) inc = stoi(tokens[i + 1]);
-		if (tokens[i] == "btime" && b->stm == chai::BLACK) timeLeft = stoi(tokens[i + 1]);
-		if (tokens[i] == "wtime" && b->stm == chai::WHITE) timeLeft = stoi(tokens[i + 1]);
+		if (tokens[i] == "binc" && b->stm == BLACK) inc = stoi(tokens[i + 1]);
+		if (tokens[i] == "winc" && b->stm == WHITE) inc = stoi(tokens[i + 1]);
+		if (tokens[i] == "btime" && b->stm == BLACK) timeLeft = stoi(tokens[i + 1]);
+		if (tokens[i] == "wtime" && b->stm == WHITE) timeLeft = stoi(tokens[i + 1]);
 		if (tokens[i] == "depth") depth = stoi(tokens[i + 1]);
 	}
 

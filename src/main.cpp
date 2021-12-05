@@ -11,7 +11,9 @@ int main() {
 	initThreadPool();
 
 	// Print status and drop into cli protocol
-	parseFen(&_board, STARTING_FEN);
+	// parseFen(&_board, STARTING_FEN);
+	parseFen(&_board, "4k3/8/p7/P7/1P6/8/8/4K3 w - - 0 1");
+
 	printBoard(&_board);
 	cli(&_board, &_instr, &_stats, &_perft);
 
@@ -27,6 +29,14 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 	moveList_t moveList;
 	move_t parsedMove;
 	std::string userInput;
+
+	// bitboard_t t = wBackwardPawns(b);
+	// printBitBoard(&t);
+
+	for (int j = 0; j < 64; j++) {
+		// bitboard_t t = pawnIsolatedMask[j];
+		// printBitBoard(&t);
+	}
 
 	while (1) {
 		cin >> userInput;

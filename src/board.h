@@ -36,36 +36,16 @@ const chai::pieceType_t pieceType[13] = {
 	chai::PAWN, chai::KNIGHT, chai::BISHOP, chai::ROOK, chai::QUEEN, chai::KING
 };
 
-const chai::color_t pieceCol[13] = {
-	chai::BOTH,
+const color_t pieceCol[13] = {
+	0,
 	chai::WHITE, chai::WHITE, chai::WHITE, chai::WHITE, chai::WHITE, chai::WHITE,
 	chai::BLACK, chai::BLACK, chai::BLACK, chai::BLACK, chai::BLACK, chai::BLACK
 };
 
 const std::string pieceChar = ".PNBRQKpnbrqk";
-const std::string sideChar = "wb-";
-const std::string rankChar = "12345678";
-const std::string fileChar = "abcdefgh";
-
-// /**
-// * Stores up to 2 killer moves for each ply.
-// */
-// extern move_t killer[2][MAX_GAME_MOVES];
-
-// /**
-// * Stores up mate killer moves for each ply.
-// */
-// extern move_t mateKiller[MAX_GAME_MOVES];
-
-// /**
-// * Stores history heuristic for both sides with [PIECE][TO] indices.
-// */
-// extern int histHeuristic[2][64][64];
-
-// /**
-// * Stores maximum history score.
-// */
-// extern int histMax;
+const std::string sideChar  = "wb-";
+const std::string rankChar  = "12345678";
+const std::string fileChar  = "abcdefgh";
 
 /**
  * board instance used for complete program
@@ -89,7 +69,7 @@ extern move_t counterHeuristic[64][64][2];
  *
  * @returns Amount of major pieces.
  */
-int countMajorPieces(board_t* b, int side);
+int countMajorPieces(board_t* b, color_t side);
 
 /**
  * Push a null move the null.
@@ -104,7 +84,7 @@ void pushNull(board_t* b);
  * @param  square Square to clear piece on.
  * @param  side   Color of cleared piece.
  */
-void clearPiece(board_t* b, int piece, int square, int side);
+void clearPiece(board_t* b, int piece, int square, color_t side);
 
 /**
  * Set bit at given index to 1 in side, occupied and piece bitboard.
@@ -114,7 +94,7 @@ void clearPiece(board_t* b, int piece, int square, int side);
  * @param  square Square to set piece on.
  * @param  side   Color of set piece.
  */
-void setPiece(board_t* b, int piece, int square, int side);
+void setPiece(board_t* b, int piece, int square, color_t side);
 
 /*
 Converts a file and a rank into the corresponding square.
@@ -128,7 +108,7 @@ int fileRankToSq(int f, int r);
  * @param color 
  * @return unsigned int relative square
  */
-unsigned int relativeSq(int sq, int color);
+unsigned int relativeSq(int sq, color_t color);
 
 /**
  * Reset board variables to default values.
@@ -160,7 +140,7 @@ key_t generatePawnHashKey(board_t* b);
  *
  * @returns Bitboard of piece and color.
  */
-bitboard_t getPieces(board_t* b, int piece, int side);
+bitboard_t getPieces(board_t* b, int piece, color_t side);
 
 /**
  * Determines the piece index at given square.
@@ -193,7 +173,7 @@ inline bool isCaptureOrPromotion(board_t* b, move_t move) {
  *
  * @returns Bitboard revealing all pinners.
  */
-bitboard_t getPinner(board_t* b, int kSq, int kSide);
+bitboard_t getPinner(board_t* b, int kSq, color_t kSide);
 
 /**
  * Generate bitboard with pinned pieces according to king square and king side. Includes rook
@@ -205,7 +185,7 @@ bitboard_t getPinner(board_t* b, int kSq, int kSide);
  *
  * @returns A bitboard_t.
  */
-bitboard_t getPinned(board_t* b, int kSq, int side);
+bitboard_t getPinned(board_t* b, int kSq, color_t side);
 
 /**
  * Get king of given side as square index.
@@ -215,7 +195,7 @@ bitboard_t getPinned(board_t* b, int kSq, int side);
  *
  * @returns Index of king.
  */
-int getKingSquare(board_t* b, int side);
+int getKingSquare(board_t* b, color_t side);
 
 /**
  * Removes both castle rights for given side.
@@ -223,7 +203,7 @@ int getKingSquare(board_t* b, int side);
  * @param  b board_t to call function.
  * @param  side Color.
  */
-void clearCastlePermission(board_t* b, int side);
+void clearCastlePermission(board_t* b, color_t side);
 
 /**
  * Parse a given fen into board variables and print board. Updates zobristKey of board to new
@@ -284,9 +264,9 @@ void pushNormal(board_t* b, move_t move);
  * @param  b board_t to call function.
  * @param  clearRookSq Clear rook on this square.
  * @param  setRookSq   Set rook on this square.
- * @param  side		   Color.
+ * @param  color		   Color.
  */
-void pushCastle(board_t* b, int clearRookSq, int setRookSq, int side);
+void pushCastle(board_t* b, int clearRookSq, int setRookSq, color_t color);
 
 /**
  * Pops move from move stack and restores enPas square, castlePermission, zobristKey, captures
@@ -306,42 +286,42 @@ undo_t popNull(board_t* b);
  * @param  b board_t to call function.
  * @param  clearRookSq Clear rook on this square.
  * @param  setRookSq   Set rook on this square.
- * @param  side		   Color.
+ * @param  color		   Color.
  */
-void popCastle(board_t* b, int clearRookSq, int setRookSq, int side);
+void popCastle(board_t* b, int clearRookSq, int setRookSq, color_t color);
 
 /**
  * Generate bitboard of attacked squares and pieces by given side.
  *
  * @param  b board_t to call function.
- * @param  side Attacker side.
+ * @param  color Attacker side.
  *
  * @returns Bitboard with attacked squares and pieces set.
  */
-bitboard_t attackerSet(board_t* b, int side);
+bitboard_t attackerSet(board_t* b, color_t color);
 
 /**
  * Generate bitboard with containing all pieces that can block the given square. King moves are
  * not included. Bitboard shows origin of pieces that can block.
  *
  * @param  b board_t to call function.
- * @param  side    Side of blocking pieces.
+ * @param  color    Side of blocking pieces.
  * @param  blockSq Square that has to be occupied.
  *
  * @returns Bitboard with blocker pieces.
  */
-bitboard_t blockerSet(board_t* b, int side, int blockSq);
+bitboard_t blockerSet(board_t* b, color_t color, int blockSq);
 
 /**
  * Check if given side attacks given square.
  *
  * @param  b board_t to call function.
  * @param  square Square to check attacks on.
- * @param  side   Side that might attack the square.
+ * @param  color   Side that might attack the square.
  *
  * @returns A bitboard_t.
  */
-bitboard_t squareAttackedBy(board_t* b, int square, int side);
+bitboard_t squareAttackedBy(board_t* b, int square, color_t color);
 
 /**
  * Get all pieces attacking the given square, independet of side.
@@ -373,7 +353,7 @@ bitboard_t squareAtkDefOcc(board_t* b, bitboard_t occupied, int square);
  *
  * @returns Returns the mask of pieces giving check.
  */
-bool isCheck(board_t* b, int side);
+bool isCheck(board_t* b, color_t color);
 
 /**
  * Check if castle move is valid: castle permission, current check, empty squares between rook

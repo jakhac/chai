@@ -2,16 +2,16 @@
 # 1. META DATA
 #######################################
 
-VERSION = v3.0.1
+VERSION = v3.0.2
 
 EXE_RELEASE = chai_$(VERSION)_release.exe
 EXE_DEBUG = chai_$(VERSION)_debug.exe
 EXE_TEST = test.exe
 
-SRCS = main.cpp tt.cpp attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
+SRCS = main.cpp tt.cpp attacks.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp timeMan.cpp
+	thread.cpp timeMan.cpp info.cpp
 
 OBJ_RELEASE_DIR = ./obj_release
 OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))

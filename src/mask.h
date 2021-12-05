@@ -61,10 +61,14 @@ const bitboard_t RANK_LIST[8] = {
 	RANK_5_HEX, RANK_6_HEX, RANK_7_HEX, RANK_8_HEX
 };
 
-const bitboard_t BLACK_SQUARES = 0xAA55AA55AA55AA55;
-const bitboard_t WHITE_SQUARES = 0x55AA55AA55AA55AA;
+const bitboard_t BLACKSQUARES = 0xAA55AA55AA55AA55;
+const bitboard_t WHITESQUARES = 0x55AA55AA55AA55AA;
 
 void initClearSetMask();
+
+// left right square of indexed square
+extern bitboard_t horizontalNeighbors[64];
+void initHorizontalNeighbors();
 
 /**
  * Initialize arrays to index square to files and ranks.

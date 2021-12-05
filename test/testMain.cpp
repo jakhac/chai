@@ -9,6 +9,8 @@ int main(int argc, char **argv)
 
 	auto old_buffer = std::cout.rdbuf(nullptr);
 
+    // ::testing::GTEST_FLAG(filter) = "EvalTest*";
+
     // 0 if passed, else 1
     return RUN_ALL_TESTS();
 }

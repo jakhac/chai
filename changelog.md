@@ -168,9 +168,11 @@ Evaluation
 - v3.0.1
   - [x] Include king position in pawnKey
   - [x] Update PSQT valueand materialBalance on-the-fly
+- v3.0.2
+  - [x] Use color_t type
   - [ ] Sophisticated evaluation of king/pawn structure
 - Project
-  - [ ] Use color_t type
+  - [ ] Implement testEGTB file
   - [ ] Strong distinguishment between piece (1 .. 13) and pieceType (1 .. 7)
 
 

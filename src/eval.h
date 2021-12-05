@@ -1,7 +1,6 @@
 #pragma once
 
-#include "board.h"
-#include "tt.h"
+#include "pawn.h"
 #include "psqt.h"
 #include "timeMan.h"
 
@@ -18,11 +17,6 @@ const value_t pieceValues[13] = {
 	0, 100, 325, 325, 550, 1000, 0
 };
 
-const value_t passedBonus[2][8] = {
-	{ 200, 100, 60, 35, 20, 10, 5, 0 },
-	{ 0, 5, 10, 20, 35, 60, 100, 200 }
-};
-
 const value_t kingZoneTropism[9] = { 0, 40, 60, 77, 87, 92, 95, 97, 100 };
 
 const value_t openFileBonusR = 10;
@@ -34,9 +28,6 @@ const int maximumMaterial = 78;
 
 /**
  * Main evaluation function. Returns static board evaulation.
- *
- * @param  b Current board to evaluate.
- *
  * @returns Score in centipawns.
  */
 value_t evaluation(board_t* b);
@@ -44,12 +35,32 @@ value_t evaluation(board_t* b);
 /**
  * Lazy evaluation function calculates static board evaulation. Considers piece values and
  * PST sum.
- *
- * @param  b Current board to evaluate.
- *
  * @returns Score in centipawns.
  */
 value_t lazyEvaluation(board_t* b);
+
+
+// 
+value_t materialScore(board_t* b);
+value_t openFilesRQ(board_t* b, color_t color);
+value_t bishopPair(board_t* b, color_t color);
+value_t kingSafety(board_t* b, color_t color, float* t);
+value_t mobility(board_t* b, color_t color, float* t);
+float interpolate(int a, int b, float t);
+int scale(int scaler, int pressure);
+
+
+
+
+
+/**
+ * Return superiority/inferiority based on material on board.
+ *
+ * @param  b board_t.
+ *
+ * @returns Superiority/inferiority score viewed as player to move (signed)
+ */
+value_t contemptFactor(board_t* b);
 
 /**
  * @brief Calculate complete PSQT balance for given psqtTable
@@ -62,57 +73,7 @@ value_t lazyEvaluation(board_t* b);
  */
 value_t calcPSQT(board_t* b, const value_t* psqtTable[64]);
 
-/**
- * @brief Return the number of { Knight, Bishop, Rook, Queen } pieces
- * for given side.
- * 
- * @param b 
- * @param side 
- * @return int Number of pieces
- */
-int nonPawnPieces(board_t* b, int side);
-
-/**
- * @brief Check if there are non-pawn (and king) pieces left on the board.
- * 
- * @param b 
- * @return True, if any of { Knight, Bishop, Rook, Queen } on board, and false otherwise
- */
-bool nonPawnPieces(board_t* b);
-
 bool insufficientMaterial(board_t* b);
-
-value_t materialScore(board_t* b);
-
-value_t isolatedPawns(board_t* b, int side);
-
-value_t passedPawns(board_t* b, int side);
-
-value_t stackedPawn(board_t* b, int side);
-
-value_t evaluatePawns(board_t* b, float* t);
-
-value_t openFilesRQ(board_t* b, int side);
-
-value_t bishopPair(board_t* b, int side);
-
-value_t kingSafety(board_t* b, int side, float* t);
-
-value_t mobility(board_t* b, bool side, float* t);
-
-float interpolate(int a, int b, float t);
-
-int scale(int scaler, int pressure);
-
-/**
- * Return superiority/inferiority based on material on board.
- *
- * @param  b board_t.
- *
- * @returns Superiority/inferiority score viewed as player to move (signed)
- */
-value_t contemptFactor(board_t* b);
-
 
 extern const int* maps[7];
 extern bitboard_t pawnIsolatedMask[64];

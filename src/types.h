@@ -29,6 +29,11 @@ typedef uint16_t move_t;
 typedef int16_t value_t;
 
 /**
+ * Color type. Alias bool type.
+ */
+typedef bool color_t;
+
+/**
  * Store moves, scores and number entries in moveList. Used in move generation.
  */
 struct moveList_t {
@@ -130,7 +135,7 @@ struct pawntable_t {
 
 struct board_t {
 	// Current side, 0 for black and 1 for white. Use enums for debug purpose.
-	bool stm;
+	color_t stm;
 
 	// Current en passant square. DEFAULT_EP_SQ, if not set.
 	int enPas;
@@ -217,9 +222,13 @@ namespace Pieces {
 }
 
 namespace chai {
-	typedef enum COLORS {
-		BLACK, WHITE, BOTH
-	} color_t;
+
+const bool BLACK = 0;
+const bool WHITE = 1;
+
+	// typedef enum COLORS {
+	// 	BLACK, WHITE
+	// };
 
 	typedef enum nodeType_t {
 		PV, NoPV

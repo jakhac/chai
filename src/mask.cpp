@@ -1,5 +1,8 @@
 #include "mask.h"
 
+using namespace chai;
+
+
 // include extern vars
 bitboard_t setMask[64];
 bitboard_t clearMask[64];
@@ -15,6 +18,17 @@ bitboard_t dirBitmap[64][8];
 bitboard_t inBetween[64][64];
 int dirFromTo[64][64];
 bitboard_t lineBB[64][64];
+
+bitboard_t horizontalNeighbors[64];
+void initHorizontalNeighbors() {
+	for (int i = 0; i < 64; i++) {
+
+		bitboard_t left  = (squareToFile[i] == FILE_A) ? 0ULL : setMask[i-1];
+		bitboard_t right = (squareToFile[i] == FILE_H) ? 0ULL : setMask[i+1];
+
+		horizontalNeighbors[i] = left | right;
+	}
+}
 
 void initClearSetMask() {
 	int index = 0;
@@ -46,10 +60,10 @@ void initSquareToRankFile() {
 void initAttackerMasks() {
 	// pawns
 	for (int i = 0; i < 64; i++) {
-		pawnAtkMask[chai::WHITE][i] = (setMask[i] << 7 & ~FILE_H_HEX) | (setMask[i] << 9 & ~FILE_A_HEX);
+		pawnAtkMask[WHITE][i] = (setMask[i] << 7 & ~FILE_H_HEX) | (setMask[i] << 9 & ~FILE_A_HEX);
 	}
 	for (int i = 63; i >= 0; i--) {
-		pawnAtkMask[chai::BLACK][i] = (setMask[i] >> 7 & ~FILE_A_HEX) | (setMask[i] >> 9 & ~FILE_H_HEX);
+		pawnAtkMask[BLACK][i] = (setMask[i] >> 7 & ~FILE_A_HEX) | (setMask[i] >> 9 & ~FILE_H_HEX);
 	}
 
 	// knights
@@ -103,20 +117,20 @@ void initEvalMasks() {
 	}
 
 	for (int i = 0; i < 64; i++) {
-		pawnPassedMask[chai::WHITE][i] = upperMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
-		pawnPassedMask[chai::BLACK][i] = lowerMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
+		pawnPassedMask[WHITE][i] = upperMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
+		pawnPassedMask[BLACK][i] = lowerMask[i] & (FILE_LIST[squareToFile[i]] | pawnIsolatedMask[i]);
 	}
 
 	bitboard_t shield;
 	for (int i = 0; i < 64; i++) {
 		shield = 0ULL;
 		shield = (setMask[i] >> 1 & ~FILE_H_HEX) | (setMask[i] << 1 & ~FILE_A_HEX) | setMask[i];
-		pawnShield[chai::WHITE][i] = (shield << 8) | (shield << 16);
-		pawnShield[chai::BLACK][i] = (shield >> 8) | (shield >> 16);
+		pawnShield[WHITE][i] = (shield << 8) | (shield << 16);
+		pawnShield[BLACK][i] = (shield >> 8) | (shield >> 16);
 	}
 
 	for (int i = 0; i < 64; i++) {
-		xMask[i] = pawnAtkMask[chai::WHITE][i] | pawnAtkMask[chai::BLACK][i];
+		xMask[i] = pawnAtkMask[WHITE][i] | pawnAtkMask[BLACK][i];
 	}
 }
 

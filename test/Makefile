@@ -18,11 +18,11 @@ EXE = ../src/test.exe
 CHAI_SRCS = attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp tt.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp timeMan.cpp
+	thread.cpp timeMan.cpp pawn.cpp
 
 SRCS = $(addprefix ../chai/, $(CHAI_SRCS))
 
-SRCS += testMain.cpp testSearch.cpp testPerft.cpp testSee.cpp
+SRCS += testMain.cpp testSearch.cpp testPerft.cpp testSee.cpp testEval.cpp
 
 OBJ_DIR = ../src/obj_debug
 OBJS = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(notdir $(SRCS)))

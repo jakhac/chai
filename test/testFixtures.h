@@ -74,3 +74,22 @@ namespace SeeTest {
 
 	};
 }
+
+namespace EvalTest {
+	class EvalTest : public ::testing::Test {
+
+	protected:
+		board_t* pBoard;
+
+		virtual void SetUp() {
+			pBoard = new board_t();
+
+			init();
+		}
+
+		virtual void TearDown() {
+			delete pBoard;
+		}
+
+	};
+}
