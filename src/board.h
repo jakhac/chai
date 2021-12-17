@@ -168,7 +168,7 @@ inline bool isCaptureOrPromotion(board_t* b, move_t move) {
  * Calculates all pinners towards given king square.
  *
  * @param  b board_t to call function.
- * @param  kSq   Square (of attacked king)
+ * @param  kSq   Square (of attacked king).
  * @param  kSide Side of attacked king.
  *
  * @returns Bitboard revealing all pinners.
@@ -181,11 +181,20 @@ bitboard_t getPinner(board_t* b, int kSq, color_t kSide);
  *
  * @param  b board_t to call function.
  * @param  kSq  Square of king.
- * @param  side Side of pinned pieces (king side)
+ * @param  side Side of pinned pieces (king side).
  *
  * @returns A bitboard_t.
  */
 bitboard_t getPinned(board_t* b, int kSq, color_t side);
+
+/**
+ * @brief Return rooks/bishops that deliver an discovered attack towards given sq.
+ * 
+ * @param b 
+ * @param sq Target square that is under discovered attacked.
+ * @param color Color of piece that is potentially attacked.
+ */
+bitboard_t getDiscoveredAttacks(board_t* b, int sq, color_t color);
 
 /**
  * Get king of given side as square index.
@@ -385,5 +394,22 @@ bool sqIsBlockerForKing(board_t* b, int kSq, int discoverSide, int potBlockerSq)
  * @param  move
  */
 bool checkingMove(board_t* b, move_t move);
+
+/**
+ * @brief Return all pawns of given color that have an opposite colored pawn ahead.
+ * 
+ * @return bitboard_t 
+ */
+bitboard_t getBlockedPawns(board_t* b, color_t color);
+
+/**
+ * @brief Return all passed pawns (no def pawns ahead) for given color.
+ */
+bitboard_t getPassers(board_t* b, color_t color);
+
+/**
+ * @brief Return true if given side has either a knight or bishop on the board.
+ */
+bool hasBishopOrKnight(board_t* b, color_t color);
 
 move_t getCurrentMove(board_t* b);

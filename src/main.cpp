@@ -11,8 +11,8 @@ int main() {
 	initThreadPool();
 
 	// Print status and drop into cli protocol
-	// parseFen(&_board, STARTING_FEN);
-	parseFen(&_board, "4k3/8/p7/P7/1P6/8/8/4K3 w - - 0 1");
+	parseFen(&_board, STARTING_FEN);
+	// parseFen(&_board, "7k/2rR3p/1Pp1qp1B/p1p3p1/P3P3/7P/5PP1/6K1 w - - 1 40");
 
 	printBoard(&_board);
 	cli(&_board, &_instr, &_stats, &_perft);
@@ -33,10 +33,13 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 	// bitboard_t t = wBackwardPawns(b);
 	// printBitBoard(&t);
 
-	for (int j = 0; j < 64; j++) {
-		// bitboard_t t = pawnIsolatedMask[j];
+	// for (int j = 0; j < 64; j++) {
+		// bitboard_t t = dangerZone[chai::BLACK][E4];
 		// printBitBoard(&t);
-	}
+	// }
+
+	// tuple_t tup = t(2, 4);
+	// cout << t1(tup) <<  " " << t2(tup) << endl;
 
 	while (1) {
 		cin >> userInput;
@@ -81,6 +84,11 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 		if (userInput == "movegen") {
 			generateMoves(b, &moveList, isCheck(b, b->stm));
 			printGeneratedMoves(b, &moveList);
+			continue;
+		}
+
+		if (userInput == "eval") {
+			cout << "Eval = " << evaluation(b) << " (white side)" << endl;
 			continue;
 		}
 

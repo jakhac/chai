@@ -170,10 +170,18 @@ Evaluation
   - [x] Update PSQT valueand materialBalance on-the-fly
 - v3.0.2
   - [x] Use color_t type
-  - [ ] Sophisticated evaluation of king/pawn structure
+  - [x] Sophisticated evaluation of pawn structure (+ king-safety wrt. pawns)
+- v3.0.3
+  - Refactor evaluation for:
+    - [x] Bishop
+    - [ ] Knight
+    - [ ] King Safety
+    - [ ] Rook
+    - [ ] Queen
+  - v3.0.4
+    - [ ] Dedicated endgame evals (KPvK, KBNvK)
 - Project
   - [ ] Implement testEGTB file
-  - [ ] Strong distinguishment between piece (1 .. 13) and pieceType (1 .. 7)
 
 
 # Todo

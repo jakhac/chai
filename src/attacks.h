@@ -154,3 +154,14 @@ bitboard_t lookUpRookMoves(int sq, bitboard_t blockers);
  * @returns Bitboard of possible moves and captures.
  */
 bitboard_t lookUpBishopMoves(int sq, bitboard_t blockers);
+
+/**
+ * Fast lookup for possible queen moves. Used in move generation. Possible queen moves and
+ * captures. Attacks all occupied pieces, check for correct color before generating attack moves.
+ *
+ * @param  sq	    From square.
+ * @param  blockers Bitboard of currently occupied squares.
+ *
+ * @returns Bitboard of possible moves and captures.
+ */
+bitboard_t lookUpQueenMoves(int sq, bitboard_t blockers);

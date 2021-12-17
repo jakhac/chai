@@ -231,6 +231,7 @@ value_t search(board_t* b, stats_t* s, instr_t* i) {
 	Thread t = threadPool[selectBestThreadIndex()];
 	// Thread t = threadPool[0];
 	int totalNodes = totalNodeCount();
+	s->depthReached = t->depth;
 
 	// UCI commands
 	printUCI(&t->instr, &t->s, t->depth, t->selDepth, t->bestScore, totalNodes);

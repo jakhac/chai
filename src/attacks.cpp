@@ -157,3 +157,6 @@ bitboard_t lookUpBishopMoves(int sq, bitboard_t blockers) {
 	return bishopTable[sq][key];
 }
 
+bitboard_t lookUpQueenMoves(int sq, bitboard_t blockers) {
+	return lookUpRookMoves(sq, blockers) | lookUpBishopMoves(sq, blockers);
+}

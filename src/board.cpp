@@ -915,6 +915,16 @@ bitboard_t getPinned(board_t* b, int kSq, color_t kSide) {
 	return pinned;
 }
 
+bitboard_t getDiscoveredAttacks(board_t* b, int sq, color_t color) {
+    bitboard_t rAttacks = lookUpRookMoves(sq, b->occupied);
+    bitboard_t bAttacks = lookUpBishopMoves(sq, b->occupied);
+    bitboard_t rooks    = getPieces(b, ROOK, color ^ 1) & ~rAttacks;
+    bitboard_t bishops  = getPieces(b, BISHOP, color ^ 1) & ~bAttacks;
+
+	return    (rooks & lookUpRookMoves(sq, b->occupied & ~rAttacks))
+        	| (bishops & lookUpBishopMoves(sq, b->occupied & ~bAttacks));
+}
+
 int getKingSquare(board_t* b, color_t color) {
 	Assert(getPieces(b, chai::KING, color));
 	return getLSB(getPieces(b, chai::KING, color));
@@ -1055,6 +1065,44 @@ bitboard_t squareAtkDefOcc(board_t* b, bitboard_t occupied, int square) {
 	attacker |= lookUpBishopMoves(square, occupied) & (b->pieces[chai::BISHOP] | b->pieces[chai::QUEEN]);
 	attacker |= lookUpRookMoves(square, occupied) & (b->pieces[chai::ROOK] | b->pieces[chai::QUEEN]);
 	return attacker;
+}
+
+bitboard_t getBlockedPawns(board_t* b, color_t color) {
+	int sq;
+	int shift = (color == WHITE) ? 8 : -8;
+	bitboard_t pawns = getPieces(b, PAWN, color);
+	bitboard_t potBlockers = getPieces(b, PAWN, color ^ 1);
+	bitboard_t res = 0ULL;
+	
+	while (pawns) {
+		sq = popLSB(&pawns);
+		if ((1ULL << (sq + shift)) & potBlockers) {
+			res |= (1ULL << sq);
+		}
+	}
+
+	return res;
+}
+
+bool hasBishopOrKnight(board_t* b, color_t color) {
+	return (b->pieces[BISHOP] & b->color[color]) || (b->pieces[KNIGHT] & b->color[color]);
+}
+
+bitboard_t getPassers(board_t* b, color_t color) {
+	bitboard_t passers = 0ULL;
+	bitboard_t pawns = getPieces(b, PAWN, color);
+	bitboard_t pawnsDef = getPieces(b, PAWN, color ^ 1);
+
+	int sq;
+	while (pawns) {
+		sq = popLSB(&pawns);
+
+		if (!(pawnPassedMask[color][sq] & pawnsDef)) {
+			passers |= (1ULL << sq);
+		}
+	}
+
+	return passers;
 }
 
 bool isCheck(board_t* b, color_t color) {

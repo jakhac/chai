@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono> // time measurement
+#include <tuple>
 
 #include "types.h"
 
@@ -31,7 +32,7 @@ using std::fixed;
 if(!(n)) { \
 	std::string errMsg = "Failed assert \"" + TOSTRING(n) + "\"\n" \
 		+ "in " + TOSTRING(__FILE__) + ":" + TOSTRING(__LINE__) + "\n" \
-		+ "at " + getTime() +"\n\n"; \
+		+ "at " + getTimeAndDate() +"\n\n"; \
 	cout << errMsg; \
 	logDebug(errMsg); \
 	exit(1); \
@@ -50,6 +51,7 @@ if(!(n)) { \
 
 extern void logDebug(std::string errMsg);
 extern std::string getTime();
+extern std::string getTimeAndDate();
 
 const std::string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const std::string MID_FEN      = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";

@@ -249,6 +249,16 @@ std::string getTime() {
     return str;
 }
 
+std::string getTimeAndDate() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+
+    return buf;
+}
+
 bool inputWaiting() {
     static int init = 0, pipe;
     static HANDLE inh;

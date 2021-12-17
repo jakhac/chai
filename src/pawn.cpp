@@ -9,8 +9,12 @@ value_t evaluatePawns(board_t* b) {
 
 	// 1) Negative pawn structure attributes (subtract value)
 	// Lack of pawns
-	if (!getPieces(b, PAWN, WHITE)) score += PAWN_LACK_PENALTY;
-	if (!getPieces(b, PAWN, BLACK)) score += PAWN_LACK_PENALTY;
+	if (!getPieces(b, PAWN, WHITE)) {
+		score += +PAWN_LACK_PENALTY;
+	}
+	if (!getPieces(b, PAWN, BLACK)) {
+		score += -PAWN_LACK_PENALTY;
+	}
 
 	// Backward pawns
 	wCount = popCount(wBackwardPawns(b));
@@ -63,37 +67,27 @@ value_t kingPawnSafety(board_t* b, color_t color) {
 	int kSq = getKingSquare(b, color);
 	bitboard_t pawns = getPieces(b, PAWN, color);
 	
-	// Open File next to king
-	score += openFilesNearKing(b, kSq, color);
+	// // Open File next to king
+	// int kingFile = squareToFile[kSq];
+	// if (   kingFile != FILE_A
+	// 	&& !(pawns & FILE_LIST[kingFile - 1])) {
+	// 	score += KING_OPEN_NEIHGBOR_FILE;
+	// }
+
+	// if (   kingFile != FILE_H
+	// 	&& !(pawns & FILE_LIST[kingFile + 1])) {
+	// 	score += KING_OPEN_NEIHGBOR_FILE;
+	// }
+
+	// if (!(pawns & FILE_LIST[kingFile])) {
+	// 	score += KING_OPEN_FILE;
+	// }
 
 	// Pawns shielding king
 	score += popCount(pawnShield[color][kSq] & pawns) * PAWN_SHIELD_REWARD;
 
 	return score;
 }
-
-int openFilesNearKing(board_t* b, int kSq, color_t color) {
-	int openCount = 0;
-	int kingFile = squareToFile[kSq];
-	bitboard_t pawns = getPieces(b, PAWN, color);
-
-	if (   kingFile != FILE_A
-		&& !(pawns & FILE_LIST[kingFile - 1])) {
-		openCount++;
-	}
-
-	if (   kingFile != FILE_H
-		&& !(pawns & FILE_LIST[kingFile + 1])) {
-		openCount++;
-	}
-
-	if (!(pawns & FILE_LIST[kingFile])) {
-		openCount++;
-	}
-
-	return openCount;
-}
-
 
 bitboard_t wBackwardPawns(board_t* b) {
 	int sq;

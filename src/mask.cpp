@@ -19,6 +19,16 @@ bitboard_t inBetween[64][64];
 int dirFromTo[64][64];
 bitboard_t lineBB[64][64];
 
+const int* maps[7];
+bitboard_t pawnIsolatedMask[64];
+bitboard_t pawnPassedMask[2][64];
+bitboard_t upperMask[64];
+bitboard_t lowerMask[64];
+bitboard_t pawnShield[2][64];
+bitboard_t xMask[64];
+bitboard_t dangerZone[2][64];
+int manhattenDistance[64][64];
+
 bitboard_t horizontalNeighbors[64];
 void initHorizontalNeighbors() {
 	for (int i = 0; i < 64; i++) {
@@ -132,6 +142,12 @@ void initEvalMasks() {
 	for (int i = 0; i < 64; i++) {
 		xMask[i] = pawnAtkMask[WHITE][i] | pawnAtkMask[BLACK][i];
 	}
+
+	for (int i = 0; i < 64; i++) {
+		dangerZone[WHITE][i] = kingAtkMask[i] | (1ULL << i) | (1ULL << (i + 16));
+		dangerZone[BLACK][i] = kingAtkMask[i] | (1ULL << i) | (1ULL << (i - 16));
+	}
+
 }
 
 void initManhattenMask() {

@@ -29,7 +29,23 @@ extern bitboard_t upperMask[64];
 extern bitboard_t lowerMask[64];
 extern bitboard_t pawnShield[2][64];
 extern bitboard_t xMask[64];
+extern bitboard_t dangerZone[2][64];
 extern int manhattenDistance[64][64];
+
+
+
+extern const int* maps[7];
+// extern bitboard_t pawnIsolatedMask[64];
+// extern bitboard_t pawnPassedMask[2][64];
+// extern bitboard_t upperMask[64];
+// extern bitboard_t lowerMask[64];
+// extern bitboard_t pawnShield[2][64];
+// extern bitboard_t xMask[64];
+
+const bitboard_t FIANCHETTO_B2 = { (1ULL << A2) | (1ULL << B3) | (1ULL << C2) };
+const bitboard_t FIANCHETTO_G2 = { (1ULL << F2) | (1ULL << G3) | (1ULL << H2) };
+const bitboard_t FIANCHETTO_B7 = { (1ULL << A7) | (1ULL << B6) | (1ULL << C7) };
+const bitboard_t FIANCHETTO_G7 = { (1ULL << F7) | (1ULL << G6) | (1ULL << H7) };
 
 const bitboard_t RANK_1_HEX = 0x00000000000000FF;
 const bitboard_t RANK_2_HEX = 0x000000000000FF00;
@@ -49,7 +65,11 @@ const bitboard_t FILE_F_HEX = 0x2020202020202020;
 const bitboard_t FILE_G_HEX = 0x4040404040404040;
 const bitboard_t FILE_H_HEX = 0x8080808080808080;
 
-const bitboard_t CENTER_SQUARES = (1ULL << D4) | (1ULL << D5) | (1ULL << E4) | (1ULL << E5);
+const bitboard_t SQUARES_BLACK      = 0xAA55AA55AA55AA55;
+const bitboard_t SQUARES_WHITE      = 0x55AA55AA55AA55AA;
+const bitboard_t CENTER_SQUARES     = 0x0000001818000000;
+const bitboard_t CENTER_SQUARES_EXT = 0x00003C3C3C3C0000;
+const bitboard_t BORDER_SQUARES     = FILE_A_HEX | FILE_H_HEX | RANK_1_HEX | RANK_8_HEX;
 
 const bitboard_t FILE_LIST[8] = {
 	FILE_A_HEX, FILE_B_HEX, FILE_C_HEX, FILE_D_HEX,
@@ -61,8 +81,7 @@ const bitboard_t RANK_LIST[8] = {
 	RANK_5_HEX, RANK_6_HEX, RANK_7_HEX, RANK_8_HEX
 };
 
-const bitboard_t BLACKSQUARES = 0xAA55AA55AA55AA55;
-const bitboard_t WHITESQUARES = 0x55AA55AA55AA55AA;
+
 
 void initClearSetMask();
 

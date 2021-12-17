@@ -2,7 +2,7 @@
 # 1. META DATA
 #######################################
 
-VERSION = v3.0.2
+VERSION = v3.0.3
 
 EXE_RELEASE = chai_$(VERSION)_release.exe
 EXE_DEBUG = chai_$(VERSION)_debug.exe
@@ -208,6 +208,7 @@ help:
 	@echo "make debug     > Build includes assertions, extra checks and information."
 	@echo "make release   > Build optimized on performance and speed."
 	@echo "make test      > Build test-suite."
+	@echo "make clean     > Remove all binaries and object-files."
 
 .depend:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null

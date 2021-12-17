@@ -28,6 +28,25 @@ typedef uint16_t move_t;
  */
 typedef int16_t value_t;
 
+typedef int32_t tuple_t;
+
+// typedef std::tuple<value_t, value_t> tuple_t;
+
+tuple_t t(value_t v1, value_t v2);
+value_t t1(tuple_t tuple);
+value_t t2(tuple_t tuple);
+
+// template<typename T, typename V>
+// tuple_t operator+(T a, V b) {
+// 	return t(std::get<0>(a) + std::get<0>(b), std::get<1>(a) + std::get<1>(b));
+// }
+
+// tuple_t& operator+=(const tuple_t& rhs) {
+
+// 	// return t(std::get<0>(a) + std::get<0>(b), std::get<1>(a) + std::get<1>(b));
+// }
+
+
 /**
  * Color type. Alias bool type.
  */
@@ -170,7 +189,7 @@ struct board_t {
 	// Store occupied squares.
 	bitboard_t occupied;
 
-	// Stores the currently attacked squares by side.
+	// Stores the currently attacked squares by WHITE/BLACK.
 	bitboard_t attackedSquares[2];
 
 	// Stack stores pushed moves as Undo objects.
@@ -188,6 +207,8 @@ struct stats_t {
 	int futileFH;
 
 	int tbHit;
+
+	int depthReached;
 
 	// fail high heuristics
 	float fh;
@@ -223,12 +244,8 @@ namespace Pieces {
 
 namespace chai {
 
-const bool BLACK = 0;
-const bool WHITE = 1;
-
-	// typedef enum COLORS {
-	// 	BLACK, WHITE
-	// };
+const color_t BLACK = 0;
+const color_t WHITE = 1;
 
 	typedef enum nodeType_t {
 		PV, NoPV

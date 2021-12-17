@@ -5,14 +5,17 @@
 namespace chai {
 
 
-const value_t PAWN_LACK_PENALTY = -16;
-const value_t BACKWARD_PAWN_PENALTY = -3;
-const value_t DOUBLED_PAWN_PENALTY = -4;
-const value_t PAWN_ISLAND_PENALTY = -2;
-const value_t PAWN_ISOLATION_PENALTY = -10;
+const value_t PAWN_LACK_PENALTY        = -16;
+const value_t BACKWARD_PAWN_PENALTY    = -3;
+const value_t DOUBLED_PAWN_PENALTY     = -4;
+const value_t PAWN_ISLAND_PENALTY      = -2;
+const value_t PAWN_ISOLATION_PENALTY   = -10;
 const value_t HIDDE_PASSED_PAWN_REWARD = 3;
-const value_t PAWN_CHAIN_REWARD = 1;
-const value_t PAWN_SHIELD_REWARD = 5;
+const value_t PAWN_CHAIN_REWARD        = 1;
+const value_t PAWN_SHIELD_REWARD       = 5;
+
+const value_t KING_OPEN_NEIHGBOR_FILE  = -5;
+const value_t KING_OPEN_FILE           = -8;
 
 // const value_t PASSED_PAWN_REWARD = 8;
 const value_t PASSED_PAWN_REWARD[2][8] = {
@@ -31,11 +34,6 @@ value_t evaluatePawns(board_t* b);
  * @brief Evaluate pawn structure with respect to king-safety.
  */
 value_t kingPawnSafety(board_t* b, color_t color);
-
-/**
- * @brief Count open files near (neighboring) king.
- */
-int openFilesNearKing(board_t* b, int kSq, color_t color);
 
 // Backwards Pawn:
 //		1) 2-rank || 7-rank

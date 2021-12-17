@@ -246,6 +246,7 @@ bool probePT(board_t* b, value_t* hashScore) {
 	Assert(index >= 0 && index <= pt->entries - 1);
 
 	if (pt->table[index].zobristPawnKey == b->zobristPawnKey) {
+		pt->hit++;
 		*hashScore = pt->table[index].eval;
 		return true;
 	}
