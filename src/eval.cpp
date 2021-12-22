@@ -139,7 +139,7 @@ value_t mixedEvaluation(board_t* b) {
 
 	// // Knight-Bishop placement and coordination
 	// tupleEval += evaluateBishops(b, WHITE) - evaluateBishops(b, BLACK);
-	// tupleEval += evaluateKnights(b, WHITE) - evaluateKnights(b, BLACK);
+	tupleEval += evaluateKnights(b, WHITE) - evaluateKnights(b, BLACK);
 
 	// // Rook-Queen
 	// tupleEval += evaluateRooks(b, WHITE) - evaluateRooks(b, BLACK);
@@ -379,10 +379,11 @@ tuple_t evaluateBishops(board_t* b, color_t color) {
 }
 
 tuple_t evaluateKnights(board_t* b, color_t color) {
-	tuple_t score = 0;
-	bitboard_t atks;
-	bitboard_t knights = getPieces(b, KNIGHT, color);
-	bitboard_t pawns = getPieces(b, PAWN, color);
+	tuple_t score            = 0;
+	int kSq                  = getKingSquare(b, color);
+	int kSqOpp               = getKingSquare(b, color ^ 1);
+	bitboard_t knights       = getPieces(b, KNIGHT, color);
+	bitboard_t pawns         = getPieces(b, PAWN, color);
 	bitboard_t oppositePawns = getPieces(b, PAWN, color ^ 1);
 	bitboard_t currentFile;
 
@@ -390,13 +391,15 @@ tuple_t evaluateKnights(board_t* b, color_t color) {
 	score += popCount(knights & BORDER_SQUARES) * KNIGHT_BORDER_SQUARE;
 
 	int sq;
+	bool isOutpost;
 	while (knights) {
 		sq = popLSB(&knights);
 
 		// 2) Outposts
 		currentFile = FILE_LIST[squareToFile[sq]];
+		isOutpost = (1ULL << sq) & outpost_squares[color];
 		if (   !((pawnPassedMask[color][sq] & ~currentFile) & oppositePawns)
-			&& !((FILE_A_HEX | FILE_H_HEX) & (1 << sq))) {
+			&& isOutpost) {
 			score += KNIGHT_OUTPOST;
 
 			// Outpost square
@@ -407,15 +410,27 @@ tuple_t evaluateKnights(board_t* b, color_t color) {
 		}
 
 		// 3) Center squares attacked
-		// - Non-occupied squares that are not attacked by opponent
 		Assert(b->attackedSquares[color ^ 1] == attackerSet(b, color ^ 1));
-		atks = knightAtkMask[sq] & CENTER_SQUARES_EXT;
+		bitboard_t atks = knightAtkMask[sq] & CENTER_SQUARES_EXT;
 		score += popCount(atks) * KNIGHT_CENTER_ATTACKS;
+
+		// 4) Distance to kings
+		int dist = (manhattenDistance[kSq][sq] + manhattenDistance[kSqOpp][sq]);
+		score -= t(0, dist);
+
+		// 5) Shielded by own pawn
+		bitboard_t shieldSquare = (color == WHITE) ? (1ULL << (sq+8)) : (1ULL << (sq-8));
+		if (shieldSquare & pawns) {
+			score += KNIGHT_SHIELDED_BY_PAWN;
+		}
 	
 	}
 
-	// Scale value by pawns remaining
-	// score = weightedSum(score, 0.8f * score); // TODO ok?
+	// Scale value by remaining pawns 
+	if (popCount(b->pieces[PAWN]) < 8) {
+		score = t(t1(score) * 0.8, t2(score) * 0.8);
+	}
+
 	return score;
 }
 
@@ -635,7 +650,7 @@ int undefendedQueenChecks(board_t* b, int kSq, color_t color) {
 	return res;
 }
 
-tuple_t kingSafety(board_t* b, int side) {
+/*tuple_t kingSafety(board_t* b, int side) {
 	int result = 0;
 	int kSq = getKingSquare(b, side);
 	bitboard_t pawns = getPieces(b, PAWN, side);
@@ -678,7 +693,7 @@ tuple_t kingSafety(board_t* b, int side) {
 
 	Assert(abs(result) < VALUE_IS_MATE_IN);
 	return t(result, result);
-}
+}*/
  
 tuple_t evaluateKing(board_t* b, color_t color) {
 	tuple_t score = 0;
@@ -723,10 +738,10 @@ tuple_t evaluateKing(board_t* b, color_t color) {
 
 	}
 
-	Assert(undefendedChecks + attackerUnits < 100);
-	value_t safetyValue = safetyTable[undefendedChecks + attackerUnits];
+	int safetyIndex = std::min(99, undefendedChecks + attackerUnits);
+	value_t safetyValue = safetyTable[safetyIndex];
+	Assert(safetyValue < VALUE_IS_MATE_IN);
 	score -= t(safetyValue, 0.5 * safetyValue);
-
 
 	// King activity
 	if ((1 << kSq) & CENTER_SQUARES_EXT) {

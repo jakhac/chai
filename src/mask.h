@@ -31,16 +31,11 @@ extern bitboard_t pawnShield[2][64];
 extern bitboard_t xMask[64];
 extern bitboard_t dangerZone[2][64];
 extern int manhattenDistance[64][64];
-
+extern bitboard_t outpost_squares[2];
 
 
 extern const int* maps[7];
-// extern bitboard_t pawnIsolatedMask[64];
-// extern bitboard_t pawnPassedMask[2][64];
-// extern bitboard_t upperMask[64];
-// extern bitboard_t lowerMask[64];
-// extern bitboard_t pawnShield[2][64];
-// extern bitboard_t xMask[64];
+
 
 const bitboard_t FIANCHETTO_B2 = { (1ULL << A2) | (1ULL << B3) | (1ULL << C2) };
 const bitboard_t FIANCHETTO_G2 = { (1ULL << F2) | (1ULL << G3) | (1ULL << H2) };

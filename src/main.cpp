@@ -12,7 +12,7 @@ int main() {
 
 	// Print status and drop into cli protocol
 	parseFen(&_board, STARTING_FEN);
-	// parseFen(&_board, "7k/2rR3p/1Pp1qp1B/p1p3p1/P3P3/7P/5PP1/6K1 w - - 1 40");
+	// parseFen(&_board, "8/1pR5/p3N1kp/Pb4p1/1P6/6KP/2p5/2r5 b - - 3 53 ");
 
 	printBoard(&_board);
 	cli(&_board, &_instr, &_stats, &_perft);

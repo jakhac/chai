@@ -28,6 +28,7 @@ bitboard_t pawnShield[2][64];
 bitboard_t xMask[64];
 bitboard_t dangerZone[2][64];
 int manhattenDistance[64][64];
+bitboard_t outpost_squares[2];
 
 bitboard_t horizontalNeighbors[64];
 void initHorizontalNeighbors() {
@@ -147,6 +148,9 @@ void initEvalMasks() {
 		dangerZone[WHITE][i] = kingAtkMask[i] | (1ULL << i) | (1ULL << (i + 16));
 		dangerZone[BLACK][i] = kingAtkMask[i] | (1ULL << i) | (1ULL << (i - 16));
 	}
+
+	outpost_squares[WHITE] = (RANK_4_HEX | RANK_5_HEX | RANK_6_HEX | RANK_7_HEX) & ~BORDER_SQUARES;
+	outpost_squares[BLACK] = (RANK_5_HEX | RANK_4_HEX | RANK_3_HEX | RANK_2_HEX) & ~BORDER_SQUARES;
 
 }
 

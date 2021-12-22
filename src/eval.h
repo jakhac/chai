@@ -21,6 +21,7 @@ const value_t VALUE_TB_WIN     = VALUE_MATE - 1000;
 
 // Maximum material in pawns excluding kings
 const int maximumMaterial = 78;
+// position startpos moves e2e4 e7e5 g1f3 b8c6 b1c3 g8f6 f1b5 f8b4 e1g1 e8g8 d2d3 d7d6 c3e2 c8g4 c2c3 b4c5 d3d4 e5d4 c3d4 c5b6 b5c6 b7c6 e2g3 d6d5 e4e5 f6d7 c1e3 c6c5 d4c5 d7c5 h2h3 g4c8 e3c5 b6c5 a1c1 c5b6 d1d3 c7c5 g3e2 c5c4 d3d2 c8b7 e2d4 d8d7 d2g5 g8h8 a2a3 h7h6 g5f5 b7c8 f5f4 b6c5 f4e3 a8b8 e3c3 c5e7 c3c2 d7b7 c1b1 b7c7 b1c1 c8d7 c2d2 c7b6 c1c2 d7a4 c2c1 e7c5 c1b1 f8e8 d2f4 b6g6 f3d2 g6d3 d2f3 b8b7 f4e3 d3e3 f2e3 e8b8 f1f2 a7a5 f3e1 h8g8 e1f3 a4e8 e5e6 f7e6 g2g4 c5a3 d4e6 c4c3 f3h4 b7b2 f2b2 b8b2
 
 // const tuple_t pieceValues[13] = { 
 // 	t(0, 0), t(100, 150), t(325, 300), t(325, 350), t(550, 575), t(1000, 1000),
@@ -34,17 +35,17 @@ const value_t pieceValues[13] = {
 };
 
 const tuple_t pieceTupleValues[13] = {
-	0, t(100, 150), t(325, 325), t(325, 325), t(550, 550), t(1000, 1000),
-	0, t(100, 150), t(325, 325), t(325, 325), t(550, 550), t(1000, 1000),
+	0, t(100, 150), t(325, 305), t(325, 325), t(550, 550), t(1000, 1000),
+	0, t(100, 150), t(325, 305), t(325, 325), t(550, 550), t(1000, 1000),
 	0
 };
 
 const value_t CENTER_OCCUPIED = 2;
 const value_t CENTER_ATTACKED = 2;
 
-const value_t BISHOP_MOBILITY = t(2, 2);
-const value_t KNIGHT_MOBILITY = t(2, 1);
-const value_t ROOK_MOBILITY   = t(1, 2);
+const tuple_t BISHOP_MOBILITY = t(2, 2);
+const tuple_t KNIGHT_MOBILITY = t(2, 1);
+const tuple_t ROOK_MOBILITY   = t(1, 2);
 
 const tuple_t BISHOP_PAIR              = t(24, 58);
 const tuple_t BISHOP_COLOR_BLOCKED     = t(-2, -10);
@@ -53,10 +54,11 @@ const tuple_t BISHOP_STRONG_COLOR_CPLX = t(10, 28);
 const tuple_t BISHOP_OUTPOST           = t(15, -10);
 const tuple_t BISHOP_OUTPOST_DEFENDED  = t(35, 0);
 
-const tuple_t KNIGHT_OUTPOST          = t(15, 3);
-const tuple_t KNIGHT_OUTPOST_DEFENDED = t(35, 3);
-const tuple_t KNIGHT_CENTER_ATTACKS   = t(4, 0);
+const tuple_t KNIGHT_OUTPOST          = t(18, -4);
+const tuple_t KNIGHT_OUTPOST_DEFENDED = t(30, 16);
+const tuple_t KNIGHT_CENTER_ATTACKS   = t(3, 1);
 const tuple_t KNIGHT_BORDER_SQUARE    = t(-7, -14);
+const tuple_t KNIGHT_SHIELDED_BY_PAWN = t(18, 4);
 
 const tuple_t ROOK_CONTROLS_PASSER   = t(5, 15);
 const tuple_t ROOK_SAME_FILE_AS_KING = t(15, 0);
@@ -139,7 +141,7 @@ bool rooksBelowPasser(bitboard_t rooks, bitboard_t passer);
 bool rooksAbovePasser(bitboard_t rooks, bitboard_t passer);
 
 /**
- * @brief Return number of knights that can deliver a check on undefended square.
+ * @brief Return number of undefended square where knights can deliver check.
  * 
  * @param b 
  * @param kSq Square of king that receives check
@@ -148,7 +150,7 @@ bool rooksAbovePasser(bitboard_t rooks, bitboard_t passer);
 int undefendedKnightChecks(board_t* b, int kSq, color_t color);
 
 /**
- * @brief Return number of bishops that can deliver a check on undefended square.
+ * @brief Return number of undefended square where bishops that can deliver check.
  * 
  * @param b 
  * @param kSq Square of king that receives check
@@ -157,7 +159,7 @@ int undefendedKnightChecks(board_t* b, int kSq, color_t color);
 int undefendedBishopChecks(board_t* b, int kSq, color_t color);
 
 /**
- * @brief Return number of rooks that can deliver a check on undefended square.
+ * @brief Return number of undefended square where rooks that can deliver check.
  * 
  * @param b 
  * @param kSq Square of king that receives check
@@ -166,7 +168,7 @@ int undefendedBishopChecks(board_t* b, int kSq, color_t color);
 int undefendedRookChecks(board_t* b, int kSq, color_t color);
 
 /**
- * @brief Return number of queens that can deliver a check on undefended square.
+ * @brief Return number of undefended square wherequeens that can deliver check.
  * 
  * @param b 
  * @param kSq Square of king that receives check

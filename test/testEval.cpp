@@ -122,22 +122,6 @@ TEST_F(EvalTest, PawnStructure) {
 	EXPECT_TRUE(pawnEval > 0);
 }
 
-// TEST_F(EvalTest, KingPawnEval) {
-//     int count;
-
-// 	parseFen(pBoard, "3k4/2p1p3/8/8/8/8/5PPP/6K1 w - - 0 1");
-//     count = openFilesNearKing(pBoard, G1, WHITE);
-// 	EXPECT_EQ(count, 0);
-//     count = openFilesNearKing(pBoard, D8, BLACK);
-// 	EXPECT_EQ(count, 1);
-
-// 	parseFen(pBoard, "4k3/2p1p3/8/8/8/8/5P2/6K1 w - - 0 1");
-//     count = openFilesNearKing(pBoard, G1, WHITE);
-// 	EXPECT_EQ(count, 2);
-//     count = openFilesNearKing(pBoard, E8, BLACK);
-// 	EXPECT_EQ(count, 2);
-// }
-
 TEST_F(EvalTest, Passers) {
     int count;
 
@@ -192,7 +176,7 @@ TEST_F(EvalTest, DiscoveredAttacks) {
     parseFen(pBoard, "4k3/5ppp/4p3/1N1P4/1nP4n/8/PP3PP1/4K3 w - - 0 1");
     pBoard->attackedSquares[chai::WHITE] = attackerSet(pBoard, chai::WHITE);
     pBoard->attackedSquares[chai::BLACK] = attackerSet(pBoard, chai::BLACK);
-	EXPECT_EQ(2, undefendedKnightChecks(pBoard, E1, chai::BLACK));
+	EXPECT_EQ(3, undefendedKnightChecks(pBoard, E1, chai::BLACK));
 
     parseFen(pBoard, "4k3/5ppp/4p3/1N1P4/1nP4n/8/PP1Q1PP1/4K3 w - - 0 1");
     pBoard->attackedSquares[chai::WHITE] = attackerSet(pBoard, chai::WHITE);

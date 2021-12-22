@@ -22,7 +22,7 @@ TEST_F(SearchTest, MateIn5_2) {
 
 TEST_F(SearchTest, MateIn7_1) {
 	parseFen(pBoard, "7k/2rR3p/1Pp1qp1B/p1p3p1/P3P3/7P/5PP1/6K1 w - - 1 40");
-	pInstr->depth = 7;
+	pInstr->depth = 10;
 	pInstr->depthSet = true;
 	pInstr->timeSet = false;
 
