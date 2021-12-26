@@ -98,14 +98,13 @@ static value_t scaleGamePhase(tuple_t tuple, float phase) {
 	return ((t1(tuple) * (256 - phase)) + (t2(tuple) * phase)) / 256;
 }
 
-
 value_t mixedEvaluation(board_t* b) {
 
 	prefetchPT(b);
 
 	value_t eval = 0;
 	float phase = gamePhase(b);
-	float interpolFactor = std::min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
+	// float interpolFactor = std::min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
 
 	// Check insufficient material to detect drawn positions
 	if (popCount(b->occupied) <= 5 && insufficientMaterial(b)) {
@@ -265,10 +264,10 @@ tuple_t mobility(board_t* b, color_t color) {
 	score += BISHOP_MOBILITY * moveList->cnt;
 
 	// Favor knight moves in opening and midgame
-	moveList->cnt = 0;
-	addKnightMoves(b, moveList);
-	addKnightCaptures(b, moveList);
-	score += KNIGHT_MOBILITY * moveList->cnt;
+	// moveList->cnt = 0;
+	// addKnightMoves(b, moveList);
+	// addKnightCaptures(b, moveList);
+	// score += KNIGHT_MOBILITY * moveList->cnt;
 
 	// Favor rook mobility in towards endgame
 	moveList->cnt = 0;
@@ -388,48 +387,51 @@ tuple_t evaluateKnights(board_t* b, color_t color) {
 	bitboard_t currentFile;
 
 	// 1) Knights on border of board
-	score += popCount(knights & BORDER_SQUARES) * KNIGHT_BORDER_SQUARE;
+	// score += popCount(knights & BORDER_SQUARES) * KNIGHT_BORDER_SQUARE;
 
 	int sq;
-	bool isOutpost;
+	bool isOutpostArea;
 	while (knights) {
 		sq = popLSB(&knights);
 
 		// 2) Outposts
 		currentFile = FILE_LIST[squareToFile[sq]];
-		isOutpost = (1ULL << sq) & outpost_squares[color];
+		isOutpostArea = (1ULL << sq) & outpost_squares[color];
 		if (   !((pawnPassedMask[color][sq] & ~currentFile) & oppositePawns)
-			&& isOutpost) {
+			&& isOutpostArea) {
 			score += KNIGHT_OUTPOST;
 
-			// Outpost square
-			currentFile = FILE_LIST[squareToFile[sq]];
+			// Defended by pawn
 			if (pawnAtkMask[color ^ 1][sq] & pawns) {
 				score += KNIGHT_OUTPOST_DEFENDED;
 			}
 		}
 
-		// 3) Center squares attacked
-		Assert(b->attackedSquares[color ^ 1] == attackerSet(b, color ^ 1));
-		bitboard_t atks = knightAtkMask[sq] & CENTER_SQUARES_EXT;
-		score += popCount(atks) * KNIGHT_CENTER_ATTACKS;
+		// 3) Mobility and Center squares attacked
+		int atks = popCount(knightAtkMask[sq]);
+		Assert(atks <= 8);
+		// score += atks (& CENTER_SQUARES?) * KNIGHT_CENTER_ATTACKS;
+		score += KNIGHT_MOBILITY[atks];
 
 		// 4) Distance to kings
-		int dist = (manhattenDistance[kSq][sq] + manhattenDistance[kSqOpp][sq]);
-		score -= t(0, dist);
+		int dist = (manhattenDistance[kSq][sq] + manhattenDistance[kSqOpp][sq]) / 2;
+		Assert(dist < 20);
+		score -= t(dist, dist);
 
-		// 5) Shielded by own pawn
-		bitboard_t shieldSquare = (color == WHITE) ? (1ULL << (sq+8)) : (1ULL << (sq-8));
-		if (shieldSquare & pawns) {
-			score += KNIGHT_SHIELDED_BY_PAWN;
-		}
+		// 5) Block opposite pawn
+		bitboard_t blockSquare = (color == WHITE) ? (1ULL << (sq+8)) : (1ULL << (sq-8));
+		if (blockSquare & oppositePawns)
+			score += KNIGHT_BLOCKS_PAWN;
+
+		// if (blockSquare & pawns & ~BORDER_SQUARES)
+		// 	score += KNIGHT_SHIELD_PAWN;
 	
 	}
 
 	// Scale value by remaining pawns 
-	if (popCount(b->pieces[PAWN]) < 8) {
-		score = t(t1(score) * 0.8, t2(score) * 0.8);
-	}
+	// if (popCount(b->pieces[PAWN]) < 8) {
+		// score = t(t1(score) * 0.8, t2(score) * 0.6);
+	// }
 
 	return score;
 }

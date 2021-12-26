@@ -182,6 +182,7 @@ Evaluation
     - [ ] Dedicated endgame evals (KPvK, KBNvK)
 - Project
   - [ ] Implement testEGTB file
+  - constexpr masks
 
 
 # Todo

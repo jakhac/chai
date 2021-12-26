@@ -40,12 +40,19 @@ const tuple_t pieceTupleValues[13] = {
 	0
 };
 
-const value_t CENTER_OCCUPIED = 2;
-const value_t CENTER_ATTACKED = 2;
+// const value_t CENTER_OCCUPIED = 2;
+// const value_t CENTER_ATTACKED = 2;
 
-const tuple_t BISHOP_MOBILITY = t(2, 2);
-const tuple_t KNIGHT_MOBILITY = t(2, 1);
-const tuple_t ROOK_MOBILITY   = t(1, 2);
+const tuple_t BISHOP_MOBILITY = t(2, 0);
+
+// const tuple_t KNIGHT_MOBILITY = t(1, 2);
+const tuple_t KNIGHT_MOBILITY[9] = {
+	t(-41, -51), t(-34, -37), t(-15, -28), 
+	t( -4, -15), t(  8,  12), t( 14,  16), 
+	t( 20,  24), t( 28,  24), t( 37,  20)
+};
+
+const tuple_t ROOK_MOBILITY   = t(1, 0);
 
 const tuple_t BISHOP_PAIR              = t(24, 58);
 const tuple_t BISHOP_COLOR_BLOCKED     = t(-2, -10);
@@ -54,11 +61,12 @@ const tuple_t BISHOP_STRONG_COLOR_CPLX = t(10, 28);
 const tuple_t BISHOP_OUTPOST           = t(15, -10);
 const tuple_t BISHOP_OUTPOST_DEFENDED  = t(35, 0);
 
-const tuple_t KNIGHT_OUTPOST          = t(18, -4);
-const tuple_t KNIGHT_OUTPOST_DEFENDED = t(30, 16);
-const tuple_t KNIGHT_CENTER_ATTACKS   = t(3, 1);
+const tuple_t KNIGHT_OUTPOST          = t(12, 12);
+const tuple_t KNIGHT_OUTPOST_DEFENDED = t(31, 16);
 const tuple_t KNIGHT_BORDER_SQUARE    = t(-7, -14);
-const tuple_t KNIGHT_SHIELDED_BY_PAWN = t(18, 4);
+const tuple_t KNIGHT_BLOCKS_PAWN      = t(6, 16);
+// const tuple_t KNIGHT_CENTER_ATTACKS   = t(3, 1);
+// const tuple_t KNIGHT_SHIELD_PAWN      = t(13, 0);
 
 const tuple_t ROOK_CONTROLS_PASSER   = t(5, 15);
 const tuple_t ROOK_SAME_FILE_AS_KING = t(15, 0);

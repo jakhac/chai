@@ -149,8 +149,8 @@ void initEvalMasks() {
 		dangerZone[BLACK][i] = kingAtkMask[i] | (1ULL << i) | (1ULL << (i - 16));
 	}
 
-	outpost_squares[WHITE] = (RANK_4_HEX | RANK_5_HEX | RANK_6_HEX | RANK_7_HEX) & ~BORDER_SQUARES;
-	outpost_squares[BLACK] = (RANK_5_HEX | RANK_4_HEX | RANK_3_HEX | RANK_2_HEX) & ~BORDER_SQUARES;
+	outpost_squares[WHITE] = (RANK_4_HEX | RANK_5_HEX | RANK_6_HEX); // & ~BORDER_SQUARES;
+	outpost_squares[BLACK] = (RANK_5_HEX | RANK_4_HEX | RANK_3_HEX); // & ~BORDER_SQUARES;
 
 }
 
