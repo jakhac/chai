@@ -30,6 +30,8 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 	move_t parsedMove;
 	std::string userInput;
 
+	parseNet("");
+
 	// bitboard_t t = wBackwardPawns(b);
 	// printBitBoard(&t);
 

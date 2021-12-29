@@ -8,7 +8,7 @@ EXE_RELEASE = chai_$(VERSION)_release.exe
 EXE_DEBUG = chai_$(VERSION)_debug.exe
 EXE_TEST = test.exe
 
-SRCS = main.cpp tt.cpp attacks.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
+SRCS = nnue.cpp main.cpp tt.cpp attacks.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
 	thread.cpp timeMan.cpp info.cpp
@@ -19,7 +19,7 @@ OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
 OBJ_DEBUG_DIR = ./obj_debug
 OBJS_DEBUG = $(patsubst %.cpp, $(OBJ_DEBUG_DIR)/%.o, $(notdir $(SRCS)))
 
-VPATH = egtb:
+VPATH = egtb:nnue:
 
 
 #######################################
