@@ -1,213 +1,159 @@
-#include "./nnue.h"
+#include "nnue.h"
 
-INCBIN(IncWeights, "./nnue/nn-fb50f1a2b1-20210705.nnue");
+const int NnueClippingShift = 6;
 
 // Feature transformer network
-int16_t in_weights[FT_I_SIZE * FT_O_SIZE_HALF];
-int16_t in_biases[FT_I_SIZE];
+a64 int16_t feat_weights[FEAT_INPUT_SIZE * FEAT_OUT_SIZE_HALF];
+a64 int16_t feat_biases[FEAT_OUT_SIZE_HALF];
 
-// Hidden layer 1
-weight_t hd1_weights[Hidden_1_outdims * Hidden_1_inputdims];
-int32_t hd1_biases[Hidden_1_outdims];
+// Hidden Layer 1
+a64 weight_t hd1_weights[HD1_OUT_SIZE * HD1_IN_SIZE];
+a64 int32_t  hd1_biases[HD1_OUT_SIZE];
 
-// Hidden layer 2
-weight_t hd2_weights[Hidden_2_inputdims * Hidden_2_outdims];
-int32_t hd2_biases[Hidden_2_inputdims];
+// Hidden Layer 2
+a64 weight_t hd2_weights[HD2_IN_SIZE * HD2_OUT_SIZE];
+a64 int32_t  hd2_biases[HD2_IN_SIZE];
 
-// Out layer
-weight_t out_weights[OutLayer_outdims * OutLayer_inputdims];
-int32_t out_biases[OutLayer_outdims];
-
-
-
-#define NNUEREAD(s, t, l) (memcpy(t, (*s), l), (*s) = (*s) + (l))
-
-uint32_t getFtTransformerHash() {
-    return NNUEFEATUREHASH ^ Feature_outdims;
-}
-
-uint32_t getInputSliceHash() {
-    return NNUEINPUTSLICEHASH ^ InputSlice_outputdims;
-}
-
-uint32_t getHiddenLayer_1_Hash() {
-    // return (NNUENETLAYERHASH + outputdims) ^ (previous->GetHash() >> 1) ^ (previous->GetHash() << 31);
-    uint32_t prevHash = getInputSliceHash();
-    return (NNUENETLAYERHASH + Hidden_1_outdims) ^ (prevHash >> 1) ^ (prevHash << 31);
-}
-
-uint32_t getReLu_1_Hash() {
-    // return NNUECLIPPEDRELUHASH + previous->GetHash();
-    return NNUECLIPPEDRELUHASH + getHiddenLayer_1_Hash();
-}
-
-uint32_t getHiddenLayer_2_Hash() {
-    uint32_t prevHash = getReLu_1_Hash();
-    return (NNUENETLAYERHASH + Hidden_2_outdims) ^ (prevHash >> 1) ^ (prevHash << 31);
-}
-
-uint32_t getReLu_2_Hash() {
-    return NNUECLIPPEDRELUHASH + getHiddenLayer_2_Hash();
-}
-
-uint32_t getOutLayerHash() {
-    uint32_t prevHash = getReLu_2_Hash();
-    return (NNUENETLAYERHASH + OutLayer_outdims) ^ (prevHash >> 1) ^ (prevHash << 31);
-}
+// Hidden Layer 3 (out layer)
+a64 weight_t out_weights[HD3_OUT_SIZE * HD3_INPUT_SIZE];
+a64 int32_t  out_biases[HD3_OUT_SIZE];
 
 
-void readFeatureTransformer() {
-
-    char* data = (char*)gIncWeightsData;
-    char* end = data + gIncWeightsSize;
-
-    uint32_t fthash = getFtTransformerHash();
-    uint32_t nethash = getOutLayerHash();
-    uint32_t filehash = (fthash ^ nethash);
-
-    uint32_t version, hash, size;
-
-    memcpy(&version, data, sizeof(uint32_t));
-    data += sizeof(uint32_t);
-
-    memcpy(&hash, data, sizeof(uint32_t));
-    data += sizeof(uint32_t);
-
-    memcpy(&size, data, sizeof(uint32_t));
-    data += sizeof(uint32_t);
-
-    std::string sarchitecture((char*)data, (char*)data + size);
-    data += size;
-    cout << "arc " << sarchitecture << endl;
-
-    int nt;
-    if (version == NNUEFILEVERSIONROTATE)
-        nt = NNUE_ROTATE;
-    else if (version == NNUEFILEVERSIONFLIP)
-        nt = NNUE_FLIP;
-    else {
-        cout << "wrong version" << endl;
-        return;
-    }
+void hiddenLayer(clipped_t* in, int32_t* out, layerData_t* layer) {
 
 
-    if (hash != filehash) {
-        cout << "wrong hash " << endl;        
-        return;
-    }
+#ifdef USE_AVX2
 
-    // Start reading the NN now
+    // TODO
 
-    memcpy(&hash, data, sizeof(uint32_t));
-    data += sizeof(uint32_t);
-    if (hash != fthash) {
-        cout << "wrong ft hash" << endl;
-        exit(EXIT_FAILURE);
-    }
+#elif defined(USE_SSSE3)
 
+    auto vOnes = _mm_set1_epi16(1);
+    auto vIn   = reinterpret_cast<__m128i*>(in);
+    auto vOut  = reinterpret_cast<__m128i*>(out);
+    auto vBias = reinterpret_cast<__m128i*>(layer->bias);
 
-    uint16_t* data16 = (uint16_t*)data;
-    std::copy(data16, data16 + FT_O_SIZE_HALF, in_biases);
-    data16 += FT_O_SIZE_HALF;
+    __m128i s0, s1, s2, s3;
+    __m128i p1, p2;
 
-    std::copy(data16, data16 + FT_NUM_WEIGHTS, in_weights);
-    data16 += FT_NUM_WEIGHTS;
-
-
-    data = (char*)data16;
-    memcpy(&hash, data, sizeof(uint32_t));
-    data += sizeof(uint32_t);
-
-
-    if (hash != nethash) {
-        cout << "wrong net hash" << endl;
-        exit(EXIT_FAILURE);
-    }
-
-
-
-
-    // HD1 BIAS //
-    uint32_t* data32 = (uint32_t*)data;
-    std::copy(data32, data32 + Hidden_1_outdims, hd1_biases);
-    data32 += Hidden_1_outdims;
-
-    // HD1 WEIGHT //
-    size_t hd1_weight_size = Hidden_1_outdims * Hidden_1_inputdims;
-
-    char* buffer1 = (char*)calloc(hd1_weight_size, sizeof(char));
-    char* w = buffer1;
+    Assert(layer->outDims % 8 == 0);
+    Assert(layer->inDims == 32 || layer->inDims % 128 == 0);
     
-    data = (char*)data32;
-    std::copy(data, data + hd1_weight_size, buffer1);
-    data += hd1_weight_size;
+    for (size_t i = 0; i < layer->outDims / 4; i++) {
 
-    for (unsigned int r = 0; r < Hidden_1_outdims; r++) {
-        for (unsigned int c = 0; c < Hidden_1_inputdims; c++) {
-            unsigned int idx = r * Hidden_1_inputdims + c;
-            hd1_weights[idx] = *w++;
+        auto vWeights = reinterpret_cast<__m128i*>(&layer->weight[4 * i * layer->inDims]);
+        s0 = s1 = s2 = s3 = _mm_setzero_si128();
+
+        for (size_t j = 0; j < layer->inDims / 32; j++) {
+            
+            p1 = _mm_maddubs_epi16(vIn[2 * j    ], vWeights[0 * layer->inDims / 16 + 2 * j    ]);
+            p2 = _mm_maddubs_epi16(vIn[2 * j + 1], vWeights[0 * layer->inDims / 16 + 2 * j + 1]);
+            s0 = _mm_add_epi32(s0, _mm_madd_epi16(_mm_add_epi16(p1, p2), vOnes));
+
+            p1 = _mm_maddubs_epi16(vIn[2 * j    ], vWeights[1 * layer->inDims / 16 + 2 * j    ]);
+            p2 = _mm_maddubs_epi16(vIn[2 * j + 1], vWeights[1 * layer->inDims / 16 + 2 * j + 1]);
+            s1 = _mm_add_epi32(s1, _mm_madd_epi16(_mm_add_epi16(p1, p2), vOnes));
+
+            p1 = _mm_maddubs_epi16(vIn[2 * j    ], vWeights[2 * layer->inDims / 16 + 2 * j    ]);
+            p2 = _mm_maddubs_epi16(vIn[2 * j + 1], vWeights[2 * layer->inDims / 16 + 2 * j + 1]);
+            s2 = _mm_add_epi32(s2, _mm_madd_epi16(_mm_add_epi16(p1, p2), vOnes));
+
+            p1 = _mm_maddubs_epi16(vIn[2 * j    ], vWeights[3 * layer->inDims / 16 + 2 * j    ]);
+            p2 = _mm_maddubs_epi16(vIn[2 * j + 1], vWeights[3 * layer->inDims / 16 + 2 * j + 1]);
+            s3 = _mm_add_epi32(s3, _mm_madd_epi16(_mm_add_epi16(p1, p2), vOnes));
         }
+
+        s0 = _mm_hadd_epi32(s0, s1);
+        s2 = _mm_hadd_epi32(s2, s3);
+        s0 = _mm_hadd_epi32(s0, s2);
+
+        vOut[i] = _mm_add_epi32(s0, vBias[i]); 
+
     }
 
-    // HD2 BIAS //
-    data32 = (uint32_t*)data;
-    std::copy(data32, data32 + Hidden_2_outdims, hd2_biases);
-    data32 += Hidden_2_outdims;
+#else
 
-    // HD2 WEIGHT //
-    size_t hd2_weight_size = Hidden_2_outdims * Hidden_2_inputdims;
-    char* buffer2 = (char*)calloc(hd2_weight_size, sizeof(char));
-    w = buffer2;
-    
-    data = (char*)data32;
-    std::copy(data, data + hd2_weight_size, buffer2);
-    data += hd2_weight_size;
+    for (size_t i = 0; i < layer->outDims; i++) {
+        int offset = i * layer->inDims;
+        int32_t sum = layer->bias[i];
+        
+        for (size_t j = 0; j < layer->inDims; j++)
+            sum += layer->weight[offset + j] * in[j];
 
-    for (unsigned int r = 0; r < Hidden_1_outdims; r++) {
-        for (unsigned int c = 0; c < Hidden_2_inputdims; c++) {
-            unsigned int idx = r * Hidden_2_inputdims + c;
-            hd2_weights[idx] = *w++;
-        }
+        out[i] = sum;
     }
 
+#endif
 
-    // OUT BIAS //
-    data32 = (uint32_t*)data;
-    std::copy(data32, data32 + OutLayer_outdims, out_biases);
-    data32 += OutLayer_outdims;
-
-    // OUT WEIGHT //
-    size_t out_weight_size = OutLayer_outdims * OutLayer_inputdims;
-    char* outbuffer = (char*)calloc(out_weight_size, sizeof(char));
-    w = outbuffer;
-    
-    data = (char*)data32;
-    std::copy(data, data + out_weight_size, outbuffer);
-    data += out_weight_size;
-
-    for (unsigned int r = 0; r < OutLayer_outdims; r++) {
-        for (unsigned int c = 0; c < OutLayer_inputdims; c++) {
-            unsigned int idx = r * OutLayer_inputdims + c;
-            out_weights[idx] = *w++;
-        }
-    }
-
-    if (data == end) {
-        cout << "hit EOF" << endl;
-    } else {
-        cout << "error eof "<< endl;
-    }
-
-    cout << "Parsing successful" << endl;
 }
 
+void clReluLayer(int32_t* in, clipped_t* out, size_t dim) {
+    Assert(RELU1_SIZE == RELU2_SIZE);
 
-void parseNet(std::string file) {
+#ifdef USE_AVX2
 
-    readFeatureTransformer();
+    // TODO
 
-    // if (   fread(in_biases, sizeof(int16_t), KPSIZE, sin) != (size_t) KPSIZE)
-        // || fread(in_weights, sizeof(int16_t), INSIZE * KPSIZE, fin) != (size_t) INSIZE * KPSIZE)
-        // printf("info string Unable to read NNUE file\n"), exit(EXIT_FAILURE);
+#elif defined(USE_SSSE3)
 
+    const int numChunks = dim / 16;
+
+    __m128i temp, words0, words1;
+    __m128i k0x80s = _mm_set1_epi8(-128);
+
+    auto vIn  = reinterpret_cast<__m128i*>(in);
+    auto vOut = reinterpret_cast<__m128i*>(out);
+
+    for (int i = 0; i < numChunks; i++) {
+
+        temp   = _mm_packs_epi32(vIn[i * 4 + 0], vIn[i * 4 + 1]);
+        words0 = _mm_srai_epi16(temp, NnueClippingShift);
+
+        temp   = _mm_packs_epi32(vIn[i * 4 + 2], vIn[i * 4 + 3]);
+        words1 = _mm_srai_epi16(temp, NnueClippingShift);
+
+        temp    = _mm_packs_epi16(words0, words1);
+        vOut[i] = _mm_subs_epi8(_mm_adds_epi8(temp, k0x80s), k0x80s);
+
+    }    
+
+#else
+
+    for (size_t i = 0; i < dim; i++)
+        out[i] = std::max(0, std::min(127, in[i] >> NnueClippingShift));
+
+#endif
+}
+
+void outLayer(clipped_t* in, int32_t* out, size_t inDim) {
+
+#ifdef USE_AVX2
+
+    // TODO
+
+#elif defined(USE_SSSE3)
+
+    Assert(inDim == 32);
+
+    __m128i* vIn     = reinterpret_cast<__m128i*>(in);
+    __m128i* vWeight = reinterpret_cast<__m128i*>(out_weights);
+    __m128i  vOnes   = _mm_set1_epi16(1);
+
+    __m128i p0  = _mm_madd_epi16(_mm_maddubs_epi16(vIn[0], vWeight[0]), vOnes);
+    __m128i p1  = _mm_madd_epi16(_mm_maddubs_epi16(vIn[1], vWeight[1]), vOnes);
+    __m128i sum = _mm_add_epi32(p0, p1);
+
+    sum = _mm_add_epi32(sum, _mm_shuffle_epi32(sum, 0xb));
+    sum = _mm_add_epi32(sum, _mm_shuffle_epi32(sum, 0x1));
+
+    *out = _mm_cvtsi128_si32(sum) + out_biases[0];
+
+#else
+
+    *out = out_biases[0];
+    for (size_t j = 0; j < inDim; j++) {
+        *out += out_weights[j] * in[j];
+    }
+
+#endif
 }

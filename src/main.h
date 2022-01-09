@@ -11,10 +11,19 @@ static std::string info_ASSERT = "1";
 static std::string info_ASSERT = "0";
 #endif // ASSERT
 
+// TODO better way to obain info and distribute to main
 #if defined(_MSC_VER)
 static std::string info_COMPILER = "MSVC";
 #elif defined(__GNUC__)
 static std::string info_COMPILER = "GNU";
+#endif
+
+#if defined(USE_AVX2)
+static std::string info_SIMD = "AVX2";
+#elif defined(USE_SSSE3)
+static std::string info_SIMD = "SSSE3";
+#else
+static std::string info_SIMD = "NATIVE";
 #endif
 
 

@@ -1,12 +1,12 @@
 #include "thread.h"
 
-// Makefile might set number of threads. If not, set to maximum.
-#ifdef CUSTOM_THREADS
-int NUM_THREADS = std::min(CUSTOM_THREADS, (int)std::thread::hardware_concurrency());
-#else
-int NUM_THREADS = MAX_THREADS; 
-#endif // CUSTOM_THREADS
-
+// // Makefile might set number of threads. If not, set to maximum.
+// #ifdef CUSTOM_THREADS
+// int NUM_THREADS = std::min(CUSTOM_THREADS, (int)std::thread::hardware_concurrency());
+// #else
+// int NUM_THREADS = MAX_THREADS; 
+// #endif // CUSTOM_THREADS
+int NUM_THREADS = 1;
 
 bool TERMINATE_THREADS = false;
 bool ABORT_SEARCH = false;

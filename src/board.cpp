@@ -467,7 +467,7 @@ static void addMaterial(board_t* b, int piece, color_t color) {
 	b->material += sign * pieceValues[piece];
 }
 
-void pushEnPas(board_t* b, move_t move) {
+void pushEnPas(board_t* b, move_t move, dirty_t* dp) {
 	Assert(b->enPas == toSq(move));
 	int fromSquare = fromSq(move);
 	int toSquare = b->enPas;
@@ -475,6 +475,22 @@ void pushEnPas(board_t* b, move_t move) {
 
 	int fromPiece = stmPiece[chai::PAWN][b->stm];
 	int enPasPiece = stmPiece[chai::PAWN][b->stm ^ 1];
+
+
+	// NNUE
+	// Moving pawn
+	dp->from[0] = fromSquare;
+	dp->to[0] = toSquare;
+	dp->piece[0] = fromPiece;
+	dp->changedPieces++;
+
+	// Moving captured pawn to NO_SQ
+	dp->from[1] = clearSquare;
+	dp->to[1] = NO_SQ;
+	dp->piece[1] = enPasPiece;
+	dp->changedPieces++;
+
+
 
 	// Update pawn key
 	b->zobristPawnKey ^= 
@@ -501,7 +517,7 @@ void pushEnPas(board_t* b, move_t move) {
 	b->enPas = DEFAULT_EP_SQ;
 }
 
-void pushPromotion(board_t* b, move_t move) {
+void pushPromotion(board_t* b, move_t move, dirty_t* dp) {
 	int fromSquare = fromSq(move);
 	int toSquare = toSq(move);
 
@@ -509,6 +525,21 @@ void pushPromotion(board_t* b, move_t move) {
 	int toPiece = pieceAt(b, toSquare);
 	int promotedPiece = promPiece(b, move);
 	Assert(pieceValidPromotion(promotedPiece));
+
+
+	// NNUE
+	// Moving the pawn to NO_SQ
+	dp->from[0] = fromSquare;
+	dp->to[0] = NO_SQ;
+	dp->piece[0] = fromPiece;
+	dp->changedPieces++;
+
+	// Place promoted piece on toSquare
+	dp->from[1] = NO_SQ;
+	dp->to[1] = toSquare;
+	dp->piece[1] = promotedPiece;
+	dp->changedPieces++;
+
 
 	b->zobristPawnKey ^= pieceKeys[fromPiece][fromSquare];
 	b->zobristKey ^= pieceKeys[fromPiece][fromSquare]
@@ -523,6 +554,13 @@ void pushPromotion(board_t* b, move_t move) {
 		// Clear from PSQT values
 		clearPSQTValue(b, toSquare, toPiece, b->stm ^ 1);
 		clearMaterial(b, toPiece, b->stm ^ 1);
+
+
+		// Remove captured piece to NO_SQ
+		dp->from[2] = toSquare;
+		dp->to[2] = NO_SQ;
+		dp->piece[2] = toPiece;
+		dp->changedPieces++;
 	}
 
 	clearPiece(b, fromPiece, fromSquare, b->stm);
@@ -538,7 +576,7 @@ void pushPromotion(board_t* b, move_t move) {
 	b->enPas = DEFAULT_EP_SQ;
 }
 
-void pushCastle(board_t* b, move_t move) {
+void pushCastle(board_t* b, move_t move, dirty_t* dp) {
 	int fromSquare = fromSq(move);
 	int toSquare = toSq(move);
 	int rClearSq = NO_SQ, rSetSq = NO_SQ;
@@ -568,6 +606,24 @@ void pushCastle(board_t* b, move_t move) {
 			break;
 	}
 
+
+	// NNUE
+	// Moving the rook
+	dp->from[0] = rClearSq;
+	dp->to[0] = rSetSq;
+	dp->piece[0] = movingRook;
+	dp->changedPieces++;
+
+	// Moving the king
+	dp->from[1] = fromSquare;
+	dp->to[1] = toSquare;
+	dp->piece[1] = movingKing;
+	dp->changedPieces++;
+
+	dp->isKingMove = true;
+
+
+
 	b->zobristKey ^= pieceKeys[movingRook][rClearSq]
 				  ^  pieceKeys[movingRook][rSetSq]
 				  ^  pieceKeys[movingKing][fromSquare]
@@ -594,12 +650,20 @@ void pushCastle(board_t* b, move_t move) {
 	b->enPas = DEFAULT_EP_SQ;
 }
 
-void pushNormal(board_t* b, move_t move) {
+void pushNormal(board_t* b, move_t move, dirty_t* dp) {
 	int fromSquare = fromSq(move);
 	int toSquare = toSq(move);
 
 	int fromPiece = pieceAt(b, fromSquare);
 	int capturedPiece = capPiece(b, move);
+
+
+	// NNUE
+	dp->from[0] = fromSquare;
+	dp->to[0] = toSquare;
+	dp->piece[0] = fromPiece;
+	dp->changedPieces++;
+
 
 	// Update captured piece
 	if (capturedPiece) {
@@ -616,6 +680,14 @@ void pushNormal(board_t* b, move_t move) {
 		// Remove captured piece from PSQT values and update material
 		clearPSQTValue(b, toSquare, capturedPiece, b->stm ^ 1);
 		clearMaterial(b, capturedPiece, b->stm ^ 1);
+
+
+		// NNUE: capture removes piece from toSq to NO_SQ
+		dp->from[1] = toSquare;
+		dp->to[1] = NO_SQ;
+		dp->piece[1] = capturedPiece;
+		dp->changedPieces++;
+
 	}
 
 	// Update normal move
@@ -628,8 +700,8 @@ void pushNormal(board_t* b, move_t move) {
 	// Pawn start changes enPas square
 	b->enPas = DEFAULT_EP_SQ;
 	if (piecePawn[fromPiece] && (toSquare ^ fromSquare) == 16) {
-		b->enPas = b->stm == WHITE ? toSquare - 8 
-										 : toSquare + 8;
+		b->enPas = (b->stm == WHITE) ? toSquare - 8 
+								     : toSquare + 8;
 	}
 
 	// Pawn moves reset 50-Move-Rule and change pawnKey
@@ -660,15 +732,31 @@ void pushNormal(board_t* b, move_t move) {
 
 		b->zobristPawnKey ^= pieceKeys[fromPiece][fromSquare]
 						  ^  pieceKeys[fromPiece][toSquare];
+
+
+		// NNUE
+		dp->isKingMove = true;
+
 	}
 
 	// Update PSQT on-the-fly
 	updatePSQTValue(b, fromSquare, toSquare, fromPiece, b->stm);
+
+
 }
 
 bool push(board_t* b, move_t move) {
 	Assert(b->enPas == DEFAULT_EP_SQ || validEnPasSq(b->enPas));
 	Assert(b->undoPly >= 0 && b->undoPly <= MAX_GAME_MOVES);
+
+	dirty_t* dp = &b->dp[b->ply + 1];
+#ifdef USE_NNUE
+	dp->changedPieces = 0;
+	dp->isKingMove    = false;
+	b->accum[b->ply + 1].compState[chai::WHITE] = EMPTY;
+	b->accum[b->ply + 1].compState[chai::BLACK] = EMPTY;
+#endif // USE_NNUE
+
 
 	// Store data that is not worth recomputing
 	undo_t* undo    = &b->undoHistory[b->undoPly];
@@ -694,16 +782,16 @@ bool push(board_t* b, move_t move) {
 
 	// Execute helper function depending on move types
 	if (moveType == NORMAL_MOVE)
-		pushNormal(b, move);
+		pushNormal(b, move, dp);
 
 	if (moveType == EP_MOVE)
-		pushEnPas(b, move);
+		pushEnPas(b, move, dp);
 
 	if (moveType == CASTLE_MOVE)
-		pushCastle(b, move);
+		pushCastle(b, move, dp);
 
 	if (moveType == PROM_MOVE)
-		pushPromotion(b, move);
+		pushPromotion(b, move, dp);
 
 	// Hash in new EP square
 	b->zobristKey ^= pieceKeys[Pieces::NO_PIECE][b->enPas];
@@ -763,6 +851,14 @@ void pushNull(board_t* b) {
 	b->halfMoves++;
 	b->undoPly++;
 	b->ply++;
+	
+	
+	dirty_t* dp = &b->dp[b->ply]; // ply already incremented
+	dp->changedPieces = 0;
+	dp->piece[0] = Pieces::NO_PIECE;
+	b->accum[b->ply].compState[chai::WHITE] = EMPTY;
+	b->accum[b->ply].compState[chai::BLACK] = EMPTY;
+
 }
 
 void clearCastlePermission(board_t* b, int side) {

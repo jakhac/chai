@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+// #include "./nnue/types.h"
+
 #define MAX_DEPTH 64
 #define MAX_GAME_MOVES 512
 #define BUCKETS 3
@@ -7,6 +10,9 @@
 #define NUM_SQUARES 64
 #define MAX_POSITION_MOVES 256
 #define DEFAULT_EP_SQ 0
+
+#define a64 alignas(64)
+
 
 /**
  * Unsigned 64-Bit integer represents bitboard isntance.
@@ -152,6 +158,54 @@ struct pawntable_t {
 	int hit;
 };
 
+
+#include <vector>
+
+typedef int8_t weight_t;
+typedef int8_t clipped_t;
+
+enum {
+    NNUE_ROTATE = 1,
+    NNUE_FLIP   = 2
+};
+
+enum {
+	EMPTY = 0,
+	COMPUTED = 1
+};
+
+struct accum_t {
+    a64 int16_t accumulation[2][256];
+    bool compState[2] = { EMPTY, EMPTY }; 
+};
+
+
+struct dirty_t {
+
+	bool isKingMove;
+
+	int changedPieces;
+
+    int piece[3];
+
+    int from[3];
+
+    int to[3];
+};
+
+struct features_t {
+    // Keep track of all feature-indices to add and to indices to delete
+    std::vector<size_t> addIndex;
+    std::vector<size_t> delIndex;
+};
+
+struct layerData_t {
+	a64 weight_t* weight;
+	a64 int32_t* bias;
+	size_t inDims;
+	size_t outDims;
+};
+
 struct board_t {
 	// Current side, 0 for black and 1 for white. Use enums for debug purpose.
 	color_t stm;
@@ -199,6 +253,10 @@ struct board_t {
 	value_t psqtOpening = 0;
 	value_t psqtEndgame = 0;
 	value_t material    = 0;
+
+
+	accum_t accum[MAX_DEPTH];
+	dirty_t dp[MAX_DEPTH];
 };
 
 /// Holds various pruning and counting statistics.
@@ -246,6 +304,7 @@ namespace chai {
 
 const color_t BLACK = 0;
 const color_t WHITE = 1;
+
 
 	typedef enum nodeType_t {
 		PV, NoPV

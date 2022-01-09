@@ -101,11 +101,26 @@ static value_t scaleGamePhase(tuple_t tuple, float phase) {
 
 value_t mixedEvaluation(board_t* b) {
 
+#ifdef USE_NNUE
+	// Use NNUE on balanced positions
+	if (abs(b->psqtEndgame) < 520) {
+		return evaluateNNUE(b);
+	}
+#endif // USE_NNUE
+
 	prefetchPT(b);
+
+	// // NNUE
+	// accumulateFeatures(b, chai::WHITE);
+	// accumulateFeatures(b, chai::BLACK);
+
+	// accum_t* accDstTest = &b->accum[b->ply];
+	// assertActiveFeatures(b, chai::WHITE, accDstTest);
+	// assertActiveFeatures(b, chai::BLACK, accDstTest);
 
 	value_t eval = 0;
 	float phase = gamePhase(b);
-	float interpolFactor = std::min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
+	// float interpolFactor = std::min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
 
 	// Check insufficient material to detect drawn positions
 	if (popCount(b->occupied) <= 5 && insufficientMaterial(b)) {

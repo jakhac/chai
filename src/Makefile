@@ -11,7 +11,7 @@ EXE_TEST = test.exe
 SRCS = nnue.cpp main.cpp tt.cpp attacks.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp timeMan.cpp info.cpp
+	thread.cpp timeMan.cpp info.cpp transformer.cpp
 
 OBJ_RELEASE_DIR = ./obj_release
 OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
@@ -34,16 +34,12 @@ test=no
 
 # architecture
 optimize=yes
-bits=64
 prefetch=yes
 popcnt=yes
-sse=yes
-sse2=yes
 ssse3=yes
-sse41=yes
 avx2=yes
 pext=yes
-bits=64
+nnue=yes
 
 # custom build configs
 threads=0
@@ -75,59 +71,56 @@ endif
 
 
 ifeq ($(info),yes)
-	CXXFLAGS += -DINFO=
+	CXXFLAGS += -DINFO
 endif
 
 ifeq ($(assert),yes)
-	CXXFLAGS += -DASSERT=
+	CXXFLAGS += -DASSERT
 endif
 
 ifeq ($(test),yes)
-	CXXFLAGS += -DTESTING=
+	CXXFLAGS += -DTESTING
 endif
 
 ifeq ($(DEBUG),yes)
-	CXXFLAGS+= -DINFO=
+	CXXFLAGS+= -DINFO
 endif
 
 ifeq ($(optimize),yes)
 	CXXFLAGS += -O3
 endif
 
-ifeq ($(bits),64)
-	CXXFLAGS += -DIS_64_BIT
-endif
-
 ifeq ($(prefetch),yes)
-	ifeq ($(sse),yes)
-		CXXFLAGS += -msse
-		DEPENDFLAGS += -msse
-	endif
+	CXXFLAGS += -msse
+	DEPENDFLAGS += -msse
 else
 	CXXFLAGS += -DNO_PREFETCH
 endif
 
 ifeq ($(popcnt),yes)
-	ifeq ($(bits),64)
-		CXXFLAGS += -msse3 -mpopcnt -DUSE_POPCNT
-	else
-		CXXFLAGS += -mpopcnt -DUSE_POPCNT
-	endif
+	CXXFLAGS += -msse3 -mpopcnt
 endif
 
 ifeq ($(avx2),yes)
-	CXXFLAGS += -DUSE_AVX2
 	CXXFLAGS += -mavx2
 endif
 
 ifeq ($(pext),yes)
-	CXXFLAGS += -DUSE_PEXT
 	CXXFLAGS += -mbmi -mbmi2
 endif
 
+ifeq ($(ssse3),yes)
+	CXXFLAGS += -msse3 -DUSE_SSSE3
+endif
+
+ifeq ($(nnue),yes)
+	CXXFLAGS += -DUSE_NNUE
+endif
+
+
 
 # Always add standard flags
-CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m$(bits)
+CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m64
 
 # Warning flags for cleaner code
 CXXFLAGS += -pedantic -Wextra -Wshadow
@@ -139,7 +132,7 @@ CXXFLAGS += -DVERSION=$(VERSION)
 CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 
 DEPENDFLAGS += -std=c++17 -fexceptions
-LDFLAGS += -m$(bits) -Wl,--stack,4194304
+LDFLAGS += -m64 -Wl,--stack,4194304
 
 
 #######################################

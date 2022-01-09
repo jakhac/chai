@@ -3,7 +3,7 @@
 #include "pawn.h"
 #include "psqt.h"
 #include "timeMan.h"
-#include "./nnue/nnue.h"
+#include "./nnue/transformer.h"
 
 
 const int pPhase   = 0;

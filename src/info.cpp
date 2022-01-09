@@ -21,12 +21,13 @@ void printCliHelp() {
     << endl;
 }
 
-void printEngineMeta(std::string assert, std::string compiler) {
+void printEngineMeta(std::string assert, std::string compiler, std::string simd) {
     	cout << "chai " << TOSTRING(VERSION) << endl
 		<< "assert=" << assert
 		<< " buckets=" << BUCKETS
-		<< " threads=" << NUM_THREADS 
-		<< " hashMb=" << DEFAULT_TT_SIZE << endl
+		<< " threads=" << NUM_THREADS
+		<< " hashMb=" << DEFAULT_TT_SIZE
+        << " simd=" << simd << endl
 		<< "compiler=" << compiler
 		<< " date=" << __DATE__ << endl << endl;
 }

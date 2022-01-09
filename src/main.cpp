@@ -2,7 +2,7 @@
 
 int main() {
 	// Print meta information at every startup
-	printEngineMeta(info_ASSERT, info_COMPILER);
+	printEngineMeta(info_ASSERT, info_COMPILER, info_SIMD);
 
 	// Init all tables and parameters
 	init();
@@ -12,7 +12,7 @@ int main() {
 
 	// Print status and drop into cli protocol
 	parseFen(&_board, STARTING_FEN);
-	// parseFen(&_board, "8/1pR5/p3N1kp/Pb4p1/1P6/6KP/2p5/2r5 b - - 3 53 ");
+	// parseFen(&_board, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
 
 	printBoard(&_board);
 	cli(&_board, &_instr, &_stats, &_perft);
@@ -30,7 +30,7 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 	move_t parsedMove;
 	std::string userInput;
 
-	parseNet("");
+	parseNet(b);
 
 	// bitboard_t t = wBackwardPawns(b);
 	// printBitBoard(&t);
@@ -131,6 +131,18 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 			cout << endl;
 			push(b, parsedMove);
 			printBoard(b);
+
+			// NNUE debug
+			propagate(b);
+
+			// accumulateFeatures(b, chai::WHITE);
+			// accumulateFeatures(b, chai::BLACK);
+
+			// accum_t* accDstTest = &b->accum[b->ply];
+			// assertActiveFeatures(b, chai::WHITE, accDstTest);
+			// assertActiveFeatures(b, chai::BLACK, accDstTest);
+			// cout << "Passed asserts" << endl;
+
 			continue;
 		}
 
