@@ -2,7 +2,7 @@
 # 1. META DATA
 #######################################
 
-VERSION = v3.0.4
+VERSION = v3.0.5
 
 EXE_RELEASE = chai_$(VERSION)_release.exe
 EXE_DEBUG = chai_$(VERSION)_debug.exe

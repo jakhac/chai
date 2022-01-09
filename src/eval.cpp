@@ -261,7 +261,8 @@ tuple_t mobility(board_t* b, color_t color) {
 	moveList->cnt = 0;
 	addBishopCaptures(b, moveList);
 	addBishopMoves(b, moveList);
-	score += BISHOP_MOBILITY * moveList->cnt;
+	// score += BISHOP_MOBILITY * moveList->cnt;
+	score += BISHOP_MOBILITY[moveList->cnt];
 
 	// Favor knight moves in opening and midgame
 	// moveList->cnt = 0;
@@ -273,7 +274,8 @@ tuple_t mobility(board_t* b, color_t color) {
 	moveList->cnt = 0;
 	addRookMoves(b, moveList);
 	addRookCaptures(b, moveList);
-	score += ROOK_MOBILITY * moveList->cnt;
+	// score += ROOK_MOBILITY * moveList->cnt;
+	score += ROOK_MOBILITY[moveList->cnt];
 	
 	b->stm = tempColor;
 	return score;
@@ -283,7 +285,7 @@ tuple_t squareControl(board_t* b, color_t color) {
 	tuple_t tuple = 0;
 	int centerExtAttacked   = popCount(b->attackedSquares[color] &  CENTER_SQUARES_EXT);
 	int surroundingAttacked = popCount(b->attackedSquares[color] & ~CENTER_SQUARES_EXT);
-	int centerOccupied      = popCount(b->color[color] & CENTER_SQUARES);
+	int centerOccupied      = popCount(b->color[color] 		     &  CENTER_SQUARES);
 	// int kingSquaresDefended = popCount(kingAtkMask[getKingSquare(b, color)] & b->attackedSquares[color]);
 
 	tuple += t(3 * centerExtAttacked, centerExtAttacked);
@@ -386,15 +388,12 @@ tuple_t evaluateKnights(board_t* b, color_t color) {
 	bitboard_t oppositePawns = getPieces(b, PAWN, color ^ 1);
 	bitboard_t currentFile;
 
-	// 1) Knights on border of board
-	// score += popCount(knights & BORDER_SQUARES) * KNIGHT_BORDER_SQUARE;
-
 	int sq;
 	bool isOutpostArea;
 	while (knights) {
 		sq = popLSB(&knights);
 
-		// 2) Outposts
+		// 1) Outposts
 		currentFile = FILE_LIST[squareToFile[sq]];
 		isOutpostArea = (1ULL << sq) & outpost_squares[color];
 		if (   !((pawnPassedMask[color][sq] & ~currentFile) & oppositePawns)
@@ -407,31 +406,21 @@ tuple_t evaluateKnights(board_t* b, color_t color) {
 			}
 		}
 
-		// 3) Mobility and Center squares attacked
+		// 2) Mobility and Center squares attacked
 		int atks = popCount(knightAtkMask[sq]);
-		Assert(atks <= 8);
-		// score += atks (& CENTER_SQUARES?) * KNIGHT_CENTER_ATTACKS;
 		score += KNIGHT_MOBILITY[atks];
 
-		// 4) Distance to kings
+		// 3) Distance to kings
 		int dist = (manhattenDistance[kSq][sq] + manhattenDistance[kSqOpp][sq]) / 2;
 		Assert(dist < 20);
 		score -= t(dist, dist);
 
-		// 5) Block opposite pawn
+		// 4) Block opposite pawn
 		bitboard_t blockSquare = (color == WHITE) ? (1ULL << (sq+8)) : (1ULL << (sq-8));
 		if (blockSquare & oppositePawns)
 			score += KNIGHT_BLOCKS_PAWN;
 
-		// if (blockSquare & pawns & ~BORDER_SQUARES)
-		// 	score += KNIGHT_SHIELD_PAWN;
-	
 	}
-
-	// Scale value by remaining pawns 
-	// if (popCount(b->pieces[PAWN]) < 8) {
-		// score = t(t1(score) * 0.8, t2(score) * 0.6);
-	// }
 
 	return score;
 }
