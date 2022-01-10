@@ -1,8 +1,10 @@
 #pragma once
 
+#include <algorithm>
+
 #include "incbin.h"
 #include "../board.h"
-#include "common.h"
+#include "simd.h"
 #include "nnue.h"
 
 #include <immintrin.h>

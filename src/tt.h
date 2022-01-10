@@ -5,10 +5,17 @@
 
 #include "moveGenerator.h"
 
+#if defined(USE_PREFETCH)
 #ifdef __GNUC__
 #define prefetch(x) __builtin_prefetch(x);
 #else
 #define prefetch(x) _m_prefetch(x);
+#endif
+
+#else
+
+#define prefetch(x)
+
 #endif
 
 // Bound sizes for Hashable.

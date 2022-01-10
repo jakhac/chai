@@ -2,7 +2,6 @@
 
 INCBIN(IncWeights, "../nets/nn-fb50f1a2b1-20210705.nnue");
 
-// Define externs
 int netType = 0x0;
 int orientOperator;
 
@@ -104,14 +103,10 @@ void gatherDirtyFeatures(board_t* b, dirty_t* dp, features_t* features, color_t 
 
 void refreshAccumulator(board_t* b, color_t color) {
 
-#ifdef AVX2
+#if defined(USE_AVX2) || defined(USE_SSSE3)
 
-    // TODO
-
-#elif USE_SSSE3
-
-    __m128i registers[NUM_REGS];
-    auto tempBias = reinterpret_cast<__m128i*>(&feat_biases);
+    vec_t registers[NUM_REGS];
+    auto tempBias = reinterpret_cast<vec_t*>(&feat_biases);
 
     accum_t* acc = &b->accum[b->ply];
     features_t features;
@@ -132,14 +127,14 @@ void refreshAccumulator(board_t* b, color_t color) {
         for (auto feature : features.addIndex) {
             int offset = FEAT_OUT_SIZE_HALF * feature + i * TILE_HEIGHT;
 
-            auto col = reinterpret_cast<const __m128i*>(&feat_weights[offset]);
+            auto col = reinterpret_cast<const vec_t*>(&feat_weights[offset]);
             for (int j = 0; j < NUM_REGS; j++)
                 registers[j] = vadd_16(registers[j], col[j]);
 
         }
 
         // Finally, we can write the accumulated weights to the accumulator
-        auto accTile = reinterpret_cast<__m128i*>(&acc->accumulation[color][i * TILE_HEIGHT]);
+        auto accTile = reinterpret_cast<vec_t*>(&acc->accumulation[color][i * TILE_HEIGHT]);
         for (unsigned int j = 0; j < NUM_REGS; j++)
             accTile[j] = registers[j];
 
@@ -209,18 +204,14 @@ void accumulateFeatures(board_t* b, color_t color) {
 
 void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features, color_t c) {
 
-#ifdef USE_AVX2
+#if defined(USE_AVX2) || defined(USE_SSSE3)
 
-    // TODO
-
-#elif USE_SSSE3
-
-    __m128i registers[NUM_REGS];
+    vec_t registers[NUM_REGS];
 
     for (size_t i = 0; i < FEAT_OUT_SIZE_HALF / TILE_HEIGHT; i++) {
 
-        auto to   = (__m128i*)&accDst->accumulation[c][i * TILE_HEIGHT];
-        auto from = (__m128i*)&accSrc->accumulation[c][i * TILE_HEIGHT];
+        auto to   = (vec_t*)&accDst->accumulation[c][i * TILE_HEIGHT];
+        auto from = (vec_t*)&accSrc->accumulation[c][i * TILE_HEIGHT];
 
         // Copy current src-accumulator values in 128-bit chunks into our registers
         for (int j = 0; j < NUM_REGS; j++)
@@ -231,7 +222,7 @@ void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features, color
         for (auto feature : features->delIndex) {
             size_t offset = FEAT_OUT_SIZE_HALF * feature + i * TILE_HEIGHT;
 
-            auto col = reinterpret_cast<__m128i*>(&feat_weights[offset]);
+            auto col = reinterpret_cast<vec_t*>(&feat_weights[offset]);
             for (int j = 0; j < NUM_REGS; j++)
                 registers[j] = vsub_16(registers[j], col[j]);
         }
@@ -240,7 +231,7 @@ void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features, color
         for (auto feature : features->addIndex) {
             size_t offset = FEAT_OUT_SIZE_HALF * feature + i * TILE_HEIGHT;
 
-            auto col = reinterpret_cast<__m128i*>(&feat_weights[offset]);
+            auto col = reinterpret_cast<vec_t*>(&feat_weights[offset]);
             for (int j = 0; j < NUM_REGS; j++)
                 registers[j] = vadd_16(registers[j], col[j]);
         }
@@ -321,29 +312,26 @@ void updateTransformer(board_t* b, clipped_t* output) {
 
         size_t offset = FEAT_OUT_SIZE_HALF * i;
 
-#ifdef USE_AVX2
-
-    // TODO
-
-#elif USE_SSSE3
+#if defined(USE_AVX2) || defined(USE_SSSE3)
 
         // We can process SIMD_WIDTH-bits within one instruction; so we only
         // loop #chunks times to clip each sum.
         size_t chunks = (FEAT_OUT_SIZE_HALF * 16) / SIMD_WIDTH;
-        auto   out    = reinterpret_cast<__m128i*>(&output[offset]);
+        auto   out    = reinterpret_cast<vec_t*>(&output[offset]);
 
         for (size_t j = 0; j < chunks/2; j++) {
-            auto idx = reinterpret_cast<__m128i*>(acc[pList[i]]);
-            _mm_store_si128(&out[j], vclp_8(idx[j * 2], idx[j * 2 + 1]));
+            auto idx = reinterpret_cast<vec_t*>(acc[pList[i]]);
+            // _mm_store_si128(&out[j], vclp_8(idx[j * 2], idx[j * 2 + 1]));
+            vstore(&out[j], vclp_8(idx[j * 2], idx[j * 2 + 1]));
         }
 
 #else
 
-    // Native implementation
-    for (size_t j = 0; j < FEAT_OUT_SIZE_HALF; j++) {
-        int16_t sum = acc[pList[i]][j];
-        output[offset + j] = std::max<int16_t>(0, std::min<int16_t>(127, sum));
-    }
+        // Native implementation
+        for (size_t j = 0; j < FEAT_OUT_SIZE_HALF; j++) {
+            int16_t sum = acc[pList[i]][j];
+            output[offset + j] = std::max<int16_t>(0, std::min<int16_t>(127, sum));
+        }
 
 #endif
 
@@ -352,30 +340,27 @@ void updateTransformer(board_t* b, clipped_t* output) {
 
 value_t propagate(board_t* b) {
 
-    layerData_t layer1 = { hd1_weights, hd1_biases, HD1_IN_SIZE, HD1_OUT_SIZE };
-    layerData_t layer2 = { hd2_weights, hd2_biases, HD2_IN_SIZE, HD2_OUT_SIZE };
-
     a64 clipped_t buffer_8[512];
     a64 int32_t buffer_32[512];
     a64 int32_t outvalue;
 
     updateTransformer(b, buffer_8);
 
-    hiddenLayer(buffer_8, buffer_32, &layer1);
-    clReluLayer(buffer_32, buffer_8, RELU1_SIZE);
+    hiddenLayer1(buffer_8, buffer_32);
+    clpReluLayer(buffer_32, buffer_8, RELU1_SIZE);
 
-    hiddenLayer(buffer_8, buffer_32, &layer2);
-    clReluLayer(buffer_32, buffer_8, RELU2_SIZE);
+    hiddenLayer2(buffer_8, buffer_32);
+    clpReluLayer(buffer_32, buffer_8, RELU2_SIZE);
 
-    outLayer(buffer_8, &outvalue, HD3_INPUT_SIZE);
+    outLayer(buffer_8, &outvalue, HD3_IN_SIZE);
 
-    cout << "\nOut layer value " << outvalue << endl;
-    // TODO reset custom threads to 1 or param
+    // cout << "\nOut layer value " << outvalue << endl;
     return outvalue;
 }
 
 value_t evaluateNNUE(board_t* b) {
-    return (propagate(b) * 64) / 1024;
+    value_t eval = (propagate(b) * 64) / 1024;
+    return std::clamp(eval, VALUE_LOSS, VALUE_WIN);
 }
 
 char* readNetInfo(char* data, uint32_t* v, uint32_t* fHash, uint32_t* size, uint32_t* ftHash) {
@@ -405,16 +390,42 @@ char* readNetInfo(char* data, uint32_t* v, uint32_t* fHash, uint32_t* size, uint
     return (char*)data32;
 }
 
+unsigned int bit_shuffle(unsigned int v, int left, int right, unsigned int mask)
+{
+    unsigned int w = v & mask;
+    w = (w << left) | (w >> right);
+    return (v & ~mask) | (w & mask);
+}
+
+inline unsigned int shuffleWeightIndex(unsigned int idx, unsigned int dims, bool outlayer)
+{
+    if (dims > 32)
+        idx = bit_shuffle(idx, 1, 1, 0x18);
+    else if (dims == 32) {
+        idx = bit_shuffle(idx, 2, 1, 0x1c);
+        if (!outlayer)
+            idx = bit_shuffle(idx, 1, 3, 0xf0);
+    }
+    return idx;
+}
+
 char* readNetData(uint32_t* data32) {
+
+    size_t idx;
 
     // Hidden Layer 1
     for (size_t i = 0; i < HD1_OUT_SIZE; i++) 
         hd1_biases[i] = *(data32++);
 
     char* data = (char*)data32;
-    for (size_t i = 0; i < HD1_OUT_SIZE*HD1_IN_SIZE; i++)
-        hd1_weights[i] = *(data++);
-
+    for (size_t i = 0; i < HD1_OUT_SIZE*HD1_IN_SIZE; i++) {
+#if defined(USE_AVX2)
+        idx = shuffleWeightIndex(i, HD1_IN_SIZE, false);
+#else
+        idx = i;
+#endif
+        hd1_weights[idx] = *(data++);
+    }
 
     // Hidden Layer 2
     data32 = (uint32_t*)data;
@@ -422,9 +433,14 @@ char* readNetData(uint32_t* data32) {
         hd2_biases[i] = *(data32++);
 
     data = (char*)data32;
-    for (size_t i = 0; i < HD2_OUT_SIZE*HD2_IN_SIZE; i++)
-        hd2_weights[i] = *(data++);
-
+    for (size_t i = 0; i < HD2_OUT_SIZE*HD2_IN_SIZE; i++) {
+#if defined(USE_AVX2)
+        idx = shuffleWeightIndex(i, HD2_IN_SIZE, false);
+#else
+        idx = i;
+#endif
+        hd2_weights[idx] = *(data++);
+    }
 
     // Outlayer
     data32 = (uint32_t*)data;
@@ -432,8 +448,14 @@ char* readNetData(uint32_t* data32) {
         out_biases[i] = *(data32++);
 
     data = (char*)data32;
-    for (size_t i = 0; i < HD3_OUT_SIZE*HD3_INPUT_SIZE; i++)
-        out_weights[i] = *(data++);
+    for (size_t i = 0; i < HD3_OUT_SIZE*HD3_IN_SIZE; i++) {
+#if defined(USE_AVX2)
+        idx = shuffleWeightIndex(i, HD3_IN_SIZE, true);
+#else
+        idx = i;
+#endif
+        out_weights[idx] = *(data++);
+    }
 
 
     return data;
@@ -479,7 +501,7 @@ void initIncNet() {
     data = readNetData(data32);
 
     if (data != end) {
-        cout << "info string Error: NNUE parsing incomplete." << endl;
+        cerr << "info string Error: NNUE parsing incomplete." << endl;
         exit(1);
     }
 

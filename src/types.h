@@ -63,8 +63,8 @@ typedef bool color_t;
  */
 struct moveList_t {
 	int cnt = 0;
-	int moves[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
-	int scores[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
+	a64 int moves[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
+	a64 int scores[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
 
 	bitboard_t attackedSquares = 0ULL;
 };
@@ -118,7 +118,7 @@ struct bucket_t {
  * Transposition table instance. Contains stat-variables and pointer to entries.
  */
 struct ttable_t {
-	bucket_t* bucketList = NULL;
+	a64 bucket_t* bucketList = NULL;
 
 	// total number of buckets (entries-stacks)
 	int buckets = 0;
@@ -247,7 +247,7 @@ struct board_t {
 	bitboard_t attackedSquares[2];
 
 	// Stack stores pushed moves as Undo objects.
-	undo_t undoHistory[MAX_GAME_MOVES];
+	a64 undo_t undoHistory[MAX_GAME_MOVES];
 
 	// PSQT values and material for calculation on-the-fly
 	value_t psqtOpening = 0;
@@ -255,8 +255,8 @@ struct board_t {
 	value_t material    = 0;
 
 
-	accum_t accum[MAX_DEPTH];
-	dirty_t dp[MAX_DEPTH];
+	a64 accum_t accum[MAX_DEPTH];
+	a64 dirty_t dp[MAX_DEPTH];
 };
 
 /// Holds various pruning and counting statistics.

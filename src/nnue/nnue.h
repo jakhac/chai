@@ -1,8 +1,10 @@
 #pragma once
 
 #include "../defs.h"
-#include "common.h"
+#include "simd.h"
 
+
+const int clipShift = 6;
 
 // Feature Layer:
 // HalfKP has 2 * 41024 binary features and forwards up to 32-2 (exclude king) active
@@ -30,7 +32,7 @@ const size_t HD2_OUT_SIZE       = 32;
 const size_t RELU2_SIZE         = 32;
 
 // Hidden Layer 3 (Out Layer)
-const size_t HD3_INPUT_SIZE     = 32;
+const size_t HD3_IN_SIZE     = 32;
 const size_t HD3_OUT_SIZE       = 1;
 
 // Feature transformer network
@@ -46,7 +48,7 @@ extern weight_t hd2_weights[HD2_IN_SIZE * HD2_OUT_SIZE];
 extern int32_t hd2_biases[HD2_IN_SIZE];
 
 // Hidden layer 3 (out layer)
-extern weight_t out_weights[HD3_OUT_SIZE * HD3_INPUT_SIZE];
+extern weight_t out_weights[HD3_OUT_SIZE * HD3_IN_SIZE];
 extern int32_t out_biases[HD3_OUT_SIZE];
 
 
@@ -71,6 +73,9 @@ extern int32_t out_biases[HD3_OUT_SIZE];
 
 void hiddenLayer(clipped_t* in, int32_t* out, layerData_t* layer);
 
-void clReluLayer(int32_t* in, clipped_t* out, size_t dim);
+void hiddenLayer1(clipped_t* in, int32_t* out);
+void hiddenLayer2(clipped_t* in, int32_t* out);
+
+void clpReluLayer(int32_t* in, clipped_t* out, size_t dim);
 
 void outLayer(clipped_t* in, int32_t* out, size_t inDim);

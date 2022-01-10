@@ -23,7 +23,7 @@ static std::string info_SIMD = "AVX2";
 #elif defined(USE_SSSE3)
 static std::string info_SIMD = "SSSE3";
 #else
-static std::string info_SIMD = "NATIVE";
+static std::string info_SIMD = "NONE";
 #endif
 
 

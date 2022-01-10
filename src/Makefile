@@ -5,13 +5,13 @@
 VERSION = v3.0.4
 
 EXE_RELEASE = chai_$(VERSION)_release.exe
-EXE_DEBUG = chai_$(VERSION)_debug.exe
-EXE_TEST = test.exe
+EXE_DEBUG   = chai_$(VERSION)_debug.exe
+EXE_TEST    = test.exe
 
-SRCS = nnue.cpp main.cpp tt.cpp attacks.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
+SRCS = main.cpp tt.cpp thread.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp timeMan.cpp info.cpp transformer.cpp
+	attacks.cpp timeMan.cpp info.cpp transformer.cpp nnue.cpp 
 
 OBJ_RELEASE_DIR = ./obj_release
 OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
@@ -26,91 +26,53 @@ VPATH = egtb:nnue:
 # 2. Configure architecture & type
 #######################################
 
-# build type
-assert=no
-debug=no
-info=yes
-test=no
+# Build type
+assert = no
+debug  = no
+nnue   = yes
 
-# architecture
-optimize=yes
-prefetch=yes
-popcnt=yes
-ssse3=yes
-avx2=yes
-pext=yes
-nnue=yes
+# Default architecture enables all
+prefetch = yes
+optimize = yes
+popcnt   = yes
+ssse3    = yes
+avx2     = yes
 
-# custom build configs
-threads=0
-hashMb=265
+####
+#### 2.1 Define optional constants if passed by user.
+####
+threads = 1
+hashMb  = 256
 
-
-ifeq ($(TYPE),release)
-	assert=no
-	debug=no
-	info=no
-	test=no
-endif
-ifeq ($(TYPE),debug)
-	assert=yes
-	debug=yes
-	info=yes
-	test=no
-
-	optimize=no
-endif
-
-
-ifneq ($(threads),0)
+ifneq ($(threads),1)
 	CXXFLAGS += -DCUSTOM_THREADS=$(threads)
 endif
-ifneq ($(hashMb),265)
+
+ifneq ($(hashMb),256)
 	CXXFLAGS += -DCUSTOM_HASHSIZE=$(hashMb)
 endif
 
 
-ifeq ($(info),yes)
-	CXXFLAGS += -DINFO
+####
+#### 2.2 Set additional flags for respective build type.
+####
+ifeq ($(TYPE),release)
+	assert = no
+	debug  = no
+endif
+
+ifeq ($(TYPE),debug)
+	assert   = yes
+	debug    = yes
+	optimize = no
 endif
 
 ifeq ($(assert),yes)
 	CXXFLAGS += -DASSERT
 endif
 
-ifeq ($(test),yes)
-	CXXFLAGS += -DTESTING
-endif
-
-ifeq ($(DEBUG),yes)
-	CXXFLAGS+= -DINFO
-endif
-
-ifeq ($(optimize),yes)
-	CXXFLAGS += -O3
-endif
-
-ifeq ($(prefetch),yes)
-	CXXFLAGS += -msse
-	DEPENDFLAGS += -msse
-else
-	CXXFLAGS += -DNO_PREFETCH
-endif
-
-ifeq ($(popcnt),yes)
-	CXXFLAGS += -msse3 -mpopcnt
-endif
-
-ifeq ($(avx2),yes)
-	CXXFLAGS += -mavx2
-endif
-
-ifeq ($(pext),yes)
-	CXXFLAGS += -mbmi -mbmi2
-endif
-
-ifeq ($(ssse3),yes)
-	CXXFLAGS += -msse3 -DUSE_SSSE3
+ifeq ($(debug),yes)
+	CXXFLAGS += -DINFO
 endif
 
 ifeq ($(nnue),yes)
@@ -118,28 +80,48 @@ ifeq ($(nnue),yes)
 endif
 
 
+####
+#### 2.3 Set optimization flags as previously defined.
+####
+ifeq ($(optimize),yes)
+	CXXFLAGS += -O3
+endif
 
-# Always add standard flags
+ifeq ($(popcnt),yes)
+	CXXFLAGS += -mssse3 -mpopcnt
+endif
+
+ifeq ($(prefetch),yes)
+	CXXFLAGS += -DUSE_PREFETCH -msse
+	DEPENDFLAGS += -msse
+endif
+
+ifeq ($(avx2),yes)
+	CXXFLAGS += -DUSE_AVX2 -mavx2
+endif
+
+ifeq ($(ssse3),yes)
+	CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
+endif
+
+
+####
+#### 2.4 Additional flags for code quality.
+####
 CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m64
-
-# Warning flags for cleaner code
+CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 CXXFLAGS += -pedantic -Wextra -Wshadow
-
-# Add version flag for info in target exe
 CXXFLAGS += -DVERSION=$(VERSION)
 
-# Set 4MB stack size
-CXXFLAGS += -Wl,--stack,4194304 -fexceptions
-
 DEPENDFLAGS += -std=c++17 -fexceptions
+
 LDFLAGS += -m64 -Wl,--stack,4194304
 
 
 #######################################
-# 3. Compiler and link to target
+# 3. Compile and link to target
 #######################################
 
-# Use GNU compiler
 CXX = g++
 
 $(EXE_DEBUG): $(OBJS_DEBUG)
@@ -153,7 +135,6 @@ $(EXE_RELEASE): $(OBJS_RELEASE)
 
 $(OBJ_RELEASE_DIR)/%.o: %.cpp
 	g++ $(CXXFLAGS) -c -o $@ $<
-
 
 
 #######################################
