@@ -10,8 +10,7 @@
 **.exe
 
 /archive
-/nets
-
+**.nnue
 
 # custom build
 **.o

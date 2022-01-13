@@ -1,13 +1,14 @@
 #pragma once
 
 #include <algorithm>
+#include <sstream>
+#include <immintrin.h>
 
 #include "incbin.h"
 #include "../board.h"
 #include "simd.h"
 #include "nnue.h"
 
-#include <immintrin.h>
 
 #define NNUEFILEVERSIONROTATE       0x7AF32F16u
 #define NNUEFILEVERSIONFLIP         0x7AF32F17u
@@ -16,9 +17,9 @@
 #define NNUEFEATUREHASH             (0x5D69D5B9u ^ 1)
 #define NNUEINPUTSLICEHASH          0xEC42E90Du
 
-
 extern int netType;
 extern int orientOperator;
+extern bool canUseNNUE;
 
 // Indices to index features
 enum {
@@ -49,14 +50,22 @@ void refreshAccumulator(board_t* b, color_t color);
 
 void accumulateFeatures(board_t* b, color_t color);
 
-value_t propagate(board_t* b);
-
-value_t evaluateNNUE(board_t* b);
-
 void assertActiveFeatures(board_t* b, color_t color, accum_t* accDstTest);
 
 void setActiveFeatures(board_t* b, color_t color, features_t* features);
 
 void updateAccumulator(board_t* b, color_t color, int reusePly);
 
-void parseNet(board_t* b);
+value_t propagate(board_t* b);
+
+value_t evaluateNNUE(board_t* b);
+
+
+// Initialize a local .nnue in compilation.
+void initIncNet();
+
+/**
+ * @brief Read NNUE parameters from the given stream.
+ * @return True if init successful, else false
+ */
+bool initNet(std::istream& ss);

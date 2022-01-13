@@ -78,7 +78,7 @@ void uciSetOption(std::string cmd) {
 		}
 
 		initEGTB(syzygyPath.c_str());
-        cout << "info string set SyzygyPath to " << syzygyPath << ". Max TB=" << TB_LARGEST << endl;
+        cout << "info string Set SyzygyPath to " << syzygyPath << ". Max TB=" << TB_LARGEST << endl;
     }
 
 	if (strStartsWith(cmd, "setoption name Threads value ")) {
@@ -91,6 +91,20 @@ void uciSetOption(std::string cmd) {
 
         cout << "info string set total Threads to " << NUM_THREADS << endl;
     }
+
+	if (strStartsWith(cmd, "setoption name EvalFile value ")) {
+		std::string netDir   = "../nets/";
+		std::string nnuePath = cmd.substr(30, std::string::npos);
+
+  		std::ifstream nnueData(netDir + nnuePath, std::ios::binary);
+
+		if (!initNet(nnueData)) {
+        	cerr << "info string Error: NNUE parsed incorrect hash value." << endl;
+			return;
+		}
+
+    	cerr << "info string NNUE parsed successfully." << endl;
+	}
 
 }
 

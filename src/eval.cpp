@@ -103,20 +103,21 @@ value_t mixedEvaluation(board_t* b) {
 
 #ifdef USE_NNUE
 	// Use NNUE on balanced positions
-	if (abs(b->psqtEndgame) < 520) {
+	if (   canUseNNUE
+		&& abs(b->psqtEndgame) < 520) {
 		return evaluateNNUE(b);
 	}
 #endif // USE_NNUE
 
 	prefetchPT(b);
 
-	// // NNUE
-	// accumulateFeatures(b, chai::WHITE);
-	// accumulateFeatures(b, chai::BLACK);
+	// NNUE
+	accumulateFeatures(b, chai::WHITE);
+	accumulateFeatures(b, chai::BLACK);
 
-	// accum_t* accDstTest = &b->accum[b->ply];
-	// assertActiveFeatures(b, chai::WHITE, accDstTest);
-	// assertActiveFeatures(b, chai::BLACK, accDstTest);
+	accum_t* accDstTest = &b->accum[b->ply];
+	assertActiveFeatures(b, chai::WHITE, accDstTest);
+	assertActiveFeatures(b, chai::BLACK, accDstTest);
 
 	value_t eval = 0;
 	float phase = gamePhase(b);

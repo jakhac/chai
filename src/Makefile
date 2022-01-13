@@ -27,9 +27,10 @@ VPATH = egtb:nnue:
 #######################################
 
 # Build type
-assert = no
-debug  = no
-nnue   = yes
+assert   = no
+debug    = no
+nnue     = yes
+evalfile = none
 
 # Default architecture enables all
 prefetch = yes
@@ -52,6 +53,9 @@ ifneq ($(hashMb),256)
 	CXXFLAGS += -DCUSTOM_HASHSIZE=$(hashMb)
 endif
 
+ifneq ($(evalfile),none)
+	CXXFLAGS += -DCUSTOM_EVALFILE=\"../nets/$(evalfile)\"
+endif
 
 ####
 #### 2.2 Set additional flags for respective build type.
@@ -78,6 +82,7 @@ endif
 ifeq ($(nnue),yes)
 	CXXFLAGS += -DUSE_NNUE
 endif
+
 
 
 ####

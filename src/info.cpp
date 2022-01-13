@@ -39,6 +39,7 @@ void printUCI_Info() {
 	cout << "option name Threads type spin default " 
 		 << NUM_THREADS << " min 1 max " << MAX_THREADS << endl;
 	cout << "option name SyzygyPath type string default \"\"" << endl;
+	cout << "option name EvalFile type string default \"\"" << endl;
 	cout << "uciok\n";
 }
 

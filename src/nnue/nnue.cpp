@@ -1,18 +1,14 @@
 #include "nnue.h"
 
-// Feature transformer network
 a64 int16_t feat_weights[FEAT_INPUT_SIZE * FEAT_OUT_SIZE_HALF];
 a64 int16_t feat_biases[FEAT_OUT_SIZE_HALF];
 
-// Hidden Layer 1
 a64 weight_t hd1_weights[HD1_OUT_SIZE * HD1_IN_SIZE];
 a64 int32_t  hd1_biases[HD1_OUT_SIZE];
 
-// Hidden Layer 2
 a64 weight_t hd2_weights[HD2_IN_SIZE * HD2_OUT_SIZE];
 a64 int32_t  hd2_biases[HD2_IN_SIZE];
 
-// Hidden Layer 3 (out layer)
 a64 weight_t out_weights[HD3_OUT_SIZE * HD3_IN_SIZE];
 a64 int32_t  out_biases[HD3_OUT_SIZE];
 
@@ -224,140 +220,6 @@ void hiddenLayer2(clipped_t* in, int32_t* out) {
         
         for (size_t j = 0; j < HD1_IN_SIZE; j++)
             sum += hd1_weights[offset + j] * in[j];
-
-        out[i] = sum;
-    }
-
-#endif
-
-}
-
-void hiddenLayer(clipped_t* in, int32_t* out, layerData_t* layer) {
-
-#ifdef USE_AVX2
-
-    if (layer->inDims > 32) {
-        __m128i* outVec = (__m128i*)out;
-        __m128i* biasVec = (__m128i*)layer->bias;
-        __m256i* inVec = (__m256i*)in;
-        for (unsigned int i = 0; i < layer->outDims / 4; i++) {
-            __m256i* w = (__m256i*) & layer->weight[4 * i * layer->inDims];
-            __m256i s0, s1, s2, s3;
-            s0 = s1 = s2 = s3 = _mm256_setzero_si256();
-            const __m256i kOnes = _mm256_set1_epi16(1);
-            __m256i p1, p2;
-            for (unsigned int j = 0; j < layer->inDims / 64; j++) {
-                p1 = _mm256_maddubs_epi16(inVec[2 * j], w[0 * layer->inDims / 32 + 2 * j]);
-                p2 = _mm256_maddubs_epi16(inVec[2 * j + 1], w[0 * layer->inDims / 32 + 2 * j + 1]);
-                s0 = _mm256_add_epi32(s0, _mm256_madd_epi16(_mm256_add_epi16(p1, p2), kOnes));
-                p1 = _mm256_maddubs_epi16(inVec[2 * j], w[1 * layer->inDims / 32 + 2 * j]);
-                p2 = _mm256_maddubs_epi16(inVec[2 * j + 1], w[1 * layer->inDims / 32 + 2 * j + 1]);
-                s1 = _mm256_add_epi32(s1, _mm256_madd_epi16(_mm256_add_epi16(p1, p2), kOnes));
-                p1 = _mm256_maddubs_epi16(inVec[2 * j], w[2 * layer->inDims / 32 + 2 * j]);
-                p2 = _mm256_maddubs_epi16(inVec[2 * j + 1], w[2 * layer->inDims / 32 + 2 * j + 1]);
-                s2 = _mm256_add_epi32(s2, _mm256_madd_epi16(_mm256_add_epi16(p1, p2), kOnes));
-                p1 = _mm256_maddubs_epi16(inVec[2 * j], w[3 * layer->inDims / 32 + 2 * j]);
-                p2 = _mm256_maddubs_epi16(inVec[2 * j + 1], w[3 * layer->inDims / 32 + 2 * j + 1]);
-                s3 = _mm256_add_epi32(s3, _mm256_madd_epi16(_mm256_add_epi16(p1, p2), kOnes));
-            }
-            s0 = _mm256_hadd_epi32(s0, s1);
-            s2 = _mm256_hadd_epi32(s2, s3);
-            s0 = _mm256_hadd_epi32(s0, s2);
-            __m128i sum128 = _mm_add_epi32(_mm256_castsi256_si128(s0),
-                _mm256_extracti128_si256(s0, 1));
-            outVec[i] = _mm_add_epi32(sum128, biasVec[i]);
-        }
-    }
-    else { // 32x32 multiplication
-        __m256i* outVec = (__m256i*)out;
-        __m256i* biasVec = (__m256i*)layer->bias;
-        __m128i* inVec = (__m128i*)in;
-        __m256i in0 = _mm256_broadcastsi128_si256(inVec[0]);
-        __m256i in1 = _mm256_broadcastsi128_si256(inVec[1]);
-        const __m256i kOnes = _mm256_set1_epi16(1);
-        __m256i s0, s1, s2, s3, p;
-        for (unsigned int i = 0; i < layer->outDims / 8; i++) {
-            __m256i* w = (__m256i*) & layer->weight[8 * i * 32];
-            s0 = _mm256_maddubs_epi16(in0, w[0]); // first half of rows 0,4
-            s0 = _mm256_madd_epi16(s0, kOnes);
-            p = _mm256_maddubs_epi16(in1, w[1]); // second half of rows 0,4
-            p = _mm256_madd_epi16(p, kOnes);
-            s0 = _mm256_add_epi32(s0, p);
-            s1 = _mm256_maddubs_epi16(in0, w[2]); // first half of rows 1,5
-            s1 = _mm256_madd_epi16(s1, kOnes);
-            p = _mm256_maddubs_epi16(in1, w[3]); // second half of rows 1,5
-            p = _mm256_madd_epi16(p, kOnes);
-            s1 = _mm256_add_epi32(s1, p);
-            s2 = _mm256_maddubs_epi16(in0, w[4]); // first half of rows 2,6
-            s2 = _mm256_madd_epi16(s2, kOnes);
-            p = _mm256_maddubs_epi16(in1, w[5]); // second half of rows 2,6
-            p = _mm256_madd_epi16(p, kOnes);
-            s2 = _mm256_add_epi32(s2, p);
-            s3 = _mm256_maddubs_epi16(in0, w[6]); // first half of rows 3,7
-            s3 = _mm256_madd_epi16(s3, kOnes);
-            p = _mm256_maddubs_epi16(in1, w[7]); // second half of rows 3,7
-            p = _mm256_madd_epi16(p, kOnes);
-            s3 = _mm256_add_epi32(s3, p);
-            s0 = _mm256_hadd_epi32(s0, s1);
-            s2 = _mm256_hadd_epi32(s2, s3);
-            s0 = _mm256_hadd_epi32(s0, s2);
-            outVec[i] = _mm256_add_epi32(s0, biasVec[i]);
-        }
-    }
-
-#elif defined(USE_SSSE3)
-
-    auto vOnes = _mm_set1_epi16(1);
-    auto vIn   = reinterpret_cast<__m128i*>(in);
-    auto vOut  = reinterpret_cast<__m128i*>(out);
-    auto vBias = reinterpret_cast<__m128i*>(layer->bias);
-
-    __m128i s0, s1, s2, s3;
-    __m128i p1, p2;
-
-    Assert(layer->outDims % 8 == 0);
-    Assert(layer->inDims == 32 || layer->inDims % 128 == 0);
-    
-    for (size_t i = 0; i < layer->outDims / 4; i++) {
-
-        auto vWeights = reinterpret_cast<__m128i*>(&layer->weight[4 * i * layer->inDims]);
-        s0 = s1 = s2 = s3 = _mm_setzero_si128();
-
-        for (size_t j = 0; j < layer->inDims / 32; j++) {
-            
-            p1 = _mm_maddubs_epi16(vIn[2 * j    ], vWeights[0 * layer->inDims / 16 + 2 * j    ]);
-            p2 = _mm_maddubs_epi16(vIn[2 * j + 1], vWeights[0 * layer->inDims / 16 + 2 * j + 1]);
-            s0 = _mm_add_epi32(s0, _mm_madd_epi16(_mm_add_epi16(p1, p2), vOnes));
-
-            p1 = _mm_maddubs_epi16(vIn[2 * j    ], vWeights[1 * layer->inDims / 16 + 2 * j    ]);
-            p2 = _mm_maddubs_epi16(vIn[2 * j + 1], vWeights[1 * layer->inDims / 16 + 2 * j + 1]);
-            s1 = _mm_add_epi32(s1, _mm_madd_epi16(_mm_add_epi16(p1, p2), vOnes));
-
-            p1 = _mm_maddubs_epi16(vIn[2 * j    ], vWeights[2 * layer->inDims / 16 + 2 * j    ]);
-            p2 = _mm_maddubs_epi16(vIn[2 * j + 1], vWeights[2 * layer->inDims / 16 + 2 * j + 1]);
-            s2 = _mm_add_epi32(s2, _mm_madd_epi16(_mm_add_epi16(p1, p2), vOnes));
-
-            p1 = _mm_maddubs_epi16(vIn[2 * j    ], vWeights[3 * layer->inDims / 16 + 2 * j    ]);
-            p2 = _mm_maddubs_epi16(vIn[2 * j + 1], vWeights[3 * layer->inDims / 16 + 2 * j + 1]);
-            s3 = _mm_add_epi32(s3, _mm_madd_epi16(_mm_add_epi16(p1, p2), vOnes));
-        }
-
-        s0 = _mm_hadd_epi32(s0, s1);
-        s2 = _mm_hadd_epi32(s2, s3);
-        s0 = _mm_hadd_epi32(s0, s2);
-
-        vOut[i] = _mm_add_epi32(s0, vBias[i]); 
-
-    }
-
-#else
-
-    for (size_t i = 0; i < layer->outDims; i++) {
-        int offset = i * layer->inDims;
-        int32_t sum = layer->bias[i];
-        
-        for (size_t j = 0; j < layer->inDims; j++)
-            sum += layer->weight[offset + j] * in[j];
 
         out[i] = sum;
     }

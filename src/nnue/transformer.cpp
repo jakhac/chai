@@ -1,9 +1,15 @@
 #include "transformer.h"
 
-INCBIN(IncWeights, "../nets/nn-fb50f1a2b1-20210705.nnue");
+#ifdef CUSTOM_EVALFILE
+INCBIN(IncWeights, CUSTOM_EVALFILE);
+#endif // CUSTOM_EVALFILE
+// INCBIN(IncWeights, "../nets/nn-fb50f1a2b1-20210705.nnue");
 
 int netType = 0x0;
 int orientOperator;
+
+bool canUseNNUE = false;
+
 
 void assertActiveFeatures(board_t* b, color_t color, accum_t* accDstTest) {
     int16_t* bias = feat_biases;
@@ -213,7 +219,7 @@ void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features, color
         auto to   = (vec_t*)&accDst->accumulation[c][i * TILE_HEIGHT];
         auto from = (vec_t*)&accSrc->accumulation[c][i * TILE_HEIGHT];
 
-        // Copy current src-accumulator values in 128-bit chunks into our registers
+        // Copy current src-accumulator values in 128/256-bit chunks into our registers
         for (int j = 0; j < NUM_REGS; j++)
             registers[j] = from[j];
 
@@ -299,13 +305,12 @@ void updateAccumulator(board_t* b, color_t color, int reusePly) {
 
 }
 
-
 void updateTransformer(board_t* b, clipped_t* output) {
 
     accumulateFeatures(b, chai::WHITE);
     accumulateFeatures(b, chai::BLACK);
 
-    auto& acc = b->accum[b->ply].accumulation; // TODO copy or pointer?
+    auto& acc = b->accum[b->ply].accumulation;
 
     std::vector<int> pList = { b->stm, b->stm^1 };
     for (size_t i = 0; i < pList.size(); i++) {
@@ -321,7 +326,6 @@ void updateTransformer(board_t* b, clipped_t* output) {
 
         for (size_t j = 0; j < chunks/2; j++) {
             auto idx = reinterpret_cast<vec_t*>(acc[pList[i]]);
-            // _mm_store_si128(&out[j], vclp_8(idx[j * 2], idx[j * 2 + 1]));
             vstore(&out[j], vclp_8(idx[j * 2], idx[j * 2 + 1]));
         }
 
@@ -354,40 +358,13 @@ value_t propagate(board_t* b) {
 
     outLayer(buffer_8, &outvalue, HD3_IN_SIZE);
 
-    // cout << "\nOut layer value " << outvalue << endl;
+    cout << "\nOut layer value " << outvalue << endl;
     return outvalue;
 }
 
 value_t evaluateNNUE(board_t* b) {
     value_t eval = (propagate(b) * 64) / 1024;
     return std::clamp(eval, VALUE_LOSS, VALUE_WIN);
-}
-
-char* readNetInfo(char* data, uint32_t* v, uint32_t* fHash, uint32_t* size, uint32_t* ftHash) {
-    
-    a64 uint32_t* data32 = (uint32_t*)data;
-
-    *v = *(data32++);
-    if (*v == NNUEFILEVERSIONROTATE) {
-        netType = NNUE_ROTATE;
-        orientOperator = 0x3f;
-    } else if (*v == NNUEFILEVERSIONFLIP) {
-        netType = NNUE_FLIP;
-        orientOperator = 0x3c;
-    }
-    
-    *fHash = *(data32++);
-    *size = *(data32++);
-
-    data = (char*)data32;
-    // std::string arch((char*)data32, (char*)data32 + *size);
-    // cout << "NNUE Arch: " << arch << endl;
-    data += *size;
-
-    data32 = (uint32_t*)data;
-    *ftHash = *(data32++);
-
-    return (char*)data32;
 }
 
 unsigned int bit_shuffle(unsigned int v, int left, int right, unsigned int mask)
@@ -397,7 +374,7 @@ unsigned int bit_shuffle(unsigned int v, int left, int right, unsigned int mask)
     return (v & ~mask) | (w & mask);
 }
 
-inline unsigned int shuffleWeightIndex(unsigned int idx, unsigned int dims, bool outlayer)
+inline unsigned int shuffle(unsigned int idx, unsigned int dims, bool outlayer)
 {
     if (dims > 32)
         idx = bit_shuffle(idx, 1, 1, 0x18);
@@ -409,63 +386,79 @@ inline unsigned int shuffleWeightIndex(unsigned int idx, unsigned int dims, bool
     return idx;
 }
 
-char* readNetData(uint32_t* data32) {
+bool isBigEndian(void) {
+    union {
+        uint32_t i;
+        char c[4];
+    } bint = {0x01020304};
 
-    size_t idx;
+    return bint.c[0] == 1; 
+}
 
-    // Hidden Layer 1
-    for (size_t i = 0; i < HD1_OUT_SIZE; i++) 
-        hd1_biases[i] = *(data32++);
+template <class T>
+void endswap(T* buffer) {
+    unsigned char *memp = reinterpret_cast<unsigned char*>(buffer);
+    std::reverse(memp, memp + sizeof(T));
+}
 
-    char* data = (char*)data32;
+template<typename T>
+void readFromStream(std::istream& ss, T* buffer, size_t cnt) {
+    ss.read(reinterpret_cast<char*>(buffer), sizeof(T) * cnt);
+
+    if (isBigEndian()) {
+        endswap(buffer);
+    }
+}
+
+void readNetData(std::istream& ss) {
+
+    readFromStream<int32_t>(ss, hd1_biases, HD1_OUT_SIZE);
     for (size_t i = 0; i < HD1_OUT_SIZE*HD1_IN_SIZE; i++) {
 #if defined(USE_AVX2)
-        idx = shuffleWeightIndex(i, HD1_IN_SIZE, false);
+        readFromStream<weight_t>(ss, &hd1_weights[shuffle(i, HD1_IN_SIZE, false)], 1);
 #else
-        idx = i;
+        readFromStream<weight_t>(ss, &hd1_weights[i], 1);
 #endif
-        hd1_weights[idx] = *(data++);
     }
 
-    // Hidden Layer 2
-    data32 = (uint32_t*)data;
-    for (size_t i = 0; i < HD2_OUT_SIZE; i++)
-        hd2_biases[i] = *(data32++);
-
-    data = (char*)data32;
+    readFromStream<int32_t>(ss, hd2_biases, HD2_OUT_SIZE);
     for (size_t i = 0; i < HD2_OUT_SIZE*HD2_IN_SIZE; i++) {
 #if defined(USE_AVX2)
-        idx = shuffleWeightIndex(i, HD2_IN_SIZE, false);
+        readFromStream<weight_t>(ss, &hd2_weights[shuffle(i, HD2_IN_SIZE, false)], 1);
 #else
-        idx = i;
+        readFromStream<weight_t>(ss, &hd2_weights[i], 1);
 #endif
-        hd2_weights[idx] = *(data++);
     }
 
-    // Outlayer
-    data32 = (uint32_t*)data;
-    for (size_t i = 0; i < HD3_OUT_SIZE; i++)
-        out_biases[i] = *(data32++);
-
-    data = (char*)data32;
+    readFromStream<int32_t>(ss, out_biases, HD3_OUT_SIZE);
     for (size_t i = 0; i < HD3_OUT_SIZE*HD3_IN_SIZE; i++) {
 #if defined(USE_AVX2)
-        idx = shuffleWeightIndex(i, HD3_IN_SIZE, true);
+        readFromStream<weight_t>(ss, &out_weights[shuffle(i, HD3_IN_SIZE, true)], 1);
 #else
-        idx = i;
+        readFromStream<weight_t>(ss, &out_weights[i], 1);
 #endif
-        out_weights[idx] = *(data++);
     }
 
-
-    return data;
 }
+
 
 void initIncNet() {
 
-    // .nnue file is included in binary; we can acces data using <g> pointers
+#if defined(CUSTOM_EVALFILE)
+
     char* data = const_cast<char*>(reinterpret_cast<const char*>(gIncWeightsData));
-    char* end  = (char*)data + gIncWeightsSize;
+    const int binSize = gIncWeightsSize;
+
+    std::istringstream ss;
+    ss.rdbuf()->pubsetbuf(data, binSize);
+
+    initNet(ss);
+
+#endif
+
+}
+
+bool initNet(std::istream& ss) {
 
     uint32_t ftHash   = NNUEFEATUREHASH ^ FEAT_OUT_SIZE;
     uint32_t netHash  = getOutLayerHash();
@@ -473,46 +466,44 @@ void initIncNet() {
 
     uint32_t version, size;
     uint32_t readFeatHash, readFilehash, readNetHash;
-    data = readNetInfo(data, &version, &readFilehash, &size, &readFeatHash);
 
+    readFromStream<uint32_t>(ss, &version, 1);
+    if (version == NNUEFILEVERSIONROTATE) {
+        netType = NNUE_ROTATE;
+        orientOperator = 0x3f;
+    } else if (version == NNUEFILEVERSIONFLIP) {
+        netType = NNUE_FLIP;
+        orientOperator = 0x3c;
+    } else {
+        return false;
+    }
+    
+    readFromStream<uint32_t>(ss, &readFilehash, 1);
+    readFromStream<uint32_t>(ss, &size, 1);
+
+    std::string arch;
+    arch.resize(size);
+    readFromStream<char>(ss, &arch[0], size);
+
+    readFromStream<uint32_t>(ss, &readFeatHash, 1);
     if (   readFeatHash != ftHash
         || readFilehash != fileHash) {
-        cerr << "info string Error: NNUE parsed incorrect hash value." << endl;
-        exit(1);
+        return false;
+
     }
 
     // Read weights for the feature layer
-    uint16_t* data16 = (uint16_t*)data;
-    for (size_t i = 0; i < FEAT_OUT_SIZE_HALF; i++)
-        feat_biases[i] = *(data16++);
+    readFromStream<int16_t>(ss, feat_biases, FEAT_OUT_SIZE_HALF);
+    readFromStream<int16_t>(ss, feat_weights, FEAT_NUM_WEIGHTS);
 
-    for (size_t i = 0; i < FEAT_NUM_WEIGHTS; i++)
-        feat_weights[i] = *(data16++);
-
-
-    uint32_t* data32 = (uint32_t*)data16;
-    readNetHash = *(data32++);
+    readFromStream<uint32_t>(ss, &readNetHash, 1);
     if (readNetHash != netHash) {
-        cerr << "info string Error: NNUE parsed incorrect hash value." << endl;
-        exit(1);
+        return false;
+
     }
 
-    // Read remaining net weights and biases
-    data = readNetData(data32);
+    readNetData(ss);
+    canUseNNUE = true;
 
-    if (data != end) {
-        cerr << "info string Error: NNUE parsing incomplete." << endl;
-        exit(1);
-    }
-
-    cout << "info string NNUE parsing completed." << endl;
-}
-
-
-void parseNet(board_t* b) {
-
-    initIncNet();
-
-    propagate(b);
-    
+    return true;
 }

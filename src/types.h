@@ -1,7 +1,8 @@
 #pragma once
 
 #include <stdint.h>
-// #include "./nnue/types.h"
+#include <vector>
+
 
 #define MAX_DEPTH 64
 #define MAX_GAME_MOVES 512
@@ -12,7 +13,6 @@
 #define DEFAULT_EP_SQ 0
 
 #define a64 alignas(64)
-
 
 /**
  * Unsigned 64-Bit integer represents bitboard isntance.
@@ -158,9 +158,6 @@ struct pawntable_t {
 	int hit;
 };
 
-
-#include <vector>
-
 typedef int8_t weight_t;
 typedef int8_t clipped_t;
 
@@ -179,17 +176,12 @@ struct accum_t {
     bool compState[2] = { EMPTY, EMPTY }; 
 };
 
-
 struct dirty_t {
-
 	bool isKingMove;
 
 	int changedPieces;
-
     int piece[3];
-
     int from[3];
-
     int to[3];
 };
 
@@ -197,13 +189,6 @@ struct features_t {
     // Keep track of all feature-indices to add and to indices to delete
     std::vector<size_t> addIndex;
     std::vector<size_t> delIndex;
-};
-
-struct layerData_t {
-	a64 weight_t* weight;
-	a64 int32_t* bias;
-	size_t inDims;
-	size_t outDims;
 };
 
 struct board_t {

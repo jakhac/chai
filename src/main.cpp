@@ -10,6 +10,14 @@ int main() {
 	initEGTB("");
 	initThreadPool();
 
+#if defined(USE_NNUE) && defined(CUSTOM_EVALFILE)
+	initIncNet();
+#endif
+
+	// TODO
+	// std::ifstream nnueData("../nets/nn-fb50f1a2b1-20210705.nnue", std::ios::binary);
+	// initNet(nnueData);
+
 	// Print status and drop into cli protocol
 	parseFen(&_board, STARTING_FEN);
 	// parseFen(&_board, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
@@ -30,7 +38,7 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 	move_t parsedMove;
 	std::string userInput;
 
-	parseNet(b);
+	propagate(b);
 
 	// bitboard_t t = wBackwardPawns(b);
 	// printBitBoard(&t);
