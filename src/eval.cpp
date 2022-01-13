@@ -104,7 +104,6 @@ value_t mixedEvaluation(board_t* b) {
 
 	value_t eval = 0;
 	float phase = gamePhase(b);
-	// float interpolFactor = std::min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
 
 	// Check insufficient material to detect drawn positions
 	if (popCount(b->occupied) <= 5 && insufficientMaterial(b)) {
@@ -137,7 +136,7 @@ value_t mixedEvaluation(board_t* b) {
 	tupleEval += squareControl(b, WHITE) - squareControl(b, BLACK);
 
 	// // Knight-Bishop placement and coordination
-	// tupleEval += evaluateBishops(b, WHITE) - evaluateBishops(b, BLACK);
+	tupleEval += evaluateBishops(b, WHITE) - evaluateBishops(b, BLACK);
 	tupleEval += evaluateKnights(b, WHITE) - evaluateKnights(b, BLACK);
 
 	// // Rook-Queen
@@ -162,7 +161,7 @@ value_t mixedEvaluation(board_t* b) {
 	// oldEval += _kingSafety(b, WHITE, &interpolFactor) - _kingSafety(b, BLACK, &interpolFactor);
 
 	oldEval += openFilesRQ(b, WHITE) - openFilesRQ(b, BLACK);
-	oldEval += bishopPair(b, WHITE) - bishopPair(b, BLACK);
+	// oldEval += bishopPair(b, WHITE) - bishopPair(b, BLACK);
 
 	// Combine evals
 	value_t newEval = scaleGamePhase(tupleEval, phase);
@@ -309,71 +308,79 @@ tuple_t evaluateBishops(board_t* b, color_t color) {
 
 	// 2) Bad Bishop
 	// - How many blocked pawns on color of bishop?
-	bitboard_t blockedPawns = getBlockedPawns(b, color);
-	if (bishops & SQUARES_BLACK) {
-		cnt = popCount(blockedPawns & SQUARES_BLACK);
-		score += BISHOP_COLOR_BLOCKED * cnt;
-	}
+	// bitboard_t blockedPawns = getBlockedPawns(b, color);
+	// if (bishops & SQUARES_BLACK) {
+	// 	cnt = popCount(blockedPawns & SQUARES_BLACK);
+	// 	score += BISHOP_COLOR_BLOCKED * cnt;
+	// }
 
-	if (bishops & SQUARES_WHITE) {
-		cnt = popCount(blockedPawns & SQUARES_WHITE);
-		score += BISHOP_COLOR_BLOCKED * cnt;
-	}
-
-
+	// if (bishops & SQUARES_WHITE) {
+	// 	cnt = popCount(blockedPawns & SQUARES_WHITE);
+	// 	score += BISHOP_COLOR_BLOCKED * cnt;
+	// }
 
 	// 3) Fianchetto Pattern
-	value_t fianchetto = 0;
+	// value_t fianchetto = 0;
 	bitboard_t pawns = getPieces(b, PAWN, color);
-	if (color == WHITE) {
-		if (popCount(FIANCHETTO_B2 & pawns) > 2 && bishops & B2)
-			fianchetto++;
+	// if (color == WHITE) {
+	// 	if (popCount(FIANCHETTO_B2 & pawns) > 2 && bishops & B2)
+	// 		fianchetto++;
 
-		if (popCount(FIANCHETTO_G2 & pawns) > 2 && bishops & G2)
-			fianchetto++;
+	// 	if (popCount(FIANCHETTO_G2 & pawns) > 2 && bishops & G2)
+	// 		fianchetto++;
 
-	} else {
-		if (popCount(FIANCHETTO_B7 & pawns) > 2 && bishops & B7)
-			fianchetto++;
+	// } else {
+	// 	if (popCount(FIANCHETTO_B7 & pawns) > 2 && bishops & B7)
+	// 		fianchetto++;
 
-		if (popCount(FIANCHETTO_G7 & pawns) > 2 && bishops & G7)
-			fianchetto++;
+	// 	if (popCount(FIANCHETTO_G7 & pawns) > 2 && bishops & G7)
+	// 		fianchetto++;
 
-	}
-	score += fianchetto * BISHOP_FIANCHETTO;
+	// }
+	// score += fianchetto * BISHOP_FIANCHETTO;
 
 	// 4) Color Weakness
 	// - One Bishop left and majority of pawns on different-colored squares
-	if (popCount(bishops) == 1) {
-		bool whiteSqMajority = 0 < (popCount(pawns & SQUARES_WHITE) - popCount(pawns & SQUARES_BLACK));
+	// if (popCount(bishops) == 1) {
+	// 	bool whiteSqMajority = 0 < (popCount(pawns & SQUARES_WHITE) - popCount(pawns & SQUARES_BLACK));
 
-		// Only bishop on color non-dominated by pawns
-		if (bishops & SQUARES_BLACK && whiteSqMajority) {
-			score += BISHOP_STRONG_COLOR_CPLX;
-		}
-		if (bishops & SQUARES_WHITE && !whiteSqMajority) {
-			score += BISHOP_STRONG_COLOR_CPLX;
-		}
-	}
+	// 	// Only bishop on color non-dominated by pawns
+	// 	if (bishops & SQUARES_BLACK && whiteSqMajority) {
+	// 		score += BISHOP_STRONG_COLOR_CPLX;
+	// 	}
+	// 	if (bishops & SQUARES_WHITE && !whiteSqMajority) {
+	// 		score += BISHOP_STRONG_COLOR_CPLX;
+	// 	}
+	// }
 
-	// Bishop Outpost
 	int sq;
 	bitboard_t oppositePawns = getPieces(b, PAWN, color ^ 1);
 	while (bishops) {
 		sq = popLSB(&bishops);
 
-		// No opposite-colored pawns can challenge this bishop.
-		if (   !(pawnPassedMask[color][sq] & oppositePawns)
-			&& !((FILE_A_HEX | FILE_H_HEX) & (1 << sq))) {
+		// Bishop Outpost
+		bitboard_t currentFile = FILE_LIST[squareToFile[sq]];
+		bool isOutpostArea = (1ULL << sq) & outpost_squares[color];
+		if (   !((pawnPassedMask[color][sq] & ~currentFile) & oppositePawns)
+			&& isOutpostArea
+			&& pawnAtkMask[color ^ 1][sq] & pawns) {
 
-			score += BISHOP_OUTPOST;
+			score += BISHOP_OUTPOST_DEFENDED;
 
-			// Bishop is defended by pawn
-			if (pawnAtkMask[color ^ 1][sq] & pawns) {
-				score += BISHOP_OUTPOST_DEFENDED;
-			}
+			// score += BISHOP_OUTPOST;
+			// // Bishop is defended by pawn
+			// if (pawnAtkMask[color ^ 1][sq] & pawns) {
+			// 	score += BISHOP_OUTPOST_DEFENDED;
+			// }
 
 		}
+
+		// Long Diagonal
+		bitboard_t atks = lookUpBishopMoves(sq, b->occupied);
+		if (popCount(atks & CENTER_SQUARES) >= 2) {
+			score += BISHOP_LONG_DIAGONAL;
+		}
+
 	}
 
 	return score;

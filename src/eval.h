@@ -59,12 +59,13 @@ const tuple_t ROOK_MOBILITY[15] = {
 };
 
 
-const tuple_t BISHOP_PAIR              = t(24, 58);
-const tuple_t BISHOP_COLOR_BLOCKED     = t(-2, -10);
-const tuple_t BISHOP_FIANCHETTO        = t(17, 0);
-const tuple_t BISHOP_STRONG_COLOR_CPLX = t(10, 28);
-const tuple_t BISHOP_OUTPOST           = t(15, -10);
-const tuple_t BISHOP_OUTPOST_DEFENDED  = t(35, 0);
+const tuple_t BISHOP_PAIR              = t(30, 69);
+// const tuple_t BISHOP_COLOR_BLOCKED     = t(-2, -5);
+// const tuple_t BISHOP_FIANCHETTO        = t(6, -2);
+// const tuple_t BISHOP_STRONG_COLOR_CPLX = t(10, 28);
+// const tuple_t BISHOP_OUTPOST           = t(15, 10);
+const tuple_t BISHOP_OUTPOST_DEFENDED  = t(17,  10);
+const tuple_t BISHOP_LONG_DIAGONAL     = t(29,  1);
 
 const tuple_t KNIGHT_OUTPOST          = t(12, 12);
 const tuple_t KNIGHT_OUTPOST_DEFENDED = t(31, 16);
