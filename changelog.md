@@ -173,15 +173,17 @@ Evaluation
   - [x] Sophisticated evaluation of pawn structure (+ king-safety wrt. pawns)
 - v3.0.3
   - Refactor evaluation for:
-    - [x] Bishop
-    - [ ] Knight
-    - [ ] King Safety
+    - [x] King Safety (v3.0.3)
+    - [x] Knight (v3.0.4)
+    - [x] Mobility Terms (v3.0.5)
+    - [x] Bishop (v3.0.5-b1)
     - [ ] Rook
     - [ ] Queen
-  - v3.0.4
+
     - [ ] Dedicated endgame evals (KPvK, KBNvK)
 - Project
   - [ ] Implement testEGTB file
+  - [ ] Template color_t
 
 
 # Todo

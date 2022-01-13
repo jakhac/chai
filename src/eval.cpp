@@ -111,14 +111,6 @@ value_t mixedEvaluation(board_t* b) {
 
 	prefetchPT(b);
 
-	// NNUE
-	accumulateFeatures(b, chai::WHITE);
-	accumulateFeatures(b, chai::BLACK);
-
-	accum_t* accDstTest = &b->accum[b->ply];
-	assertActiveFeatures(b, chai::WHITE, accDstTest);
-	assertActiveFeatures(b, chai::BLACK, accDstTest);
-
 	value_t eval = 0;
 	float phase = gamePhase(b);
 	// float interpolFactor = std::min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));

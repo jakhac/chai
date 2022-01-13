@@ -57,6 +57,10 @@ value_t t2(tuple_t tuple);
  * Color type. Alias bool type.
  */
 typedef bool color_t;
+// typedef enum color_t {
+// 	BLACK = 0,
+// 	WHITE = 1
+// } color_t;
 
 /**
  * Store moves, scores and number entries in moveList. Used in move generation.
@@ -289,6 +293,11 @@ namespace chai {
 
 const color_t BLACK = 0;
 const color_t WHITE = 1;
+
+	// enum color_t {
+	// 	BLACK = 0,
+	// 	WHITE = 1
+	// };
 
 
 	typedef enum nodeType_t {

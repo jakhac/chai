@@ -15,10 +15,10 @@ CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 
 EXE = ../src/test.exe
 
-CHAI_SRCS = attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
+CHAI_SRCS = main.cpp tt.cpp thread.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
-	syzygy.cpp tt.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp timeMan.cpp pawn.cpp nnue.cpp transformer.cpp
+	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
+	attacks.cpp timeMan.cpp info.cpp transformer.cpp nnue.cpp layers.cpp
 
 SRCS = $(addprefix ../chai/, $(CHAI_SRCS))
 

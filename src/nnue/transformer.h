@@ -1,13 +1,9 @@
 #pragma once
 
-#include <algorithm>
-#include <sstream>
-#include <immintrin.h>
-
 #include "incbin.h"
 #include "../board.h"
 #include "simd.h"
-#include "nnue.h"
+#include "layers.h"
 
 
 #define NNUEFILEVERSIONROTATE       0x7AF32F16u
@@ -17,9 +13,9 @@
 #define NNUEFEATUREHASH             (0x5D69D5B9u ^ 1)
 #define NNUEINPUTSLICEHASH          0xEC42E90Du
 
-extern int netType;
+
+// Either rotation or flip. Defined while parsing a network
 extern int orientOperator;
-extern bool canUseNNUE;
 
 // Indices to index features
 enum {
@@ -44,28 +40,17 @@ const uint32_t PieceToIndex[2][13] = {
     { 0, PS_WPAWN, PS_WKNIGHT, PS_WBISHOP, PS_WROOK, PS_WQUEEN, 0, PS_BPAWN, PS_BKNIGHT, PS_BBISHOP, PS_BROOK, PS_BQUEEN, 0 },
 };
 
+
 int getHalfKPIndex(int sq, int piece, color_t color, int kIdx);
 
 void refreshAccumulator(board_t* b, color_t color);
 
 void accumulateFeatures(board_t* b, color_t color);
 
-void assertActiveFeatures(board_t* b, color_t color, accum_t* accDstTest);
-
 void setActiveFeatures(board_t* b, color_t color, features_t* features);
 
 void updateAccumulator(board_t* b, color_t color, int reusePly);
 
+void updateTransformer(board_t* b, clipped_t* output);
+
 value_t propagate(board_t* b);
-
-value_t evaluateNNUE(board_t* b);
-
-
-// Initialize a local .nnue in compilation.
-void initIncNet();
-
-/**
- * @brief Read NNUE parameters from the given stream.
- * @return True if init successful, else false
- */
-bool initNet(std::istream& ss);

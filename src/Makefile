@@ -11,7 +11,7 @@ EXE_TEST    = test.exe
 SRCS = main.cpp tt.cpp thread.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	attacks.cpp timeMan.cpp info.cpp transformer.cpp nnue.cpp 
+	attacks.cpp timeMan.cpp info.cpp transformer.cpp nnue.cpp layers.cpp
 
 OBJ_RELEASE_DIR = ./obj_release
 OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))

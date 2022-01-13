@@ -1,55 +1,57 @@
 #pragma once
 
-#include "../defs.h"
-#include "simd.h"
+#include <sstream>
+#include <algorithm>
+
+#include "layers.h"
+#include "transformer.h"
 
 
-const int clipShift = 6;
-
-// Feature Layer:
-// HalfKP has 2 * 41024 binary features and forwards up to 32-2 (exclude king) active
-// features to the first hidden layer HD1 with 512 inputs. Both colors use identical
-// weights, thus we only use half of the inputs.
-const size_t FEAT_INPUT_SIZE    = 64 * 641;
-const size_t FEAT_OUT_SIZE_HALF = 256;
-const size_t FEAT_OUT_SIZE      = FEAT_OUT_SIZE_HALF * 2;
-const size_t FEAT_NUM_WEIGHTS   = FEAT_OUT_SIZE_HALF * FEAT_INPUT_SIZE;
-
-const size_t INSLICE_OUT_SIZE   = 512;
-
-// Architecture of the neural network
-const size_t HD1_IN_SIZE        = 512;
-const size_t HD1_OUT_SIZE       = 32;
-
-const size_t RELU1_SIZE         = 32;
-
-const size_t HD2_IN_SIZE        = 32;
-const size_t HD2_OUT_SIZE       = 32;
-
-const size_t RELU2_SIZE         = 32;
-
-const size_t HD3_IN_SIZE     = 32;
-const size_t HD3_OUT_SIZE       = 1;
+extern int netType;
+extern bool canUseNNUE;
 
 
-// Parameters of neural network
-extern int16_t feat_weights[FEAT_INPUT_SIZE * FEAT_OUT_SIZE_HALF];
-extern int16_t feat_biases[FEAT_OUT_SIZE_HALF];
+/**
+ * @brief Initialize a local .nnue from the ../net folder.
+ * (no-op if no CUSTOM_EVALFILE is defined)
+ * 
+ */
+void initIncNet();
 
-extern weight_t hd1_weights[HD1_OUT_SIZE * HD1_IN_SIZE];
-extern int32_t hd1_biases[HD1_OUT_SIZE];
+/**
+ * @brief Read NNUE parameters from the given stream.
+ * @return True if init successful, else false
+ */
+bool initNet(std::istream& ss);
 
-extern weight_t hd2_weights[HD2_IN_SIZE * HD2_OUT_SIZE];
-extern int32_t hd2_biases[HD2_IN_SIZE];
+/**
+ * @brief Read NNUE parameters from the given input stream.
+ */
+void readNetData(std::istream& ss);
 
-extern weight_t out_weights[HD3_OUT_SIZE * HD3_IN_SIZE];
-extern int32_t out_biases[HD3_OUT_SIZE];
+/**
+ * @brief Read cnt elements of type T from the stream into the buffer.
+ */
+template<typename T>
+void readFromStream(std::istream& ss, T* buffer, size_t cnt);
+
+/**
+ * @brief Propagate active features wrt the given board through neural network and
+ * return the value of outlayer neuron.
+ */
+value_t propagate(board_t* b);
+
+/**
+ * @brief Return the NNUE evaluation for the given board.
+ */
+value_t evaluateNNUE(board_t* b);
 
 
-void hiddenLayer1(clipped_t* in, int32_t* out);
+// Misc functions
+uint32_t getOutLayerHash();
+int bit_shuffle(int v, int left, int right, int mask);
+int shuffle(int idx, int dims, bool outlayer);
+bool isBigEndian(void);
 
-void hiddenLayer2(clipped_t* in, int32_t* out);
-
-void clpReluLayer(int32_t* in, clipped_t* out, size_t dim);
-
-void outLayer(clipped_t* in, int32_t* out, size_t inDim);
+template <typename T>
+void endswap(T* buffer);
