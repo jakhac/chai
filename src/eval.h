@@ -72,12 +72,12 @@ const tuple_t KNIGHT_OUTPOST_DEFENDED = t(31, 16);
 const tuple_t KNIGHT_BORDER_SQUARE    = t(-7, -14);
 const tuple_t KNIGHT_BLOCKS_PAWN      = t(6, 16);
 
-const tuple_t ROOK_CONTROLS_PASSER   = t(5, 15);
-const tuple_t ROOK_SAME_FILE_AS_KING = t(15, 0);
+const tuple_t ROOK_CONTROLS_PASSER   = t(0, 12);
+// const tuple_t ROOK_SAME_FILE_AS_KING = t(15, 0);
 const tuple_t ROOK_OPEN_FILE         = t(40, 8);
 const tuple_t ROOK_SEMI_OPEN_FILE    = t(10, 8);
 const tuple_t ROOK_ON_SEVENTH        = t(-1, 33);
-const tuple_t ROOK_CONNECTED         = t(10, 15);
+const tuple_t ROOK_CONNECTED         = t(7, 13);
 
 const tuple_t QUEEN_EARLY_DEVELOPMENT = t(-5, 0);
 const tuple_t QUEEN_DANGEROUS_SQUARE  = t(-7, -7);

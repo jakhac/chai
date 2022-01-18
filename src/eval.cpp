@@ -139,8 +139,8 @@ value_t mixedEvaluation(board_t* b) {
 	tupleEval += evaluateBishops(b, WHITE) - evaluateBishops(b, BLACK);
 	tupleEval += evaluateKnights(b, WHITE) - evaluateKnights(b, BLACK);
 
-	// // Rook-Queen
-	// tupleEval += evaluateRooks(b, WHITE) - evaluateRooks(b, BLACK);
+	// Rook-Queen
+	tupleEval += evaluateRooks(b, WHITE) - evaluateRooks(b, BLACK);
 	// tupleEval += evaluateQueens(b, WHITE) - evaluateQueens(b, BLACK);
 
 	// // // King
@@ -160,7 +160,7 @@ value_t mixedEvaluation(board_t* b) {
 
 	// oldEval += _kingSafety(b, WHITE, &interpolFactor) - _kingSafety(b, BLACK, &interpolFactor);
 
-	oldEval += openFilesRQ(b, WHITE) - openFilesRQ(b, BLACK);
+	// oldEval += openFilesRQ(b, WHITE) - openFilesRQ(b, BLACK);
 	// oldEval += bishopPair(b, WHITE) - bishopPair(b, BLACK);
 
 	// Combine evals
@@ -490,9 +490,9 @@ tuple_t evaluateRooks(board_t* b, color_t color) {
 		lastSq = sq;
 		sq = popLSB(&rooks);
 
-		if (FILE_LIST[squareToFile[sq]] & oppKSq) {
-			score += ROOK_SAME_FILE_AS_KING;
-		}
+		// if (FILE_LIST[squareToFile[sq]] & oppKSq) {
+		// 	score += ROOK_SAME_FILE_AS_KING;
+		// }
 
 		// Rooks on open files
 		if (!(b->occupied & FILE_LIST[squareToFile[sq]])) {
