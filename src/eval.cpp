@@ -141,7 +141,7 @@ value_t mixedEvaluation(board_t* b) {
 
 	// Rook-Queen
 	tupleEval += evaluateRooks(b, WHITE) - evaluateRooks(b, BLACK);
-	// tupleEval += evaluateQueens(b, WHITE) - evaluateQueens(b, BLACK);
+	tupleEval += evaluateQueens(b, WHITE) - evaluateQueens(b, BLACK);
 
 	// // // King
 	tupleEval += evaluateKing(b, WHITE) - evaluateKing(b, BLACK);
@@ -522,11 +522,11 @@ tuple_t evaluateQueens(board_t* b, color_t color) {
 	bitboard_t queens = getPieces(b, QUEEN, color);
 
 	// Penality for early development
-	if (   (color == WHITE && pieceAt(b, D1) != Pieces::Q)
-		|| (color == BLACK && pieceAt(b, D8) != Pieces::q)) {
+	// if (   (color == WHITE && pieceAt(b, D1) != Pieces::Q)
+	// 	|| (color == BLACK && pieceAt(b, D8) != Pieces::q)) {
 
-		score += QUEEN_EARLY_DEVELOPMENT;
-	}
+	// 	score += QUEEN_EARLY_DEVELOPMENT;
+	// }
 
 	int sq;
 	bitboard_t threats;

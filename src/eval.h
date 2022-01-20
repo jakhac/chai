@@ -29,8 +29,8 @@ const value_t pieceValues[13] = {
 };
 
 const tuple_t pieceTupleValues[13] = {
-	0, t(100, 150), t(325, 305), t(325, 325), t(550, 550), t(1000, 1000),
-	0, t(100, 150), t(325, 305), t(325, 325), t(550, 550), t(1000, 1000),
+	0, t(100, 160), t(325, 310), t(325, 340), t(550, 640), t(1000, 1150),
+	0, t(100, 160), t(325, 310), t(325, 340), t(550, 640), t(1000, 1150),
 	0
 };
 
@@ -79,7 +79,7 @@ const tuple_t ROOK_SEMI_OPEN_FILE    = t(10, 8);
 const tuple_t ROOK_ON_SEVENTH        = t(-1, 33);
 const tuple_t ROOK_CONNECTED         = t(7, 13);
 
-const tuple_t QUEEN_EARLY_DEVELOPMENT = t(-5, 0);
+// const tuple_t QUEEN_EARLY_DEVELOPMENT = t(-5, 0);
 const tuple_t QUEEN_DANGEROUS_SQUARE  = t(-7, -7);
 // const tuple_t QUEEN_CENTER_SIGHT      = t(2, 3);
 
