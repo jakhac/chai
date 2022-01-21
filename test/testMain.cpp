@@ -1,16 +1,16 @@
 #include <iostream>
-#include "gtest/gtest.h"
 
 #include "testFixtures.h"
 
-int main(int argc, char **argv) 
-{
+
+int main(int argc, char **argv) {
+    
     ::testing::InitGoogleTest(&argc, argv);
-
-	auto old_buffer = std::cout.rdbuf(nullptr);
-
     // ::testing::GTEST_FLAG(filter) = "SearchTest*";
+    // ::testing::FLAGS_gtest_color = "yes"; TODO if linux
 
-    // 0 if passed, else 1
+    // Disable std output to prevent spam in cmd-interface
+	std::cout.rdbuf(nullptr);
+
     return RUN_ALL_TESTS();
 }

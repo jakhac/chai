@@ -27,12 +27,12 @@ const int promIndex[] = { chai::KNIGHT, chai::BISHOP, chai::ROOK, chai::QUEEN };
 const int piecePromIndex[] = { 0, 0, PROM_TO_KNIGHT, PROM_TO_BISHOP, PROM_TO_ROOK, PROM_TO_QUEEN, 0 };
 
 // new move, promPiece
-inline move_t serializeMove(int from, int to, int flag, int promoteTo) {
+inline move_t serializeMove(int from, int to, int moveType, int promoteTo) {
 	Assert(promoteTo == 0 || (PROM_TO_KNIGHT <= promoteTo && promoteTo <= PROM_TO_QUEEN));
 
 	return (from)
 		| (to << 6)
-		| (flag)
+		| (moveType)
 		| (promoteTo);
 }
 

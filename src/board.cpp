@@ -1187,7 +1187,8 @@ bool checkingMove(board_t* b, move_t move) {
 			break;
 	}
 
-	// 2. Discovered attack: Slider can hit kingSq
+	// TODO use getDiscoveredAttacks w/ b, n, q
+	// 2. Discovered attack: Slider can hit kingSq 
 	// If (from, to, kSq) are not aligned, check if xray from king hits any sliders
 	if (!aligned(kingSq, from, to)
 		&& (sqIsBlockerForKing(b, kingSq, b->stm, from))) {
@@ -1250,6 +1251,8 @@ bool castleValid(board_t* b, int castle, bitboard_t* attackerSet) {
 	if (isCheck(b, b->stm)) return false;
 
 	if (!(b->castlePermission & castle)) return false;
+
+	// TODO Assert that piece H1 [..] is a rook
 
 	switch (castle) {
 		case K_CASTLE:

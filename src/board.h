@@ -343,11 +343,11 @@ bitboard_t squareAttackedBy(board_t* b, int square, color_t color);
 bitboard_t squareAtkDef(board_t* b, int square);
 
 /**
- * Get all pieces attacking the given square, independet of side.
+ * Get all pieces attacking the given square, independent of side.
  * Extra parameter to pass the occupied squares needed or slider generation.
  *
  * @param  b board_t to call function.
- * @param occupied Bitboard of currently occupied squares
+ * @param  occupied Bitboard of currently occupied squares
  * @param  square Square to check.
  *
  * @returns Bitboard with attackers / defenders.

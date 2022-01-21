@@ -1,6 +1,6 @@
 #include "testFixtures.h"
 
-using namespace SearchTest;
+namespace SearchTest {
 
 TEST_F(SearchTest, MateIn5_1) {
 	parseFen(pBoard, "r7/3bb1kp/q4p1N/1pnPp1np/2p4Q/2P5/1PB3P1/2B2RK1 w - - 1 40");
@@ -65,3 +65,4 @@ TEST_F(SearchTest, Fisher_5) {
 	EXPECT_GE(search(pBoard, pSearch, pInstr), VALUE_IS_MATE_IN);
 }
 
+} // namespace SearchTest

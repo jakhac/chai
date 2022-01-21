@@ -271,23 +271,23 @@ enum CASTLING_RIGHTS {
 };
 
 typedef enum TT_FLAG {
-	TT_NONE = 0,
+	TT_NONE  = 0,
 	TT_ALPHA = 1,
-	TT_BETA = 1 << 1,
+	TT_BETA  = 1 << 1,
 	TT_VALUE = 1 << 2,
-	TT_EVAL = 1 << 3
+	TT_EVAL  = 1 << 3
 } bound_t;
 
 enum MOVE_FLAG {
-	NORMAL_MOVE = 0 << 12,
-	CASTLE_MOVE = 1 << 12,
-	EP_MOVE = 2 << 12,
-	PROM_MOVE = 3 << 12,
+	NORMAL_MOVE    = 0 << 12,
+	CASTLE_MOVE    = 1 << 12,
+	EP_MOVE        = 2 << 12,
+	PROM_MOVE      = 3 << 12,
 
 	PROM_TO_KNIGHT = 0 << 14,
 	PROM_TO_BISHOP = 1 << 14,
-	PROM_TO_ROOK = 2 << 14,
-	PROM_TO_QUEEN = 3 << 14,
+	PROM_TO_ROOK   = 2 << 14,
+	PROM_TO_QUEEN  = 3 << 14,
 };
 
 enum SQUARES {

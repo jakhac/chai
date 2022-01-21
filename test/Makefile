@@ -22,7 +22,8 @@ CHAI_SRCS = attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
 
 SRCS = $(addprefix ../chai/, $(CHAI_SRCS))
 
-SRCS += testMain.cpp testSearch.cpp testPerft.cpp testSee.cpp testEval.cpp
+SRCS += testMain.cpp testSearch.cpp testPerft.cpp \
+	testSee.cpp testEval.cpp testPosition.cpp
 
 OBJ_DIR = ../src/obj_debug
 OBJS = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(notdir $(SRCS)))

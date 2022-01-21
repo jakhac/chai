@@ -1,7 +1,8 @@
-#include "gtest/gtest.h"
 
 #include "../src/uci.h"
 #include "../src/perft.h"
+
+#include "gtest/gtest.h"
 
 
 namespace SearchTest {
@@ -77,6 +78,25 @@ namespace SeeTest {
 
 namespace EvalTest {
 	class EvalTest : public ::testing::Test {
+
+	protected:
+		board_t* pBoard;
+
+		virtual void SetUp() {
+			pBoard = new board_t();
+
+			init();
+		}
+
+		virtual void TearDown() {
+			delete pBoard;
+		}
+
+	};
+}
+
+namespace PositionalTest {
+	class PositionalTest : public ::testing::Test {
 
 	protected:
 		board_t* pBoard;
