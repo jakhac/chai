@@ -4,6 +4,7 @@
 #include "pawn.h"
 #include "psqt.h"
 #include "timeMan.h"
+#include "./nnue/nnue.h"
 
 
 const int pPhase   = 0;
@@ -18,6 +19,7 @@ const value_t VALUE_MATE       = 31000;
 const value_t VALUE_IS_MATE_IN = VALUE_MATE - (MAX_DEPTH * 2);
 const value_t VALUE_NONE       = VALUE_INFTY + 1;
 const value_t VALUE_WIN        = 10000;
+const value_t VALUE_LOSS       = -VALUE_WIN;
 const value_t VALUE_TB_WIN     = VALUE_MATE - 1000;
 
 // Maximum material in pawns excluding kings

@@ -15,10 +15,15 @@ CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 
 EXE = ../src/test.exe
 
-CHAI_SRCS = attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
+CHAI_SRCS = main.cpp tt.cpp thread.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
+<<<<<<< HEAD
 	syzygy.cpp tt.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
 	thread.cpp timeMan.cpp pawn.cpp endgame.cpp
+=======
+	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
+	attacks.cpp timeMan.cpp info.cpp transformer.cpp nnue.cpp layers.cpp
+>>>>>>> nnue
 
 SRCS = $(addprefix ../chai/, $(CHAI_SRCS))
 
@@ -28,7 +33,7 @@ SRCS += testMain.cpp testSearch.cpp testPerft.cpp \
 OBJ_DIR = ../src/obj_debug
 OBJS = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(notdir $(SRCS)))
 
-VPATH = ../src:../src/egtb:
+VPATH = ../src:../src/egtb:../src/nnue:
 
 $(EXE): $(OBJS)
 	$(CXX) $(LXXFLAGS) -o $(EXE) $(OBJS) $(GTEST)

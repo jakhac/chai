@@ -199,6 +199,10 @@ static void resetSearchParameters(Thread thread) {
 	s->fh = 0;
 	s->futileFH = 0;
 	s->futileCnt = 0;
+
+	// NNUE
+	b->accum[b->ply].compState[chai::WHITE] = EMPTY;
+	b->accum[b->ply].compState[chai::BLACK] = EMPTY;
 }
 
 value_t search(board_t* b, stats_t* s, instr_t* i) {
@@ -546,7 +550,7 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 	// Give opposite side a free move and use nullScore as lower bound.
 	// If this position is still winning, e.g. fails high, it will never be reached.
 	// Restrict NMP to reasonable positions (zugzwang, depth, checks).
-	if (ss->currentMove != MOVE_NULL
+	if (ss->currentMove != MOVE_NULL // TODO
 		&& !inCheck
 		&& !pvNode
 		&& depth > 2

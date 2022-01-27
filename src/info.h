@@ -52,7 +52,7 @@ std::string getStringMove(board_t* b, const move_t move);
  */
 void printBinary(bitboard_t x);
 
-void printEngineMeta(std::string assert, std::string compiler);
+void printEngineMeta(std::string assert, std::string compiler, std::string simd);
 
 /**
  * Print UCI info to console.

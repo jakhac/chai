@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+#include <vector>
+
+
 #define MAX_DEPTH 64
 #define MAX_GAME_MOVES 512
 #define BUCKETS 3
@@ -7,6 +11,8 @@
 #define NUM_SQUARES 64
 #define MAX_POSITION_MOVES 256
 #define DEFAULT_EP_SQ 0
+
+#define a64 alignas(64)
 
 /**
  * Unsigned 64-Bit integer represents bitboard isntance.
@@ -50,15 +56,19 @@ value_t t2(tuple_t tuple);
 /**
  * Color type. Alias bool type.
  */
-typedef int color_t;
+typedef bool color_t;
+// typedef enum color_t {
+// 	BLACK = 0,
+// 	WHITE = 1
+// } color_t;
 
 /**
  * Store moves, scores and number entries in moveList. Used in move generation.
  */
 struct moveList_t {
 	int cnt = 0;
-	int moves[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
-	int scores[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
+	a64 int moves[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
+	a64 int scores[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
 
 	bitboard_t attackedSquares = 0ULL;
 };
@@ -112,7 +122,7 @@ struct bucket_t {
  * Transposition table instance. Contains stat-variables and pointer to entries.
  */
 struct ttable_t {
-	bucket_t* bucketList = NULL;
+	a64 bucket_t* bucketList = NULL;
 
 	// total number of buckets (entries-stacks)
 	int buckets = 0;
@@ -150,6 +160,39 @@ struct pawntable_t {
 	// measure successful probes
 	int probed;
 	int hit;
+};
+
+typedef int8_t weight_t;
+typedef int8_t clipped_t;
+
+enum {
+    NNUE_ROTATE = 1,
+    NNUE_FLIP   = 2
+};
+
+enum {
+	EMPTY = 0,
+	COMPUTED = 1
+};
+
+struct accum_t {
+    a64 int16_t accumulation[2][256];
+    bool compState[2] = { EMPTY, EMPTY }; 
+};
+
+struct dirty_t {
+	bool isKingMove;
+
+	int changedPieces;
+    int piece[3];
+    int from[3];
+    int to[3];
+};
+
+struct features_t {
+    // Keep track of all feature-indices to add and to indices to delete
+    std::vector<size_t> addIndex;
+    std::vector<size_t> delIndex;
 };
 
 struct board_t {
@@ -193,12 +236,16 @@ struct board_t {
 	bitboard_t attackedSquares[2];
 
 	// Stack stores pushed moves as Undo objects.
-	undo_t undoHistory[MAX_GAME_MOVES];
+	a64 undo_t undoHistory[MAX_GAME_MOVES];
 
 	// PSQT values and material for calculation on-the-fly
 	value_t psqtOpening = 0;
 	value_t psqtEndgame = 0;
 	value_t material    = 0;
+
+
+	a64 accum_t accum[MAX_DEPTH];
+	a64 dirty_t dp[MAX_DEPTH];
 };
 
 /// Holds various pruning and counting statistics.
@@ -248,6 +295,12 @@ namespace chai {
 
 const color_t BLACK = 0;
 const color_t WHITE = 1;
+
+	// enum color_t {
+	// 	BLACK = 0,
+	// 	WHITE = 1
+	// };
+
 
 	typedef enum nodeType_t {
 		PV, NoPV

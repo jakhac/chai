@@ -91,6 +91,14 @@ static value_t scaleGamePhase(tuple_t tuple, float phase) {
 
 value_t evaluation(board_t* b) {
 
+#ifdef USE_NNUE
+	// Use NNUE on balanced positions
+	if (   canUseNNUE
+		&& abs(b->psqtEndgame) < 520) {
+		return evaluateNNUE(b);
+	}
+#endif // USE_NNUE
+
 	prefetchPT(b);
 
 	// evaluateEndgame<KvKNB>(b);

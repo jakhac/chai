@@ -5,13 +5,14 @@
 VERSION = v3.1.0
 
 EXE_RELEASE = chai_$(VERSION)_release.exe
-EXE_DEBUG = chai_$(VERSION)_debug.exe
-EXE_TEST = test.exe
+EXE_DEBUG   = chai_$(VERSION)_debug.exe
+EXE_TEST    = test.exe
 
-SRCS = main.cpp tt.cpp attacks.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
+SRCS = main.cpp tt.cpp thread.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp timeMan.cpp info.cpp endgame.cpp
+	thread.cpp timeMan.cpp info.cpp endgame.cpp attacks.cpp nnue.cpp  \
+	transformer.cpp layers.cpp
 
 OBJ_RELEASE_DIR = ./obj_release
 OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
@@ -19,134 +20,114 @@ OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
 OBJ_DEBUG_DIR = ./obj_debug
 OBJS_DEBUG = $(patsubst %.cpp, $(OBJ_DEBUG_DIR)/%.o, $(notdir $(SRCS)))
 
-VPATH = egtb:
+VPATH = egtb:nnue:
 
 
 #######################################
 # 2. Configure architecture & type
 #######################################
 
-# build type
-assert=no
-debug=no
-info=yes
-test=no
+# Build type
+assert   = no
+debug    = no
+nnue     = yes
+evalfile = none
 
-# architecture
-optimize=yes
-bits=64
-prefetch=yes
-popcnt=yes
-sse=yes
-sse2=yes
-ssse3=yes
-sse41=yes
-avx2=yes
-pext=yes
-bits=64
+# Default architecture enables all
+prefetch = yes
+optimize = yes
+popcnt   = yes
+ssse3    = yes
+avx2     = yes
 
-# custom build configs
-threads=0
-hashMb=265
+####
+#### 2.1 Define optional constants if passed by user.
+####
+threads = 1
+hashMb  = 256
 
-
-ifeq ($(TYPE),release)
-	assert=no
-	debug=no
-	info=no
-	test=no
-endif
-ifeq ($(TYPE),debug)
-	assert=yes
-	debug=yes
-	info=yes
-	test=no
-
-	optimize=no
-endif
-
-
-ifneq ($(threads),0)
+ifneq ($(threads),1)
 	CXXFLAGS += -DCUSTOM_THREADS=$(threads)
 endif
-ifneq ($(hashMb),265)
+
+ifneq ($(hashMb),256)
 	CXXFLAGS += -DCUSTOM_HASHSIZE=$(hashMb)
 endif
 
+ifneq ($(evalfile),none)
+	CXXFLAGS += -DCUSTOM_EVALFILE=\"../nets/$(evalfile)\"
+endif
 
-ifeq ($(info),yes)
-	CXXFLAGS += -DINFO=
+####
+#### 2.2 Set additional flags for respective build type.
+####
+ifeq ($(TYPE),release)
+	assert = no
+	debug  = no
+endif
+
+ifeq ($(TYPE),debug)
+	assert   = yes
+	debug    = yes
+	optimize = no
 endif
 
 ifeq ($(assert),yes)
-	CXXFLAGS += -DASSERT=
+	CXXFLAGS += -DASSERT
 endif
 
-ifeq ($(test),yes)
-	CXXFLAGS += -DTESTING=
+ifeq ($(debug),yes)
+	CXXFLAGS += -DINFO
 endif
 
-ifeq ($(DEBUG),yes)
-	CXXFLAGS+= -DINFO=
+ifeq ($(nnue),yes)
+	CXXFLAGS += -DUSE_NNUE
 endif
 
+
+
+####
+#### 2.3 Set optimization flags as previously defined.
+####
 ifeq ($(optimize),yes)
 	CXXFLAGS += -O3
 endif
 
-ifeq ($(bits),64)
-	CXXFLAGS += -DIS_64_BIT
+ifeq ($(popcnt),yes)
+	CXXFLAGS += -mssse3 -mpopcnt
 endif
 
 ifeq ($(prefetch),yes)
-	ifeq ($(sse),yes)
-		CXXFLAGS += -msse
-		DEPENDFLAGS += -msse
-	endif
-else
-	CXXFLAGS += -DNO_PREFETCH
-endif
-
-ifeq ($(popcnt),yes)
-	ifeq ($(bits),64)
-		CXXFLAGS += -msse3 -mpopcnt -DUSE_POPCNT
-	else
-		CXXFLAGS += -mpopcnt -DUSE_POPCNT
-	endif
+	CXXFLAGS += -DUSE_PREFETCH -msse
+	DEPENDFLAGS += -msse
 endif
 
 ifeq ($(avx2),yes)
-	CXXFLAGS += -DUSE_AVX2
-	CXXFLAGS += -mavx2
+	CXXFLAGS += -DUSE_AVX2 -mavx2
 endif
 
-ifeq ($(pext),yes)
-	CXXFLAGS += -DUSE_PEXT
-	CXXFLAGS += -mbmi -mbmi2
+ifeq ($(ssse3),yes)
+	CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
 endif
 
 
-# Always add standard flags
-CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m$(bits)
-
-# Warning flags for cleaner code
+####
+#### 2.4 Additional flags for code quality.
+####
+CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m64
+CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 CXXFLAGS += -pedantic -Wextra -Wshadow
-
-# Add version flag for info in target exe
 CXXFLAGS += -DVERSION=$(VERSION)
 
-# Set 4MB stack size
-CXXFLAGS += -Wl,--stack,4194304 -fexceptions
-
 DEPENDFLAGS += -std=c++17 -fexceptions
-LDFLAGS += -m$(bits) -Wl,--stack,4194304
+
+LDFLAGS += -m64 -Wl,--stack,4194304
 
 
 #######################################
-# 3. Compiler and link to target
+# 3. Compile and link to target
 #######################################
 
-# Use GNU compiler
 CXX = g++
 
 $(EXE_DEBUG): $(OBJS_DEBUG)
@@ -160,7 +141,6 @@ $(EXE_RELEASE): $(OBJS_RELEASE)
 
 $(OBJ_RELEASE_DIR)/%.o: %.cpp
 	g++ $(CXXFLAGS) -c -o $@ $<
-
 
 
 #######################################

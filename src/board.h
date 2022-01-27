@@ -262,10 +262,10 @@ bool checkBoard(board_t* board);
  */
 bool push(board_t* b, move_t move);
 
-void pushCastle(board_t* b, move_t move);
-void pushEnPas(board_t* b, move_t move);
-void pushPromotion(board_t* b, move_t move);
-void pushNormal(board_t* b, move_t move);
+void pushCastle(board_t* b, move_t move, dirty_t* dp);
+void pushEnPas(board_t* b, move_t move, dirty_t* dp);
+void pushPromotion(board_t* b, move_t move, dirty_t* dp);
+void pushNormal(board_t* b, move_t move, dirty_t* dp);
 
 /**
  * Push rooks with castle move on board. Small checks for valid init positions of king and rook.

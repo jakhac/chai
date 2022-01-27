@@ -2,13 +2,21 @@
 
 int main() {
 	// Print meta information at every startup
-	printEngineMeta(info_ASSERT, info_COMPILER);
+	printEngineMeta(info_ASSERT, info_COMPILER, info_SIMD);
 
 	// Init all tables and parameters
 	init();
 	initHashTables();
 	initEGTB("");
 	initThreadPool();
+
+#if defined(USE_NNUE) && defined(CUSTOM_EVALFILE)
+	initIncNet();
+#endif
+
+	// TODO
+	// std::ifstream nnueData("../nets/nn-fb50f1a2b1-20210705.nnue", std::ios::binary);
+	// initNet(nnueData);
 
 	// Print status and drop into cli protocol
 	parseFen(&_board, STARTING_FEN);
@@ -29,6 +37,11 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 	moveList_t moveList;
 	move_t parsedMove;
 	std::string userInput;
+
+	propagate(b);
+
+	// bitboard_t t = wBackwardPawns(b);
+	// printBitBoard(&t);
 
 	// for (int j = 0; j < 64; j++) {
 		// bitboard_t t = dangerZone[chai::BLACK][E4];
@@ -126,6 +139,18 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 			cout << endl;
 			push(b, parsedMove);
 			printBoard(b);
+
+			// NNUE debug
+			propagate(b);
+
+			// accumulateFeatures(b, chai::WHITE);
+			// accumulateFeatures(b, chai::BLACK);
+
+			// accum_t* accDstTest = &b->accum[b->ply];
+			// assertActiveFeatures(b, chai::WHITE, accDstTest);
+			// assertActiveFeatures(b, chai::BLACK, accDstTest);
+			// cout << "Passed asserts" << endl;
+
 			continue;
 		}
 
