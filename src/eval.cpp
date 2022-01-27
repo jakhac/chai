@@ -33,16 +33,7 @@ value_t t1(tuple_t tuple) {
 
 value_t t2(tuple_t tuple) {
 	return (int16_t)((uint16_t)((unsigned)(tuple + 0x8000) >> 16));
-	// return (tuple >> 16) & 0x0000FFFF;
 }
-
-
-// Old functions
-float interpolate(int a, int b, float t);
-value_t openFilesRQ(board_t* b, color_t color);
-value_t bishopPair(board_t* b, color_t color);
-value_t _kingSafety(board_t* b, color_t color, float* interpol);
-
 
 
 /**
@@ -98,19 +89,38 @@ static value_t scaleGamePhase(tuple_t tuple, float phase) {
 	return ((t1(tuple) * (256 - phase)) + (t2(tuple) * phase)) / 256;
 }
 
-value_t mixedEvaluation(board_t* b) {
+value_t evaluation(board_t* b) {
 
 	prefetchPT(b);
+
+	// evaluateEndgame<KvKNB>(b);
 
 	value_t eval = 0;
 	float phase = gamePhase(b);
 
-	// Check insufficient material to detect drawn positions
-	if (popCount(b->occupied) <= 5 && insufficientMaterial(b)) {
-		return 0;
+	// Check for known endgames
+	if (popCount(b->occupied) <= 5) {
+
+		if (insufficientMaterial(b))
+			return 0;
+
+		if (isKvKNB(b))
+ 			return evaluate_KvKNB(b);
+
+		if (isKQvKR(b))
+ 			return evaluate_KQvKR(b);
+
+		if (isKQvKP(b))
+			return evaluate_KQvKP(b);
+
+		if (isKQvKQ(b))
+			return evaluate_KQvKQ(b);
+
+		// if (isKvKX(b))
+		// 	return evaluate_KvKX(b);
 	}
 
-	// calculate reused bitboards once and share between functions
+	// Calculate these bitboards once and share between functions
 	b->attackedSquares[WHITE] = attackerSet(b, WHITE);
 	b->attackedSquares[BLACK] = attackerSet(b, BLACK);
 
@@ -126,42 +136,20 @@ value_t mixedEvaluation(board_t* b) {
 	}
 
 	tupleEval += t(pawnEval, pawnEval);
-	tupleEval += materialTupleScore(b);
 	tupleEval += t(b->psqtOpening, b->psqtEndgame);
+	tupleEval += materialTupleScore(b);
 
 	tupleEval += mobility(b, WHITE) - mobility(b, BLACK);
-
-	/****** NEW EVAL ******/
-
 	tupleEval += squareControl(b, WHITE) - squareControl(b, BLACK);
 
-	// // Knight-Bishop placement and coordination
 	tupleEval += evaluateBishops(b, WHITE) - evaluateBishops(b, BLACK);
 	tupleEval += evaluateKnights(b, WHITE) - evaluateKnights(b, BLACK);
 
-	// Rook-Queen
 	tupleEval += evaluateRooks(b, WHITE) - evaluateRooks(b, BLACK);
 	tupleEval += evaluateQueens(b, WHITE) - evaluateQueens(b, BLACK);
 
-	// // // King
+	// King
 	tupleEval += evaluateKing(b, WHITE) - evaluateKing(b, BLACK);
-
-
-	/****** OLD EVAL ******/
-
-	// squares controlled
-	// int centerSquares = (popCount(b->attackedSquares[WHITE] & CENTER_SQUARES) -
-	// 					 popCount(b->attackedSquares[BLACK] & CENTER_SQUARES));
-	// int surroundingSquares = popCount(b->attackedSquares[WHITE] & ~CENTER_SQUARES) -
-	// 	popCount(b->attackedSquares[BLACK] & ~CENTER_SQUARES);
-	// int kingSquares = popCount(b->attackedSquares[WHITE] & kingAtkMask[getKingSquare(b, WHITE)]) -
-	// 	popCount(b->attackedSquares[BLACK] & kingAtkMask[getKingSquare(b, BLACK)]);
-	// oldEval += surroundingSquares + 2 * centerSquares + 3 * kingSquares;
-
-	// oldEval += _kingSafety(b, WHITE, &interpolFactor) - _kingSafety(b, BLACK, &interpolFactor);
-
-	// oldEval += openFilesRQ(b, WHITE) - openFilesRQ(b, BLACK);
-	// oldEval += bishopPair(b, WHITE) - bishopPair(b, BLACK);
 
 	// Combine evals
 	value_t newEval = scaleGamePhase(tupleEval, phase);
@@ -171,57 +159,6 @@ value_t mixedEvaluation(board_t* b) {
 	return (b->stm == WHITE) ? eval : -eval;
 }
 
-
-value_t evaluation(board_t* b) {
-	return mixedEvaluation(b);
-
-	// Prefetch as early as possible
-	prefetchPT(b);
-
-	// Check insufficient material to detect drawn positions
-	if (popCount(b->occupied) <= 5 && insufficientMaterial(b)) {
-		return 0;
-	}
-
-	tuple_t eval = 0;
-	// float w1 = interpolCoeff(b);
-	float phase = gamePhase(b);
-	
-	// Calculate reused bitboards once and share between eval functions
-	b->attackedSquares[WHITE] = attackerSet(b, WHITE);
-	b->attackedSquares[BLACK] = attackerSet(b, BLACK);
-
-	// Pawn evaluation
-	pt->probed++;
-	value_t pawnEval = 0;
-	if (!probePT(b, &pawnEval)) {
-		pawnEval = evaluatePawns(b);
-		storePT(b, pawnEval);
-	}
-
-	// Basic evaluation components: Center control, Mobility
-	eval += t(pawnEval, pawnEval);
-	eval += materialTupleScore(b);
-	eval += t(b->psqtOpening, b->psqtEndgame);
-
-	eval += squareControl(b, WHITE) - squareControl(b, BLACK);
-	eval += mobility(b, WHITE) - mobility(b, BLACK);
-
-	// Knight-Bishop placement and coordination
-	eval += evaluateBishops(b, WHITE) - evaluateBishops(b, BLACK);
-	eval += evaluateKnights(b, WHITE) - evaluateKnights(b, BLACK);
-
-	// Rook-Queen
-	eval += evaluateRooks(b, WHITE) - evaluateRooks(b, BLACK);
-	eval += evaluateQueens(b, WHITE) - evaluateQueens(b, BLACK);
-
-	// King
-	eval += evaluateKing(b, WHITE) - evaluateKing(b, BLACK);
-
-	value_t finalEval = ((t1(eval) * (256 - phase)) + (t2(eval) * phase)) / 256;
-	Assert(abs(finalEval) < VALUE_IS_MATE_IN);
-	return (b->stm == WHITE) ? finalEval : -finalEval;
-}
 
 value_t lazyEvaluation(board_t* b) {
 	value_t eval = 0;
@@ -260,20 +197,12 @@ tuple_t mobility(board_t* b, color_t color) {
 	moveList->cnt = 0;
 	addBishopCaptures(b, moveList);
 	addBishopMoves(b, moveList);
-	// score += BISHOP_MOBILITY * moveList->cnt;
 	score += BISHOP_MOBILITY[moveList->cnt];
-
-	// Favor knight moves in opening and midgame
-	// moveList->cnt = 0;
-	// addKnightMoves(b, moveList);
-	// addKnightCaptures(b, moveList);
-	// score += KNIGHT_MOBILITY * moveList->cnt;
 
 	// Favor rook mobility in towards endgame
 	moveList->cnt = 0;
 	addRookMoves(b, moveList);
 	addRookCaptures(b, moveList);
-	// score += ROOK_MOBILITY * moveList->cnt;
 	score += ROOK_MOBILITY[moveList->cnt];
 	
 	b->stm = tempColor;
@@ -647,51 +576,6 @@ int undefendedQueenChecks(board_t* b, int kSq, color_t color) {
 	}
 	return res;
 }
-
-/*tuple_t kingSafety(board_t* b, int side) {
-	int result = 0;
-	int kSq = getKingSquare(b, side);
-	bitboard_t pawns = getPieces(b, PAWN, side);
-
-	// count pawn shielder
-	result += popCount(pawnShield[side][kSq] & pawns) * 3;
-
-	// punish attacked squares around king 
-	result += 8 - popCount(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
-
-	// int openFilePenalty = 0; TODO
-	// if not endgame
-	if (!(popCount(b->occupied) <= 7 || countMajorPieces(b, side) <= 6)) {
-		int file;
-		// punish open king file
-		if (!(FILE_LIST[squareToFile[kSq]] & pawns)) {
-			result -= 8;
-		}
-
-		file = squareToFile[kSq - 1];
-		if (fileValid(file) && !(FILE_LIST[file] & pawns)) {
-			result -= 5;
-		}
-
-		file = squareToFile[kSq + 1];
-		if (fileValid(file) && !(FILE_LIST[file] & pawns)) {
-			result -= 5;
-		}
-	}
-
-	// punish pinned pieces (excluding pawns) to kSq
-	result -= popCount(getPinned(b, kSq, side) & ~pawns);
-
-	//scale depending on gamestate
-
-	int attackedKingSquares = popCount(kingAtkMask[kSq] & b->attackedSquares[side ^ 1]);
-	Assert(attackedKingSquares <= 8);
-
-	result -= kingZoneTropism[attackedKingSquares];
-
-	Assert(abs(result) < VALUE_IS_MATE_IN);
-	return t(result, result);
-}*/
  
 tuple_t evaluateKing(board_t* b, color_t color) {
 	tuple_t score = 0;
@@ -715,30 +599,18 @@ tuple_t evaluateKing(board_t* b, color_t color) {
 	// determine danger-level by lookup in the safety table
 	bitboard_t dZone = dangerZone[color][kSq];
 
-	int attackerUnits    = 0;
 	int undefendedChecks = 2 * undefendedKnightChecks(b, kSq, color ^ 1)
 						 + 2 * undefendedBishopChecks(b, kSq, color ^ 1)
 						 + 3 * undefendedRookChecks(b, kSq, color ^ 1)
 						 + 3 * undefendedQueenChecks(b, kSq, color ^ 1);
 
-	if (popCount(dZone & b->attackedSquares[color ^ 1]) > 2) {
-
+	int attackerUnits    = 0;
+	if (popCount(dZone & b->attackedSquares[color ^ 1]) > 2)
 		attackerUnits = getAttackerUnits(b, dZone, color);
-		// int attackedKingSquares = popCount(dangerZone & b->attackedSquares[color ^ 1]);
-		// value_t tropism = kingZoneTropism[attackedKingSquares];
-		// score -= t(tropism, tropism);
 
-		// 4) Count pieces that can check king from non-attacked square
-		// score += undefendedKnightChecks(b, kSq, color ^ 1) * KING_CHECK_UNDEF_KNIGHT;
-		// score += undefendedBishopChecks(b, kSq, color ^ 1) * KING_CHECK_UNDEF_BISHOP;
-		// score += undefendedRookChecks(b, kSq, color ^ 1) * KING_CHECK_UNDEF_ROOK;
-		// score += undefendedQueenChecks(b, kSq, color ^ 1) * KING_CHECK_UNDEF_QUEEN;
-
-	}
 
 	int safetyIndex = std::min(99, undefendedChecks + attackerUnits);
 	value_t safetyValue = safetyTable[safetyIndex];
-	Assert(safetyValue < VALUE_IS_MATE_IN);
 	score -= t(safetyValue, 0.5 * safetyValue);
 
 	// King activity
@@ -761,7 +633,6 @@ tuple_t evaluateKing(board_t* b, color_t color) {
 	if (!(pawns & FILE_LIST[kingFile])) {
 		score += T_KING_OPEN_FILE;
 	}
-
 
 	Assert(abs(t1(score)) < VALUE_IS_MATE_IN);
 	Assert(abs(t2(score)) < VALUE_IS_MATE_IN);
@@ -791,17 +662,19 @@ tuple_t materialTupleScore(board_t* b) {
 }
 
 value_t contemptFactor(board_t* b) {
-	value_t contempt = lazyEvaluation(b);
+	return 0; // TODO?
 
-	switch (b->stm) {
-		case WHITE:
-			return (contempt > 100) ? -50 : 0;
-			break;
-		case BLACK:
-			return (contempt < -100) ? 50 : 0;
-			break;
-	}
-	return 0;
+	// value_t contempt = lazyEvaluation(b);
+
+	// switch (b->stm) {
+	// 	case WHITE:
+	// 		return (contempt > 100) ? -50 : 0;
+	// 		break;
+	// 	case BLACK:
+	// 		return (contempt < -100) ? 50 : 0;
+	// 		break;
+	// }
+	// return 0;
 }
 
 bool insufficientMaterial(board_t* b) {
@@ -923,200 +796,3 @@ value_t calcPSQT(board_t* b, const value_t* psqtTable[64]) {
 	return value;
 }
 
-
-
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-
-
-const value_t openFileBonusR = 10;
-const value_t openFileBonusQ = 5;
-
-// 0 == a / 1 == b
-float interpolate(int a, int b, float t) {
-	return (float)a + t * ((float)b - (float)a);
-}
-
-// value_t _evaluation(board_t* b) {
-// 	value_t eval = 0;
-// 	float interpolFactor = std::min(1.f, (float)b->halfMoves / (float)(70 + popCount(b->occupied)));
-
-// 	prefetchPT(b);
-
-// 	// Check insufficient material to detect drawn positions
-// 	if (popCount(b->occupied) <= 5 && insufficientMaterial(b)) {
-// 		return 0;
-// 	}
-
-// 	// calculate reused bitboards once and share between functions
-// 	b->attackedSquares[WHITE] = attackerSet(b, WHITE);
-// 	b->attackedSquares[BLACK] = attackerSet(b, BLACK);
-
-// 	pt->probed++;
-// 	value_t pawnEval = 0;
-// 	bool foundHash = probePT(b, &pawnEval);
-// 	if (foundHash) {
-// 		pt->hit++;
-// 	} else {
-// 		pawnEval = evaluatePawns(b);
-// 		storePT(b, pawnEval);
-// 	}
-
-// 	// squares controlled
-// 	int centerSquares = (popCount(b->attackedSquares[WHITE] & CENTER_SQUARES) -
-// 						 popCount(b->attackedSquares[BLACK] & CENTER_SQUARES));
-// 	int surroundingSquares = popCount(b->attackedSquares[WHITE] & ~CENTER_SQUARES) -
-// 		popCount(b->attackedSquares[BLACK] & ~CENTER_SQUARES);
-// 	int kingSquares = popCount(b->attackedSquares[WHITE] & kingAtkMask[getKingSquare(b, WHITE)]) -
-// 		popCount(b->attackedSquares[BLACK] & kingAtkMask[getKingSquare(b, BLACK)]);
-
-// 	eval += surroundingSquares + 2 * centerSquares + 3 * kingSquares;
-// 	eval += pawnEval;
-
-// 	float w1 = interpolCoeff(b);
-// 	eval += weightedSum(b->psqtOpening, b->psqtEndgame, w1);
-
-// 	eval += materialScore(b);
-// 	eval += openFilesRQ(b, WHITE) - openFilesRQ(b, BLACK);
-// 	eval += bishopPair(b, WHITE) - bishopPair(b, BLACK);
-// 	eval += _kingSafety(b, WHITE, &interpolFactor) - _kingSafety(b, BLACK, &interpolFactor);
-// 	eval += t1(mobility(b, WHITE) - mobility(b, BLACK)); // TODO check
-
-// 	Assert(abs(eval) < VALUE_IS_MATE_IN);
-
-// 	// white scores positive and black scores negative
-// 	int sign = (b->stm == WHITE) ? 1 : -1;
-// 	return eval * sign;
-// }
-
-value_t openFilesRQ(board_t* b, color_t color) {
-	int sq, score = 0;
-	bitboard_t pawns = b->pieces[PAWN];
-
-	// openFileBonus for rooks
-	bitboard_t rooks = getPieces(b, ROOK, color);
-	bitboard_t oppKing = getKingSquare(b, color ^ 1);
-	while (rooks) {
-		sq = popLSB(&rooks);
-		if (!(setMask[squareToFile[sq]] & pawns)) {
-			score += openFileBonusR;
-		}
-
-		// small bonus for rooks on same file as queen or king
-		if (FILE_LIST[squareToFile[sq]] & oppKing) {
-			score += 3;
-		}
-	}
-
-	// openFileBonus for queens
-	bitboard_t queens = getPieces(b, QUEEN, color);
-	while (queens) {
-		sq = popLSB(&queens);
-		if (!(setMask[squareToFile[sq]] & pawns)) {
-			score += openFileBonusQ;
-		}
-	}
-
-	return score;
-}
-
-value_t bishopPair(board_t* b, color_t color) {
-	Assert(((bool)(popCount(getPieces(b, BISHOP, color)) >= 2)) * 30 <= 30);
-	value_t res = ((bool)(popCount(getPieces(b, BISHOP, color)) >= 2)) * 30;
-	return res;
-}
-
-value_t _kingSafety(board_t* b, color_t color, float* interpol) {
-	int result = 0;
-	int kSq = getKingSquare(b, color);
-	bitboard_t pawns = getPieces(b, PAWN, color);
-
-	// punish attacked squares around king 
-	result += 8 - popCount(kingAtkMask[kSq] & b->attackedSquares[color ^ 1]);
-
-	// int openFilePenalty = 0; TODO
-	// if not endgame
-	// if (!(popCount(b->occupied) <= 7 || countMajorPieces(b, color) <= 6)) {
-	// 	int file;
-	// 	// punish open king file
-	// 	if (!(FILE_LIST[squareToFile[kSq]] & pawns)) {
-	// 		result -= 8;
-	// 	}
-
-	// 	file = squareToFile[kSq - 1];
-	// 	if (fileValid(file) && !(FILE_LIST[file] & pawns)) {
-	// 		result -= 5;
-	// 	}
-
-	// 	file = squareToFile[kSq + 1];
-	// 	if (fileValid(file) && !(FILE_LIST[file] & pawns)) {
-	// 		result -= 5;
-	// 	}
-	// }
-	
-
-	// punish pinned pieces (excluding pawns) to kSq
-	result -= popCount(getPinned(b, kSq, color) & ~pawns);
-
-	// scale depending on gamestate
-	result = (int)interpolate(result * 2, result, *interpol);
-
-	int attackedKingSquares = popCount(kingAtkMask[kSq] & b->attackedSquares[color ^ 1]);
-	Assert(attackedKingSquares <= 8);
-
-	result -= kingZoneTropism[attackedKingSquares];
-
-	Assert(abs(result) < VALUE_IS_MATE_IN);
-	return result;
-}
-
-// tuple_t _mobility(board_t* b, color_t color) {
-// 	int mobility = 0;
-// 	int restoreSide = b->stm;
-
-// 	// how many pieces are attacked by color
-// 	mobility += popCount(b->attackedSquares[color] & b->color[color ^ 1]) / 4;
-
-// 	// weighted sum of possible moves, reward knight, bishop and rook moves
-// 	moveList_t move_s[1];
-// 	move_s->cnt = 0;
-
-// 	// change color for move generation
-// 	if (b->stm != color) b->stm = color;
-
-// 	// int pieceMoves = 0;
-// 	addBishopCaptures(b, move_s);
-// 	addBishopMoves(b, move_s);
-// 	mobility += move_s->cnt;
-// 	move_s->cnt = 0;
-
-// 	addKnightMoves(b, move_s);
-// 	addKnightCaptures(b, move_s);
-// 	mobility += move_s->cnt;
-// 	move_s->cnt = 0;
-
-// 	addRookMoves(b, move_s);
-// 	addRookCaptures(b, move_s);
-// 	mobility += move_s->cnt / 3;
-// 	move_s->cnt = 0;
-// 	b->stm = restoreSide;
-
-// 	return t(mobility, mobility);
-// }
-
-int scale(int scaler, int pressure) {
-	int scaledPressure;
-	switch (scaler) {
-		case 0: scaledPressure  = 0; break;
-		case 1: scaledPressure  = 1; break;
-		case 2: scaledPressure  = pressure; break;
-		case 3: scaledPressure  = (pressure * 4) / 3; break;
-		case 4: scaledPressure  = (pressure * 3) / 2; break;
-		default: scaledPressure = pressure * 2; break;
-	}
-
-	return scaledPressure;
-}

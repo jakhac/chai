@@ -4,7 +4,7 @@
 #ifdef CUSTOM_THREADS
 int NUM_THREADS = std::min(CUSTOM_THREADS, (int)std::thread::hardware_concurrency());
 #else
-int NUM_THREADS = MAX_THREADS; 
+int NUM_THREADS = 1; 
 #endif // CUSTOM_THREADS
 
 

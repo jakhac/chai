@@ -179,7 +179,12 @@ Evaluation
     - [x] Bishop          (v3.0.6 +7)
     - [x] Rook            (v3.0.7 +7)
     - [x] Queen           (v3.0.8 +5)
-    - [ ] Dedicated endgame evals (KPvK, KBNvK)
+- v3.1.0
+  - [ ] Dedicated endgame evals (KPvK, KBNvK)
+- v3.2.0
+  - [ ] Cleanup (namespaces, constexpr, docs, inline, refactoring)
+- v3.3.0
+  - [ ] Add NNUE evaluation
 - Project
   - [ ] Implement testEGTB file
   - constexpr masks

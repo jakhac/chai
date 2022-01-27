@@ -50,7 +50,7 @@ value_t t2(tuple_t tuple);
 /**
  * Color type. Alias bool type.
  */
-typedef bool color_t;
+typedef int color_t;
 
 /**
  * Store moves, scores and number entries in moveList. Used in move generation.
@@ -241,6 +241,8 @@ namespace Pieces {
 		p = 7, n, b, r, q, k
 	} piece_t;
 }
+
+
 
 namespace chai {
 

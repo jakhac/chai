@@ -1,5 +1,6 @@
 #pragma once
 
+#include "endgame.h"
 #include "pawn.h"
 #include "psqt.h"
 #include "timeMan.h"
@@ -35,7 +36,6 @@ const tuple_t pieceTupleValues[13] = {
 };
 
 
-
 const tuple_t KNIGHT_MOBILITY[9] = {
 	t(-41, -51), t(-34, -37), t(-15, -28), 
 	t( -4, -15), t(  8,  12), t( 14,  16), 
@@ -60,10 +60,6 @@ const tuple_t ROOK_MOBILITY[15] = {
 
 
 const tuple_t BISHOP_PAIR              = t(30, 69);
-// const tuple_t BISHOP_COLOR_BLOCKED     = t(-2, -5);
-// const tuple_t BISHOP_FIANCHETTO        = t(6, -2);
-// const tuple_t BISHOP_STRONG_COLOR_CPLX = t(10, 28);
-// const tuple_t BISHOP_OUTPOST           = t(15, 10);
 const tuple_t BISHOP_OUTPOST_DEFENDED  = t(17,  10);
 const tuple_t BISHOP_LONG_DIAGONAL     = t(29,  1);
 
@@ -73,15 +69,12 @@ const tuple_t KNIGHT_BORDER_SQUARE    = t(-7, -14);
 const tuple_t KNIGHT_BLOCKS_PAWN      = t(6, 16);
 
 const tuple_t ROOK_CONTROLS_PASSER   = t(0, 12);
-// const tuple_t ROOK_SAME_FILE_AS_KING = t(15, 0);
 const tuple_t ROOK_OPEN_FILE         = t(40, 8);
 const tuple_t ROOK_SEMI_OPEN_FILE    = t(10, 8);
 const tuple_t ROOK_ON_SEVENTH        = t(-1, 33);
 const tuple_t ROOK_CONNECTED         = t(7, 13);
 
-// const tuple_t QUEEN_EARLY_DEVELOPMENT = t(-5, 0);
 const tuple_t QUEEN_DANGEROUS_SQUARE  = t(-7, -7);
-// const tuple_t QUEEN_CENTER_SIGHT      = t(2, 3);
 
 const tuple_t KING_DANGEROUS_SQUARE   = t(-15, -25);
 const tuple_t KING_CHECK_UNDEF_KNIGHT = t(-3, -3);

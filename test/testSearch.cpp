@@ -65,4 +65,59 @@ TEST_F(SearchTest, Fisher_5) {
 	EXPECT_GE(search(pBoard, pSearch, pInstr), VALUE_IS_MATE_IN);
 }
 
+TEST_F(SearchTest, Endgame_KQvKP_1) {
+	parseFen(pBoard, "8/2Q5/K7/8/8/8/4kp2/8 w - - 0 1");
+	pInstr->depth = 10;
+	pInstr->depthSet = true;
+	pInstr->timeSet = false;
+
+	EXPECT_LE(abs(search(pBoard, pSearch, pInstr)), 100);
+}
+
+TEST_F(SearchTest, Endgame_KQvKP_2) {
+	parseFen(pBoard, "8/2Q5/K7/8/8/8/4k1p1/8 w - - 0 1");
+	pInstr->depth = 10;
+	pInstr->depthSet = true;
+	pInstr->timeSet = false;
+
+	EXPECT_GE(abs(search(pBoard, pSearch, pInstr)), 100);
+}
+
+TEST_F(SearchTest, Endgame_KQvKP_3) {
+	parseFen(pBoard, "8/2Q5/K7/7k/8/5p2/8/8 w - - 0 1");
+	pInstr->depth = 10;
+	pInstr->depthSet = true;
+	pInstr->timeSet = false;
+
+	EXPECT_GE(abs(search(pBoard, pSearch, pInstr)), 100);
+}
+
+TEST_F(SearchTest, Endgame_KQvKP_4) {
+	parseFen(pBoard, "8/8/K7/8/8/8/2Q1pk2/8 w - - 0 1");
+	pInstr->depth = 10;
+	pInstr->depthSet = true;
+	pInstr->timeSet = false;
+
+	EXPECT_GE(abs(search(pBoard, pSearch, pInstr)), 100);
+}
+
+TEST_F(SearchTest, Endgame_KQvKP_5) {
+	parseFen(pBoard, "8/8/K7/8/8/8/1Qp1k3/8 b - - 0 1");
+	pInstr->depth = 10;
+	pInstr->depthSet = true;
+	pInstr->timeSet = false;
+
+	EXPECT_LE(abs(search(pBoard, pSearch, pInstr)), 100);
+}
+
+TEST_F(SearchTest, Endgame_KQvKP_6) {
+	parseFen(pBoard, "8/2k2K1P/8/8/8/8/1q6/8 b - - 0 1");
+	pInstr->depth = 10;
+	pInstr->depthSet = true;
+	pInstr->timeSet = false;
+
+	EXPECT_GE(abs(search(pBoard, pSearch, pInstr)), 100);
+}
+
+
 } // namespace SearchTest

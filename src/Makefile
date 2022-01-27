@@ -2,7 +2,7 @@
 # 1. META DATA
 #######################################
 
-VERSION = v3.0.8
+VERSION = v3.1.0
 
 EXE_RELEASE = chai_$(VERSION)_release.exe
 EXE_DEBUG = chai_$(VERSION)_debug.exe
@@ -11,7 +11,7 @@ EXE_TEST = test.exe
 SRCS = main.cpp tt.cpp attacks.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp timeMan.cpp info.cpp
+	thread.cpp timeMan.cpp info.cpp endgame.cpp
 
 OBJ_RELEASE_DIR = ./obj_release
 OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))

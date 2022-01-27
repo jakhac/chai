@@ -12,10 +12,10 @@ int main() {
 
 	// Print status and drop into cli protocol
 	parseFen(&_board, STARTING_FEN);
-	// parseFen(&_board, "8/1pR5/p3N1kp/Pb4p1/1P6/6KP/2p5/2r5 b - - 3 53 ");
+	// parseFen(&_board, "8/2Q5/K7/8/8/8/4kp2/8 w - - 0 1");
 
 	printBoard(&_board);
-	cli(&_board, &_instr, &_stats, &_perft);
+	cli(&_board, &_instr, &_stats, &_perft); // TODO move cli func to info
 
 	// Free hash tables and allocated memory before exit
 	freeHashTables();
@@ -29,9 +29,6 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 	moveList_t moveList;
 	move_t parsedMove;
 	std::string userInput;
-
-	// bitboard_t t = wBackwardPawns(b);
-	// printBitBoard(&t);
 
 	// for (int j = 0; j < 64; j++) {
 		// bitboard_t t = dangerZone[chai::BLACK][E4];
@@ -57,7 +54,7 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 
 		// Start searching this position.
 		if (userInput == "s") {
-			i->depth = 15;
+			i->depth = 40;
 			i->timeSet = false;
 
 			search(b, s, i);
