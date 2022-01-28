@@ -13,13 +13,13 @@ bool ABORT_SEARCH = false;
 std::vector<Thread> threadPool;
 
 void ThreadWrapper::resetThreadStates(board_t* board, stats_t* search, instr_t* instructions) {
-    b = *board;
-    s = *search;
+    b     = *board;
+    s     = *search;
     instr = *instructions;
 
+
     // Reset heuristics: Matekiller, Killer, Counter, History
-    std::fill_n(mateKiller, 
-        MAX_GAME_MOVES, MOVE_NONE);
+    std::fill_n(mateKiller, MAX_GAME_MOVES, MOVE_NONE);
 
     for (int i = 0; i < 2; i++) {
         std::fill_n(killer[i], MAX_DEPTH, 0);

@@ -207,7 +207,7 @@ static void resetSearchParameters(Thread thread) {
 
 value_t search(board_t* b, stats_t* s, instr_t* i) {
 	
-	// 1. Prepare each thread for search:
+	// 1. Prepare each thread for search
 	resetAllThreadStates(b, s, i);
 
 	// 2. Start helper threads
@@ -396,7 +396,7 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 	// Check if position is draw at a non-root node
 	if (!rootNode) {
 		if (isRepetition(b)) {
-			return contemptFactor(b);
+			return 0;
 		}
 
 		// 50-move rule might checkmate / stalemate
@@ -404,7 +404,7 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth) {
 			return (b->fiftyMove == 100 
 					&& isCheck(b, b->stm) 
 					&& !hasEvadingMove(b)) ? -VALUE_MATE + b->ply
-										   : contemptFactor(b);
+										   : 0;
 		}
 	}
 
@@ -944,13 +944,13 @@ value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth) {
 
 	// Draw detection
 	if (isRepetition(b) || insufficientMaterial(b)) {
-		return contemptFactor(b);
+		return 0;
 	} else if (b->fiftyMove >= 100) {
 		// 50-move rule might checkmate / stalemate
 		return (b->fiftyMove == 100 
 				&& isCheck(b, b->stm) 
 				&& !hasEvadingMove(b)) ? -VALUE_MATE + b->ply
-									   : contemptFactor(b);
+									   : 0;
 	}
 
 	if (b->ply > MAX_DEPTH - 1) {

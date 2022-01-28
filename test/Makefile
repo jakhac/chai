@@ -13,17 +13,30 @@ CXXFLAGS += -pedantic -Wextra -Wshadow
 CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 
 
+nnue     = yes
+evalfile = none
+ifneq ($(evalfile),none)
+	CXXFLAGS += -DCUSTOM_EVALFILE=\"../nets/$(evalfile)\"
+endif
+ifeq ($(nnue),yes)
+	CXXFLAGS += -DUSE_NNUE
+endif
+
+CXXFLAGS += -DUSE_PREFETCH -msse
+CXXFLAGS += -DUSE_AVX2 -mavx2
+CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
+
+CXXFLAGS += -mssse3 -mpopcnt
+DEPENDFLAGS += -msse
+
+
 EXE = ../src/test.exe
 
-CHAI_SRCS = main.cpp tt.cpp thread.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
+CHAI_SRCS = tt.cpp thread.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
-<<<<<<< HEAD
-	syzygy.cpp tt.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp timeMan.cpp pawn.cpp endgame.cpp
-=======
 	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	attacks.cpp timeMan.cpp info.cpp transformer.cpp nnue.cpp layers.cpp
->>>>>>> nnue
+	timeMan.cpp info.cpp nnue.cpp endgame.cpp attacks.cpp layers.cpp  \
+	transformer.cpp
 
 SRCS = $(addprefix ../chai/, $(CHAI_SRCS))
 

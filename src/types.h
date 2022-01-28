@@ -14,6 +14,7 @@
 
 #define a64 alignas(64)
 
+
 /**
  * Unsigned 64-Bit integer represents bitboard isntance.
  */

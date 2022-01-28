@@ -31,7 +31,7 @@ value_t propagate(board_t* b) {
 
     outLayer(buffer_8, buffer_32);
 
-    cout << "\nOut layer value " << buffer_32[0] << endl;
+    // cout << "\nOut layer value " << buffer_32[0] << endl;
     return buffer_32[0];
 }
 

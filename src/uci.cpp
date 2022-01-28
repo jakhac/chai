@@ -130,6 +130,10 @@ void uciParsePosition(board_t* b, std::string cmd) {
 		for (std::string m : tokens) {
 			parsedMove = parseMove(b, m);
 			push(b, parsedMove);
+
+			// Push increases ply by default. We have to keep it at zero,
+			// otherwise some of our arrays are indexed out-of-bounds!
+			b->ply = 0;
 		}
 
 		return;

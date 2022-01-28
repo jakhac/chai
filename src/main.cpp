@@ -12,18 +12,17 @@ int main() {
 
 #if defined(USE_NNUE) && defined(CUSTOM_EVALFILE)
 	initIncNet();
+	cout << "NNUE is now active." << endl;
 #endif
 
-	// TODO
-	// std::ifstream nnueData("../nets/nn-fb50f1a2b1-20210705.nnue", std::ios::binary);
-	// initNet(nnueData);
-
 	// Print status and drop into cli protocol
-	parseFen(&_board, STARTING_FEN);
-	// parseFen(&_board, "8/2Q5/K7/8/8/8/4kp2/8 w - - 0 1");
+	// parseFen(&_board, STARTING_FEN);
+	parseFen(&_board, "7Q/4P1k1/5p2/1p3Kp1/pB2p2p/P3P3/1P5R/8 b - - 91 93");
 
 	printBoard(&_board);
 	cli(&_board, &_instr, &_stats, &_perft); // TODO move cli func to info
+
+// 2022-01-27 23:37:19.056-->2:position startpos moves c2c4 g8f6 b1c3 e7e5 e2e3 f8b4 d1b3 b8c6 g1e2 e8g8 a2a3 b4c3 e2c3 f8e8 d2d3 b7b6 f1e2 d7d6 e1g1 c8f5 b3d1 a7a5 f2f4 e5e4 d3d4 d8d7 h2h3 f5h3 g2h3 d7h3 f1f2 c6e7 f2h2 h3g3 h2g2 g3h3 d1f1 g8h8 c1d2 e8f8 g2h2 h3f1 a1f1 e7f5 g1f2 c7c6 d4d5 c6d5 c3d5 f6d5 c4d5 h8g8 d2c3 a5a4 f1g1 f7f6 e2g4 f5h6 g4e6 g8h8 c3b4 h6f7 g1c1 h7h6 c1c7 f7d8 f4f5 d8e6 f5e6 h8g8 f2g3 a8c8 b4d6 f8e8 g3f4 b6b5 c7c8 e8c8 d6b4 h6h5 d5d6 c8a8 d6d7 g7g5 f4f5 g8g7 e6e7 a8h8 d7d8q h5h4 d8h8
 
 	// Free hash tables and allocated memory before exit
 	freeHashTables();
@@ -38,7 +37,8 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 	move_t parsedMove;
 	std::string userInput;
 
-	propagate(b);
+	// cout << "Propagate " << propagate(b) << endl;
+	// cout << "nnue eval " << evaluateNNUE(b) << endl;
 
 	// bitboard_t t = wBackwardPawns(b);
 	// printBitBoard(&t);

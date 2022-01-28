@@ -2,7 +2,7 @@
 # 1. META DATA
 #######################################
 
-VERSION = v3.1.0
+VERSION = v3.2.0
 
 EXE_RELEASE = chai_$(VERSION)_release.exe
 EXE_DEBUG   = chai_$(VERSION)_debug.exe
@@ -11,8 +11,8 @@ EXE_TEST    = test.exe
 SRCS = main.cpp tt.cpp thread.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
 	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp timeMan.cpp info.cpp endgame.cpp attacks.cpp nnue.cpp  \
-	transformer.cpp layers.cpp
+	timeMan.cpp info.cpp nnue.cpp endgame.cpp attacks.cpp layers.cpp  \
+	transformer.cpp
 
 OBJ_RELEASE_DIR = ./obj_release
 OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
@@ -31,7 +31,7 @@ VPATH = egtb:nnue:
 assert   = no
 debug    = no
 nnue     = yes
-evalfile = none
+evalfile = nn-fb50f1a2b1-20210705.nnue
 
 # Default architecture enables all
 prefetch = yes
@@ -42,7 +42,6 @@ avx2     = yes
 
 ####
 #### 2.1 Define optional constants if passed by user.
-####
 threads = 1
 hashMb  = 256
 
@@ -60,7 +59,6 @@ endif
 
 ####
 #### 2.2 Set additional flags for respective build type.
-####
 ifeq ($(TYPE),release)
 	assert = no
 	debug  = no
@@ -88,7 +86,6 @@ endif
 
 ####
 #### 2.3 Set optimization flags as previously defined.
-####
 ifeq ($(optimize),yes)
 	CXXFLAGS += -O3
 endif
@@ -113,7 +110,6 @@ endif
 
 ####
 #### 2.4 Additional flags for code quality.
-####
 CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m64
 CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 CXXFLAGS += -pedantic -Wextra -Wshadow
@@ -162,7 +158,7 @@ strip:
 	$(MAKE) objClean
 
 test:
-	cd ../test & $(MAKE) TYPE=debug
+	cd ../test & $(MAKE) TYPE=debug evalfile=$(evalfile)
 
 clean:
 	$(MAKE) cleanExe

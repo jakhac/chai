@@ -2,6 +2,18 @@
 
 namespace SearchTest {
 
+#if defined(USE_NNUE)
+TEST_F(SearchTest, NNUE) {
+	if (canUseNNUE) {
+		parseFen(pBoard, STARTING_FEN);
+		ASSERT_EQ(evaluation(pBoard), 28);
+		cout << "NNUE is used for evaluation." << endl;
+	} else {
+		cout << "HCE is used for evaluation." << endl;
+	}
+}
+#endif
+
 TEST_F(SearchTest, MateIn5_1) {
 	parseFen(pBoard, "r7/3bb1kp/q4p1N/1pnPp1np/2p4Q/2P5/1PB3P1/2B2RK1 w - - 1 40");
 	pInstr->depth = 5;

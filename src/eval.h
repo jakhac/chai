@@ -184,12 +184,6 @@ int undefendedRookChecks(board_t* b, int kSq, color_t color);
 int undefendedQueenChecks(board_t* b, int kSq, color_t color);
 
 /**
- * @brief Return superiority/inferiority based on material 
- * on board viewed as player to move (signed).
- */
-value_t contemptFactor(board_t* b);
-
-/**
  * @brief Calculate complete PSQT balance for given psqtTable.
  */
 value_t calcPSQT(board_t* b, const value_t* psqtTable[64]);

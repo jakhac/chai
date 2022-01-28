@@ -35,44 +35,6 @@ value_t t2(tuple_t tuple) {
 	return (int16_t)((uint16_t)((unsigned)(tuple + 0x8000) >> 16));
 }
 
-
-/**
- * @brief Interpolates between two evaluations.
- * 
- * @param s1 Opening value
- * @param s2 Endgame value
- * @param w1 Weight of opening; implicitly determines w2 = 1 - w1
- * @return float The weighted sum
- */
-static float weightedSum(float s1, float s2, float w1) {
-	Assert(0 <= w1 && w1 <= 1);
-	return (w1 * s1) + ((1 - w1) * s2);
-}
-
-/**
- * @brief This coefficient is used to interpolate between opening-endgame evaluations 
- * based on the amount of material left on the board.
- * 
- * @return Return coefficient value w1 (weight of opening-value)
- */
-static float interpolCoeff(board_t* b) {
-	// 1) Evaluate first 15 moves with opening PSQT
-	if (b->halfMoves <= 30) {
-		return 1;
-	}
-
-	int mat = totalMaterial(b);
-
-	// 2) Material below 20 is endgame
-	if (mat <= 20) {
-		return 0;
-	}
-	
-	// 3) The less material is left, the more we head into an endgame.
-	// => (remaining-material + puffer) / (maximum-material)
-	return std::min(1.f, (mat + 10.f) / (maximumMaterial));
-}
-
 static float gamePhase(board_t* b) {
 	int	phase = maxPhase;
 
@@ -91,20 +53,7 @@ static value_t scaleGamePhase(tuple_t tuple, float phase) {
 
 value_t evaluation(board_t* b) {
 
-#ifdef USE_NNUE
-	// Use NNUE on balanced positions
-	if (   canUseNNUE
-		&& abs(b->psqtEndgame) < 520) {
-		return evaluateNNUE(b);
-	}
-#endif // USE_NNUE
-
 	prefetchPT(b);
-
-	// evaluateEndgame<KvKNB>(b);
-
-	value_t eval = 0;
-	float phase = gamePhase(b);
 
 	// Check for known endgames
 	if (popCount(b->occupied) <= 5) {
@@ -124,9 +73,22 @@ value_t evaluation(board_t* b) {
 		if (isKQvKQ(b))
 			return evaluate_KQvKQ(b);
 
-		// if (isKvKX(b))
-		// 	return evaluate_KvKX(b);
 	}
+
+
+#ifdef USE_NNUE
+
+	// Use NNUE on balanced positions
+	if (   canUseNNUE
+		&& abs(b->psqtEndgame) < 520) {
+		return evaluateNNUE(b);
+	}
+
+#endif // USE_NNUE
+
+	// Continue with HCE
+	value_t eval = 0;
+	float phase = gamePhase(b);
 
 	// Calculate these bitboards once and share between functions
 	b->attackedSquares[WHITE] = attackerSet(b, WHITE);
@@ -167,28 +129,6 @@ value_t evaluation(board_t* b) {
 	return (b->stm == WHITE) ? eval : -eval;
 }
 
-
-value_t lazyEvaluation(board_t* b) {
-	value_t eval = 0;
-
-	pt->probed++;
-	value_t pawnEval = 0;
-	bool foundHash = probePT(b, &pawnEval);
-	if (foundHash) {
-		pt->hit++;
-		eval += pawnEval;
-	}
-
-	float w1 = interpolCoeff(b);
-	eval += weightedSum(b->psqtOpening, b->psqtEndgame, w1);
-	eval += materialScore(b);
-
-	Assert(abs(eval) < VALUE_IS_MATE_IN);
-
-	// white scores positive and black scores negative
-	return (b->stm == WHITE) ? eval : -eval;
-}
-
 tuple_t mobility(board_t* b, color_t color) {
 	value_t score = 0;
 	moveList_t moveList[1];
@@ -222,80 +162,29 @@ tuple_t squareControl(board_t* b, color_t color) {
 	int centerExtAttacked   = popCount(b->attackedSquares[color] &  CENTER_SQUARES_EXT);
 	int surroundingAttacked = popCount(b->attackedSquares[color] & ~CENTER_SQUARES_EXT);
 	int centerOccupied      = popCount(b->color[color] 		     &  CENTER_SQUARES);
-	// int kingSquaresDefended = popCount(kingAtkMask[getKingSquare(b, color)] & b->attackedSquares[color]);
 
 	tuple += t(3 * centerExtAttacked, centerExtAttacked);
 	tuple += t(surroundingAttacked, surroundingAttacked);
 	tuple += t(2 * centerOccupied, centerOccupied);
-	// tuple += t(2 * kingSquaresDefended, kingSquaresDefended);
 	return tuple;
 }
 
 tuple_t evaluateBishops(board_t* b, color_t color) {
-	int cnt;
 	tuple_t score = 0;
 	bitboard_t bishops = getPieces(b, BISHOP, color);
-
-	// TODO who favors opposite colored bishops?
+	bitboard_t pawns = getPieces(b, PAWN, color);
 
 	// 1) Bishop Pair
 	if (popCount(bishops) > 1) {
 		score += BISHOP_PAIR;
 	}
 
-	// 2) Bad Bishop
-	// - How many blocked pawns on color of bishop?
-	// bitboard_t blockedPawns = getBlockedPawns(b, color);
-	// if (bishops & SQUARES_BLACK) {
-	// 	cnt = popCount(blockedPawns & SQUARES_BLACK);
-	// 	score += BISHOP_COLOR_BLOCKED * cnt;
-	// }
-
-	// if (bishops & SQUARES_WHITE) {
-	// 	cnt = popCount(blockedPawns & SQUARES_WHITE);
-	// 	score += BISHOP_COLOR_BLOCKED * cnt;
-	// }
-
-	// 3) Fianchetto Pattern
-	// value_t fianchetto = 0;
-	bitboard_t pawns = getPieces(b, PAWN, color);
-	// if (color == WHITE) {
-	// 	if (popCount(FIANCHETTO_B2 & pawns) > 2 && bishops & B2)
-	// 		fianchetto++;
-
-	// 	if (popCount(FIANCHETTO_G2 & pawns) > 2 && bishops & G2)
-	// 		fianchetto++;
-
-	// } else {
-	// 	if (popCount(FIANCHETTO_B7 & pawns) > 2 && bishops & B7)
-	// 		fianchetto++;
-
-	// 	if (popCount(FIANCHETTO_G7 & pawns) > 2 && bishops & G7)
-	// 		fianchetto++;
-
-	// }
-	// score += fianchetto * BISHOP_FIANCHETTO;
-
-	// 4) Color Weakness
-	// - One Bishop left and majority of pawns on different-colored squares
-	// if (popCount(bishops) == 1) {
-	// 	bool whiteSqMajority = 0 < (popCount(pawns & SQUARES_WHITE) - popCount(pawns & SQUARES_BLACK));
-
-	// 	// Only bishop on color non-dominated by pawns
-	// 	if (bishops & SQUARES_BLACK && whiteSqMajority) {
-	// 		score += BISHOP_STRONG_COLOR_CPLX;
-	// 	}
-	// 	if (bishops & SQUARES_WHITE && !whiteSqMajority) {
-	// 		score += BISHOP_STRONG_COLOR_CPLX;
-	// 	}
-	// }
-
 	int sq;
 	bitboard_t oppositePawns = getPieces(b, PAWN, color ^ 1);
 	while (bishops) {
 		sq = popLSB(&bishops);
 
-		// Bishop Outpost
+		// 2) Bishop Outpost
 		bitboard_t currentFile = FILE_LIST[squareToFile[sq]];
 		bool isOutpostArea = (1ULL << sq) & outpost_squares[color];
 		if (   !((pawnPassedMask[color][sq] & ~currentFile) & oppositePawns)
@@ -303,16 +192,9 @@ tuple_t evaluateBishops(board_t* b, color_t color) {
 			&& pawnAtkMask[color ^ 1][sq] & pawns) {
 
 			score += BISHOP_OUTPOST_DEFENDED;
-
-			// score += BISHOP_OUTPOST;
-			// // Bishop is defended by pawn
-			// if (pawnAtkMask[color ^ 1][sq] & pawns) {
-			// 	score += BISHOP_OUTPOST_DEFENDED;
-			// }
-
 		}
 
-		// Long Diagonal
+		// 3) Long Diagonal
 		bitboard_t atks = lookUpBishopMoves(sq, b->occupied);
 		if (popCount(atks & CENTER_SQUARES) >= 2) {
 			score += BISHOP_LONG_DIAGONAL;
@@ -422,14 +304,10 @@ tuple_t evaluateRooks(board_t* b, color_t color) {
 
 	}
 
-	int sq = NO_SQ, lastSq, oppKSq = getKingSquare(b, color ^ 1);
+	int sq = NO_SQ, lastSq;
 	while(rooks) {
 		lastSq = sq;
 		sq = popLSB(&rooks);
-
-		// if (FILE_LIST[squareToFile[sq]] & oppKSq) {
-		// 	score += ROOK_SAME_FILE_AS_KING;
-		// }
 
 		// Rooks on open files
 		if (!(b->occupied & FILE_LIST[squareToFile[sq]])) {
@@ -458,13 +336,6 @@ tuple_t evaluateQueens(board_t* b, color_t color) {
 	tuple_t score = 0;
 	bitboard_t queens = getPieces(b, QUEEN, color);
 
-	// Penality for early development
-	// if (   (color == WHITE && pieceAt(b, D1) != Pieces::Q)
-	// 	|| (color == BLACK && pieceAt(b, D8) != Pieces::q)) {
-
-	// 	score += QUEEN_EARLY_DEVELOPMENT;
-	// }
-
 	int sq;
 	bitboard_t threats;
 	while (queens) {
@@ -474,8 +345,6 @@ tuple_t evaluateQueens(board_t* b, color_t color) {
 		threats = getDiscoveredAttacks(b, sq, color);
 		score += popCount(threats) * QUEEN_DANGEROUS_SQUARE;
 
-		// Reward activity (central and mobile) of queen in later game phase
-		// score += popCount(lookUpQueenMoves(sq, b->occupied) & CENTER_SQUARES_EXT) * QUEEN_CENTER_SIGHT;
 	}
 
 	return score;
@@ -489,32 +358,24 @@ int getAttackerUnits(board_t* b, bitboard_t dZone, color_t color) {
 	while (piece) {
 		sq = popLSB(&piece);
 		attackUnits += KNIGHT_UNIT * popCount(knightAtkMask[sq] & dZone);
-		// if (knightAtkMask[sq] & dZone)
-			// attackUnits += KNIGHT_UNIT;
 	}
 
 	piece = getPieces(b, BISHOP, color ^ 1);
 	while (piece) {
 		sq = popLSB(&piece);
 		attackUnits += BISHOP_UNIT * popCount(lookUpBishopMoves(sq, b->occupied) & dZone);
-		// if (lookUpBishopMoves(sq, b->occupied) & dZone)
-		// 	attackUnits += BISHOP_UNIT;
 	}
 
 	piece = getPieces(b, ROOK, color ^ 1);
 	while (piece) {
 		sq = popLSB(&piece);
 		attackUnits += ROOK_UNIT * popCount(lookUpRookMoves(sq, b->occupied) & dZone);
-		// if (lookUpRookMoves(sq, b->occupied) & dZone)
-			// attackUnits += ROOK_UNIT;
 	}
 
 	piece = getPieces(b, QUEEN, color ^ 1);
 	while (piece) {
 		sq = popLSB(&piece);
 		attackUnits += QUEEN_UNIT * popCount(lookUpQueenMoves(sq, b->occupied) & dZone);
-		// if ((lookUpBishopMoves(sq, b->occupied) | lookUpRookMoves(sq, b->occupied)) & dZone)
-			// attackUnits += QUEEN_UNIT;
 	}
 
 	Assert(attackUnits < 100);
@@ -667,22 +528,6 @@ tuple_t materialTupleScore(board_t* b) {
 
 	// Assert (b->material == score); // TODO
 	return score;
-}
-
-value_t contemptFactor(board_t* b) {
-	return 0; // TODO?
-
-	// value_t contempt = lazyEvaluation(b);
-
-	// switch (b->stm) {
-	// 	case WHITE:
-	// 		return (contempt > 100) ? -50 : 0;
-	// 		break;
-	// 	case BLACK:
-	// 		return (contempt < -100) ? 50 : 0;
-	// 		break;
-	// }
-	// return 0;
 }
 
 bool insufficientMaterial(board_t* b) {

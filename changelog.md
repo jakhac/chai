@@ -180,14 +180,16 @@ Evaluation
     - [x] Rook            (v3.0.7 +7)
     - [x] Queen           (v3.0.8 +5)
 - v3.1.0
-  - [ ] Dedicated endgame evals (KPvK, KBNvK)
+  - [x] Dedicated endgame evals (-+ 0)
 - v3.2.0
-  - [ ] Cleanup (namespaces, constexpr, docs, inline, refactoring)
-- v3.3.0
   - [ ] Add NNUE evaluation
+- v3.3.0
+  - [ ] Cleanup (namespaces, constexpr, docs, inline, refactoring)
 - Project
-  - [ ] Implement testEGTB file
-  - constexpr masks
+  - Update readme: how to use uci options, what are the defaults?
+  - a1a1 bug if non-main thread is selected
+  - clean makefile for tests
+  - config cmd shows nnue, simd, etc info
 
 
 # Todo

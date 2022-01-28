@@ -491,7 +491,6 @@ void pushEnPas(board_t* b, move_t move, dirty_t* dp) {
 	dp->changedPieces++;
 
 
-
 	// Update pawn key
 	b->zobristPawnKey ^= 
 		  pieceKeys[fromPiece][fromSquare]		// Remove fromSq
