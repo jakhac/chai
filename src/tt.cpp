@@ -4,8 +4,8 @@
 int indexMask = 0;
 
 // Extern variables
-ttable_t tt[1];
-pawntable_t pt[1];
+TTable tt[1];
+PTable pt[1];
 
 namespace TT {
 
@@ -41,7 +41,7 @@ void freeHashTables() {
 static size_t allocateTT(size_t newMbSize) {
 	
 	unsigned long long totalBytes = (unsigned long long)newMbSize << 20;
-	unsigned long long numBucketsPossible = totalBytes / sizeof(bucket_t);
+	unsigned long long numBucketsPossible = totalBytes / sizeof(Bucket);
 
 	// Most significant bit is maximum power of 2 while smaller than number of buckets
 	int msb = getMSB(numBucketsPossible);
@@ -53,7 +53,7 @@ static size_t allocateTT(size_t newMbSize) {
 	}
 
 	tt->buckets = 1 << msb;
-	tt->bucketList = (bucket_t*)VirtualAlloc(NULL, sizeof(bucket_t) * tt->buckets, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	tt->bucketList = (Bucket*)VirtualAlloc(NULL, sizeof(Bucket) * tt->buckets, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 	Assert(tt->bucketList);
 
 	for (int i = 0; i < msb; i++) indexMask |= (1 << i);
@@ -61,24 +61,25 @@ static size_t allocateTT(size_t newMbSize) {
 	clearTT();
 
 	// Return remaining bytes
-	return totalBytes - (sizeof(bucket_t) * tt->buckets);
+	return totalBytes - (sizeof(Bucket) * tt->buckets);
 }
 
 /**
  * @brief Init pawn table with clamped remaining MBs
  */
 static size_t allocatePT(size_t remainingByte) {
+
 	if (remainingByte < (DEFAULT_PT_SIZE << 20)) {
 		remainingByte = DEFAULT_PT_SIZE << 20;
 	} else if (remainingByte > (MAX_PT_SIZE << 20)) {
 		remainingByte = MAX_PT_SIZE << 20;
 	}
 
-	pt->entries = remainingByte / sizeof(pawntable_entry_t);
+	pt->entries = remainingByte / sizeof(PTEntry);
 	pt->stored  = 0;
 	pt->entries -= 2;
 
-	pt->table = (pawntable_entry_t*)malloc(pt->entries * sizeof(pawntable_entry_t));
+	pt->table = (PTEntry*)malloc(pt->entries * sizeof(PTEntry));
 	clearPT();
 
 	// Return used bytes
@@ -86,6 +87,7 @@ static size_t allocatePT(size_t remainingByte) {
 }
 
 bool resizeHashTables(size_t newMbSize) {
+
 	if (newMbSize < MIN_TT_SIZE || newMbSize > MAX_TT_SIZE) {
 		return false;
 	}
@@ -119,22 +121,22 @@ bool resizeHashTables(size_t newMbSize) {
 }
 
 void clearTT() {
-	memset((void*)tt->bucketList, 0, (tt->buckets * BUCKETS * sizeof(ttable_entry_t)));
+	memset((void*)tt->bucketList, 0, (tt->buckets * BUCKETS * sizeof(TTEntry)));
 }
 
 void clearPT() {
-	memset(pt->table, 0, (pt->entries * sizeof(pawntable_entry_t)));
+	memset(pt->table, 0, (pt->entries * sizeof(PTEntry)));
 }
 
-static uint32_t getTTIndex(key_t zobristKey) {
+static uint32_t getTTIndex(Key zobristKey) {
 	return (uint32_t)(zobristKey & indexMask);
 }
 
-static uint16_t getBucketIndex(key_t zobristKey) {
+static uint16_t getBucketIndex(Key zobristKey) {
 	return (uint16_t)(zobristKey >> 48);
 }
 
-void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int flag, int depth) {
+void storeTT(Board* b, Move move, Value value, Value staticEval, int flag, int depth) {
 
 	int32_t index = getTTIndex(b->zobristKey);
 	uint16_t key  = getBucketIndex(b->zobristKey);
@@ -152,9 +154,9 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 	tt->stored++;
 
 	// Iterate entries in bucket and find least valuable entry
-	bucket_t* bucket = tt->bucketList + index;
-	ttable_entry_t* e = nullptr;
-	ttable_entry_t* leastValuable = nullptr;
+	Bucket* bucket = tt->bucketList + index;
+	TTEntry* e = nullptr;
+	TTEntry* leastValuable = nullptr;
 
 	int minDepth = MAX_DEPTH + 1;
 	for (int i = 0; i < BUCKETS; i++) {
@@ -201,7 +203,7 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 	leastValuable->depth      = depth;
 }
 
-void storePT(board_t* b, const value_t eval) {
+void storePT(Board* b, const Value eval) {
 	int index = b->zobristPawnKey % pt->entries;
 	Assert(index >= 0 && index <= pt->entries - 1);
 
@@ -216,16 +218,16 @@ void storePT(board_t* b, const value_t eval) {
 	pt->table[index].zobristPawnKey = b->zobristPawnKey;
 }
 
-bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int8_t* hashDepth) {
+bool probeTT(Board* b, Move* move, Value* hashValue, Value* hashEval, uint8_t* hashFlag, int8_t* hashDepth) {
 
 	int32_t index = getTTIndex(b->zobristKey);
-	uint16_t key = getBucketIndex(b->zobristKey);
+	uint16_t key  = getBucketIndex(b->zobristKey);
 
 	Assert(index >= 0 && index <= (tt->buckets - 1));
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
-	bucket_t* bucket = tt->bucketList + index;
-	ttable_entry_t* e;
+	Bucket* bucket = tt->bucketList + index;
+	TTEntry* e;
 
 	for (int i = 0; i < BUCKETS; i++) {
 		tt->probed++;
@@ -252,7 +254,7 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 	return false;
 }
 
-bool probePT(board_t* b, value_t* hashScore) {
+bool probePT(Board* b, Value* hashScore) {
 
 	int index = b->zobristPawnKey % pt->entries;
 	Assert(index >= 0 && index <= pt->entries - 1);
@@ -266,17 +268,17 @@ bool probePT(board_t* b, value_t* hashScore) {
 	return false;
 }
 
-void prefetchTT(board_t* b) {
+void prefetchTT(Board* b) {
 	uint32_t index = getTTIndex(b->zobristKey);
-	prefetch((bucket_t*)&tt->bucketList[index]);
+	prefetch((Bucket*)&tt->bucketList[index]);
 }
 
-void prefetchPT(board_t* b) {
+void prefetchPT(Board* b) {
 	int index = b->zobristPawnKey % pt->entries;
 	prefetch(&pt->table[index]);
 }
 
-int hashToSearch(int ply, value_t score) {
+int hashToSearch(int ply, Value score) {
 
 	if (score > VALUE_IS_MATE_IN)
 		return score - ply;
@@ -287,7 +289,7 @@ int hashToSearch(int ply, value_t score) {
 	return score;
 }
 
-int searchToHash(int ply, value_t score) {
+int searchToHash(int ply, Value score) {
 
 	if (score > VALUE_IS_MATE_IN)
 		return score + ply;
@@ -298,7 +300,7 @@ int searchToHash(int ply, value_t score) {
 	return score;
 }
 
-move_t probePV(board_t* b) {
+Move probePV(Board* b) {
 
 	int32_t index = getTTIndex(b->zobristKey);
 	uint16_t key  = getBucketIndex(b->zobristKey);
@@ -307,8 +309,8 @@ move_t probePV(board_t* b) {
 	Assert(index >= 0 && index <= (tt->buckets - 1));
 	Assert(b->ply >= 0 && b->ply <= MAX_DEPTH);
 
-	bucket_t* bucket = tt->bucketList + index;
-	ttable_entry_t* e;
+	Bucket* bucket = tt->bucketList + index;
+	TTEntry* e;
 
 	for (int i = 0; i < BUCKETS; i++) {
 		tt->probed++;

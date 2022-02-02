@@ -3,19 +3,19 @@
 /**
  * @brief Return the material in pawn=1 ratio.
  */
-int totalMaterial(board_t* b);
+int totalMaterial(Board* b);
 
 /**
  * @brief Estimate the number of remaining halfmoves.
  */
-int remainingHalfMoves(board_t* b);
+int remainingHalfMoves(Board* b);
 
 /**
  * @brief Allocate time for next move.
  */
-int allocateTime(board_t* b, int timeLeft, int inc);
+int allocateTime(Board* b, int timeLeft, int inc);
 
 /**
  * @brief Returns true if we have more time to search the postition.
  */
-bool isTimeLeft(instr_t* instr);
+bool isTimeLeft(Instructions* instr);

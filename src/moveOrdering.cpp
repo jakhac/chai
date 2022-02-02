@@ -18,15 +18,15 @@ void init() {
 	}
 }
 
-bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkDef, int side) {
+Bitboard getLeastValuablePiece(Board* b, Bitboard atkDef, int side) {
 
 	atkDef &= b->color[side];
 	if (!atkDef) {
 		return 0;
 	}
 
-	bitboard_t lva;
-	for (int i = cPAWN; i <= cKING; i++) {
+	Bitboard lva;
+	for (int i = PAWN; i <= KING; i++) {
 		lva = atkDef & b->pieces[i];
 		if (lva) {
 			return setMask[getLSB(lva)];
@@ -37,25 +37,25 @@ bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkDef, int side) {
 	return 0;
 }
 
-int see(board_t* b, const int move) {
+int see(Board* b, const int move) {
 
 	int to = toSq(move);
 	int d  = 0;
 	int atkPiece = pieceAt(b, fromSq(move));
 	int gain[32]{};
 	
-	color_t side = b->stm;
+	Color side = b->stm;
 
-	bitboard_t occ        = b->occupied;
-	bitboard_t mayXray    = b->pieces[cPAWN  ] 
-						  | b->pieces[cBISHOP]
-						  | b->pieces[cROOK  ] 
-						  | b->pieces[cQUEEN ];
+	Bitboard occ     = b->occupied;
+	Bitboard mayXray = b->pieces[PAWN  ] 
+					 | b->pieces[BISHOP]
+					 | b->pieces[ROOK  ] 
+					 | b->pieces[QUEEN ];
 
-	bitboard_t attadef    = squareAtkDef(b, to);
-	bitboard_t from       = setMask[fromSq(move)];
-	bitboard_t used       = 0;
-	bitboard_t discovered = 0;
+	Bitboard attadef    = squareAtkDef(b, to);
+	Bitboard from       = setMask[fromSq(move)];
+	Bitboard used       = 0;
+	Bitboard discovered = 0;
 
 	gain[d] = pieceValues[capPiece(b, move)];
 	do {
@@ -73,8 +73,8 @@ int see(board_t* b, const int move) {
 
 		if (from & mayXray) {
 			discovered  = 0;
-			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, cQUEEN, side) | getPieces(b, cBISHOP, side));
-			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, cQUEEN, side) | getPieces(b, cROOK, side));
+			discovered |= lookUpBishopMoves(to, occ) & (getPieces(b, QUEEN, side) | getPieces(b, BISHOP, side));
+			discovered |= lookUpRookMoves(to, occ) & (getPieces(b, QUEEN, side) | getPieces(b, ROOK, side));
 			attadef    |= discovered & ~used;
 		}
 
@@ -94,7 +94,7 @@ int see(board_t* b, const int move) {
 	return gain[0];
 }
 
-bool see_ge(board_t* b, move_t move, int threshold) {
+bool see_ge(Board* b, Move move, int threshold) {
 
 	bool color;
 	int from = fromSq(move);
@@ -108,11 +108,11 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 
 	if (isPromotion(move)) {
 		nextVictim = promPiece(b, move);
-		balance += (SEEPieceValues[nextVictim] - SEEPieceValues[cPAWN]);
+		balance += (SEEPieceValues[nextVictim] - SEEPieceValues[PAWN]);
 	}
 
 	if (isEnPassant(move)) {
-		balance = SEEPieceValues[cPAWN];
+		balance = SEEPieceValues[PAWN];
 	}
 
 	balance -= threshold;
@@ -122,18 +122,18 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 	if (balance >= 0) return true;
 
 	// slider used to detect discovered attack
-	bitboard_t bishops = b->pieces[cBISHOP] | b->pieces[cQUEEN];
-	bitboard_t rooks   = b->pieces[cROOK] | b->pieces[cQUEEN];
+	Bitboard bishops = b->pieces[BISHOP] | b->pieces[QUEEN];
+	Bitboard rooks   = b->pieces[ROOK] | b->pieces[QUEEN];
 
 	// copy occupied to simulate captures on bitboard
-	bitboard_t occ = b->occupied;
+	Bitboard occ = b->occupied;
 	occ = (occ ^ (1ULL << from)) | (1ULL << to);
 	if (isEnPassant(move)) {
 		occ ^= (1ULL << b->enPas);
 	}
 
-	bitboard_t nowAttacking;
-	bitboard_t attackers = squareAtkDefOcc(b, occ, to) & occ;
+	Bitboard nowAttacking;
+	Bitboard attackers = squareAtkDefOcc(b, occ, to) & occ;
 
 	color = !b->stm;
 
@@ -146,7 +146,7 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 		}
 
 		// Find weakest attacker
-		for (nextVictim = cPAWN; nextVictim <= cKING; nextVictim++) {
+		for (nextVictim = PAWN; nextVictim <= KING; nextVictim++) {
 			if (nowAttacking & b->pieces[nextVictim])
 				break;
 		}
@@ -155,13 +155,13 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 		Assert(nowAttacking & b->pieces[nextVictim]);
 		occ ^= (1ULL << getLSB(nowAttacking & b->pieces[nextVictim]));
 
-		if (   nextVictim == cPAWN 
-			|| nextVictim == cBISHOP 
-			|| nextVictim == cQUEEN)
+		if (   nextVictim == PAWN 
+			|| nextVictim == BISHOP 
+			|| nextVictim == QUEEN)
 			attackers |= lookUpBishopMoves(to, occ) & bishops;
 
-		if (   nextVictim == cROOK 
-			|| nextVictim == cQUEEN)
+		if (   nextVictim == ROOK 
+			|| nextVictim == QUEEN)
 			attackers |= lookUpRookMoves(to, occ) & rooks;
 
 		attackers &= occ;
@@ -171,7 +171,7 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 
 		if (balance >= 0) {
 
-			if (nextVictim == cKING && (attackers & b->color[color])) {
+			if (nextVictim == KING && (attackers & b->color[color])) {
 				color ^= 1;
 			}
 
@@ -183,12 +183,12 @@ bool see_ge(board_t* b, move_t move, int threshold) {
 	return b->stm != color;
 }
 
-void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove, 
-				move_t killer[][512], move_t mKiller[512], 
-				move_t counterHeur[][64][2], int histHeur[][64][64]) {
+void scoreMoves(Thread thread, MoveList* moveList, Move hashMove) {
 
-	move_t currentMove;
-	int mvvLvaScore = 0;
+	Board* b = &thread->b;
+	Move currentMove;
+	
+	int mvvLvaScore   = 0;
 	int capturedPiece = 0;
 
 	for (int i = 0; i < moveList->cnt; i++) {
@@ -241,20 +241,20 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove,
 		}
 
 		// Mate killer
-		if (currentMove == mKiller[b->ply]) {
+		if (currentMove == thread->mateKiller[b->ply]) {
 			moveList->scores[i] = MATE_KILLER;
 			continue;
 		}
 
 		// First killer
-		if (currentMove == killer[0][b->ply]) {
+		if (currentMove == thread->killer[0][b->ply]) {
 			Assert(!capPiece(b, currentMove));
 			moveList->scores[i] = KILLER_SCORE_1;
 			continue;
 		}
 
 		// Second killer
-		if (currentMove == killer[1][b->ply]) {
+		if (currentMove == thread->killer[1][b->ply]) {
 			Assert(!capPiece(b, currentMove));
 			moveList->scores[i] = KILLER_SCORE_2;
 			continue;
@@ -262,8 +262,8 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove,
 
 		// Counter move
 		if (b->ply > 0) {
-			move_t prevMove    = b->undoHistory[b->ply - 1].move;
-			move_t counterMove = counterHeur[fromSq(prevMove)][toSq(prevMove)][b->stm];
+			Move prevMove    = b->undoHistory[b->ply - 1].move;
+			Move counterMove = thread->counterHeuristic[fromSq(prevMove)][toSq(prevMove)][b->stm];
 
 			if (currentMove == counterMove) {
 				moveList->scores[i] = COUNTER_SCORE;
@@ -279,7 +279,7 @@ void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove,
 		}
 
 		// Last resort: history heuristic
-		int histScore = histHeur[b->stm][fromSq(currentMove)][toSq(currentMove)];
+		int histScore = thread->histHeuristic[b->stm][fromSq(currentMove)][toSq(currentMove)];
 		Assert(0 <= histScore && histScore <= HISTORY_MAX);
 		moveList->scores[i] = QUIET_SCORE + (histScore);
 		Assert3(moveList->scores[i] < COUNTER_SCORE,

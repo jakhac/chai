@@ -47,16 +47,16 @@ const int borderReward[64] = {
 
 
 
-bool isKvKNB(board_t* b);
-bool isKQvKR(board_t* b);
-bool isKvKX(board_t* b);
-bool isKQvKP(board_t* b);
-bool isKQvKQ(board_t* b);
+bool isKvKNB(Board* b);
+bool isKQvKR(Board* b);
+bool isKvKX(Board* b);
+bool isKQvKP(Board* b);
+bool isKQvKQ(Board* b);
 
-value_t evaluate_KvKNB(board_t* b);
-value_t evaluate_KQvKR(board_t* b);
-value_t evaluate_KvKX(board_t* b);
-value_t evaluate_KQvKP(board_t* b);
-value_t evaluate_KQvKQ(board_t* b);
+Value evaluate_KvKNB(Board* b);
+Value evaluate_KQvKR(Board* b);
+Value evaluate_KvKX(Board* b);
+Value evaluate_KQvKP(Board* b);
+Value evaluate_KQvKQ(Board* b);
 
 // } // namespace chai

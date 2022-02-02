@@ -1,6 +1,7 @@
 #pragma once
 
 #include "moveGenerator.h"
+#include "thread.h"
 
 /*
 * Move Ordering:
@@ -60,14 +61,14 @@ void init();
 /**
  * Gets least valuable piece
  *
- * @param  b	    board_t to find least valuable piece on.
+ * @param  b	    Board to find least valuable piece on.
  * @param  atkSet   Bitboard with all attackers and defenders.
  * @param  side	    The attacking side.
  * @param  atkPiece The initial attacking piece.
  *
  * @returns The bitboard with least valuable piece.
  */
-bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkSet, int side);
+Bitboard getLeastValuablePiece(Board* b, Bitboard atkSet, int side);
 
 /**
  * Calculates static exchange evaluation starting with given move. Fully calculates all
@@ -78,7 +79,7 @@ bitboard_t getLeastValuablePiece(board_t* b, bitboard_t atkSet, int side);
  *
  * @returns Final score in centipawns after all exchanges have been made.
  */
-int see(board_t* b, const int move);
+int see(Board* b, const int move);
 
 /**
  * Calculate the see score and compare against a given treshold.
@@ -88,19 +89,16 @@ int see(board_t* b, const int move);
  * @param threshHold
  * @return True if see score is greater than the threshold, else false.
  */
-bool see_ge(board_t* b, move_t move, int threshHold);
+bool see_ge(Board* b, Move move, int threshHold);
 
 /**
  * Score moves according to moveOrdering.h rules. After scoring every move, best move is swapped
  * to first position. (not yet)
  *
- * @param  b	    Reference to board.
+ * @param  Thread   Reference to the thread.
  * @param  moveList Reference to moveList to score moves in.
  * @param  hashMove Hash move found in pvLine or ttable.
  */
-void scoreMoves(board_t* b, moveList_t* moveList, move_t hashMove, 
-				move_t killer[][512], move_t mKiller[512], 
-				move_t counterHeur[][64][2], int histHeur[][64][64]);
-
+void scoreMoves(Thread thread, MoveList* moveList, Move hashMove);
 
 } // namespace MoveOrder

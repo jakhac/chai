@@ -1,48 +1,48 @@
 #include "board.h"
 
 
-int capPiece(board_t* b, move_t move) {
+int capPiece(Board* b, Move move) {
 	return pieceAt(b, toSq(move));
 }
 
-bool isCapture(board_t* b, move_t move) {
+bool isCapture(Board* b, Move move) {
 	return pieceAt(b, toSq(move));
 }
 
-bool isCaptureOrPromotion(board_t* b, move_t move) {
+bool isCaptureOrPromotion(Board* b, Move move) {
 	return isCapture(b, move) || isPromotion(move);
 }
 
-bitboard_t getDiagPieces(board_t* b, color_t color) {
-	return getPieces(b, cBISHOP, color) | getPieces(b, cQUEEN, color);
+Bitboard getDiagPieces(Board* b, Color color) {
+	return getPieces(b, BISHOP, color) | getPieces(b, QUEEN, color);
 }
 
-bitboard_t getVertPieces(board_t* b, color_t color) {
-	return getPieces(b, cROOK, color) | getPieces(b, cQUEEN, color);
+Bitboard getVertPieces(Board* b, Color color) {
+	return getPieces(b, ROOK, color) | getPieces(b, QUEEN, color);
 }
 
-unsigned int relativeSq(int sq, color_t color) {
+unsigned int relativeSq(int sq, Color color) {
 	return (color == WHITE) ? sq : mirror64[sq];
 }
 
 
-void setPiece(board_t* b, int piece, int square, color_t color) {
+void setPiece(Board* b, int piece, int square, Color color) {
 
-	pType_t p        = pieceType[piece];
+	PieceType p      = pieceType[piece];
 	b->pieces[p]    ^= (1ULL << square);
 	b->color[color] ^= (1ULL << square);
 	b->occupied     ^= (1ULL << square);
 }
 
-void delPiece(board_t* b, int piece, int square, color_t color) {
+void delPiece(Board* b, int piece, int square, Color color) {
 
-	pType_t p        = pieceType[piece];
+	PieceType p      = pieceType[piece];
 	b->pieces[p]    ^= (1ULL << square);
 	b->color[color] ^= (1ULL << square);
 	b->occupied     ^= (1ULL << square);
 }
 
-void reset(board_t* b) {
+void reset(Board* b) {
 
 	b->stm       = WHITE;
 	b->enPas     = DEFAULT_EP_SQ;
@@ -59,7 +59,7 @@ void reset(board_t* b) {
 	b->zobristKey     = 0x0;
 	b->zobristPawnKey = 0x0;
 
-	for (int i = cNO_TYPE; i <= cKING; i++) {
+	for (int i = NO_PTYPE; i <= KING; i++) {
 		b->pieces[i] = 0ULL;
 	} 
 
@@ -68,14 +68,14 @@ void reset(board_t* b) {
 	b->occupied = 0ULL;
 }
 
-key_t generateZobristKey(board_t* b) {
+Key generateZobristKey(Board* b) {
 
-	key_t key  = 0;
+	Key key    = 0;
 	int square = 0;
 	int piece  = 0;
 
 	// Hash all pieces on their current square
-	bitboard_t occ = b->occupied;
+	Bitboard occ = b->occupied;
 	while (occ) {
 		square = popLSB(&occ);
 		piece  = pieceAt(b, square);
@@ -94,12 +94,12 @@ key_t generateZobristKey(board_t* b) {
 	return key;
 }
 
-key_t generatePawnHashKey(board_t* b) {
+Key generatePawnHashKey(Board* b) {
 	
 	int sq;
-	key_t key    = 0x0;
-	bitboard_t whitePawns = getPieces(b, cPAWN, WHITE);
-	bitboard_t blackPawns = getPieces(b, cPAWN, BLACK);
+	Key key    = 0x0;
+	Bitboard whitePawns = getPieces(b, PAWN, WHITE);
+	Bitboard blackPawns = getPieces(b, PAWN, BLACK);
 
 	while (whitePawns) {
 		sq   = popLSB(&whitePawns);
@@ -120,7 +120,7 @@ key_t generatePawnHashKey(board_t* b) {
 }
 
 
-void clearCastleRights(board_t* b, color_t stm) {
+void clearCastleRights(Board* b, Color stm) {
 
 	if (stm == WHITE) {
 		b->castlePermission &= ~K_CASTLE;
@@ -136,13 +136,13 @@ void clearCastleRights(board_t* b, color_t stm) {
 /**
  * @brief Updates the PSQT values according to a piece moving fromSq -> toSq.
  */
-static void updatePSQTValue(board_t* b, int fromSq, int toSq, int piece, color_t color) {
+static void updatePSQTValue(Board* b, int fromSq, int toSq, int piece, Color color) {
 
 	int relFromSq = relativeSq(fromSq, color);
 	int relToSq   = relativeSq(toSq, color);
 
-	pType_t type = pieceType[piece];
-	int sign     = (color == WHITE) ? 1 : -1;
+	PieceType type = pieceType[piece];
+	int sign       = (color == WHITE) ? 1 : -1;
 
 	b->psqtOpening -= sign * PSQT_OPENING[type][relFromSq];
 	b->psqtOpening += sign * PSQT_OPENING[type][relToSq];
@@ -153,11 +153,11 @@ static void updatePSQTValue(board_t* b, int fromSq, int toSq, int piece, color_t
 /**
  * @brief Removes the PSQT value from piece on sq.
  */
-static void delPSQTValue(board_t* b, int sq, int piece, color_t color) {
+static void delPSQTValue(Board* b, int sq, int piece, Color color) {
 
-	pType_t type  = pieceType[piece];
-	int relFromSq = relativeSq(sq, color);
-	int sign      = (color == WHITE) ? 1 : -1;
+	PieceType type = pieceType[piece];
+	int relFromSq  = relativeSq(sq, color);
+	int sign       = (color == WHITE) ? 1 : -1;
 
 	b->psqtOpening -= sign * PSQT_OPENING[type][relFromSq];
 	b->psqtEndgame -= sign * PSQT_ENDGAME[type][relFromSq];
@@ -166,38 +166,38 @@ static void delPSQTValue(board_t* b, int sq, int piece, color_t color) {
 /**
  * @brief Adds the PSQT value on sq from piece.
  */
-static void addPSQTValue(board_t* b, int sq, int piece, color_t color) {
+static void addPSQTValue(Board* b, int sq, int piece, Color color) {
 
-	pType_t type  = pieceType[piece];
-	int relFromSq = relativeSq(sq, color);
-	int sign      = (color == WHITE) ? 1 : -1;
+	PieceType type = pieceType[piece];
+	int relFromSq  = relativeSq(sq, color);
+	int sign       = (color == WHITE) ? 1 : -1;
 
 	b->psqtOpening += sign * PSQT_OPENING[type][relFromSq];
 	b->psqtEndgame += sign * PSQT_ENDGAME[type][relFromSq];
 }
 
-static void delMaterial(board_t* b, int piece, color_t color) {
+static void delMaterial(Board* b, int piece, Color color) {
 	int sign = (color == WHITE) ? 1 : -1;
 	b->material -= sign * pieceValues[piece];
 }
 
-static void addMaterial(board_t* b, int piece, color_t color) {
+static void addMaterial(Board* b, int piece, Color color) {
 	int sign = (color == WHITE) ? 1 : -1;
 	b->material += sign * pieceValues[piece];
 }
 
-void pushEnPas(board_t* b, move_t move) {
+void pushEnPas(Board* b, Move move) {
 
 	Assert(b->enPas == toSq(move));
 	int fromSquare  = fromSq(move);
 	int toSquare    = b->enPas;
 	int clearSquare = toSquare + 8 - (b->stm << 4);
 
-	int fromPiece  = stmPiece[cPAWN][b->stm];
-	int enPasPiece = stmPiece[cPAWN][!b->stm];
+	int fromPiece  = stmPiece[PAWN][b->stm];
+	int enPasPiece = stmPiece[PAWN][!b->stm];
 
 #if defined(USE_NNUE)
-	dirty_t* dp = &b->dp[b->ply + 1];
+	Dirty* dp = &b->dp[b->ply + 1];
 
 	// Moving pawn
 	dp->piece[0] = fromPiece;
@@ -222,9 +222,9 @@ void pushEnPas(board_t* b, move_t move) {
 				  ^  pieceKeys[fromPiece][toSquare]
 				  ^  pieceKeys[enPasPiece][clearSquare];
 
-	delPiece(b, cPAWN, clearSquare, !b->stm);
-	delPiece(b, cPAWN, fromSquare, b->stm);
-	setPiece(b, cPAWN, b->enPas, b->stm);
+	delPiece(b, PAWN, clearSquare, !b->stm);
+	delPiece(b, PAWN, fromSquare, b->stm);
+	setPiece(b, PAWN, b->enPas, b->stm);
 
 	// Calculate PSQT values on-the-fly
 	updatePSQTValue(b, fromSquare, toSquare, fromPiece, b->stm);
@@ -235,19 +235,19 @@ void pushEnPas(board_t* b, move_t move) {
 	b->enPas = DEFAULT_EP_SQ;
 }
 
-void pushPromotion(board_t* b, move_t move) {
+void pushPromotion(Board* b, Move move) {
 
 	int fromSquare = fromSq(move);
 	int toSquare   = toSq(move);
 
-	int fromPiece     = stmPiece[cPAWN][b->stm];
+	int fromPiece     = stmPiece[PAWN][b->stm];
 	int toPiece       = pieceAt(b, toSquare);
 	int promotedPiece = promPiece(b, move);
 	Assert(pieceValidPromotion(promotedPiece));
 
 
 #if defined(USE_NNUE)
-	dirty_t* dp = &b->dp[b->ply + 1];
+	Dirty* dp = &b->dp[b->ply + 1];
 
 	// Moving the pawn to NO_SQ
 	dp->piece[0] = fromPiece;
@@ -265,7 +265,7 @@ void pushPromotion(board_t* b, move_t move) {
 
 	b->zobristPawnKey ^= pieceKeys[fromPiece][fromSquare];
 	b->zobristKey     ^= pieceKeys[fromPiece][fromSquare]
-					  ^ pieceKeys[promotedPiece][toSquare];
+					  ^  pieceKeys[promotedPiece][toSquare];
 
 	// In case of promoting capture
 	if (toPiece) {
@@ -300,14 +300,14 @@ void pushPromotion(board_t* b, move_t move) {
 	b->enPas = DEFAULT_EP_SQ;
 }
 
-void pushCastle(board_t* b, move_t move) {
+void pushCastle(Board* b, Move move) {
 
 	int fromSquare = fromSq(move);
 	int toSquare   = toSq(move);
 	int rDelSq   = NO_SQ, rSetSq = NO_SQ;
 
-	int movingRook = stmPiece[cROOK][b->stm];
-	int movingKing = stmPiece[cKING][b->stm];
+	int movingRook = stmPiece[ROOK][b->stm];
+	int movingKing = stmPiece[KING][b->stm];
 
 	switch (toSquare) {
 		case C1:
@@ -331,7 +331,7 @@ void pushCastle(board_t* b, move_t move) {
 	}
 
 #if defined(USE_NNUE)
-	dirty_t* dp = &b->dp[b->ply + 1];
+	Dirty* dp = &b->dp[b->ply + 1];
 
 	// Moving the rook
 	dp->piece[0] = movingRook;
@@ -356,11 +356,11 @@ void pushCastle(board_t* b, move_t move) {
 	b->zobristPawnKey ^= pieceKeys[movingKing][fromSquare]
 					  ^  pieceKeys[movingKing][toSquare];
 
-	delPiece(b, cROOK, rDelSq, b->stm);
-	setPiece(b, cROOK, rSetSq, b->stm);
+	delPiece(b, ROOK, rDelSq, b->stm);
+	setPiece(b, ROOK, rSetSq, b->stm);
 
-	delPiece(b, cKING, fromSquare, b->stm);
-	setPiece(b, cKING, toSquare, b->stm);
+	delPiece(b, KING, fromSquare, b->stm);
+	setPiece(b, KING, toSquare, b->stm);
 
 	b->zobristKey ^= castleKeys[b->castlePermission];
 	clearCastleRights(b, b->stm);
@@ -373,7 +373,7 @@ void pushCastle(board_t* b, move_t move) {
 	b->enPas = DEFAULT_EP_SQ;
 }
 
-void pushNormal(board_t* b, move_t move) {
+void pushNormal(Board* b, Move move) {
 
 	int fromSquare = fromSq(move);
 	int toSquare   = toSq(move);
@@ -383,7 +383,7 @@ void pushNormal(board_t* b, move_t move) {
 
 #if defined(USE_NNUE)
 	// NNUE
-	dirty_t* dp = &b->dp[b->ply + 1];
+	Dirty* dp = &b->dp[b->ply + 1];
 
 	dp->piece[0] = fromPiece;
 	dp->from[0]  = fromSquare;
@@ -469,13 +469,13 @@ void pushNormal(board_t* b, move_t move) {
 	updatePSQTValue(b, fromSquare, toSquare, fromPiece, b->stm);
 }
 
-bool push(board_t* b, move_t move) {
+bool push(Board* b, Move move) {
 
 	Assert(b->enPas == DEFAULT_EP_SQ || validEnPasSq(b->enPas));
 	Assert(b->undoPly >= 0 && b->undoPly <= MAX_GAME_MOVES);
 
 #ifdef USE_NNUE
-	dirty_t* dp = &b->dp[b->ply + 1];
+	Dirty* dp = &b->dp[b->ply + 1];
 	dp->changedPieces = 0;
 	dp->isKingMove    = false;
 	b->accum[b->ply + 1].compState[WHITE] = EMPTY;
@@ -483,15 +483,15 @@ bool push(board_t* b, move_t move) {
 #endif // USE_NNUE
 
 	// Store data that is not worth recomputing
-	undo_t* undo    = &b->undoHistory[b->undoPly];
-	undo->enPas     = b->enPas;
-	undo->castle    = b->castlePermission;
-	undo->zobKey    = b->zobristKey;
-	undo->pawnKey   = b->zobristPawnKey;
-	undo->move      = move;
-	undo->cap       = Piece::NO_PIECE;
-	undo->fiftyMove = b->fiftyMove;
+	Undo* undo    = &b->undoHistory[b->undoPly];
+	undo->enPas   = b->enPas;
+	undo->castle  = b->castlePermission;
+	undo->zobKey  = b->zobristKey;
+	undo->pawnKey = b->zobristPawnKey;
+	undo->move    = move;
+	undo->cap     = Piece::NO_PIECE;
 
+	undo->fiftyMove   = b->fiftyMove;
 	undo->psqtOpening = b->psqtOpening;
 	undo->psqtEndgame = b->psqtEndgame;
 	undo->material    = b->material;
@@ -542,17 +542,17 @@ bool push(board_t* b, move_t move) {
 	return true;
 }
 
-void pushNull(board_t* b) {
+void pushNull(Board* b) {
 
 	Assert(!isCheck(b, b->stm));
 
-	undo_t* undo  = &b->undoHistory[b->undoPly];
+	Undo* undo    = &b->undoHistory[b->undoPly];
 	undo->enPas   = b->enPas;
 	undo->castle  = b->castlePermission;
 	undo->zobKey  = b->zobristKey;
 	undo->pawnKey = b->zobristPawnKey;
 	undo->move    = MOVE_NULL;
-	undo->cap     = cNO_TYPE;
+	undo->cap     = NO_PTYPE;
 
 	undo->psqtOpening = b->psqtOpening;
 	undo->psqtEndgame = b->psqtEndgame;
@@ -578,7 +578,7 @@ void pushNull(board_t* b) {
 	b->ply++;
 	
 #if defined (USE_NNUE)
-	dirty_t* dp = &b->dp[b->ply]; // ply already incremented
+	Dirty* dp = &b->dp[b->ply]; // ply already incremented
 	dp->changedPieces = 0;
 	dp->piece[0] = Piece::NO_PIECE;
 
@@ -587,7 +587,7 @@ void pushNull(board_t* b) {
 #endif
 }
 
-void clearCastlePermission(board_t* b, int side) {
+void clearCastlePermission(Board* b, int side) {
 
 	if (side == WHITE) {
 		b->castlePermission &= ~K_CASTLE;
@@ -598,7 +598,7 @@ void clearCastlePermission(board_t* b, int side) {
 	}
 }
 
-undo_t pop(board_t* b) {
+Undo pop(Board* b) {
 	
 	b->halfMoves--;
 	b->undoPly--;
@@ -608,7 +608,7 @@ undo_t pop(board_t* b) {
 	b->stm = !b->stm;
 
 	// reset board variables
-	undo_t* undo        = &b->undoHistory[b->undoPly];
+	Undo* undo        = &b->undoHistory[b->undoPly];
 	b->castlePermission = undo->castle;
 	b->fiftyMove        = undo->fiftyMove;
 	b->zobristKey       = undo->zobKey;
@@ -635,14 +635,14 @@ undo_t pop(board_t* b) {
 
 	// EP captures
 	if (isEnPassant(undo->move)) {
-		if (b->stm == WHITE) setPiece(b, cPAWN, toSquare - 8, !b->stm);
-		else setPiece(b, cPAWN, toSquare + 8, !b->stm);
+		if (b->stm == WHITE) setPiece(b, PAWN, toSquare - 8, !b->stm);
+		else setPiece(b, PAWN, toSquare + 8, !b->stm);
 	}
 
 	// Promotions
 	if (promPiece(b, undo->move)) {
 		delPiece(b, movingPiece, fromSquare, b->stm);
-		setPiece(b, cPAWN, fromSquare, b->stm);
+		setPiece(b, PAWN, fromSquare, b->stm);
 	}
 
 	// undo castles
@@ -666,15 +666,15 @@ undo_t pop(board_t* b) {
 	return *undo;
 }
 
-void popCastle(board_t* b, int clearRookSq, int setRookSq, color_t color) {
+void popCastle(Board* b, int clearRookSq, int setRookSq, Color color) {
 
 	Assert(pieceAt(b, clearRookSq) == Piece::R || pieceAt(b, clearRookSq) == Piece::r);
 
-	delPiece(b, cROOK, clearRookSq, color);
-	setPiece(b, cROOK, setRookSq, color);
+	delPiece(b, ROOK, clearRookSq, color);
+	setPiece(b, ROOK, setRookSq, color);
 }
 
-undo_t popNull(board_t* b) {
+Undo popNull(Board* b) {
 	
 	b->halfMoves--;
 	b->undoPly--;
@@ -685,7 +685,7 @@ undo_t popNull(board_t* b) {
 	b->stm = !b->stm;
 
 	// Reset board variables
-	undo_t* undo        = &b->undoHistory[b->undoPly];
+	Undo* undo          = &b->undoHistory[b->undoPly];
 	b->castlePermission = undo->castle;
 	b->fiftyMove        = undo->fiftyMove;
 	b->zobristKey       = undo->zobKey;
@@ -697,17 +697,17 @@ undo_t popNull(board_t* b) {
 	return *undo;
 }
 
-move_t getCurrentMove(board_t* b) {
+Move getCurrentMove(Board* b) {
 	return b->undoPly > 0 ? b->undoHistory[b->undoPly - 1].move
 						  : MOVE_NONE;
 }
 
-bool isCheck(board_t* b, color_t color) {
+bool isCheck(Board* b, Color color) {
 
 	int kSq = getKingSquare(b, color);
 
-	if (   pawnAtkMask[color][kSq] & getPieces(b, cPAWN, !color)
-		|| knightAtkMask[kSq]      & getPieces(b, cKNIGHT, !color)
+	if (   pawnAtkMask[color][kSq] & getPieces(b, PAWN, !color)
+		|| knightAtkMask[kSq]      & getPieces(b, KNIGHT, !color)
 		|| lookUpBishopMoves(kSq, b->occupied) & getDiagPieces(b, !color)
 		|| lookUpRookMoves(kSq, b->occupied)   & getVertPieces(b, !color))
 		return true;
@@ -715,14 +715,14 @@ bool isCheck(board_t* b, color_t color) {
 	return false;
 }
 
-bool sqIsBlockerForKing(board_t* b, int kSq, color_t movingSide, int potBlockerSq) {
+bool sqIsBlockerForKing(Board* b, int kSq, Color movingSide, int potBlockerSq) {
 
 	int sq;
-	bitboard_t pinner = 0;
+	Bitboard pinner = 0;
 
-	bitboard_t kingSlider = lookUpRookMoves(kSq, b->occupied);
-	bitboard_t potBlocker = kingSlider & b->color[movingSide];
-	bitboard_t xrays      = kingSlider ^ lookUpRookMoves(kSq, b->occupied ^ potBlocker);
+	Bitboard kingSlider = lookUpRookMoves(kSq, b->occupied);
+	Bitboard potBlocker = kingSlider & b->color[movingSide];
+	Bitboard xrays      = kingSlider ^ lookUpRookMoves(kSq, b->occupied ^ potBlocker);
 
 	pinner |= xrays & (getVertPieces(b, b->stm));
 	while (pinner) {
@@ -743,12 +743,12 @@ bool sqIsBlockerForKing(board_t* b, int kSq, color_t movingSide, int potBlockerS
 	return false;
 }
 
-bool checkingMove(board_t* b, move_t move) {
+bool checkingMove(Board* b, Move move) {
 	int from = fromSq(move);
 	int to = toSq(move);
 	int movingPiece = pieceAt(b, from);
 	int kingSq = getKingSquare(b, !b->stm);
-	bitboard_t kingMask = (1ULL << kingSq);
+	Bitboard kingMask = (1ULL << kingSq);
 
 	// 1. Direct check: atkMask hits kingSq
 	Assert(pieceValid(movingPiece))
@@ -845,7 +845,7 @@ bool checkingMove(board_t* b, move_t move) {
 	return false;
 }
 
-bool castleValid(board_t* b, int castle, bitboard_t* attackerSet) {
+bool castleValid(Board* b, int castle, Bitboard* attackerSet) {
 	if (   isCheck(b, b->stm)
 		|| !(b->castlePermission & castle))
 		return false;
@@ -885,7 +885,7 @@ bool castleValid(board_t* b, int castle, bitboard_t* attackerSet) {
 	return true;
 }
 
-bool checkBoard(board_t* board) {
+bool checkBoard(Board* board) {
 
 	Assert(board->castlePermission >= 0 && board->castlePermission <= 15);
 	Assert(popCount(board->occupied) >= 2 && popCount(board->occupied) <= 32);

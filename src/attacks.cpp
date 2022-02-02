@@ -1,18 +1,18 @@
 #include "attacks.h"
 
 // Bit set- and clear-masks
-bitboard_t setMask[64];
-bitboard_t clearMask[64];
+Bitboard setMask[64];
+Bitboard clearMask[64];
 
-bitboard_t rookTable[64][4096];
-bitboard_t bishopTable[64][1024];
+Bitboard rookTable[64][4096];
+Bitboard bishopTable[64][1024];
 
 // Move masks for all pieces
-bitboard_t pawnAtkMask[2][64];
-bitboard_t knightAtkMask[64];
-bitboard_t bishopMasks[64];
-bitboard_t rookMasks[64];
-bitboard_t kingAtkMask[64];
+Bitboard pawnAtkMask[2][64];
+Bitboard knightAtkMask[64];
+Bitboard bishopMasks[64];
+Bitboard rookMasks[64];
+Bitboard kingAtkMask[64];
 
 int squareToRank[64];
 int squareToFile[64];
@@ -20,26 +20,26 @@ int squareToFile[64];
 int dirFromTo[64][64];
 int manhatten[64][64];
 
-bitboard_t dirBitmap[64][8];
-bitboard_t inBetween[64][64];
-bitboard_t lineBB[64][64];
+Bitboard dirBitmap[64][8];
+Bitboard inBetween[64][64];
+Bitboard lineBB[64][64];
 
 // Evaluation masks
-bitboard_t pawnIsolatedMask[64];
-bitboard_t pawnPassedMask[2][64];
-bitboard_t upperMask[64];
-bitboard_t lowerMask[64];
-bitboard_t pawnShield[2][64];
-bitboard_t xMask[64];
-bitboard_t dangerZone[2][64];
-bitboard_t outpostSquares[2];
-bitboard_t horizontalNeighbors[64];
+Bitboard pawnIsolatedMask[64];
+Bitboard pawnPassedMask[2][64];
+Bitboard upperMask[64];
+Bitboard lowerMask[64];
+Bitboard pawnShield[2][64];
+Bitboard xMask[64];
+Bitboard dangerZone[2][64];
+Bitboard outpostSquares[2];
+Bitboard horizontalNeighbors[64];
 
 
-static bitboard_t getBlockers(bitboard_t mask, int idx) {
+static Bitboard getBlockers(Bitboard mask, int idx) {
 
-	bitboard_t blockers = 0ULL;
-	bitboard_t m = mask;
+	Bitboard blockers = 0ULL;
+	Bitboard m = mask;
 	int bits = popCount(m);
 
 	for (int i = 0; i < bits; i++) {
@@ -55,7 +55,7 @@ static bitboard_t getBlockers(bitboard_t mask, int idx) {
 
 static void initRookMasks() {
 
-	bitboard_t result;
+	Bitboard result;
 	for (int sq = 0; sq < 64; sq++) {
 		result = 0ULL;
 		int rk = sq / 8, fl = sq % 8, r, f;
@@ -70,7 +70,7 @@ static void initRookMasks() {
 static void initBishopMasks() {
 
 	for (int sq = 0; sq < 64; sq++) {
-		bitboard_t result = 0ULL;
+		Bitboard result = 0ULL;
 		int rk = sq / 8, fl = sq % 8, r, f;
 		for (r = rk + 1, f = fl + 1; r <= 6 && f <= 6; r++, f++) result |= (1ULL << (f + r * 8));
 		for (r = rk + 1, f = fl - 1; r <= 6 && f >= 1; r++, f--) result |= (1ULL << (f + r * 8));
@@ -106,8 +106,8 @@ static void initNonSliderAttacks() {
 
 	// Kings
 	for (int i = 0; i < 64; i++) {
-		bitboard_t kingSet = setMask[i];
-		bitboard_t attacks = (kingSet << 1 & ~FILE_A_HEX) 
+		Bitboard kingSet = setMask[i];
+		Bitboard attacks = (kingSet << 1 & ~FILE_A_HEX) 
 						   | (kingSet >> 1 & ~FILE_H_HEX);
 
 		kingSet |= attacks;
@@ -117,9 +117,9 @@ static void initNonSliderAttacks() {
 	}
 }
 
-static bitboard_t calculateRookMoves(int square, bitboard_t blockers) {
+static Bitboard calculateRookMoves(int square, Bitboard blockers) {
 
-	bitboard_t result = 0ULL;
+	Bitboard result = 0ULL;
 	int rk = square / 8;
 	int fl = square % 8, r, f;
 
@@ -146,10 +146,12 @@ static bitboard_t calculateRookMoves(int square, bitboard_t blockers) {
 	return result;
 }
 
-static bitboard_t calculateBishopMoves(int sq, bitboard_t blockers) {
+static Bitboard calculateBishopMoves(int sq, Bitboard blockers) {
 
-	bitboard_t result = 0ULL;
-	int rk = sq / 8, fl = sq % 8, r, f;
+	Bitboard result = 0ULL;
+	int rk = sq / 8;
+	int fl = sq % 8;
+	int r, f;
 
 	for (r = rk + 1, f = fl + 1; r <= 7 && f <= 7; r++, f++) {
 		result |= (1ULL << (f + r * 8));
@@ -176,8 +178,8 @@ static bitboard_t calculateBishopMoves(int sq, bitboard_t blockers) {
 
 static void initRookMagicTable() {
 
-	bitboard_t tableIndex;
-	bitboard_t blockers, rookMoves;
+	Bitboard tableIndex;
+	Bitboard blockers, rookMoves;
 
 	for (int sq = 0; sq < 64; sq++) {
 		for (int block = 0; block < (1 << rookIndexBits[sq]); block++) {
@@ -197,7 +199,7 @@ static void initRookMagicTable() {
 
 static void initBishopMagicTable() {
 
-	bitboard_t tableIndex, blockers, bishopMoves;
+	Bitboard tableIndex, blockers, bishopMoves;
 
 	for (int sq = 0; sq < 64; sq++) {
 		for (int block = 0; block < (1 << bishopIndexBits[sq]); block++) {
@@ -214,21 +216,21 @@ static void initBishopMagicTable() {
 	}
 }
 
-bitboard_t lookUpRookMoves(int sq, bitboard_t blockers) {
+Bitboard lookUpRookMoves(int sq, Bitboard blockers) {
 
 	blockers &= rookMasks[sq];
-	bitboard_t key = (blockers * rookMagic[sq]) >> (64 - rookIndexBits[sq]);
+	Bitboard key = (blockers * rookMagic[sq]) >> (64 - rookIndexBits[sq]);
 	return rookTable[sq][key];
 }
 
-bitboard_t lookUpBishopMoves(int sq, bitboard_t blockers) {
+Bitboard lookUpBishopMoves(int sq, Bitboard blockers) {
 
 	blockers &= bishopMasks[sq];
-	bitboard_t key = (blockers * bishopMagic[sq]) >> (64 - bishopIndexBits[sq]);
+	Bitboard key = (blockers * bishopMagic[sq]) >> (64 - bishopIndexBits[sq]);
 	return bishopTable[sq][key];
 }
 
-bitboard_t lookUpQueenMoves(int sq, bitboard_t blockers) {
+Bitboard lookUpQueenMoves(int sq, Bitboard blockers) {
 	return lookUpRookMoves(sq, blockers) | lookUpBishopMoves(sq, blockers);
 }
 
@@ -236,8 +238,8 @@ static void initHorizontalNeighbors() {
 
 	for (int i = 0; i < 64; i++) {
 
-		bitboard_t left  = (toFile(i) == FILE_A) ? 0ULL : setMask[i-1];
-		bitboard_t right = (toFile(i) == FILE_H) ? 0ULL : setMask[i+1];
+		Bitboard left  = (toFile(i) == FILE_A) ? 0ULL : setMask[i-1];
+		Bitboard right = (toFile(i) == FILE_H) ? 0ULL : setMask[i+1];
 
 		horizontalNeighbors[i] = left | right;
 	}
@@ -275,7 +277,7 @@ static void initSquareToRankFile() {
 static void initEvalMasks() {
 
 	int file;
-	bitboard_t left, right;
+	Bitboard left, right;
 	for (int i = 0; i < 64; i++) {
 		file = squareToFile[i] - 1;
 		left = (file >= 0) ? FILE_LIST[file] : 0ULL;
@@ -307,7 +309,7 @@ static void initEvalMasks() {
 												 | pawnIsolatedMask[i]);
 	}
 
-	bitboard_t shield;
+	Bitboard shield;
 	for (int i = 0; i < 64; i++) {
 		shield = 0ULL;
 		shield =  setMask[i]
@@ -368,7 +370,7 @@ static void initObstructed() {
 
 	for (int sq = 0; sq < 64; ++sq) {
 		for (int sq2 = 0; sq2 < 64; ++sq2) {
-			inBetween[sq][sq2] = bitboard_t(0);
+			inBetween[sq][sq2] = Bitboard(0);
 			int k = dirFromTo[sq][sq2];
 			if (k != 8) {
 				int k2 = dirFromTo[sq2][sq];
@@ -380,11 +382,13 @@ static void initObstructed() {
 
 static void initLine() {
 
-	bitboard_t midDiagonalUp = 0x8040201008040201;
-	bitboard_t midDiagonalDown = 0x0102040810204080;
-	bitboard_t vertical = FILE_A_HEX;
-	bitboard_t horizontal = RANK_1_HEX;
-	std::vector<bitboard_t> axis = { 
+	Bitboard midDiagonalUp   = 0x8040201008040201;
+	Bitboard midDiagonalDown = 0x0102040810204080;
+
+	Bitboard vertical   = FILE_A_HEX;
+	Bitboard horizontal = RANK_1_HEX;
+
+	std::vector<Bitboard> axis = { 
 		midDiagonalDown, midDiagonalUp, vertical, horizontal,
 		FILE_B_HEX, FILE_C_HEX, FILE_D_HEX, FILE_E_HEX,
 		FILE_F_HEX, FILE_G_HEX, FILE_H_HEX };

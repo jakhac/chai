@@ -8,17 +8,17 @@
 a64 int16_t feat_weights[FEAT_INPUT_SIZE * FEAT_OUT_SIZE_HALF];
 a64 int16_t feat_biases[FEAT_OUT_SIZE_HALF];
 
-a64 weight_t hd1_weights[HD1_OUT_SIZE * HD1_IN_SIZE];
+a64 Weight hd1_weights[HD1_OUT_SIZE * HD1_IN_SIZE];
 a64 int32_t  hd1_biases[HD1_OUT_SIZE];
 
-a64 weight_t hd2_weights[HD2_IN_SIZE * HD2_OUT_SIZE];
+a64 Weight hd2_weights[HD2_IN_SIZE * HD2_OUT_SIZE];
 a64 int32_t  hd2_biases[HD2_IN_SIZE];
 
-a64 weight_t out_weights[HD3_OUT_SIZE * HD3_IN_SIZE];
+a64 Weight out_weights[HD3_OUT_SIZE * HD3_IN_SIZE];
 a64 int32_t  out_biases[HD3_OUT_SIZE];
 
 
-void hiddenLayer1(clipped_t* in, int32_t* out) {
+void hiddenLayer1(Clipped* in, int32_t* out) {
 
 #if defined(USE_AVX2)
 
@@ -124,7 +124,7 @@ void hiddenLayer1(clipped_t* in, int32_t* out) {
 
 }
 
-void hiddenLayer2(clipped_t* in, int32_t* out) {
+void hiddenLayer2(Clipped* in, int32_t* out) {
 
 #if defined(USE_AVX2)
 
@@ -233,7 +233,7 @@ void hiddenLayer2(clipped_t* in, int32_t* out) {
 
 }
 
-void clpReluLayer(int32_t* in, clipped_t* out, size_t dim) {
+void clpReluLayer(int32_t* in, Clipped* out, size_t dim) {
     Assert(RELU1_SIZE == RELU2_SIZE);
 
 #if defined(USE_AVX2)
@@ -288,7 +288,7 @@ void clpReluLayer(int32_t* in, clipped_t* out, size_t dim) {
 #endif
 }
 
-void outLayer(clipped_t* in, int32_t* out) {
+void outLayer(Clipped* in, int32_t* out) {
 
 #if defined(USE_AVX2)
 

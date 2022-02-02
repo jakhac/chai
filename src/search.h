@@ -34,7 +34,7 @@ void init();
  * @returns Best score found in search.
  */
 template <nodeType_t nodeType>
-value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth);
+Value alphaBeta(Thread thread, Value alpha, Value beta, int depth);
 
 /**
  * Quiescence search pushes all captures to evaluate a stable and quiet position. AlphaBeta
@@ -49,16 +49,16 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth);
  * @returns Best score found in quiescences search.
  */
 template <nodeType_t nodeType>
-value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth);
+Value quiescence(Thread thread, Value alpha, Value beta, int depth);
 
 /**
  * Root function that starts alphaBeta search in iterative deepening framework.
  *
  * @param  b Reference to current board.
  *
- * @returns value_t Best value found search.
+ * @returns Value Best value found search.
  */
-value_t search(board_t* b, stats_t* s, instr_t* i);
+Value search(Board* b, Stats* s, Instructions* i);
 
 /**
  * Apply offset of aspiration windows in alphaBeta call and try to score inside alpha and beta.
@@ -71,14 +71,14 @@ value_t search(board_t* b, stats_t* s, instr_t* i);
  *
  * @returns Best score found in alphaBeta search.
  */
-value_t aspirationSearch(Thread thread, int depth, value_t bestScore);
+Value aspirationSearch(Thread thread, int depth, Value bestScore);
 
 /**
  * Print search information to console.
  *
  * @param  s This search info printed to console.
  */
-void printSearchInfo(stats_t* s);
+void printSearchInfo(Stats* s);
 
 
 } // namespace Search

@@ -49,12 +49,12 @@ void readFromStream(std::istream& ss, T* buffer, size_t cnt);
  * @brief Propagate active features wrt the given board through neural network and
  * return the value of outlayer neuron.
  */
-value_t propagate(board_t* b);
+Value propagate(Board* b);
 
 /**
  * @brief Return the NNUE evaluation for the given board.
  */
-value_t evaluateNNUE(board_t* b);
+Value evaluateNNUE(Board* b);
 
 
 // Misc functions

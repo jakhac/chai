@@ -20,8 +20,8 @@
 #endif
 
 
-extern ttable_t tt[1];
-extern pawntable_t pt[1];
+extern TTable tt[1];
+extern PTable pt[1];
 
 const int QS_DEPTH       = -1;
 const int QS_DEPTH_CHECK = 0;
@@ -97,7 +97,7 @@ void clearPT();
  * @param  flag  Flag for score type.
  * @param  depth Depth used in search for move and score.
  */
-void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int flag, int depth);
+void storeTT(Board* b, Move move, Value value, Value staticEval, int flag, int depth);
 
 /**
  * Store a pawn table entry with pawn evaluation score.
@@ -105,7 +105,7 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
  * @param  b    Current board.
  * @param  eval Score for pawn structure.
  */
-void storePT(board_t* b, const value_t eval);
+void storePT(Board* b, const Value eval);
 
 /**
  * Probe the transposition table. If a hash entry with equal zobristKey is found, all
@@ -120,7 +120,7 @@ void storePT(board_t* b, const value_t eval);
  *
  * @returns True if hash entry was found, else false.
  */
-bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int8_t* hashDepth);
+bool probeTT(Board* b, Move* move, Value* hashValue, Value* hashEval, uint8_t* hashFlag, int8_t* hashDepth);
 
 /**
  * Probe pawn table and return score if found.
@@ -130,31 +130,31 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
  *
  * @returns True if hash was found and score is assigned.
  */
-bool probePT(board_t* b, value_t* hashScore);
+bool probePT(Board* b, Value* hashScore);
 
 /**
  * Prefetch pawn entry in cache line using assembly instruction.
  *
  * @param  b The current board.
  */
-void prefetchPT(board_t* b);
+void prefetchPT(Board* b);
 
 /**
  * Prefetch first tt entry of bucket into cache using assembly instructions.
  *
  * @param  key The zobrist hash of current board.
  */
-void prefetchTT(board_t* b);
+void prefetchTT(Board* b);
 
 
 /**
  * Probe PV move from ttable.
  *
- * @param  b A board_t to process.
+ * @param  b A Board to process.
  *
  * @returns The hash move if found, else NO_MOVE.
  */
-move_t probePV(board_t* b);
+Move probePV(Board* b);
 
 /**
  * Checks if score from ttable is mate score. Update score according with ply to
@@ -163,7 +163,7 @@ move_t probePV(board_t* b);
  * @param  ply	 Current ply.
  * @param  score The score to check.
  */
-int hashToSearch(int ply, value_t score);
+int hashToSearch(int ply, Value score);
 
 /**
  * Checks if score from search is mate score. Update score according with ply to
@@ -172,7 +172,7 @@ int hashToSearch(int ply, value_t score);
  * @param  ply	 Current ply.
  * @param  score The score to check.
  */
-int searchToHash(int ply, value_t score);
+int searchToHash(int ply, Value score);
 
 
 }

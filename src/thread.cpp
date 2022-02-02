@@ -10,13 +10,10 @@ int NUM_THREADS = 1;
 bool TERMINATE_THREADS = false;
 bool ABORT_SEARCH = false;
 
-// using namespace Search;
-// using namespace Threads;
-// namespace Threads {
 
 std::vector<Thread> threadPool;
 
-void ThreadWrapper::resetThreadStates(board_t* board, stats_t* search, instr_t* instructions) {
+void ThreadWrapper::resetThreadStates(Board* board, Stats* search, Instructions* instructions) {
     b     = *board;
     s     = *search;
     instr = *instructions;
@@ -133,7 +130,7 @@ bool resizePool(size_t numWorkers) {
     return true;
 }
 
-void resetAllThreadStates(board_t* board, stats_t* search, instr_t* instructions) {
+void resetAllThreadStates(Board* board, Stats* search, Instructions* instructions) {
     for (int i = 0; i < NUM_THREADS; i++) {
         threadPool[i]->resetThreadStates(board, search, instructions);
     }
@@ -166,7 +163,7 @@ int totalNodeCount() {
 int selectBestThreadIndex() {
     
     int bestIdx = 0;
-    value_t bestScore = threadPool[bestIdx]->bestScore;
+    Value bestScore = threadPool[bestIdx]->bestScore;
     int bestDepth = threadPool[bestIdx]->depth;
 
     for (size_t i = 1; i < threadPool.size(); i++) {

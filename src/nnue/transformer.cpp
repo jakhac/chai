@@ -1,12 +1,12 @@
 #include "transformer.h"
 
 
-template<color_t color>
+template<Color color>
 int orientSq(int sq) {
     return (color == BLACK) ? sq ^ orientOperator : sq;
 }
 
-template<color_t color>
+template<Color color>
 int getHalfKPIndex(int sq, int piece, int kIdx) {
 
     int relSq = orientSq<color>(sq);
@@ -15,10 +15,10 @@ int getHalfKPIndex(int sq, int piece, int kIdx) {
     return relSq + (PieceToIndex[color][piece]) + kIdx;
 }
 
-template<color_t color>
-void setActiveFeatures(board_t* b, features_t* features) {
+template<Color color>
+void setActiveFeatures(Board* b, Features* features) {
 
-    bitboard_t pieces = b->occupied & ~b->pieces[cKING];
+    Bitboard pieces = b->occupied & ~b->pieces[KING];
     int kSq = getKingSquare(b, color);
     int kIdx = PS_END * orientSq<color>(kSq);
 
@@ -28,8 +28,8 @@ void setActiveFeatures(board_t* b, features_t* features) {
     }
 }
 
-template<color_t color>
-void getDirtyFeatures(board_t* b, dirty_t* dp, features_t* features) {
+template<Color color>
+void getDirtyFeatures(Board* b, Dirty* dp, Features* features) {
 
     int kSq = getKingSquare(b, color);
     int kIdx = PS_END * orientSq<color>(kSq);
@@ -48,16 +48,16 @@ void getDirtyFeatures(board_t* b, dirty_t* dp, features_t* features) {
     }
 }
 
-template<color_t color>
-void refreshAccumulator(board_t* b) {
+template<Color color>
+void refreshAccumulator(Board* b) {
 
 #if defined(USE_AVX2) || defined(USE_SSSE3)
 
     vec_t registers[NUM_REGS];
     auto tempBias = reinterpret_cast<vec_t*>(&feat_biases);
 
-    accum_t* acc = &b->accum[b->ply];
-    features_t features;
+    Accum* acc = &b->accum[b->ply];
+    Features features;
     setActiveFeatures<color>(b, &features);
 
 
@@ -93,8 +93,8 @@ void refreshAccumulator(board_t* b) {
 #else
 
     int16_t* bias = feat_biases;
-    accum_t* acc = &b->accum[b->ply];
-    features_t features;
+    Accum* acc = &b->accum[b->ply];
+    Features features;
 
     setActiveFeatures<color>(b, &features);
 
@@ -117,8 +117,8 @@ void refreshAccumulator(board_t* b) {
 
 }
 
-template<color_t color>
-void accumulateFeatures(board_t* b) {
+template<Color color>
+void accumulateFeatures(Board* b) {
 
     int refreshCost = popCount(b->occupied) - 2;
     int reusePly = b->ply;
@@ -151,8 +151,8 @@ void accumulateFeatures(board_t* b) {
 
 }
 
-template<color_t color>
-void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features) {
+template<Color color>
+void adjustWeights(Accum* accDst, Accum* accSrc, Features* features) {
 
 #if defined(USE_AVX2) || defined(USE_SSSE3)
 
@@ -218,8 +218,8 @@ void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features) {
 
 }
 
-template<color_t color>
-void updateAccumulator(board_t* b, int reusePly) {
+template<Color color>
+void updateAccumulator(Board* b, int reusePly) {
 
     // For the following code we have the invariant: reusePly < b-ply
     if (reusePly == b->ply)
@@ -227,10 +227,10 @@ void updateAccumulator(board_t* b, int reusePly) {
 
     // Initialize two feature sets. We either update the prveious ply and ignore the second set
     // or utilize a ply further away and gather all additionally
-    features_t features[2];
+    Features features[2];
 
     // Append changed pieces from (reusePly + 1) to the first feature list
-    dirty_t* dp = &b->dp[reusePly + 1];
+    Dirty* dp = &b->dp[reusePly + 1];
     getDirtyFeatures<color>(b, dp, &features[0]);
 
     // Append changed pieces for further plies mslast+2 <= ply to indexList1
@@ -250,7 +250,7 @@ void updateAccumulator(board_t* b, int reusePly) {
 
 }
 
-void updateTransformer(board_t* b, clipped_t* output) {
+void updateTransformer(Board* b, Clipped* output) {
 
     accumulateFeatures<WHITE>(b);
     accumulateFeatures<BLACK>(b);

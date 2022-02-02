@@ -14,20 +14,20 @@ public:
 	/**
 	 * Standard perft root call.
 	 *
-	 * @param  b	 The board_t reference.
+	 * @param  b	 The Board reference.
 	 * @param  depth Perft depth.
 	 *
 	 * @returns The number of leaf nodes counted at given depth.
 	 */
-	long long perftRoot(board_t* b, int depth);
+	long long perftRoot(Board* b, int depth);
 
 	/**
-	 * Recursive call for perft using {@link #isLegal(board_t, move_t)} isLegal function.
+	 * Recursive call for perft using {@link #isLegal(Board, Move)} isLegal function.
 	 *
 	 * @param  b	 The board reference.
 	 * @param  depth Depth remaining.
 	 */
-	void perft(board_t* b, int depth);
+	void perft(Board* b, int depth);
 
 };
 
@@ -35,8 +35,8 @@ public:
 /**
  * Function to divide with cmd-line move after each perft.
  *
- * @param  b	 board_t reference.
+ * @param  b	 Board reference.
  * @param  fen   The fen.
  * @param  depth The initial depth.
  */
-void dividePerft(Perft* p, board_t* b, int depth);
+void dividePerft(Perft* p, Board* b, int depth);

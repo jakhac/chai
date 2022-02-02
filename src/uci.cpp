@@ -3,15 +3,15 @@
 namespace UCI {
 
 
-void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
-	moveList_t moveList;
-	move_t parsedMove;
+void cli(Board* b, Instructions* i, Stats* s, Perft* p) {
+	MoveList moveList;
+	Move parsedMove;
 	std::string userInput;
 
 	// cout << "Propagate " << propagate(b) << endl;
 	// cout << "nnue eval " << evaluateNNUE(b) << endl;
 
-	// bitboard_t = 
+	// Bitboard = 
 	// printBitBoard(&t);
 
 	while (1) {
@@ -85,7 +85,7 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 
 		// Pop move from board.
 		if (userInput == "pop") {
-			undo_t undoPop = pop(b);
+			Undo undoPop = pop(b);
 			cout << "Popped " << getStringMove(b, undoPop.move) 
 				 << " from stack." << endl;
 			printBoard(b);
@@ -114,7 +114,7 @@ void cli(board_t* b, instr_t* i, stats_t* s, Perft* p) {
 	}
 }
 
-void uciMode(board_t* b, stats_t* s, instr_t* i) {
+void uciMode(Board* b, Stats* s, Instructions* i) {
 	std::string cmd;
 
 	printUCI_Info();
@@ -196,7 +196,7 @@ void uciSetOption(std::string cmd) {
 
 }
 
-void uciParsePosition(board_t* b, std::string cmd) {
+void uciParsePosition(Board* b, std::string cmd) {
 
 	if (strStartsWith(cmd, "position fen")) {
 		std::string fen = cmd.substr(13, cmd.size());
@@ -236,7 +236,7 @@ void uciParsePosition(board_t* b, std::string cmd) {
 	fflush(stdout);
 }
 
-void uciParseGo(board_t* b, stats_t* s, instr_t* instr, std::string cmd) {
+void uciParseGo(Board* b, Stats* s, Instructions* instr, std::string cmd) {
 	instr->startTime = getTimeMs();
 
 	int depth    = 0; // search to this depth

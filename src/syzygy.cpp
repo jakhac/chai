@@ -17,10 +17,10 @@ void freeEGTB() {
 	tb_free();
 }
 
-int probeTB(board_t* b) {
+int probeTB(Board* b) {
 	// Do not allow TB probing in root nodes
 	// TB only works if both players have no castling rights
-	if (b->ply == 0
+	if (   b->ply == 0
 		|| b->castlePermission != 0
 		|| b->fiftyMove > 0
 		|| (unsigned) popCount(b->occupied) > TB_LARGEST)
@@ -31,12 +31,12 @@ int probeTB(board_t* b) {
 
 	return tb_probe_wdl(b->color[WHITE],
 						b->color[BLACK],
-						b->pieces[cKING],
-						b->pieces[cQUEEN],
-						b->pieces[cROOK],
-						b->pieces[cBISHOP],
-						b->pieces[cKNIGHT],
-						b->pieces[cPAWN],
+						b->pieces[KING],
+						b->pieces[QUEEN],
+						b->pieces[ROOK],
+						b->pieces[BISHOP],
+						b->pieces[KNIGHT],
+						b->pieces[PAWN],
 						0,
 						0,
 						enPas,

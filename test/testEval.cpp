@@ -4,7 +4,7 @@ using namespace EvalTest;
 
 
 TEST_F(EvalTest, Backward_Pawns) {
-    bitboard_t sol, ans;
+    Bitboard sol, ans;
 
 	parseFen(pBoard, "4k3/2p3p1/1p1pp3/8/6p1/pP2Pp2/P6P/4K3 w - - 0 1");
     ans = wBackwardPawns(pBoard);
@@ -106,7 +106,7 @@ TEST_F(EvalTest, HiddenPassedPawns) {
 }
 
 TEST_F(EvalTest, PawnStructure) {
-    value_t pawnEval;
+    Value pawnEval;
 
 	parseFen(pBoard, "4k3/7p/4p3/8/1p4p1/4Pp2/PP5P/4K3 w - - 0 1");
     pawnEval = evaluatePawns(pBoard);
@@ -132,10 +132,10 @@ TEST_F(EvalTest, Passers) {
 
     bool flag;
 	parseFen(pBoard, "1r2k3/2p2Ppp/3Pp3/8/1Pp5/Pp6/3P4/R3K1R1 w - - 0 1");
-    bitboard_t wRooks = getPieces(pBoard, cROOK, WHITE);
-    bitboard_t bRooks = getPieces(pBoard, cROOK, BLACK);
-    bitboard_t wPasser = getPassers(pBoard, WHITE);
-    bitboard_t bPasser = getPassers(pBoard, BLACK);
+    Bitboard wRooks = getPieces(pBoard, ROOK, WHITE);
+    Bitboard bRooks = getPieces(pBoard, ROOK, BLACK);
+    Bitboard wPasser = getPassers(pBoard, WHITE);
+    Bitboard bPasser = getPassers(pBoard, BLACK);
 
     flag = rookControlsPasser(wRooks, wPasser, false);
 	EXPECT_EQ(flag, true);
@@ -156,7 +156,7 @@ TEST_F(EvalTest, Passers) {
 }
 
 TEST_F(EvalTest, DiscoveredAttacks) {
-    bitboard_t res;
+    Bitboard res;
 
     // DiscoveredAttacks
 	parseFen(pBoard, "3rk2b/8/3ppp2/8/5Q2/8/1PPP4/4K3 w - - 0 1");
@@ -175,34 +175,34 @@ TEST_F(EvalTest, DiscoveredAttacks) {
     parseFen(pBoard, "4k3/5ppp/4p3/1N1P4/1nP4n/8/PP3PP1/4K3 w - - 0 1");
     pBoard->attackedSquares[WHITE] = attackerSet(pBoard, WHITE);
     pBoard->attackedSquares[BLACK] = attackerSet(pBoard, BLACK);
-	EXPECT_EQ(3, undefendedChecksFrom<cKNIGHT>(pBoard, E1, BLACK));
+	EXPECT_EQ(3, undefendedChecksFrom<KNIGHT>(pBoard, E1, BLACK));
 
     parseFen(pBoard, "4k3/5ppp/4p3/1N1P4/1nP4n/8/PP1Q1PP1/4K3 w - - 0 1");
     pBoard->attackedSquares[WHITE] = attackerSet(pBoard, WHITE);
     pBoard->attackedSquares[BLACK] = attackerSet(pBoard, BLACK);
-	EXPECT_EQ(1, undefendedChecksFrom<cKNIGHT>(pBoard, E1, BLACK));
+	EXPECT_EQ(1, undefendedChecksFrom<KNIGHT>(pBoard, E1, BLACK));
 
     // Bishop checks
     parseFen(pBoard, "4k3/5ppp/3bp3/1N1P4/1nP4n/5P2/PP1Q2P1/4K3 w - - 0 1");
     pBoard->attackedSquares[WHITE] = attackerSet(pBoard, WHITE);
     pBoard->attackedSquares[BLACK] = attackerSet(pBoard, BLACK);
-	EXPECT_EQ(1, undefendedChecksFrom<cBISHOP>(pBoard, E1, BLACK));
+	EXPECT_EQ(1, undefendedChecksFrom<BISHOP>(pBoard, E1, BLACK));
 
     parseFen(pBoard, "4k3/5ppp/3bp3/1N1P4/1nP4n/5P2/PP1Q2P1/4KN2 w - - 0 1");
     pBoard->attackedSquares[WHITE] = attackerSet(pBoard, WHITE);
     pBoard->attackedSquares[BLACK] = attackerSet(pBoard, BLACK);
-	EXPECT_EQ(0, undefendedChecksFrom<cBISHOP>(pBoard, E1, BLACK));
+	EXPECT_EQ(0, undefendedChecksFrom<BISHOP>(pBoard, E1, BLACK));
 
     // Rook checks
     parseFen(pBoard, "r3k3/5ppp/3bp3/1N1P4/1nP4n/5P2/1P1Q2P1/4KN2 w - - 0 1");
     pBoard->attackedSquares[WHITE] = attackerSet(pBoard, WHITE);
     pBoard->attackedSquares[BLACK] = attackerSet(pBoard, BLACK);
-	EXPECT_EQ(1, undefendedChecksFrom<cROOK>(pBoard, E1, BLACK));
+	EXPECT_EQ(1, undefendedChecksFrom<ROOK>(pBoard, E1, BLACK));
 
     parseFen(pBoard, "r3k3/5ppp/3bp3/1N1P4/1nP4n/2Q2P2/6P1/4KN2 w - - 0 1");
     pBoard->attackedSquares[WHITE] = attackerSet(pBoard, WHITE);
     pBoard->attackedSquares[BLACK] = attackerSet(pBoard, BLACK);
-	EXPECT_EQ(0, undefendedChecksFrom<cROOK>(pBoard, E1, BLACK));
+	EXPECT_EQ(0, undefendedChecksFrom<ROOK>(pBoard, E1, BLACK));
     
 }
 

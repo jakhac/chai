@@ -2,10 +2,10 @@
 #include "search.h"
 
 
-board_t board;
-Perft   perft;
-instr_t instr;
-stats_t stats;
+Board board;
+Perft perft;
+Stats stats;
+Instructions instr;
 
 int main() {
 

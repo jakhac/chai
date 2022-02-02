@@ -12,15 +12,15 @@ bool canUseNNUE = false;
 namespace NNUE {
 
 
-value_t evaluateNNUE(board_t* b) {
+Value evaluateNNUE(Board* b) {
 
-    value_t eval = (propagate(b) * 64) / 1024;
+    Value eval = (propagate(b) * 64) / 1024;
     return std::clamp(eval, VALUE_LOSS, VALUE_WIN);
 }
 
-value_t propagate(board_t* b) {
+Value propagate(Board* b) {
 
-    a64 clipped_t buffer_8[512];
+    a64 Clipped buffer_8[512];
     a64 int32_t buffer_32[512];
 
     updateTransformer(b, buffer_8);
@@ -33,7 +33,6 @@ value_t propagate(board_t* b) {
 
     outLayer(buffer_8, buffer_32);
 
-    // cout << "\nOut layer value " << buffer_32[0] << endl;
     return buffer_32[0];
 }
 
@@ -105,15 +104,15 @@ void readNetData(std::istream& ss) {
 
     readFromStream<int32_t>(ss, hd1_biases, HD1_OUT_SIZE);
     for (size_t i = 0; i < HD1_OUT_SIZE * HD1_IN_SIZE; i++)
-        readFromStream<weight_t>(ss, &hd1_weights[shuffle(i, HD1_IN_SIZE, false)], 1);
+        readFromStream<Weight>(ss, &hd1_weights[shuffle(i, HD1_IN_SIZE, false)], 1);
 
     readFromStream<int32_t>(ss, hd2_biases, HD2_OUT_SIZE);
     for (size_t i = 0; i < HD2_OUT_SIZE * HD2_IN_SIZE; i++)
-        readFromStream<weight_t>(ss, &hd2_weights[shuffle(i, HD2_IN_SIZE, false)], 1);
+        readFromStream<Weight>(ss, &hd2_weights[shuffle(i, HD2_IN_SIZE, false)], 1);
 
     readFromStream<int32_t>(ss, out_biases, HD3_OUT_SIZE);
     for (size_t i = 0; i < HD3_OUT_SIZE * HD3_IN_SIZE; i++)
-        readFromStream<weight_t>(ss, &out_weights[shuffle(i, HD3_IN_SIZE, true)], 1);
+        readFromStream<Weight>(ss, &out_weights[shuffle(i, HD3_IN_SIZE, true)], 1);
 }
 
 template<typename T>

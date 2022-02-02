@@ -10,15 +10,15 @@ namespace SearchTest {
 	class SearchTest : public ::testing::Test {
 
 	protected:
-		board_t* pBoard;
-		stats_t* pSearch;
-		instr_t* pInstr;
+		Board* pBoard;
+		Stats* pSearch;
+		Instructions* pInstr;
 	
 	public:
 		virtual void SetUp() {
-			pBoard = new board_t();
-			pSearch = new stats_t();
-			pInstr = new instr_t();
+			pBoard = new Board();
+			pSearch = new Stats();
+			pInstr = new Instructions();
 			
 			MoveOrder::init();
 			Mask::init();
@@ -42,11 +42,11 @@ namespace PerftTest {
 	class PerftTest : public ::testing::Test {
 
 	protected:
-		board_t* pBoard;
+		Board* pBoard;
 		Perft* pPerft;
 
 		virtual void SetUp() {
-			pBoard = new board_t();
+			pBoard = new Board();
 			pPerft = new Perft();
 
 			MoveOrder::init();
@@ -66,10 +66,10 @@ namespace SeeTest {
 	class SeeTest : public ::testing::Test {
 
 	protected:
-		board_t* pBoard;
+		Board* pBoard;
 
 		virtual void SetUp() {
-			pBoard = new board_t();
+			pBoard = new Board();
 
 			MoveOrder::init();
 			Mask::init();
@@ -87,10 +87,10 @@ namespace EvalTest {
 	class EvalTest : public ::testing::Test {
 
 	protected:
-		board_t* pBoard;
+		Board* pBoard;
 
 		virtual void SetUp() {
-			pBoard = new board_t();
+			pBoard = new Board();
 
 			MoveOrder::init();
 			Mask::init();
@@ -108,10 +108,10 @@ namespace PositionalTest {
 	class PositionalTest : public ::testing::Test {
 
 	protected:
-		board_t* pBoard;
+		Board* pBoard;
 
 		virtual void SetUp() {
-			pBoard = new board_t();
+			pBoard = new Board();
 
 			MoveOrder::init();
 			Mask::init();

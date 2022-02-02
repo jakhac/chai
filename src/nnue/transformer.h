@@ -35,26 +35,26 @@ const uint32_t PieceToIndex[2][13] = {
 };
 
 
-template<color_t color>
+template<Color color>
 int getHalfKPIndex(int sq, int piece, int kIdx);
 
-template<color_t color>
-void refreshAccumulator(board_t* b);
+template<Color color>
+void refreshAccumulator(Board* b);
 
-template<color_t color>
-void accumulateFeatures(board_t* b);
+template<Color color>
+void accumulateFeatures(Board* b);
 
-template<color_t color>
-void setActiveFeatures(board_t* b, features_t* features);
+template<Color color>
+void setActiveFeatures(Board* b, Features* features);
 
-template<color_t color>
-void updateAccumulator(board_t* b, int reusePly);
+template<Color color>
+void updateAccumulator(Board* b, int reusePly);
 
-void updateTransformer(board_t* b, clipped_t* output);
+void updateTransformer(Board* b, Clipped* output);
 
 
 namespace NNUE {
 
-value_t propagate(board_t* b);
+Value propagate(Board* b);
 
 } // namespace NNUE

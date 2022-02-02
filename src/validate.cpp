@@ -19,7 +19,7 @@ bool fileValid(int file) {
 	return (file >= 0) && (file <= 7);
 }
 
-bool pseudoValidBitMove(move_t move) {
+bool pseudoValidBitMove(Move move) {
 	if (move != MOVE_NULL && move != MOVE_NONE) {
 		return true;
 	}

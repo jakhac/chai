@@ -3,7 +3,7 @@
 namespace PositionalTest {
 
 TEST_F(PositionalTest, CheckingMoves) {
-    move_t move;
+    Move move;
 
 
     // Checking moves
@@ -40,7 +40,7 @@ TEST_F(PositionalTest, CheckingMoves) {
 }
 
 TEST_F(PositionalTest, DiscoveredAttacks) {
-    bitboard_t discoveredAtks = 0ULL;
+    Bitboard discoveredAtks = 0ULL;
 
 
     // Discovered attacks
@@ -69,8 +69,8 @@ TEST_F(PositionalTest, DiscoveredAttacks) {
 }
 
 TEST_F(PositionalTest, Pinner) {
-    bitboard_t pinner = 0ULL;
-    bitboard_t pinned = 0ULL;
+    Bitboard pinner = 0ULL;
+    Bitboard pinned = 0ULL;
 
 
 	parseFen(pBoard, "r2q3k/pb1np2p/1ppp1rpb/1B5n/3QP1N1/1NP1B3/PP3PPP/R3K2R w KQ - 4 10");

@@ -1,43 +1,43 @@
 #include "endgame.h"
 
 
-bool isKvKNB(board_t* b) {
+bool isKvKNB(Board* b) {
     return popCount(b->occupied) == 4 && 
            (   (getPieces(b, Piece::B, WHITE) && getPieces(b, Piece::N, WHITE))
             || (getPieces(b, Piece::b, BLACK) && getPieces(b, Piece::n, BLACK)));
 }
 
-bool isKQvKR(board_t* b) {
+bool isKQvKR(Board* b) {
     return popCount(b->occupied) == 4 && 
            (   (getPieces(b, Piece::Q, WHITE) && getPieces(b, Piece::r, BLACK))
             || (getPieces(b, Piece::q, BLACK) && getPieces(b, Piece::R, WHITE)));
 }
 
-bool isKvKX(board_t* b) {
-    return popCount(b->pieces[cPAWN]) == 0 && 
+bool isKvKX(Board* b) {
+    return popCount(b->pieces[PAWN]) == 0 && 
           (   popCount(b->color[WHITE]) == 1
            || popCount(b->color[BLACK]) == 1);
 }
 
-bool isKQvKP(board_t* b) {
+bool isKQvKP(Board* b) {
     return popCount(b->occupied) == 4 && 
            (   (getPieces(b, Piece::Q, WHITE) && getPieces(b, Piece::p, BLACK))
             || (getPieces(b, Piece::q, BLACK) && getPieces(b, Piece::P, WHITE)));
 }
 
-bool isKQvKQ(board_t* b) {
+bool isKQvKQ(Board* b) {
     return popCount(b->occupied) == 4 
-        && popCount(getPieces(b, cQUEEN, WHITE)) 
-        && popCount(getPieces(b, cQUEEN, BLACK));
+        && popCount(getPieces(b, QUEEN, WHITE)) 
+        && popCount(getPieces(b, QUEEN, BLACK));
 }
 
 
-value_t evaluate_KvKNB(board_t* b) {
+Value evaluate_KvKNB(Board* b) {
 
-    value_t eval = pieceValues[cBISHOP] + pieceValues[cKNIGHT];
+    Value eval = pieceValues[BISHOP] + pieceValues[KNIGHT];
 
-    color_t strongColor = (b->material > 0) ? WHITE : BLACK;
-    color_t bishopColor = (b->pieces[cBISHOP] & SQUARES_WHITE) ? WHITE : BLACK;
+    Color strongColor = (b->material > 0) ? WHITE : BLACK;
+    Color bishopColor = (b->pieces[BISHOP] & SQUARES_WHITE) ? WHITE : BLACK;
     Assert(popCount(b->color[strongColor  ]) == 3);
     Assert(popCount(b->color[strongColor^1]) == 1);
 
@@ -54,10 +54,10 @@ value_t evaluate_KvKNB(board_t* b) {
     return (b->stm == strongColor) ? eval : -eval;
 }
 
-value_t evaluate_KQvKR(board_t* b) {
+Value evaluate_KQvKR(Board* b) {
 
-    value_t eval = pieceValues[cQUEEN] - pieceValues[cROOK];
-    color_t strongColor = (b->material > 0) ? WHITE : BLACK;
+    Value eval = pieceValues[QUEEN] - pieceValues[ROOK];
+    Color strongColor = (b->material > 0) ? WHITE : BLACK;
 
     // 1) Minimize distance between kings
     int strongKingSq = getKingSquare(b, strongColor  );
@@ -72,7 +72,7 @@ value_t evaluate_KQvKR(board_t* b) {
     return (b->stm == strongColor) ? eval : -eval;
 }
 
-value_t evaluate_KQvKQ(board_t* b) {
+Value evaluate_KQvKQ(Board* b) {
 
     int kSq1 = getKingSquare(b, WHITE);
     int kSq2 = getKingSquare(b, BLACK);
@@ -81,14 +81,14 @@ value_t evaluate_KQvKQ(board_t* b) {
     return kDistance;
 }
 
-value_t evaluate_KQvKP(board_t* b) {
+Value evaluate_KQvKP(Board* b) {
 
-    value_t eval = 0;
-    color_t strongColor = (b->material > 0) ? WHITE : BLACK;
+    Value eval = 0;
+    Color strongColor = (b->material > 0) ? WHITE : BLACK;
 
     Assert(b->material != 0);
-    Assert(popCount(getPieces(b, cPAWN, !strongColor)) == 1);
-    Assert(popCount(getPieces(b, cQUEEN, strongColor)) == 1);
+    Assert(popCount(getPieces(b, PAWN, !strongColor)) == 1);
+    Assert(popCount(getPieces(b, QUEEN, strongColor)) == 1);
     Assert(popCount(b->occupied) == 4);
 
     // 1) Minimize distance between kings
@@ -101,16 +101,16 @@ value_t evaluate_KQvKP(board_t* b) {
 
     // 2) Bishop- or rook-pawns on seventh-rank supported 
     // by king are theoretical draw due to stalemate issues
-    bitboard_t pawnBoard    = getPieces(b, cPAWN, !strongColor);
-    bitboard_t seventh      = (strongColor == WHITE) ? RANK_2_HEX : RANK_7_HEX;
-    bitboard_t winningFiles = FILE_B_HEX | FILE_D_HEX | FILE_E_HEX | FILE_G_HEX;
+    Bitboard pawnBoard    = getPieces(b, PAWN, !strongColor);
+    Bitboard seventh      = (strongColor == WHITE) ? RANK_2_HEX : RANK_7_HEX;
+    Bitboard winningFiles = FILE_B_HEX | FILE_D_HEX | FILE_E_HEX | FILE_G_HEX;
 
     // Winning case
     if (   pawnBoard & winningFiles
         || pawnBoard & ~seventh
         || !(kingAtkMask[weakKingSq] & pawnBoard)) {
 
-        eval += pieceValues[cQUEEN] - pieceValues[cPAWN];
+        eval += pieceValues[QUEEN] - pieceValues[PAWN];
     }
 
     return (b->stm == strongColor) ? eval : -eval;

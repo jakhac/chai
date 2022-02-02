@@ -7,7 +7,7 @@ void logDebug(std::string errMsg) {
     ofs.close();
 }
 
-void printEval(board_t* b) {
+void printEval(Board* b) {
 
 	cout << "Overall evaluation: "  << evaluation(b) 
 		 << " (positive states advantage for white)" << endl
@@ -60,8 +60,8 @@ void printUCI_Info() {
 		 << "uciok" << endl;
 }
 
-void printBitBoard(bitboard_t* bb) {
-    bitboard_t shiftBit = 1ULL;
+void printBitBoard(Bitboard* bb) {
+    Bitboard shiftBit = 1ULL;
     int sq;
 
     std::cout << std::endl;
@@ -80,7 +80,7 @@ void printBitBoard(bitboard_t* bb) {
     }
 }
 
-void printMove(board_t* b, const move_t move) {
+void printMove(Board* b, const Move move) {
 
     if (move == MOVE_NULL) {
         cout << "0000" << endl;
@@ -112,7 +112,7 @@ void printMove(board_t* b, const move_t move) {
     cout << ret << promChar << endl;
 }
 
-std::string getStringMove(board_t* b, const move_t move) {
+std::string getStringMove(Board* b, const Move move) {
     if (move == MOVE_NULL) {
         return "0000";
     }
@@ -143,7 +143,7 @@ std::string getStringMove(board_t* b, const move_t move) {
     return ret;
 }
 
-void printMoveStatus(board_t* b, move_t move) {
+void printMoveStatus(Board* b, Move move) {
     cout << "\n#### - Move Status: " << getStringMove(b, move) << endl;
     printBinary(move);
     cout << "From " << fromSq(move) << " to " << toSq(move) << endl;
@@ -155,7 +155,7 @@ void printMoveStatus(board_t* b, move_t move) {
     cout << "####\n" << endl;
 }
 
-void printBinary(bitboard_t x) {
+void printBinary(Bitboard x) {
     std::bitset<64> b(x);
     cout << b << endl;
 }
@@ -166,7 +166,7 @@ void log(std::string logMsg) {
     ofs.close();
 }
 
-void printUCI(instr_t* instr, stats_t* s, int d, int selDpt, int score, long totalNodes) {
+void printUCI(Instructions* instr, Stats* s, int d, int selDpt, int score, long totalNodes) {
     std::string scoreStr = " score ";
 
     if (abs(score) >= VALUE_IS_MATE_IN) {
@@ -185,7 +185,7 @@ void printUCI(instr_t* instr, stats_t* s, int d, int selDpt, int score, long tot
         << " time " << (getTimeMs() - instr->startTime);
 }
 
-void printUCIBestMove(board_t* b, move_t bestMove) {
+void printUCIBestMove(Board* b, Move bestMove) {
     Assert(bestMove != MOVE_NONE);
 
     cout << "bestmove "
@@ -193,7 +193,7 @@ void printUCIBestMove(board_t* b, move_t bestMove) {
         << endl;
 }
 
-void printPV(board_t* b, move_t* moves, int len) {
+void printPV(Board* b, Move* moves, int len) {
     cout << " pv ";
 
     for (int i = 0; i < len; i++) {
@@ -201,12 +201,12 @@ void printPV(board_t* b, move_t* moves, int len) {
     }
 }
 
-void printTTablePV(board_t* b, int depth) {
+void printTTablePV(Board* b, int depth) {
     int cnt = 0;
     cout << " pv ";
 
     for (int i = 0; i <= depth; i++) {
-        move_t pvMove = TT::probePV(b);
+        Move pvMove = TT::probePV(b);
 
         if (pvMove != MOVE_NONE && isLegal(b, pvMove)) {
             cout << getStringMove(b, pvMove);
@@ -223,7 +223,7 @@ void printTTablePV(board_t* b, int depth) {
 
 }
 
-void printPvLine(board_t* b, move_t* pvLine, int d, int score) {
+void printPvLine(Board* b, Move* pvLine, int d, int score) {
     if (score >= VALUE_IS_MATE_IN)
         d = VALUE_MATE - score;
 
@@ -252,7 +252,7 @@ std::string getTimeAndDate() {
     return buf;
 }
 
-bool parseFen(board_t* board, std::string fen) {
+bool parseFen(Board* board, std::string fen) {
 
 	reset(board);
 
@@ -288,7 +288,7 @@ bool parseFen(board_t* board, std::string fen) {
 			case '6':
 			case '7':
 			case '8':
-				piece = cNO_TYPE;
+				piece = NO_PTYPE;
 				count = fen[index] - '0';
 				break;
 
@@ -307,7 +307,7 @@ bool parseFen(board_t* board, std::string fen) {
 		for (int i = 0; i < count; i++) {
 			square = rank * 8 + file;
 
-			if (piece != cNO_TYPE) {
+			if (piece != NO_PTYPE) {
 				setPiece(board, piece, square, pieceCol[piece]);
 			}
 
@@ -377,7 +377,7 @@ bool parseFen(board_t* board, std::string fen) {
 	return false;
 }
 
-std::string getFEN(board_t* b) {
+std::string getFEN(Board* b) {
 
 	int piece;
 	int empty = 0;
@@ -444,7 +444,7 @@ std::string getFEN(board_t* b) {
 	return fen;
 }
 
-move_t parseMove(board_t* b, std::string move) {
+Move parseMove(Board* b, std::string move) {
 
 	if (move == "0000")
 		return MOVE_NULL;

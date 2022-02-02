@@ -23,8 +23,8 @@ TEST_F(SeeTest, PawnCap2) {
 TEST_F(SeeTest, RookCap) {
 	parseFen(pBoard, "2r2r1k/6bp/p7/2q2p1Q/3PpP2/1B6/P5PP/2RR3K b - - 0 1");
 	int move = serializeMove(C5, C1, NORMAL_MOVE, Piece::NO_PIECE);
-	EXPECT_EQ(see(pBoard, move), 2 * pieceValues[cROOK] - pieceValues[cQUEEN]);
-	EXPECT_EQ(see_ge(pBoard, move, 2 * SEEPieceValues[cROOK] - SEEPieceValues[cQUEEN]), 1);
+	EXPECT_EQ(see(pBoard, move), 2 * pieceValues[ROOK] - pieceValues[QUEEN]);
+	EXPECT_EQ(see_ge(pBoard, move, 2 * SEEPieceValues[ROOK] - SEEPieceValues[QUEEN]), 1);
 }
 
 TEST_F(SeeTest, EnPas) {
@@ -37,13 +37,13 @@ TEST_F(SeeTest, EnPas) {
 TEST_F(SeeTest, StackedRooksQueen) {
 	parseFen(pBoard, "4q3/1p1pr1k1/1B2rp2/6p1/p3PP2/P3R1P1/1P2R1K1/4Q3 b - - 0 1");
 	int move = serializeMove(E6, E4, NORMAL_MOVE, Piece::NO_PIECE);
-	EXPECT_EQ(see(pBoard, move), pieceValues[cPAWN] - pieceValues[cROOK]);
-	EXPECT_EQ(see_ge(pBoard, move, SEEPieceValues[cPAWN] - SEEPieceValues[cROOK]), 1);
+	EXPECT_EQ(see(pBoard, move), pieceValues[PAWN] - pieceValues[ROOK]);
+	EXPECT_EQ(see_ge(pBoard, move, SEEPieceValues[PAWN] - SEEPieceValues[ROOK]), 1);
 }
 
 TEST_F(SeeTest, StackedPieces) {
 	parseFen(pBoard, "4q3/1p1pr1kb/1B2rp2/6p1/p3PP2/P3R1P1/1P2R1K1/4Q3 b - - 0 1");
 	int move = serializeMove(H7, E4, NORMAL_MOVE, Piece::NO_PIECE);
-	EXPECT_EQ(see(pBoard, move), pieceValues[cPAWN]);
-	EXPECT_EQ(see_ge(pBoard, move, pieceValues[cPAWN]), 1);
+	EXPECT_EQ(see(pBoard, move), pieceValues[PAWN]);
+	EXPECT_EQ(see_ge(pBoard, move, pieceValues[PAWN]), 1);
 }

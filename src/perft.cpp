@@ -1,6 +1,6 @@
 #include "perft.h"
 
-void dividePerft(Perft* p, board_t* b, int depth) {
+void dividePerft(Perft* p, Board* b, int depth) {
 	std::string move = "";
 
 	while (depth) {
@@ -27,14 +27,14 @@ void dividePerft(Perft* p, board_t* b, int depth) {
 
 }
 
-long long Perft::perftRoot(board_t* b, int depth) {
+long long Perft::perftRoot(Board* b, int depth) {
 	Assert(checkBoard(b));
 	cout << endl << "Perft to depth " << depth << endl;
 	auto start = std::chrono::high_resolution_clock::now();
 
 	leafNodes = 0;
 	bool inCheck = isCheck(b, b->stm);
-	moveList_t _moveList[1];
+	MoveList _moveList[1];
 	generateMoves(b, _moveList, inCheck);
 
 	int move;
@@ -68,7 +68,7 @@ long long Perft::perftRoot(board_t* b, int depth) {
 	return leafNodes;
 }
 
-void Perft::perft(board_t* b, int depth) {
+void Perft::perft(Board* b, int depth) {
 	Assert(checkBoard(b));
 
 	if (depth == 0) {
@@ -77,7 +77,7 @@ void Perft::perft(board_t* b, int depth) {
 	}
 
 	bool inCheck = isCheck(b, b->stm);
-	moveList_t _moveList[1];
+	MoveList _moveList[1];
 	generateMoves(b, _moveList, inCheck);
 
 	Assert(attackerSet(b, !b->stm) == _moveList->attackedSquares);

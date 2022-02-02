@@ -2,7 +2,7 @@
 
 const int pieceValuesPawns[7] = { 0, 1, 3, 3, 5, 9, 0 };
 
-int totalMaterial(board_t* b) {
+int totalMaterial(Board* b) {
 
     int value = 0;
 	for (int i = 1; i < 7; i++) {
@@ -12,7 +12,7 @@ int totalMaterial(board_t* b) {
     return value;
 }
 
-int remainingHalfMoves(board_t* b) {
+int remainingHalfMoves(Board* b) {
 
     int mat = totalMaterial(b);
 
@@ -34,7 +34,7 @@ static int middleGameFactor(int moveNumber) {
 //      1) Estimate remaining full-moves based on material.
 //      2) Equally distribute remaining time
 //      3) Time in middle game is slightly increased
-int allocateTime(board_t* b, int timeLeft, int inc) {
+int allocateTime(Board* b, int timeLeft, int inc) {
 
         // Catch low remaining time
 		if (timeLeft <= 2000) {
@@ -65,6 +65,6 @@ int allocateTime(board_t* b, int timeLeft, int inc) {
         return std::min(timeToAllocate, timeLeft - 100);
 }
 
-bool isTimeLeft(instr_t* instr) {
+bool isTimeLeft(Instructions* instr) {
     return getTimeMs() < (instr->startTime + instr->allocatedTime);
 }

@@ -4,10 +4,10 @@
 
 #define MIRROR64(sq) (mirror64[(sq)])
 
-extern const value_t* PSQT_OPENING[7];
-extern const value_t* PSQT_ENDGAME[7];
+extern const Value* PSQT_OPENING[7];
+extern const Value* PSQT_ENDGAME[7];
 
-const value_t PAWN_OPENING[64] = {
+const Value PAWN_OPENING[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0,
 	5, 10, 10,-20,-20, 10, 10,  5,
 	5, -5,-10,  0,  0,-10, -5,  5,
@@ -18,7 +18,7 @@ const value_t PAWN_OPENING[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0,
 };
 
-const value_t PAWN_ENDGAME[64] = {
+const Value PAWN_ENDGAME[64] = {
 	  0,  0,  0,  0,  0,  0,  0,  0
 	-20,-20,-20,-20,-20,-20,-20,-20,
 	  0,  0,  0,  0,  0,  0,  0,  0,
@@ -29,7 +29,7 @@ const value_t PAWN_ENDGAME[64] = {
 	  0,  0,  0,  0,  0,  0,  0,  0,
 };
 
-const value_t KNIGHT_OPENING[64] = {
+const Value KNIGHT_OPENING[64] = {
 	-50,-40,-30,-30,-30,-30,-40,-50,
 	-40,-20,  0,  5,  5,  0,-20,-40,
 	-30,  5, 10, 15, 15, 10,  5,-30,
@@ -40,7 +40,7 @@ const value_t KNIGHT_OPENING[64] = {
 	-50,-40,-30,-30,-30,-30,-40,-50
 };
 
-const value_t KNIGHT_ENDGAME[64] = {
+const Value KNIGHT_ENDGAME[64] = {
 	-50,-40,-30,-30,-30,-30,-40,-50
 	- 40,-20,  0,  5,  5,  0,-20,-40,
 	-30,  5, 10, 15, 15, 10,  5,-30,
@@ -51,7 +51,7 @@ const value_t KNIGHT_ENDGAME[64] = {
 	-50,-40,-30,-30,-30,-30,-40,-50,
 };
 
-const value_t BISHOP_OPENING[64] = {
+const Value BISHOP_OPENING[64] = {
 	-20,-10,-10,-10,-10,-10,-10,-20,
 	-10,  5,  0,  0,  0,  0,  5,-10,
 	-10, 10, 10, 10, 10, 10, 10,-10,
@@ -62,7 +62,7 @@ const value_t BISHOP_OPENING[64] = {
 	-20,-10,-10,-10,-10,-10,-10,-20
 };
 
-const value_t BISHOP_ENDGAME[64] = {
+const Value BISHOP_ENDGAME[64] = {
 	-20,-10,-10,-10,-10,-10,-10,-20
 	- 10,  5,  0,  0,  0,  0,  5,-10,
 	-10, 10, 10, 10, 10, 10, 10,-10,
@@ -73,7 +73,7 @@ const value_t BISHOP_ENDGAME[64] = {
 	-20,-10,-10,-10,-10,-10,-10,-20,
 };
 
-const value_t ROOK_OPENING[64] = {
+const Value ROOK_OPENING[64] = {
 	0,  0, 20,  5,  5, 20,  0,  0,
 	5,  0,  0,  0,  0,  0,  0,  5,
    -5,  0,  0,  0,  0,  0,  0, -5,
@@ -84,7 +84,7 @@ const value_t ROOK_OPENING[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0
 };
 
-const value_t ROOK_ENDGAME[64] = {
+const Value ROOK_ENDGAME[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0,
    -5,  0,  0,  0,  0,  0,  0, -5,
    -5,  0,  0,  0,  0,  0,  0, -5,
@@ -95,7 +95,7 @@ const value_t ROOK_ENDGAME[64] = {
 	0,  0,  0,  0,  0,  0,  0,  0
 };
 
-const value_t QUEEN_OPENING[64] = {
+const Value QUEEN_OPENING[64] = {
 	-20,-10,-10, -5, -5,-10,-10,-20
 	- 10,  0,  5,  0,  0,  0,  0,-10,
 	-10,  5,  5,  5,  5,  5,  0,-10,
@@ -106,7 +106,7 @@ const value_t QUEEN_OPENING[64] = {
 	-20,-10,-10, -5, -5,-10,-10,-20,
 };
 
-const value_t QUEEN_ENDGAME[64] = {
+const Value QUEEN_ENDGAME[64] = {
 	-20,-10,-10, -5, -5,-10,-10,-20
 	- 10,  0,  5,  0,  0,  0,  0,-10,
 	-10,  5,  5,  5,  5,  5,  0,-10,
@@ -117,7 +117,7 @@ const value_t QUEEN_ENDGAME[64] = {
 	-20,-10,-10, -5, -5,-10,-10,-20,
 };
 
-const value_t KING_OPENING[64] = {
+const Value KING_OPENING[64] = {
 	 30, 30, 40, 20, 20, 30, 40, 30,
 	 20, 20,  0,  0,  0,  0, 20, 20,
 	-10,-20,-20,-20,-20,-20,-20,-10,
@@ -128,7 +128,7 @@ const value_t KING_OPENING[64] = {
 	-30,-40,-40,-50,-50,-40,-40,-30
 };
 
-const value_t KING_ENDGAME[64] = {
+const Value KING_ENDGAME[64] = {
 	-50,-30,-30,-30,-30,-30,-30,-50
 	-30,-30,  0,  0,  0,  0,-30,-30,
 	-30,-10, 20, 30, 30, 20,-10,-30,

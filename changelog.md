@@ -88,11 +88,11 @@
   - [x] Reset MateKillers between search
 
 - Project
-  - [x] Update typedefs: `key_t`
+  - [x] Update typedefs: `Key`
   - [x] Rename executables according to version
   - [x] Refactor `Board`-Class
-    - Convert `Board` to `struct board_t`
-    - Reduce `board_t` size and share huge arrays between instances if possible
+    - Convert `Board` to `struct Board`
+    - Reduce `Board` size and share huge arrays between instances if possible
   - [x] Namespace `Piece::` for piece enums
 - Bugfixes:
 
@@ -169,7 +169,7 @@ Evaluation
   - [x] Include king position in pawnKey
   - [x] Update PSQT valueand materialBalance on-the-fly
 - v3.0.2
-  - [x] Use color_t type
+  - [x] Use Color type
   - [x] Sophisticated evaluation of pawn structure (+ king-safety wrt. pawns)
 - v3.0.3
   - Refactor evaluation for:
