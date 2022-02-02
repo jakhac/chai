@@ -9,10 +9,10 @@ bool pieceValid(int piece) {
 }
 
 bool pieceValidPromotion(int piece) {
-	return piece == Pieces::q || piece == Pieces::r
-		|| piece == Pieces::b || piece == Pieces::n
-		|| piece == Pieces::Q || piece == Pieces::R
-		|| piece == Pieces::B || piece == Pieces::N;
+	return piece == Piece::q || piece == Piece::r
+		|| piece == Piece::b || piece == Piece::n
+		|| piece == Piece::Q || piece == Piece::R
+		|| piece == Piece::B || piece == Piece::N;
 }
 
 bool fileValid(int file) {

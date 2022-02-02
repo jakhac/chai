@@ -1,6 +1,8 @@
 #include "syzygy.h"
 
-void initEGTB(const char* tbPath) {
+namespace EGTB {
+	
+void init(const char* tbPath) {
 	if (!tb_init(tbPath)) {
 		cout << "TB init failed." << endl;
 		Assert(false);
@@ -25,18 +27,21 @@ int probeTB(board_t* b) {
 		return TB_RESULT_FAILED;
 
 	int enPas = b->enPas == DEFAULT_EP_SQ ? 0 : 1;
-	int stm = b->stm == chai::WHITE ? 1 : 0;
+	int stm   = b->stm == WHITE ? 1 : 0;
 
-	return tb_probe_wdl(b->color[chai::WHITE],
-						b->color[chai::BLACK],
-						b->pieces[chai::KING],
-						b->pieces[chai::QUEEN],
-						b->pieces[chai::ROOK],
-						b->pieces[chai::BISHOP],
-						b->pieces[chai::KNIGHT],
-						b->pieces[chai::PAWN],
+	return tb_probe_wdl(b->color[WHITE],
+						b->color[BLACK],
+						b->pieces[cKING],
+						b->pieces[cQUEEN],
+						b->pieces[cROOK],
+						b->pieces[cBISHOP],
+						b->pieces[cKNIGHT],
+						b->pieces[cPAWN],
 						0,
 						0,
 						enPas,
 						stm);
 }
+
+
+} // namespace EGTB

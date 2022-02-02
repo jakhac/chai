@@ -7,12 +7,15 @@
 
 #include "move.h"
 
-#define MAX_THREADS std::max((unsigned int)1, std::thread::hardware_concurrency() - 1)
+
+#define MAX_THREADS std::max((unsigned int)1, std::thread::hardware_concurrency())
 
 
 extern int NUM_THREADS;
 extern bool TERMINATE_THREADS;
 extern bool ABORT_SEARCH;
+
+
 
 class ThreadWrapper {
 
@@ -77,14 +80,14 @@ typedef std::shared_ptr<ThreadWrapper> Thread;
 
 extern std::vector<Thread> threadPool;
 
-// Forward declaration
-void iid(Thread thread);
 
-void initThreadPool();
-void deleteThreadPool();
+namespace Threads {
+
+void initPool();
+void deletePool();
 
 // Return true if numThreads is valid, else false
-bool resizeThreadPool(size_t numThreads);
+bool resizePool(size_t numThreads);
 
 void resetAllThreadStates(board_t* b, stats_t* s, instr_t* i);
 void startAllThreads();
@@ -93,3 +96,8 @@ void waitAllThreads();
 int selectBestThreadIndex();
 
 int totalNodeCount();
+
+// Forward declaration
+void iid(Thread thread);
+
+}

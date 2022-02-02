@@ -10,6 +10,10 @@ int NUM_THREADS = 1;
 bool TERMINATE_THREADS = false;
 bool ABORT_SEARCH = false;
 
+// using namespace Search;
+// using namespace Threads;
+// namespace Threads {
+
 std::vector<Thread> threadPool;
 
 void ThreadWrapper::resetThreadStates(board_t* board, stats_t* search, instr_t* instructions) {
@@ -57,7 +61,7 @@ void ThreadWrapper::idle() {
         // Returned from conditional wait: Start searching
         // cout << "T" << id << " searches." << endl;
         searching = true;
-        iid(threadPool[this->id]);
+        Threads::iid(threadPool[this->id]);
         searching = false;
         // cout << "T" << id << " finished search." << endl;
     }
@@ -77,7 +81,11 @@ void ThreadWrapper::waitThread() {
     });
 }
 
-void initThreadPool() {
+
+namespace Threads {
+
+
+void initPool() {
 
     threadPool.clear();
     TERMINATE_THREADS = false;
@@ -96,7 +104,7 @@ void initThreadPool() {
 
 }
 
-void deleteThreadPool() {
+void deletePool() {
 
     // Let all threads run into termination
     TERMINATE_THREADS = true;
@@ -113,14 +121,15 @@ void deleteThreadPool() {
     // cout << "Joined all threads" << endl;
 }
 
-bool resizeThreadPool(size_t numWorkers) {
-    if (numWorkers < 1) {
-        return false;
-    }
+bool resizePool(size_t numWorkers) {
 
-    deleteThreadPool();
+    if (numWorkers < 1)
+        return false;
+
+    deletePool();
     NUM_THREADS = std::min(numWorkers, (size_t)MAX_THREADS);
-    initThreadPool();
+    initPool();
+
     return true;
 }
 
@@ -131,6 +140,7 @@ void resetAllThreadStates(board_t* board, stats_t* search, instr_t* instructions
 }
 
 void startAllThreads() {
+
     for (int i = 1; i < NUM_THREADS; i++) {
         threadPool[i]->searching = true;
         threadPool[i]->startThread();
@@ -138,12 +148,14 @@ void startAllThreads() {
 }
 
 void waitAllThreads() {
+
     for (int i = 1; i < NUM_THREADS; i++) {
         threadPool[i]->waitThread();
     }
 }
 
 int totalNodeCount() {
+
     int n = 0;
     for (auto t : threadPool) {
         n += t->nodes + t->qnodes;
@@ -152,6 +164,7 @@ int totalNodeCount() {
 }
 
 int selectBestThreadIndex() {
+    
     int bestIdx = 0;
     value_t bestScore = threadPool[bestIdx]->bestScore;
     int bestDepth = threadPool[bestIdx]->depth;
@@ -169,4 +182,7 @@ int selectBestThreadIndex() {
     }
 
     return bestIdx;
+}
+
+
 }

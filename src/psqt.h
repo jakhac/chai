@@ -1,3 +1,5 @@
+#pragma once
+
 #include "types.h"
 
 #define MIRROR64(sq) (mirror64[(sq)])

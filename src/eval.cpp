@@ -1,59 +1,463 @@
 #include "eval.h"
 
-using namespace chai;
-
-const value_t* PSQT_ENDGAME[7] = {
-	{},
-	PAWN_ENDGAME,
-	KNIGHT_ENDGAME,
-	BISHOP_ENDGAME,
-	ROOK_ENDGAME,
-	QUEEN_ENDGAME,
-	KING_ENDGAME
+const value_t* PSQT_ENDGAME[7] = { {},
+	PAWN_ENDGAME, KNIGHT_ENDGAME, BISHOP_ENDGAME, 
+	ROOK_ENDGAME, QUEEN_ENDGAME,  KING_ENDGAME
 };
 
-const value_t* PSQT_OPENING[7] = {
-	{},
-	PAWN_OPENING,
-	KNIGHT_OPENING,
-	BISHOP_OPENING,
-	ROOK_OPENING,
-	QUEEN_OPENING,
-	KING_OPENING
+const value_t* PSQT_OPENING[7] = { {},
+	PAWN_OPENING, KNIGHT_OPENING, BISHOP_OPENING, 
+	ROOK_OPENING, QUEEN_OPENING,  KING_OPENING
+};
+
+const int pPhase   = 0;
+const int nPhase   = 1;
+const int bPhase   = 1;
+const int rPhase   = 2;
+const int qPhase   = 4;
+const int maxPhase = pPhase*16 + nPhase*4 + bPhase*4 + rPhase*4 + qPhase*2;
+
+
+const tuple_t KNIGHT_MOBILITY[9] = {
+	t(-41, -51), t(-34, -37), t(-15, -28), 
+	t( -4, -15), t(  8,  12), t( 14,  16), 
+	t( 20,  24), t( 28,  24), t( 37,  20)
+};
+
+const tuple_t BISHOP_MOBILITY[14] = {
+	t(-57, -89), t(-24, -67), t(  8,  -8),
+	t( 17,   8), t( 31,  13), t( 39,  24),
+	t( 41,  28), t( 42,  34), t( 43,  39),
+	t( 45,  47), t( 55,  58), t( 68,  70),
+	t( 89,  88), t( 94,  90)
+};
+
+const tuple_t ROOK_MOBILITY[15] = {
+	t(-67, -82), t(-34, -82), t(-14, -23),
+	t(-10,   3), t( -8,  20), t( -6,  27),
+	t( 10,  39), t( 11,  42), t( 13,  52),
+	t( 22,  60), t( 36,  75), t( 45,  90),
+	t( 55, 100), t( 58, 105), t( 59, 110)
 };
 
 
-tuple_t t(value_t v1, value_t v2) {
-	return (v2 << 16) + (v1);
-}
+const tuple_t BISHOP_PAIR              = t( 30,  69);
+const tuple_t BISHOP_OUTPOST_DEFENDED  = t( 17,  10);
+const tuple_t BISHOP_LONG_DIAGONAL     = t( 29,   1);
 
-value_t t1(tuple_t tuple) {
-	return (int16_t)((uint16_t)((unsigned)(tuple)));
-}
+const tuple_t KNIGHT_OUTPOST           = t( 12,  12);
+const tuple_t KNIGHT_OUTPOST_DEFENDED  = t( 31,  16);
+const tuple_t KNIGHT_BORDER_SQUARE     = t( -7, -14);
+const tuple_t KNIGHT_BLOCKS_PAWN       = t(  6,  16);
 
-value_t t2(tuple_t tuple) {
-	return (int16_t)((uint16_t)((unsigned)(tuple + 0x8000) >> 16));
-}
+const tuple_t ROOK_CONTROLS_PASSER     = t(  0,  12);
+const tuple_t ROOK_SEMI_OPEN_FILE      = t (10,  8);
+const tuple_t ROOK_OPEN_FILE           = t( 30,  0);
+const tuple_t ROOK_ON_SEVENTH          = t( -1,  33);
+const tuple_t ROOK_CONNECTED           = t(  7,  13);
 
-static float gamePhase(board_t* b) {
+const tuple_t QUEEN_DANGEROUS_SQUARE   = t( -7,  -7);
+
+const tuple_t KING_DANGEROUS_SQUARE    = t(-15, -25);
+const tuple_t KING_CHECK_UNDEF_KNIGHT  = t( -3,  -3);
+const tuple_t KING_CHECK_UNDEF_BISHOP  = t( -4,  -4);
+const tuple_t KING_CHECK_UNDEF_ROOK    = t( -7,  -7);
+const tuple_t KING_CHECK_UNDEF_QUEEN   = t( -6,  -6);
+const tuple_t KING_ACTIVITY			   = t(  0,  15);
+
+const tuple_t KING_OPEN_NEIHGBOR_FILE  = t(-15,   0);
+const tuple_t KING_OPEN_FILE           = t(-23,   0);
+
+
+const int UNIT_TABLE[7] = { 0, 0, 3, 3, 4, 6, 0 };
+
+const value_t safetyTable[100] = {
+	  0,   0,   1,   2,   3,   5,   7,   9,  12,  15,
+	 18,  22,  26,  30,  35,  39,  44,  50,  56,  62,
+	 68,  75,  82,  85,  89,  97, 105, 113, 122, 131,
+	140, 150, 169, 180, 191, 202, 213, 225, 237, 248,
+	260, 272, 283, 295, 307, 319, 330, 342, 354, 366,
+	377, 389, 401, 412, 424, 436, 448, 459, 471, 483,
+	494, 500, 500, 500, 500, 500, 500, 500, 500, 500,
+	500, 500, 500, 500, 500, 500, 500, 500, 500, 500,
+	500, 500, 500, 500, 500, 500, 500, 500, 500, 500,
+	500, 500, 500, 500, 500, 500, 500, 500, 500, 500
+};
+
+
+
+/**
+ * @brief Return a parameter indicating the phase regarding opening-endgame.
+ */
+float gamePhase(board_t* b) {
 	int	phase = maxPhase;
 
-	phase -= popCount(b->pieces[PAWN  ]);
-	phase -= popCount(b->pieces[KNIGHT]);
-	phase -= popCount(b->pieces[BISHOP]);
-	phase -= popCount(b->pieces[ROOK  ]);
-	phase -= popCount(b->pieces[QUEEN]);
+	phase -= popCount(b->pieces[cPAWN  ]);
+	phase -= popCount(b->pieces[cKNIGHT]);
+	phase -= popCount(b->pieces[cBISHOP]);
+	phase -= popCount(b->pieces[cROOK  ]);
+	phase -= popCount(b->pieces[cQUEEN ]);
 
 	return (phase * 256 + (maxPhase / 2)) / maxPhase;
 }
 
-static value_t scaleGamePhase(tuple_t tuple, float phase) {
+/**
+ * @brief Returns the weighted sum between opening- and endgame-evaluation.
+ */
+value_t scaleGamePhase(tuple_t tuple, float phase) {
 	return ((t1(tuple) * (256 - phase)) + (t2(tuple) * phase)) / 256;
+}
+
+bool rookControlsPasser(bitboard_t rooks, bitboard_t passer, bool above) {
+
+	bitboard_t* mask = (above) ? upperMask : lowerMask;
+
+	while (passer) {
+		int sq = popLSB(&passer);
+		if (rooks & toFileBB(sq) & mask[sq])
+			return true;
+
+	}
+
+	return false;
+}
+
+bool rooksConnected(board_t* b, int rookSq1, int rookSq2) {
+
+	bool connected = !(obstructed(rookSq1, rookSq2) & b->occupied);
+	bool aligned   = (toFile(rookSq1) == toFile(rookSq2))
+				  || (toRank(rookSq1) == toRank(rookSq2));
+
+	return aligned && connected;
+}
+
+template<pType_t pType>
+int undefendedChecksFrom(board_t* b, int kSq, color_t us) {
+
+	Assert(b->attackedSquares[WHITE] == attackerSet(b, WHITE));
+	Assert(b->attackedSquares[BLACK] == attackerSet(b, BLACK));
+	
+	bitboard_t pieces = getPieces(b, pType, us);
+	bitboard_t checkingSquares = getMoveMask<pType>(kSq, b->occupied, us)
+							   & ~b->attackedSquares[!us];
+
+	int sq, res = 0;
+	while (pieces) {
+		sq = popLSB(&pieces);
+		res += popCount(getMoveMask<pType>(sq, b->occupied, us) & checkingSquares);
+	}
+	return res;
+}
+
+template<color_t us, pType_t pType>
+int getAttackerUnitsFor(board_t* b, bitboard_t dZone) {
+
+	int sq;
+	int attackUnits = 0;
+	bitboard_t piece, moves;
+
+	piece = getPieces(b, pType, !us);
+	while (piece) {
+		sq = popLSB(&piece);
+		
+		moves = getMoveMask<pType>(sq, b->occupied);
+		attackUnits += UNIT_TABLE[pType] * popCount(moves & dZone);
+	}
+
+	return attackUnits;
+}
+
+template<color_t us>
+int getAttackerUnits(board_t* b, bitboard_t dZone) {
+
+	int attackUnits = 0;
+	attackUnits += getAttackerUnitsFor<us, cKNIGHT>(b, dZone);
+	attackUnits += getAttackerUnitsFor<us, cBISHOP>(b, dZone);
+	attackUnits += getAttackerUnitsFor<us, cROOK  >(b, dZone);
+	attackUnits += getAttackerUnitsFor<us, cQUEEN >(b, dZone);
+
+	Assert(attackUnits < 100);
+	return attackUnits;
+}
+
+template<color_t us>
+static tuple_t mobility(board_t* b) {
+
+	// How many of our pieces are attacked - and might have to be moved?
+	int attacked = popCount(b->attackedSquares[!us] & b->color[us]) / 4;
+
+	return -t(attacked, attacked);
+}
+
+template<color_t us>
+static tuple_t sqControl(board_t* b) {
+
+	tuple_t tuple = 0;
+	int centerExtAttacked   = popCount(b->attackedSquares[us] &  MIDDLE_SQUARES);
+	int surroundingAttacked = popCount(b->attackedSquares[us] & ~MIDDLE_SQUARES);
+	int centerOccupied      = popCount(b->color[us] 		  &  CENTER_SQUARES);
+
+	tuple += t(3 * centerExtAttacked, centerExtAttacked);
+	tuple += t(surroundingAttacked, surroundingAttacked);
+	tuple += t(2 * centerOccupied, centerOccupied);
+	return tuple;
+}
+
+value_t materialScore(board_t* b) {
+
+	value_t score = 0;
+	for (int i = cPAWN; i <= cKING; i++) {
+		score += popCount(getPieces(b, i, WHITE)) * pieceValues[i];
+		score -= popCount(getPieces(b, i, BLACK)) * pieceValues[i];
+	}
+
+	return score;
+}
+
+tuple_t materialTupleScore(board_t* b) {
+
+	tuple_t score = 0;
+	for (int i = cPAWN; i <= cKING; i++) {
+		score += popCount(getPieces(b, i, WHITE)) * pieceTupleValues[i];
+		score -= popCount(getPieces(b, i, BLACK)) * pieceTupleValues[i];
+	}
+
+	return score;
+}
+
+template<color_t us>
+static tuple_t evaluateKnights(board_t* b) {
+
+
+	tuple_t score = 0;
+	color_t them  = !us;
+
+	int kSq                  = getKingSquare(b, us);
+	int kSqOpp               = getKingSquare(b, them);
+	bitboard_t knights       = getPieces(b, cKNIGHT, us);
+	bitboard_t pawns         = getPieces(b, cPAWN, us);
+	bitboard_t oppositePawns = getPieces(b, cPAWN, them);
+	bitboard_t currentFile;
+
+	int sq;
+	bool isOutpostArea;
+	while (knights) {
+		sq = popLSB(&knights);
+
+		// 1) Outposts
+		currentFile = toFileBB(sq);
+		isOutpostArea = (1ULL << sq) & outpostSquares[us];
+		if (   !((pawnPassedMask[us][sq] & ~currentFile) & oppositePawns)
+			&& isOutpostArea) {
+			score += KNIGHT_OUTPOST;
+
+			// Defended by pawn
+			if (pawnAtkMask[them][sq] & pawns) {
+				score += KNIGHT_OUTPOST_DEFENDED;
+			}
+		}
+
+		// 2) Mobility and Center squares attacked
+		int atks = popCount(knightAtkMask[sq]);
+		score += KNIGHT_MOBILITY[atks];
+
+		// 3) Distance to kings
+		int dist = (manhatten[kSq][sq] + manhatten[kSqOpp][sq]) / 2;
+		Assert(dist < 20);
+		score -= t(dist, dist);
+
+		// 4) Block opposite pawn
+		bitboard_t blockSquare = (us == WHITE) ? (1ULL << (sq+8)) : (1ULL << (sq-8));
+		if (blockSquare & oppositePawns)
+			score += KNIGHT_BLOCKS_PAWN;
+
+	}
+
+	return score;
+}
+
+template<color_t us>
+static tuple_t evaluateBishops(board_t* b) {
+
+	tuple_t score = 0;
+
+	bitboard_t bishops  = getPieces(b, cBISHOP, us);
+	bitboard_t pawns    = getPieces(b, cPAWN, us);
+	bitboard_t oppPawns = getPieces(b, cPAWN, !us);
+	bitboard_t atks;
+
+	// 1) Bishop Pair
+	if (popCount(bishops) > 1)
+		score += BISHOP_PAIR;
+
+
+	int sq, numMoves = 0;
+	while (bishops) {
+		sq = popLSB(&bishops);
+
+		numMoves += popCount(  lookUpBishopMoves(sq, b->occupied) 
+							& ~b->color[us]);
+
+		// 2) Bishop Outpost
+		bitboard_t currentFile = toFileBB(sq);
+		bool isOutpostArea = (1ULL << sq) & outpostSquares[us];
+		if (   !((pawnPassedMask[us][sq] & ~currentFile) & oppPawns)
+			&& isOutpostArea
+			&& pawnAtkMask[!us][sq] & pawns) {
+
+			score += BISHOP_OUTPOST_DEFENDED;
+		}
+
+		// 3) Long Diagonal
+		atks = lookUpBishopMoves(sq, b->occupied);
+		if (popCount(atks & CENTER_SQUARES) >= 2) {
+			score += BISHOP_LONG_DIAGONAL;
+		}
+
+	}
+
+	// 4) Mobility
+	score += BISHOP_MOBILITY[numMoves];
+
+	return score;
+}
+
+template<color_t us>
+static tuple_t evaluateRooks(board_t* b) {
+
+	tuple_t score = 0;
+	
+	int numMoves = 0;
+	int sq = NO_SQ;
+	int lastSq;
+
+	bitboard_t rooks = getPieces(b, cROOK, us);
+	bitboard_t wPassers = getPassers(b, WHITE);
+	bitboard_t bPassers = getPassers(b, BLACK);
+
+	// 1) Get rook behind own passers
+	if (rookControlsPasser(rooks, bPassers, true))
+		score += ROOK_CONTROLS_PASSER;
+
+	if (rookControlsPasser(rooks, wPassers, false))
+		score += ROOK_CONTROLS_PASSER;
+
+
+	while(rooks) {
+		lastSq = sq;
+		sq = popLSB(&rooks);
+
+		numMoves += popCount(  lookUpRookMoves(sq, b->occupied) 
+							 & ~b->color[us]);
+
+
+		// 2) Rooks on open files
+		bitboard_t file = FILE_LIST[toFile(sq)];
+
+		if (!(file & b->pieces[cPAWN]))
+			score += ROOK_SEMI_OPEN_FILE;
+
+		if (!(file & b->occupied))
+			score += ROOK_OPEN_FILE;
+
+
+		// 3) Rook on seventh rank
+		if (toRank(sq) == relSeventh<us>())
+			score += ROOK_ON_SEVENTH;
+
+		// 4) Connected rooks
+		if (lastSq != NO_SQ && rooksConnected(b, sq, lastSq))
+			score += ROOK_CONNECTED;
+			
+	}
+
+	// 5) Mobility
+	score += ROOK_MOBILITY[numMoves];
+
+	return score;
+}
+
+template<color_t us>
+static tuple_t evaluateQueens(board_t* b) {
+
+	tuple_t score = 0;
+	bitboard_t queens = getPieces(b, cQUEEN, us);
+
+	int sq;
+	bitboard_t threats;
+	while (queens) {
+		sq = popLSB(&queens);
+
+		// Discovered attacks on queen
+		threats = getDiscoveredAttacks(b, sq, us);
+		score  += popCount(threats) * QUEEN_DANGEROUS_SQUARE;
+	}
+
+	return score;
+}
+
+template<color_t us>
+tuple_t evaluateKing(board_t* b) {
+
+	color_t them    = !us;
+	tuple_t score = 0;
+	int kSq = getKingSquare(b, us);
+
+	// 1) Reward king activity in endgames
+	bitboard_t pawns = getPieces(b, cPAWN, us);
+	int sq;
+	int longestDistToPawn = 0;
+
+	while (pawns) {
+		sq = popLSB(&pawns);
+		longestDistToPawn = std::max(longestDistToPawn, manhatten[sq][kSq]);
+	}
+
+	score += t(0, -longestDistToPawn);
+
+	// 2) Penalty for discovered attacks
+	int discoveredAttacks = popCount(getDiscoveredAttacks(b, kSq, us));
+	score += discoveredAttacks * KING_DANGEROUS_SQUARE;
+
+	// 3) If at least 3 pieces attack dangerZone of king, count attacker-units and 
+	// determine danger-level by lookup in the safety table
+	int undefendedChecks = 2 * undefendedChecksFrom<cKNIGHT>(b, kSq, them)
+						 + 2 * undefendedChecksFrom<cBISHOP>(b, kSq, them)
+						 + 3 * undefendedChecksFrom<cROOK>  (b, kSq, them)
+						 + 3 * undefendedChecksFrom<cQUEEN> (b, kSq, them);
+
+	bitboard_t dZone  = dangerZone[us][kSq];
+	int attackerUnits = 0;
+
+	if (popCount(dZone & b->attackedSquares[them]) > 2)
+		attackerUnits = getAttackerUnits<us>(b, dZone);
+
+
+	int safetyIndex = std::min(99, undefendedChecks + attackerUnits);
+	value_t safetyValue = safetyTable[safetyIndex];
+	score -= t(safetyValue, 0.5 * safetyValue);
+
+	// 4) King activity in endgames
+	if ((1 << kSq) & MIDDLE_SQUARES)
+		score += KING_ACTIVITY;
+
+
+	// 5) Punish open files around king
+	int kingFile = toFile(kSq);
+
+	if (   (kingFile != FILE_A && !(pawns & FILE_LIST[kingFile - 1]))
+		|| (kingFile != FILE_H && !(pawns & FILE_LIST[kingFile + 1])))
+		score += KING_OPEN_NEIHGBOR_FILE;
+
+	if (!(pawns & FILE_LIST[kingFile]))
+		score += KING_OPEN_FILE;
+
+	return score;
 }
 
 value_t evaluation(board_t* b) {
 
-	prefetchPT(b);
+	TT::prefetchPT(b);
 
 	// Check for known endgames
 	if (popCount(b->occupied) <= 5) {
@@ -75,577 +479,116 @@ value_t evaluation(board_t* b) {
 
 	}
 
-
 #ifdef USE_NNUE
 
 	// Use NNUE on balanced positions
 	if (   canUseNNUE
 		&& abs(b->psqtEndgame) < 520) {
-		return evaluateNNUE(b);
+		return NNUE::evaluateNNUE(b);
 	}
 
 #endif // USE_NNUE
 
-	// Continue with HCE
-	value_t eval = 0;
-	float phase = gamePhase(b);
+	float phase  = gamePhase(b);
+	tuple_t eval = 0;
 
-	// Calculate these bitboards once and share between functions
+	// Calculate these bitboards once and share among eval-functions
 	b->attackedSquares[WHITE] = attackerSet(b, WHITE);
 	b->attackedSquares[BLACK] = attackerSet(b, BLACK);
-
-	tuple_t tupleEval = 0;
-	value_t oldEval = 0;
 
 	// Pawn evaluation
 	pt->probed++;
 	value_t pawnEval = 0;
-	if (!probePT(b, &pawnEval)) {
+	if (!TT::probePT(b, &pawnEval)) {
 		pawnEval = evaluatePawns(b);
-		storePT(b, pawnEval);
+		TT::storePT(b, pawnEval);
 	}
 
-	tupleEval += t(pawnEval, pawnEval);
-	tupleEval += t(b->psqtOpening, b->psqtEndgame);
-	tupleEval += materialTupleScore(b);
+	eval += t(pawnEval, pawnEval);
+	eval += t(b->psqtOpening, b->psqtEndgame);
 
-	tupleEval += mobility(b, WHITE) - mobility(b, BLACK);
-	tupleEval += squareControl(b, WHITE) - squareControl(b, BLACK);
+	eval += sqControl<WHITE>(b) - sqControl<BLACK>(b);
+	eval += mobility<WHITE>(b)  - mobility<BLACK>(b);
+	eval += materialTupleScore(b);
+	
+	eval += evaluateBishops<WHITE>(b) - evaluateBishops<BLACK>(b);
+	eval += evaluateKnights<WHITE>(b) - evaluateKnights<BLACK>(b);
+	eval += evaluateRooks<WHITE>(b)   - evaluateRooks<BLACK>(b);
+	eval += evaluateQueens<WHITE>(b)  - evaluateQueens<BLACK>(b);
+	eval += evaluateKing<WHITE>(b)    - evaluateKing<BLACK>(b);
 
-	tupleEval += evaluateBishops(b, WHITE) - evaluateBishops(b, BLACK);
-	tupleEval += evaluateKnights(b, WHITE) - evaluateKnights(b, BLACK);
-
-	tupleEval += evaluateRooks(b, WHITE) - evaluateRooks(b, BLACK);
-	tupleEval += evaluateQueens(b, WHITE) - evaluateQueens(b, BLACK);
-
-	// King
-	tupleEval += evaluateKing(b, WHITE) - evaluateKing(b, BLACK);
-
-	// Combine evals
-	value_t newEval = scaleGamePhase(tupleEval, phase);
-	eval = newEval + oldEval;
+	eval = scaleGamePhase(eval, phase);
 
 	Assert(abs(eval) < VALUE_IS_MATE_IN);
 	return (b->stm == WHITE) ? eval : -eval;
 }
 
-tuple_t mobility(board_t* b, color_t color) {
-	value_t score = 0;
-	moveList_t moveList[1];
-
-	// How many of our pieces are attacked - might have to move away?
-	int piecesAttacked = popCount(b->attackedSquares[color ^ 1] & b->color[color]) / 4;
-	score -= t(piecesAttacked, piecesAttacked);
-
-	// Change color for move generation
-	color_t tempColor = b->stm;
-	if (b->stm != color) b->stm = color;
-
-	// Uniformly weight bishop moves
-	moveList->cnt = 0;
-	addBishopCaptures(b, moveList);
-	addBishopMoves(b, moveList);
-	score += BISHOP_MOBILITY[moveList->cnt];
-
-	// Favor rook mobility in towards endgame
-	moveList->cnt = 0;
-	addRookMoves(b, moveList);
-	addRookCaptures(b, moveList);
-	score += ROOK_MOBILITY[moveList->cnt];
-	
-	b->stm = tempColor;
-	return score;
-}
-
-tuple_t squareControl(board_t* b, color_t color) {
-	tuple_t tuple = 0;
-	int centerExtAttacked   = popCount(b->attackedSquares[color] &  CENTER_SQUARES_EXT);
-	int surroundingAttacked = popCount(b->attackedSquares[color] & ~CENTER_SQUARES_EXT);
-	int centerOccupied      = popCount(b->color[color] 		     &  CENTER_SQUARES);
-
-	tuple += t(3 * centerExtAttacked, centerExtAttacked);
-	tuple += t(surroundingAttacked, surroundingAttacked);
-	tuple += t(2 * centerOccupied, centerOccupied);
-	return tuple;
-}
-
-tuple_t evaluateBishops(board_t* b, color_t color) {
-	tuple_t score = 0;
-	bitboard_t bishops = getPieces(b, BISHOP, color);
-	bitboard_t pawns = getPieces(b, PAWN, color);
-
-	// 1) Bishop Pair
-	if (popCount(bishops) > 1) {
-		score += BISHOP_PAIR;
-	}
-
-	int sq;
-	bitboard_t oppositePawns = getPieces(b, PAWN, color ^ 1);
-	while (bishops) {
-		sq = popLSB(&bishops);
-
-		// 2) Bishop Outpost
-		bitboard_t currentFile = FILE_LIST[squareToFile[sq]];
-		bool isOutpostArea = (1ULL << sq) & outpost_squares[color];
-		if (   !((pawnPassedMask[color][sq] & ~currentFile) & oppositePawns)
-			&& isOutpostArea
-			&& pawnAtkMask[color ^ 1][sq] & pawns) {
-
-			score += BISHOP_OUTPOST_DEFENDED;
-		}
-
-		// 3) Long Diagonal
-		bitboard_t atks = lookUpBishopMoves(sq, b->occupied);
-		if (popCount(atks & CENTER_SQUARES) >= 2) {
-			score += BISHOP_LONG_DIAGONAL;
-		}
-
-	}
-
-	return score;
-}
-
-tuple_t evaluateKnights(board_t* b, color_t color) {
-	tuple_t score            = 0;
-	int kSq                  = getKingSquare(b, color);
-	int kSqOpp               = getKingSquare(b, color ^ 1);
-	bitboard_t knights       = getPieces(b, KNIGHT, color);
-	bitboard_t pawns         = getPieces(b, PAWN, color);
-	bitboard_t oppositePawns = getPieces(b, PAWN, color ^ 1);
-	bitboard_t currentFile;
-
-	int sq;
-	bool isOutpostArea;
-	while (knights) {
-		sq = popLSB(&knights);
-
-		// 1) Outposts
-		currentFile = FILE_LIST[squareToFile[sq]];
-		isOutpostArea = (1ULL << sq) & outpost_squares[color];
-		if (   !((pawnPassedMask[color][sq] & ~currentFile) & oppositePawns)
-			&& isOutpostArea) {
-			score += KNIGHT_OUTPOST;
-
-			// Defended by pawn
-			if (pawnAtkMask[color ^ 1][sq] & pawns) {
-				score += KNIGHT_OUTPOST_DEFENDED;
-			}
-		}
-
-		// 2) Mobility and Center squares attacked
-		int atks = popCount(knightAtkMask[sq]);
-		score += KNIGHT_MOBILITY[atks];
-
-		// 3) Distance to kings
-		int dist = (manhattenDistance[kSq][sq] + manhattenDistance[kSqOpp][sq]) / 2;
-		Assert(dist < 20);
-		score -= t(dist, dist);
-
-		// 4) Block opposite pawn
-		bitboard_t blockSquare = (color == WHITE) ? (1ULL << (sq+8)) : (1ULL << (sq-8));
-		if (blockSquare & oppositePawns)
-			score += KNIGHT_BLOCKS_PAWN;
-
-	}
-
-	return score;
-}
-
-bool rooksBelowPasser(bitboard_t rooks, bitboard_t passer) {
-	int sq;
-	while (passer) {
-		sq = popLSB(&passer);
-		if (rooks & FILE_LIST[squareToFile[sq]] & lowerMask[sq]) {
-			return true;
-		}
-
-	}
-	return false;
-}
-
-bool rooksAbovePasser(bitboard_t rooks, bitboard_t passer) {
-	int sq;
-	while (passer) {
-		sq = popLSB(&passer);
-		if (rooks & FILE_LIST[squareToFile[sq]] & upperMask[sq]) {
-			return true;
-		}
-
-	}
-	return false;
-}
-
-bool rooksConnected(board_t* b, int sq1, int sq2) {
-	return (   squareToFile[sq1] == squareToFile[sq2]
-			|| squareToRank[sq1] == squareToRank[sq2])
-			&& !(inBetween[sq1][sq2] & b->occupied);
-}
-
-tuple_t evaluateRooks(board_t* b, color_t color) {
-	tuple_t score = 0;
-	bitboard_t rooks = getPieces(b, ROOK, color);
-	bitboard_t wPassers = getPassers(b, WHITE);
-	bitboard_t bPassers = getPassers(b, BLACK);
-
-	// Get rook behind own passers
-	if (color == WHITE) {
-		if (rooksBelowPasser(rooks, wPassers))
-			score += ROOK_CONTROLS_PASSER;
-
-		if (rooksAbovePasser(rooks, bPassers))
-			score += ROOK_CONTROLS_PASSER;
-
-	} else {
-		if (rooksAbovePasser(rooks, bPassers))
-			score += ROOK_CONTROLS_PASSER;
-			
-		if (rooksBelowPasser(rooks, wPassers))
-			score += ROOK_CONTROLS_PASSER;
-
-	}
-
-	int sq = NO_SQ, lastSq;
-	while(rooks) {
-		lastSq = sq;
-		sq = popLSB(&rooks);
-
-		// Rooks on open files
-		if (!(b->occupied & FILE_LIST[squareToFile[sq]])) {
-			score += ROOK_OPEN_FILE;
-		} else if (!(b->pieces[PAWN] & FILE_LIST[squareToFile[sq]])) {
-			score += ROOK_SEMI_OPEN_FILE;
-		}
-
-		// Rook on 2nd (7th) rank
-		if (   (color == WHITE && squareToRank[sq] == RANK_7)
-			|| (color == BLACK && squareToRank[sq] == RANK_2)) {
-			
-			score += ROOK_ON_SEVENTH;
-		}
-
-		// Connected rooks
-		if (lastSq != NO_SQ && rooksConnected(b, sq, lastSq)) {
-			score += ROOK_CONNECTED;
-		}
-	}
-
-	return score;
-}
-
-tuple_t evaluateQueens(board_t* b, color_t color) {
-	tuple_t score = 0;
-	bitboard_t queens = getPieces(b, QUEEN, color);
-
-	int sq;
-	bitboard_t threats;
-	while (queens) {
-		sq = popLSB(&queens);
-
-		// Discovered attacks on queen
-		threats = getDiscoveredAttacks(b, sq, color);
-		score += popCount(threats) * QUEEN_DANGEROUS_SQUARE;
-
-	}
-
-	return score;
-}
-
-int getAttackerUnits(board_t* b, bitboard_t dZone, color_t color) {
-	int sq;
-	int attackUnits = 0;
-
-	bitboard_t piece = getPieces(b, KNIGHT, color ^ 1);
-	while (piece) {
-		sq = popLSB(&piece);
-		attackUnits += KNIGHT_UNIT * popCount(knightAtkMask[sq] & dZone);
-	}
-
-	piece = getPieces(b, BISHOP, color ^ 1);
-	while (piece) {
-		sq = popLSB(&piece);
-		attackUnits += BISHOP_UNIT * popCount(lookUpBishopMoves(sq, b->occupied) & dZone);
-	}
-
-	piece = getPieces(b, ROOK, color ^ 1);
-	while (piece) {
-		sq = popLSB(&piece);
-		attackUnits += ROOK_UNIT * popCount(lookUpRookMoves(sq, b->occupied) & dZone);
-	}
-
-	piece = getPieces(b, QUEEN, color ^ 1);
-	while (piece) {
-		sq = popLSB(&piece);
-		attackUnits += QUEEN_UNIT * popCount(lookUpQueenMoves(sq, b->occupied) & dZone);
-	}
-
-	Assert(attackUnits < 100);
-	return attackUnits;
-}
-
-int undefendedKnightChecks(board_t* b, int kSq, color_t color) {
-	Assert(b->attackedSquares[WHITE] == attackerSet(b, WHITE));
-	Assert(b->attackedSquares[BLACK] == attackerSet(b, BLACK));
-	
-	bitboard_t knights = getPieces(b, KNIGHT, color);
-	bitboard_t checkingSquares = knightAtkMask[kSq] & ~b->attackedSquares[color ^ 1];
-
-	int sq, res = 0;
-	while (knights) {
-		sq = popLSB(&knights);
-		res += popCount(knightAtkMask[sq] & checkingSquares);
-	}
-
-	return res;
-}
-
-int undefendedBishopChecks(board_t* b, int kSq, color_t color) {
-	Assert(b->attackedSquares[WHITE] == attackerSet(b, WHITE));
-	Assert(b->attackedSquares[BLACK] == attackerSet(b, BLACK));
-	
-	bitboard_t bishops = getPieces(b, BISHOP, color);
-	bitboard_t checkingSquares = lookUpBishopMoves(kSq, b->occupied);
-	checkingSquares &= ~b->occupied & ~b->attackedSquares[color ^ 1];
-
-	int sq, res = 0;
-	while (bishops) {
-		sq = popLSB(&bishops);
-		res += popCount(lookUpBishopMoves(sq, b->occupied) & checkingSquares);
-	}
-	return res;
-}
-
-int undefendedRookChecks(board_t* b, int kSq, color_t color) {
-	Assert(b->attackedSquares[WHITE] == attackerSet(b, WHITE));
-	Assert(b->attackedSquares[BLACK] == attackerSet(b, BLACK));
-
-	bitboard_t rooks = getPieces(b, ROOK, color);
-	bitboard_t checkingSquares = lookUpRookMoves(kSq, b->occupied);
-	checkingSquares &= ~b->occupied & ~b->attackedSquares[color ^ 1];
-
-	int sq, res = 0;
-	while (rooks) {
-		sq = popLSB(&rooks);
-		res += popCount(lookUpRookMoves(sq, b->occupied) & checkingSquares);
-	}
-	return res;;
-}
-
-int undefendedQueenChecks(board_t* b, int kSq, color_t color) {
-	Assert(b->attackedSquares[WHITE] == attackerSet(b, WHITE));
-	Assert(b->attackedSquares[BLACK] == attackerSet(b, BLACK));
-	
-	bitboard_t queens = getPieces(b, QUEEN, color);
-	bitboard_t checkingSquares = lookUpQueenMoves(kSq, b->occupied);
-	checkingSquares &= ~b->occupied & ~b->attackedSquares[color ^ 1];
-
-	int sq, res = 0;
-	while (queens) {
-		sq = popLSB(&queens);
-		res += popCount(lookUpQueenMoves(sq, b->occupied) & checkingSquares);
-	}
-	return res;
-}
- 
-tuple_t evaluateKing(board_t* b, color_t color) {
-	tuple_t score = 0;
-	int kSq = getKingSquare(b, color);
-
-	// 1) Reward king activity in endgames
-	bitboard_t pawns = getPieces(b, PAWN, color);
-	int sq;
-	int longestDistToPawn = 0;
-	while (pawns) {
-		sq = popLSB(&pawns);
-		longestDistToPawn = std::max(longestDistToPawn, manhattenDistance[sq][kSq]);
-	}
-	score += t(0, -longestDistToPawn);
-
-	// 2) Penalty for discovered attacks
-	int discoveredAttacks = popCount(getDiscoveredAttacks(b, kSq, color));
-	score += discoveredAttacks * KING_DANGEROUS_SQUARE;
-
-	// 3) If at least 3 pieces attack dangerZone of king, count attacker-units and 
-	// determine danger-level by lookup in the safety table
-	bitboard_t dZone = dangerZone[color][kSq];
-
-	int undefendedChecks = 2 * undefendedKnightChecks(b, kSq, color ^ 1)
-						 + 2 * undefendedBishopChecks(b, kSq, color ^ 1)
-						 + 3 * undefendedRookChecks(b, kSq, color ^ 1)
-						 + 3 * undefendedQueenChecks(b, kSq, color ^ 1);
-
-	int attackerUnits    = 0;
-	if (popCount(dZone & b->attackedSquares[color ^ 1]) > 2)
-		attackerUnits = getAttackerUnits(b, dZone, color);
-
-
-	int safetyIndex = std::min(99, undefendedChecks + attackerUnits);
-	value_t safetyValue = safetyTable[safetyIndex];
-	score -= t(safetyValue, 0.5 * safetyValue);
-
-	// King activity
-	if ((1 << kSq) & CENTER_SQUARES_EXT) {
-		score += KING_ACTIVITY;
-	}
-
-	// Open File next to king
-	int kingFile = squareToFile[kSq];
-	if (   kingFile != FILE_A
-		&& !(pawns & FILE_LIST[kingFile - 1])) {
-		score += T_KING_OPEN_NEIHGBOR_FILE;
-	}
-
-	if (   kingFile != FILE_H
-		&& !(pawns & FILE_LIST[kingFile + 1])) {
-		score += T_KING_OPEN_NEIHGBOR_FILE;
-	}
-
-	if (!(pawns & FILE_LIST[kingFile])) {
-		score += T_KING_OPEN_FILE;
-	}
-
-	Assert(abs(t1(score)) < VALUE_IS_MATE_IN);
-	Assert(abs(t2(score)) < VALUE_IS_MATE_IN);
-	return score;
-}
-
-value_t materialScore(board_t* b) {
-	int score = 0;
-	for (int i = 1; i < 7; i++) {
-		score += popCount(getPieces(b, i, WHITE)) * pieceValues[i];
-		score -= popCount(getPieces(b, i, BLACK)) * pieceValues[i];
-	}
-
-	// Assert (b->material == score); // TODO
-	return score;
-}
-
-tuple_t materialTupleScore(board_t* b) {
-	tuple_t score = 0;
-	for (int i = 1; i < 7; i++) {
-		score += popCount(getPieces(b, i, WHITE)) * pieceTupleValues[i];
-		score -= popCount(getPieces(b, i, BLACK)) * pieceTupleValues[i];
-	}
-
-	// Assert (b->material == score); // TODO
-	return score;
-}
-
 bool insufficientMaterial(board_t* b) {
+
 	int occ = popCount(b->occupied);
 
-	// Trivial case, most likely to happen
-	if (occ > 5) {
-		return false;
-	}
+	// Rule out most frequent case first
+	if (occ > 5) return false;
 
-	// King vs King
-	if (occ == 2) {
-		return true;
-	}
+	// KvK
+	if (occ == 2) return true;
 
-	// 3 pieces on board:
 	if (occ == 3) {
-		// King Knight vs King
-		if (b->pieces[KNIGHT]) {
-			return true;
-		}
+		// KvKN
+		if (b->pieces[cKNIGHT]) return true;
 
-		// King Bishop vs King
-		if (b->pieces[BISHOP]) {
-			return true;
-		}
+		// KvKB
+		if (b->pieces[cBISHOP]) return true;
 	}
 
 	if (occ == 4) {
-		// King Bishop vs King Bishop (all same color)
-		if (popCount(b->pieces[BISHOP] & SQUARES_WHITE) == 2 &&
-			popCount(b->pieces[BISHOP] & SQUARES_BLACK) == 2) {
+		// KBvKB (all same color)
+		if (   popCount(b->pieces[cBISHOP] & SQUARES_WHITE) == 2
+		    && popCount(b->pieces[cBISHOP] & SQUARES_BLACK) == 2)
 			return true;
-		}
 
 	}
 
 	if (occ == 5) {
-		// King Bishop Bishop vs King Bishop (all same color)
-		if (popCount(b->pieces[BISHOP] & SQUARES_WHITE) == 3 &&
-			popCount(b->pieces[BISHOP] & SQUARES_BLACK) == 3) {
+		// KBBvKB (all same color)
+		if (   popCount(b->pieces[cBISHOP] & SQUARES_WHITE) == 3 
+			&& popCount(b->pieces[cBISHOP] & SQUARES_BLACK) == 3)
 			return true;
-		}
 
 	}
 
 	return false;
 }
 
-value_t calcPSQT(board_t* b, const value_t* psqtTable[64]) {
-	bitboard_t pieces;
-	int sq, sign, value = 0;
+template<pType_t piece>
+value_t calcPSQTFor(board_t* b, const value_t* psqtTable[64]) {
 
-	// PAWNS
-	pieces = b->pieces[PAWN];
+	int sq, sign;
+	color_t col;
+	value_t value = 0;
+	bitboard_t pieces = b->pieces[piece];
+
 	while (pieces) {
-		sq = popLSB(&pieces);
+		sq   = popLSB(&pieces);
+		col  = colorAt(b, sq);
+		sq   = relSquare(sq, col);
+		sign = (col == WHITE) ? 1 : -1;
 
-		sign = 1;
-		if (b->color[BLACK] & (1ULL << sq)) {
-			sq = mirror64[sq];
-			sign = -1;
-		}
-		value += sign * psqtTable[PAWN][sq];
+		value += sign * psqtTable[piece][sq];
 	}
-
-	// KNIGHTS
-	pieces = b->pieces[KNIGHT];
-	while (pieces) {
-		sq = popLSB(&pieces);
-
-		sign = 1;
-		if (b->color[BLACK] & (1ULL << sq)) {
-			sq = mirror64[sq];
-			sign = -1;
-		}
-		value += sign * psqtTable[KNIGHT][sq];
-	}
-
-	pieces = b->pieces[BISHOP];
-	while (pieces) {
-		sq = popLSB(&pieces);
-
-		sign = 1;
-		if (b->color[BLACK] & (1ULL << sq)) {
-			sq = mirror64[sq];
-			sign = -1;
-		}
-		value += sign * psqtTable[BISHOP][sq];
-	}
-
-	pieces = b->pieces[ROOK];
-	while (pieces) {
-		sq = popLSB(&pieces);
-
-		sign = 1;
-		if (b->color[BLACK] & (1ULL << sq)) {
-			sq = mirror64[sq];
-			sign = -1;
-		}
-		value += sign * psqtTable[ROOK][sq];
-	}
-
-	pieces = b->pieces[QUEEN];
-	while (pieces) {
-		sq = popLSB(&pieces);
-
-		sign = 1;
-		if (b->color[BLACK] & (1ULL << sq)) {
-			sq = mirror64[sq];
-			sign = -1;
-		}
-		value += sign * psqtTable[QUEEN][sq];
-	}
-
-	value += psqtTable[KING][getKingSquare(b, WHITE)];
-	value -= psqtTable[KING][mirror64[getKingSquare(b, BLACK)]];
 
 	return value;
 }
 
+value_t calcPSQT(board_t* b, const value_t* psqtTable[64]) {
+
+	value_t value = 0;
+	value += calcPSQTFor<cPAWN>(b, psqtTable);
+	value += calcPSQTFor<cKNIGHT>(b, psqtTable);
+	value += calcPSQTFor<cBISHOP>(b, psqtTable);
+	value += calcPSQTFor<cROOK>(b, psqtTable);
+	value += calcPSQTFor<cQUEEN>(b, psqtTable);
+	value += calcPSQTFor<cKING>(b, psqtTable);
+
+	return value;
+}

@@ -27,6 +27,9 @@
  //#include <tbconfig.h>
 #include "tbconfig.h"
 
+
+
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -157,141 +160,146 @@ extern "C"
 #define TB_RESULT_STALEMATE         TB_SET_WDL(0, TB_DRAW)
 #define TB_RESULT_FAILED            0xFFFFFFFF
 
+
 /*
  * The tablebase can be probed for any position where #pieces <= TB_LARGEST.
  */
-	extern unsigned TB_LARGEST;
+extern unsigned TB_LARGEST;
 
-	/*
-	 * Initialize the tablebase.
-	 *
-	 * PARAMETERS:
-	 * - path:
-	 *   The tablebase PATH string.
-	 *
-	 * RETURN:
-	 * - true=succes, false=failed.  The TB_LARGEST global will also be
-	 *   initialized.  If no tablebase files are found, then `true' is returned
-	 *   and TB_LARGEST is set to zero.
-	 */
-	bool tb_init(const char* _path);
+namespace EGTB {
 
-	/*
-	 * Free any resources allocated by tb_init
-	 */
-	void tb_free(void);
+/*
+* Initialize the tablebase.
+*
+* PARAMETERS:
+* - path:
+*   The tablebase PATH string.
+*
+* RETURN:
+* - true=succes, false=failed.  The TB_LARGEST global will also be
+*   initialized.  If no tablebase files are found, then `true' is returned
+*   and TB_LARGEST is set to zero.
+*/
+bool tb_init(const char* _path);
 
-	/*
-	 * Probe the Win-Draw-Loss (WDL) table.
-	 *
-	 * PARAMETERS:
-	 * - white, black, kings, queens, rooks, bishops, knights, pawns:
-	 *   The current position (bitboards).
-	 * - rule50:
-	 *   The 50-move half-move clock.
-	 * - castling:
-	 *   Castling rights.  Set to zero if no castling is possible.
-	 * - ep:
-	 *   The en passant square (if exists).  Set to zero if there is no en passant
-	 *   square.
-	 * - turn:
-	 *   true=white, false=black
-	 *
-	 * RETURN:
-	 * - One of {TB_LOSS, TB_BLESSED_LOSS, TB_DRAW, TB_CURSED_WIN, TB_WIN}.
-	 *   Otherwise returns TB_RESULT_FAILED if the probe failed.
-	 *
-	 * NOTES:
-	 * - Engines should use this function during search.
-	 * - This function is thread safe assuming TB_NO_THREADS is disabled.
-	 */
-	static inline unsigned tb_probe_wdl(
-		uint64_t _white,
-		uint64_t _black,
-		uint64_t _kings,
-		uint64_t _queens,
-		uint64_t _rooks,
-		uint64_t _bishops,
-		uint64_t _knights,
-		uint64_t _pawns,
-		unsigned _rule50,
-		unsigned _castling,
-		unsigned _ep,
-		bool     _turn) {
-		if (_castling != 0)
-			return TB_RESULT_FAILED;
-		if (_rule50 != 0)
-			return TB_RESULT_FAILED;
-		return tb_probe_wdl_impl(_white, _black, _kings, _queens, _rooks,
-								 _bishops, _knights, _pawns, _ep, _turn);
-	}
+/*
+* Free any resources allocated by tb_init
+*/
+void tb_free(void);
 
-	/*
-	 * Probe the Distance-To-Zero (DTZ) table.
-	 *
-	 * PARAMETERS:
-	 * - white, black, kings, queens, rooks, bishops, knights, pawns:
-	 *   The current position (bitboards).
-	 * - rule50:
-	 *   The 50-move half-move clock.
-	 * - castling:
-	 *   Castling rights.  Set to zero if no castling is possible.
-	 * - ep:
-	 *   The en passant square (if exists).  Set to zero if there is no en passant
-	 *   square.
-	 * - turn:
-	 *   true=white, false=black
-	 * - results (OPTIONAL):
-	 *   Alternative results, one for each possible legal move.  The passed array
-	 *   must be TB_MAX_MOVES in size.
-	 *   If alternative results are not desired then set results=NULL.
-	 *
-	 * RETURN:
-	 * - A TB_RESULT value comprising:
-	 *   1) The WDL value (TB_GET_WDL)
-	 *   2) The suggested move (TB_GET_FROM, TB_GET_TO, TB_GET_PROMOTES, TB_GET_EP)
-	 *   3) The DTZ value (TB_GET_DTZ)
-	 *   The suggested move is guaranteed to preserved the WDL value.
-	 *
-	 *   Otherwise:
-	 *   1) TB_RESULT_STALEMATE is returned if the position is in stalemate.
-	 *   2) TB_RESULT_CHECKMATE is returned if the position is in checkmate.
-	 *   3) TB_RESULT_FAILED is returned if the probe failed.
-	 *
-	 *   If results!=NULL, then a TB_RESULT for each legal move will be generated
-	 *   and stored in the results array.  The results array will be terminated
-	 *   by TB_RESULT_FAILED.
-	 *
-	 * NOTES:
-	 * - Engines can use this function to probe at the root.  This function should
-	 *   not be used during search.
-	 * - DTZ tablebases can suggest unnatural moves, especially for losing
-	 *   positions.  Engines may prefer to traditional search combined with WDL
-	 *   move filtering using the alternative results array.
-	 * - This function is NOT thread safe.  For engines this function should only
-	 *   be called once at the root per search.
-	 */
-	static inline unsigned tb_probe_root(
-		uint64_t _white,
-		uint64_t _black,
-		uint64_t _kings,
-		uint64_t _queens,
-		uint64_t _rooks,
-		uint64_t _bishops,
-		uint64_t _knights,
-		uint64_t _pawns,
-		unsigned _rule50,
-		unsigned _castling,
-		unsigned _ep,
-		bool     _turn,
-		unsigned* _results) {
-		if (_castling != 0)
-			return TB_RESULT_FAILED;
-		return tb_probe_root_impl(_white, _black, _kings, _queens, _rooks,
-								  _bishops, _knights, _pawns, _rule50, _ep, _turn, _results);
-	}
+/*
+* Probe the Win-Draw-Loss (WDL) table.
+*
+* PARAMETERS:
+* - white, black, kings, queens, rooks, bishops, knights, pawns:
+*   The current position (bitboards).
+* - rule50:
+*   The 50-move half-move clock.
+* - castling:
+*   Castling rights.  Set to zero if no castling is possible.
+* - ep:
+*   The en passant square (if exists).  Set to zero if there is no en passant
+*   square.
+* - turn:
+*   true=white, false=black
+*
+* RETURN:
+* - One of {TB_LOSS, TB_BLESSED_LOSS, TB_DRAW, TB_CURSED_WIN, TB_WIN}.
+*   Otherwise returns TB_RESULT_FAILED if the probe failed.
+*
+* NOTES:
+* - Engines should use this function during search.
+* - This function is thread safe assuming TB_NO_THREADS is disabled.
+*/
+static inline unsigned tb_probe_wdl(
+	uint64_t _white,
+	uint64_t _black,
+	uint64_t _kings,
+	uint64_t _queens,
+	uint64_t _rooks,
+	uint64_t _bishops,
+	uint64_t _knights,
+	uint64_t _pawns,
+	unsigned _rule50,
+	unsigned _castling,
+	unsigned _ep,
+	bool     _turn) {
+	if (_castling != 0)
+		return TB_RESULT_FAILED;
+	if (_rule50 != 0)
+		return TB_RESULT_FAILED;
+	return tb_probe_wdl_impl(_white, _black, _kings, _queens, _rooks,
+								_bishops, _knights, _pawns, _ep, _turn);
+}
 
-	typedef uint16_t TbMove;
+} // namespace EGTB
+
+/*
+* Probe the Distance-To-Zero (DTZ) table.
+*
+* PARAMETERS:
+* - white, black, kings, queens, rooks, bishops, knights, pawns:
+*   The current position (bitboards).
+* - rule50:
+*   The 50-move half-move clock.
+* - castling:
+*   Castling rights.  Set to zero if no castling is possible.
+* - ep:
+*   The en passant square (if exists).  Set to zero if there is no en passant
+*   square.
+* - turn:
+*   true=white, false=black
+* - results (OPTIONAL):
+*   Alternative results, one for each possible legal move.  The passed array
+*   must be TB_MAX_MOVES in size.
+*   If alternative results are not desired then set results=NULL.
+*
+* RETURN:
+* - A TB_RESULT value comprising:
+*   1) The WDL value (TB_GET_WDL)
+*   2) The suggested move (TB_GET_FROM, TB_GET_TO, TB_GET_PROMOTES, TB_GET_EP)
+*   3) The DTZ value (TB_GET_DTZ)
+*   The suggested move is guaranteed to preserved the WDL value.
+*
+*   Otherwise:
+*   1) TB_RESULT_STALEMATE is returned if the position is in stalemate.
+*   2) TB_RESULT_CHECKMATE is returned if the position is in checkmate.
+*   3) TB_RESULT_FAILED is returned if the probe failed.
+*
+*   If results!=NULL, then a TB_RESULT for each legal move will be generated
+*   and stored in the results array.  The results array will be terminated
+*   by TB_RESULT_FAILED.
+*
+* NOTES:
+* - Engines can use this function to probe at the root.  This function should
+*   not be used during search.
+* - DTZ tablebases can suggest unnatural moves, especially for losing
+*   positions.  Engines may prefer to traditional search combined with WDL
+*   move filtering using the alternative results array.
+* - This function is NOT thread safe.  For engines this function should only
+*   be called once at the root per search.
+*/
+static inline unsigned tb_probe_root(
+	uint64_t _white,
+	uint64_t _black,
+	uint64_t _kings,
+	uint64_t _queens,
+	uint64_t _rooks,
+	uint64_t _bishops,
+	uint64_t _knights,
+	uint64_t _pawns,
+	unsigned _rule50,
+	unsigned _castling,
+	unsigned _ep,
+	bool     _turn,
+	unsigned* _results) {
+	if (_castling != 0)
+		return TB_RESULT_FAILED;
+	return tb_probe_root_impl(_white, _black, _kings, _queens, _rooks,
+								_bishops, _knights, _pawns, _rule50, _ep, _turn, _results);
+}
+
+typedef uint16_t TbMove;
 
 #define TB_MOVE_FROM(move)                                                 \
     (((move) >> 6) & 0x3F)
@@ -300,82 +308,82 @@ extern "C"
 #define TB_MOVE_PROMOTES(move)                                             \
     (((move) >> 12) & 0x7)
 
-	struct TbRootMove {
-		TbMove move;
-		TbMove pv[TB_MAX_PLY];
-		unsigned pvSize;
-		int32_t tbScore, tbRank;
-	};
+struct TbRootMove {
+	TbMove move;
+	TbMove pv[TB_MAX_PLY];
+	unsigned pvSize;
+	int32_t tbScore, tbRank;
+};
 
-	struct TbRootMoves {
-		unsigned size;
-		struct TbRootMove moves[TB_MAX_MOVES];
-	};
+struct TbRootMoves {
+	unsigned size;
+	struct TbRootMove moves[TB_MAX_MOVES];
+};
 
-	/*
-	 * Use the DTZ tables to rank and score all root moves.
-	 * INPUT: as for tb_probe_root
-	 * OUTPUT: TbRootMoves structure is filled in. This contains
-	 * an array of TbRootMove structures.
-	 * Each structure instance contains a rank, a score, and a
-	 * predicted principal variation.
-	 * RETURN VALUE:
-	 *   non-zero if ok, 0 means not all probes were successful
-	 *
-	 */
-	int tb_probe_root_dtz(
-		uint64_t _white,
-		uint64_t _black,
-		uint64_t _kings,
-		uint64_t _queens,
-		uint64_t _rooks,
-		uint64_t _bishops,
-		uint64_t _knights,
-		uint64_t _pawns,
-		unsigned _rule50,
-		unsigned _castling,
-		unsigned _ep,
-		bool     _turn,
-		bool hasRepeated,
-		bool useRule50,
-		struct TbRootMoves* _results);
+/*
+	* Use the DTZ tables to rank and score all root moves.
+	* INPUT: as for tb_probe_root
+	* OUTPUT: TbRootMoves structure is filled in. This contains
+	* an array of TbRootMove structures.
+	* Each structure instance contains a rank, a score, and a
+	* predicted principal variation.
+	* RETURN VALUE:
+	*   non-zero if ok, 0 means not all probes were successful
+	*
+	*/
+int tb_probe_root_dtz(
+	uint64_t _white,
+	uint64_t _black,
+	uint64_t _kings,
+	uint64_t _queens,
+	uint64_t _rooks,
+	uint64_t _bishops,
+	uint64_t _knights,
+	uint64_t _pawns,
+	unsigned _rule50,
+	unsigned _castling,
+	unsigned _ep,
+	bool     _turn,
+	bool hasRepeated,
+	bool useRule50,
+	struct TbRootMoves* _results);
 
-	/*
-	// Use the WDL tables to rank and score all root moves.
-	// This is a fallback for the case that some or all DTZ tables are missing.
-	 * INPUT: as for tb_probe_root
-	 * OUTPUT: TbRootMoves structure is filled in. This contains
-	 * an array of TbRootMove structures.
-	 * Each structure instance contains a rank, a score, and a
-	 * predicted principal variation.
-	 * RETURN VALUE:
-	 *   non-zero if ok, 0 means not all probes were successful
-	 *
-	 */
-	int tb_probe_root_wdl(uint64_t _white,
-						  uint64_t _black,
-						  uint64_t _kings,
-						  uint64_t _queens,
-						  uint64_t _rooks,
-						  uint64_t _bishops,
-						  uint64_t _knights,
-						  uint64_t _pawns,
-						  unsigned _rule50,
-						  unsigned _castling,
-						  unsigned _ep,
-						  bool     _turn,
-						  bool useRule50,
-						  struct TbRootMoves* _results);
+/*
+// Use the WDL tables to rank and score all root moves.
+// This is a fallback for the case that some or all DTZ tables are missing.
+	* INPUT: as for tb_probe_root
+	* OUTPUT: TbRootMoves structure is filled in. This contains
+	* an array of TbRootMove structures.
+	* Each structure instance contains a rank, a score, and a
+	* predicted principal variation.
+	* RETURN VALUE:
+	*   non-zero if ok, 0 means not all probes were successful
+	*
+	*/
+int tb_probe_root_wdl(uint64_t _white,
+						uint64_t _black,
+						uint64_t _kings,
+						uint64_t _queens,
+						uint64_t _rooks,
+						uint64_t _bishops,
+						uint64_t _knights,
+						uint64_t _pawns,
+						unsigned _rule50,
+						unsigned _castling,
+						unsigned _ep,
+						bool     _turn,
+						bool useRule50,
+						struct TbRootMoves* _results);
 
-	/****************************************************************************/
-	/* HELPER API                                                               */
-	/****************************************************************************/
+/****************************************************************************/
+/* HELPER API                                                               */
+/****************************************************************************/
 
-	/*
-	 * The HELPER API provides some useful additional functions.  It is optional
-	 * and can be disabled by defining TB_NO_HELPER_API.  Engines should disable
-	 * the HELPER API.
-	 */
+/*
+	* The HELPER API provides some useful additional functions.  It is optional
+	* and can be disabled by defining TB_NO_HELPER_API.  Engines should disable
+	* the HELPER API.
+	*/
 
 #ifndef TB_NO_HELPER_API
 
@@ -396,3 +404,4 @@ extern "C"
 #endif
 
 #endif
+

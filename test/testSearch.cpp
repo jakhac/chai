@@ -1,6 +1,10 @@
 #include "testFixtures.h"
 
-namespace SearchTest {
+using namespace SearchTest;
+using namespace Search;
+
+// namespace chai {
+// namespace Search {
 
 #if defined(USE_NNUE)
 TEST_F(SearchTest, NNUE) {
@@ -19,6 +23,8 @@ TEST_F(SearchTest, MateIn5_1) {
 	pInstr->depth = 5;
 	pInstr->depthSet = true;
 	pInstr->timeSet = false;
+
+	evaluation(pBoard);
 
 	EXPECT_GE(search(pBoard, pSearch, pInstr), VALUE_IS_MATE_IN);
 }
@@ -124,7 +130,7 @@ TEST_F(SearchTest, Endgame_KQvKP_5) {
 
 TEST_F(SearchTest, Endgame_KQvKP_6) {
 	parseFen(pBoard, "8/2k2K1P/8/8/8/8/1q6/8 b - - 0 1");
-	pInstr->depth = 10;
+	pInstr->depth = 15;
 	pInstr->depthSet = true;
 	pInstr->timeSet = false;
 
@@ -132,4 +138,6 @@ TEST_F(SearchTest, Endgame_KQvKP_6) {
 }
 
 
-} // namespace SearchTest
+
+// }
+// }

@@ -1,7 +1,174 @@
 #pragma once
 
-#include "defs.h"
+#include "types.h"
 #include "bitUtils.h"
+
+// Bit set- and clear-masks
+extern bitboard_t setMask[64];
+extern bitboard_t clearMask[64];
+
+// Table stores attacker set for each square and each blocker set
+extern bitboard_t rookTable[64][4096];
+extern bitboard_t bishopTable[64][1024];
+
+// Array contains all masks for rook moves indexed by square
+extern bitboard_t pawnAtkMask[2][64];
+extern bitboard_t knightAtkMask[64];
+extern bitboard_t kingAtkMask[64];
+extern bitboard_t rookMasks[64];
+extern bitboard_t bishopMasks[64];
+
+extern int squareToRank[64];
+extern int squareToFile[64];
+
+extern int dirFromTo[64][64];
+extern int manhatten[64][64];
+
+extern bitboard_t dirBitmap[64][8];
+extern bitboard_t inBetween[64][64];
+extern bitboard_t lineBB[64][64];
+
+// Evaluation masks
+extern bitboard_t pawnIsolatedMask[64];
+extern bitboard_t pawnPassedMask[2][64];
+extern bitboard_t upperMask[64];
+extern bitboard_t lowerMask[64];
+extern bitboard_t pawnShield[2][64];
+extern bitboard_t xMask[64];
+extern bitboard_t dangerZone[2][64];
+extern bitboard_t outpostSquares[2];
+extern bitboard_t horizontalNeighbors[64];
+
+
+const bitboard_t RANK_1_HEX = 0x00000000000000FF;
+const bitboard_t RANK_2_HEX = 0x000000000000FF00;
+const bitboard_t RANK_3_HEX = 0x0000000000FF0000;
+const bitboard_t RANK_4_HEX = 0x00000000FF000000;
+const bitboard_t RANK_5_HEX = 0x000000FF00000000;
+const bitboard_t RANK_6_HEX = 0x0000FF0000000000;
+const bitboard_t RANK_7_HEX = 0x00FF000000000000;
+const bitboard_t RANK_8_HEX = 0xFF00000000000000;
+
+const bitboard_t FILE_A_HEX = 0x0101010101010101;
+const bitboard_t FILE_B_HEX = 0x0202020202020202;
+const bitboard_t FILE_C_HEX = 0x0404040404040404;
+const bitboard_t FILE_D_HEX = 0x0808080808080808;
+const bitboard_t FILE_E_HEX = 0x1010101010101010;
+const bitboard_t FILE_F_HEX = 0x2020202020202020;
+const bitboard_t FILE_G_HEX = 0x4040404040404040;
+const bitboard_t FILE_H_HEX = 0x8080808080808080;
+
+const bitboard_t SQUARES_BLACK  = 0xAA55AA55AA55AA55;
+const bitboard_t SQUARES_WHITE  = 0x55AA55AA55AA55AA;
+const bitboard_t CENTER_SQUARES = 0x0000001818000000;
+const bitboard_t MIDDLE_SQUARES = 0x00003C3C3C3C0000;
+const bitboard_t BORDER_SQUARES = FILE_A_HEX | FILE_H_HEX | RANK_1_HEX | RANK_8_HEX;
+
+const bitboard_t FILE_LIST[8] = {
+	FILE_A_HEX, FILE_B_HEX, FILE_C_HEX, FILE_D_HEX,
+	FILE_E_HEX, FILE_F_HEX, FILE_G_HEX, FILE_H_HEX
+};
+
+const bitboard_t RANK_LIST[8] = {
+	RANK_1_HEX, RANK_2_HEX, RANK_3_HEX, RANK_4_HEX,
+	RANK_5_HEX, RANK_6_HEX, RANK_7_HEX, RANK_8_HEX
+};
+
+namespace Mask {
+
+	void init();
+
+}
+
+/**
+ * Fast lookup for possible rook moves.
+ */
+bitboard_t lookUpRookMoves(int sq, bitboard_t blockers);
+
+/**
+ * Fast lookup for possible bishop moves.
+ */
+bitboard_t lookUpBishopMoves(int sq, bitboard_t blockers);
+
+/**
+ * Fast lookup for possible queen moves.
+ */
+bitboard_t lookUpQueenMoves(int sq, bitboard_t blockers);
+
+/**
+ * Returns a bitboard with line set between s1 and s2.
+ * @returns Line-bitboard or zero (!) if s1 and s2 are not aligned.
+ */
+inline bitboard_t lineBetween(int s1, int s2) {
+	return lineBB[s1][s2];
+}
+
+/**
+ * Checks if three square are aligned (horizontal, vertical, diagonal)
+ * @returns True if all squares are aligned, else false.
+ */
+inline bool aligned(int s1, int s2, int s3) {
+	return lineBetween(s1, s2) & setMask[s3];
+}
+
+/**
+ * Returns bitboard with all bits sets between sq1 and sq2
+ */
+inline bitboard_t obstructed(int sq1, int sq2) {
+	return inBetween[sq1][sq2];
+}
+
+inline int toRank(int sq) {
+	return squareToRank[sq];
+}
+
+inline int toFile(int sq) {
+	return squareToFile[sq];
+}
+
+inline bitboard_t toRankBB(int sq) {
+	return RANK_LIST[toRank(sq)];
+}
+
+inline bitboard_t toFileBB(int sq) {
+	return FILE_LIST[toFile(sq)];
+}
+
+
+/**
+ * @brief Return bitboard with all possible moves for given piece.
+ */
+template<pType_t piece>
+inline bitboard_t getMoveMask(int sq, bitboard_t occ, color_t color) {
+
+	switch (piece) {
+		case cPAWN:   return pawnAtkMask[color][sq];
+		case cKNIGHT: return knightAtkMask[sq];
+		case cBISHOP: return lookUpBishopMoves(sq, occ);
+		case cROOK:   return lookUpRookMoves(sq, occ);
+		case cQUEEN:  return lookUpQueenMoves(sq, occ);
+		case cKING:   return kingAtkMask[sq];
+		default: break;
+	}
+}
+
+/**
+ * @brief Return bitboard with all possible moves for given piece.
+ */
+template<pType_t piece>
+inline bitboard_t getMoveMask(int sq, bitboard_t occ) {
+
+	switch (piece) {
+		case cPAWN:   Assert(false); exit(1);
+		case cKNIGHT: return knightAtkMask[sq];
+		case cBISHOP: return lookUpBishopMoves(sq, occ);
+		case cROOK:   return lookUpRookMoves(sq, occ);
+		case cQUEEN:  return lookUpQueenMoves(sq, occ);
+		case cKING:   return kingAtkMask[sq];
+		default: break;
+	}
+}
+
 
 /** Store number of bits required for that square in rook magic table index */
 const int rookIndexBits[64] = {
@@ -66,102 +233,3 @@ const bitboard_t rookMagic[64] = {
 	bitboard_t(0x00FFFCDDFCED714A), bitboard_t(0x007FFCDDFCED714A), bitboard_t(0x003FFFCDFFD88096), bitboard_t(0x0000040810002101),
 	bitboard_t(0x0001000204080011), bitboard_t(0x0001000204000801), bitboard_t(0x0001000082000401), bitboard_t(0x0001FFFAABFAD1A2)
 };
-
-/** Array contains all masks for rook moves indexed by square */
-extern bitboard_t rookMasks[64];
-
-/** Table stores attacker set for each square and each blocker set */
-extern bitboard_t rookTable[64][4096];
-
-/** Array contains all masks for bishop moves indexed by square */
-extern bitboard_t bishopMasks[64];
-
-/** Table stores attacker set for each square and each blocker set */
-extern bitboard_t bishopTable[64][1024];
-
-/**
- * Generate a bitboard of blockers unique to the index.
- *
- * @param  mask Bitboard mask.
- * @param  i    index.
- *
- * @returns The blockers.
- */
-bitboard_t getBlockers(bitboard_t mask, int i);
-
-/**
- * Initialize rook masks with all possible moves from indexed square.
- */
-void initRookMasks();
-
-/**
- * Initialize bishop masks with all possible moves from indexed square.
- */
-void initBishopMasks();
-
-/**
- * Initialize blocker masks for every square.
- */
-void initRookMagicTable();
-
-/**
- * Initialize blocker masks for every square.
- */
-void initBishopMagicTable();
-
-/**
- * Calculate all possible rook attacks from given square with blockers. This function is used
- * only to initialize the rook table and should not be used in any other case. Attacks all
- * occupied pieces, check for correct color before generating attack moves.
- *
- * @param  square   Start square.
- * @param  blockers Mask of blockers.
- *
- * @returns The calculated rook moves.
- */
-bitboard_t calculateRookMoves(int square, bitboard_t blockers);
-
-/**
- * Calculate all possible bishop attacks from given square with blockers. This function is used
- * only to initialize the rook table and should not be used in any other case. Attacks all
- * occupied pieces, check for correct color before generating attack moves.
- *
- * @param  square   Start square.
- * @param  blockers Mask of blockers.
- *
- * @returns The calculated bishop moves.
- */
-bitboard_t calculateBishopMoves(int square, bitboard_t blockers);
-
-/**
- * Fast lookup for possible rook moves. Used in move generation. Possible rook moves and
- * captures. Attacks all occupied pieces, check for correct color before generating attack moves.
- *
- * @param  sq	    From square.
- * @param  blockers Bitboard of currently occupied squares.
- *
- * @returns Bitboard of possible moves and captures.
- */
-bitboard_t lookUpRookMoves(int sq, bitboard_t blockers);
-
-/**
- * Fast lookup for possible bishop moves. Used in move generation. Possible bishop moves and
- * captures. Attacks all occupied pieces, check for correct color before generating attack moves.
- *
- * @param  sq	    From square.
- * @param  blockers Bitboard of currently occupied squares.
- *
- * @returns Bitboard of possible moves and captures.
- */
-bitboard_t lookUpBishopMoves(int sq, bitboard_t blockers);
-
-/**
- * Fast lookup for possible queen moves. Used in move generation. Possible queen moves and
- * captures. Attacks all occupied pieces, check for correct color before generating attack moves.
- *
- * @param  sq	    From square.
- * @param  blockers Bitboard of currently occupied squares.
- *
- * @returns Bitboard of possible moves and captures.
- */
-bitboard_t lookUpQueenMoves(int sq, bitboard_t blockers);

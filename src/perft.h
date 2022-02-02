@@ -2,10 +2,6 @@
 
 #include "moveGenerator.h"
 
-//#include "moveOrdering.h"
-//#include <chrono>
-
-
 class Perft {
 
 public:
@@ -34,3 +30,13 @@ public:
 	void perft(board_t* b, int depth);
 
 };
+
+
+/**
+ * Function to divide with cmd-line move after each perft.
+ *
+ * @param  b	 board_t reference.
+ * @param  fen   The fen.
+ * @param  depth The initial depth.
+ */
+void dividePerft(Perft* p, board_t* b, int depth);

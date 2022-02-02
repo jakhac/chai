@@ -5,10 +5,26 @@
 
 #include "search.h"
 #include "timeMan.h"
+#include "perft.h"
+
 
 #ifndef VERSION
 #define VERSION 0
 #endif // !VERSION
+
+
+inline bool strStartsWith(std::string str, std::string start) {
+	return str.rfind(start, 0) == 0;
+}
+
+
+namespace UCI {
+
+
+/**
+ * Start a game in console.
+ */
+void cli(board_t* b, instr_t* i, stats_t* s, Perft* p);
 
 /**
  * Enters UCI mode. Described in http://wbec-ridderkerk.nl/html/UCIProtocol.html
@@ -37,7 +53,5 @@ void uciParsePosition(board_t* b, std::string cmd);
  */
 void uciParseGo(board_t* b, stats_t* s, instr_t* instr, std::string cmd);
 
-/**
- * Complete initialization for chess engine. Called once at startup.
- */
-void init();
+
+}

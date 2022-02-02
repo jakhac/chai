@@ -1,5 +1,32 @@
 #include "perft.h"
 
+void dividePerft(Perft* p, board_t* b, int depth) {
+	std::string move = "";
+
+	while (depth) {
+
+		if (move != "") {
+			int parsedMove = parseMove(b, move);
+			push(b, parsedMove);
+			depth--;
+		}
+
+		p->perftRoot(b, depth);
+
+		cout << "\nDivide at move ";
+		cin >> move;
+
+		if (move == "quit") {
+			return;
+		}
+
+	}
+
+	cout << "Reached depth 0" << endl;
+	return;
+
+}
+
 long long Perft::perftRoot(board_t* b, int depth) {
 	Assert(checkBoard(b));
 	cout << endl << "Perft to depth " << depth << endl;
@@ -18,7 +45,7 @@ long long Perft::perftRoot(board_t* b, int depth) {
 		bool moveGivesCheck = checkingMove(b, move);
 #endif // ASSERT
 
-		//skip illegal moves
+		// Skip illegal moves
 		if (!push(b, move)) {
 			Assert(!inCheck);
 			continue;
@@ -53,7 +80,7 @@ void Perft::perft(board_t* b, int depth) {
 	moveList_t _moveList[1];
 	generateMoves(b, _moveList, inCheck);
 
-	Assert(attackerSet(b, b->stm ^ 1) == _moveList->attackedSquares);
+	Assert(attackerSet(b, !b->stm) == _moveList->attackedSquares);
 
 	int move;
 	for (int i = 0; i < _moveList->cnt; i++) {
@@ -63,15 +90,15 @@ void Perft::perft(board_t* b, int depth) {
 		bool moveGivesCheck = checkingMove(b, move);
 #endif // ASSERT
 
-		//skip illegal moves
+		// Skip illegal moves
 		if (!push(b, move)) {
 			Assert(!inCheck);
 			continue;
+		}
+
+			Assert(isCheck(b, b->stm) == moveGivesCheck);
+
+			perft(b, depth - 1);
+			pop(b);
 	}
-
-		Assert(isCheck(b, b->stm) == moveGivesCheck);
-
-		perft(b, depth - 1);
-		pop(b);
-}
 }

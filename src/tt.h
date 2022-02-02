@@ -6,6 +6,7 @@
 #include "moveGenerator.h"
 
 #if defined(USE_PREFETCH)
+
 #ifdef __GNUC__
 #define prefetch(x) __builtin_prefetch(x);
 #else
@@ -18,35 +19,44 @@
 
 #endif
 
+
+extern ttable_t tt[1];
+extern pawntable_t pt[1];
+
+const int QS_DEPTH       = -1;
+const int QS_DEPTH_CHECK = 0;
+
 // Bound sizes for Hashable.
 const size_t MIN_TT_SIZE = 2;
 const size_t MAX_TT_SIZE = 8192;
 const size_t MAX_PT_SIZE = 16;
-
-// Default sizes for Hashtable.
-#ifdef CUSTOM_HASHSIZE
-const size_t DEFAULT_TT_SIZE = std::min(MAX_TT_SIZE, 
-                                        std::max(MIN_TT_SIZE, (size_t)CUSTOM_HASHSIZE));
-#else
-const size_t DEFAULT_TT_SIZE = 256;
-#endif // CUSTOM_HASHSIZE
-
 const size_t DEFAULT_PT_SIZE = 8;
 
-const int QS_DEPTH = -1;
-const int QS_DEPTH_CHECK = 0;
+// Default sizes for Hashtable.
+const size_t DEFAULT_TT_SIZE =
+#ifdef CUSTOM_HASHSIZE
+    std::min(MAX_TT_SIZE, std::max(MIN_TT_SIZE, (size_t)CUSTOM_HASHSIZE));
+#else
+    256;
+#endif // CUSTOM_HASHSIZE
 
 
-// Transposition table used for whole program.
-extern ttable_t tt[1];
+typedef enum TT_FLAG {
+	TT_NONE  = 0,
+	TT_ALPHA = 1,
+	TT_BETA  = 1 << 1,
+	TT_VALUE = 1 << 2,
+	TT_EVAL  = 1 << 3
+} bound_t;
 
-// Pawn hash table used for whole program.
-extern pawntable_t pt[1];
+
+namespace TT {
+
 
 /**
  * Initialize both TT and PT with default MB size.
  */
-void initHashTables();
+void init();
 
 /**
  * Free memory allocated for ttable and ptable.
@@ -163,4 +173,7 @@ int hashToSearch(int ply, value_t score);
  * @param  score The score to check.
  */
 int searchToHash(int ply, value_t score);
+
+
+}
 

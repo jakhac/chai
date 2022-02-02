@@ -1,34 +1,38 @@
 #include "transformer.h"
 
 
-int orientSq(color_t color, int sq) {
-    return (color == chai::BLACK) ? sq ^ orientOperator : sq;
+template<color_t color>
+int orientSq(int sq) {
+    return (color == BLACK) ? sq ^ orientOperator : sq;
 }
 
-int getHalfKPIndex(int sq, int piece, color_t color, int kIdx) {
+template<color_t color>
+int getHalfKPIndex(int sq, int piece, int kIdx) {
 
-    int relSq = orientSq(color, sq);
+    int relSq = orientSq<color>(sq);
     Assert(pieceValid(piece));
 
     return relSq + (PieceToIndex[color][piece]) + kIdx;
 }
 
-void setActiveFeatures(board_t* b, color_t color, features_t* features) {
+template<color_t color>
+void setActiveFeatures(board_t* b, features_t* features) {
 
-    bitboard_t pieces = b->occupied & ~b->pieces[chai::KING];
+    bitboard_t pieces = b->occupied & ~b->pieces[cKING];
     int kSq = getKingSquare(b, color);
-    int kIdx = PS_END * orientSq(color, kSq);
+    int kIdx = PS_END * orientSq<color>(kSq);
 
     while (pieces) {
         int sq = popLSB(&pieces);
-        features->addIndex.push_back(getHalfKPIndex(sq, pieceAt(b, sq), color, kIdx));
+        features->addIndex.push_back(getHalfKPIndex<color>(sq, pieceAt(b, sq), kIdx));
     }
 }
 
-void gatherDirtyFeatures(board_t* b, dirty_t* dp, features_t* features, color_t c) {
+template<color_t color>
+void getDirtyFeatures(board_t* b, dirty_t* dp, features_t* features) {
 
-    int kSq = getKingSquare(b, c);
-    int kIdx = PS_END * orientSq(c, kSq);
+    int kSq = getKingSquare(b, color);
+    int kIdx = PS_END * orientSq<color>(kSq);
 
     for (int i = 0; i < dp->changedPieces; i++) {
 
@@ -36,15 +40,16 @@ void gatherDirtyFeatures(board_t* b, dirty_t* dp, features_t* features, color_t 
             continue;
 
         if (dp->from[i] != NO_SQ)
-            features->delIndex.push_back(getHalfKPIndex(dp->from[i], dp->piece[i], c, kIdx));
+            features->delIndex.push_back(getHalfKPIndex<color>(dp->from[i], dp->piece[i], kIdx));
         
         if (dp->to[i] != NO_SQ)
-            features->addIndex.push_back(getHalfKPIndex(dp->to[i], dp->piece[i], c, kIdx));
+            features->addIndex.push_back(getHalfKPIndex<color>(dp->to[i], dp->piece[i], kIdx));
 
     }
 }
 
-void refreshAccumulator(board_t* b, color_t color) {
+template<color_t color>
+void refreshAccumulator(board_t* b) {
 
 #if defined(USE_AVX2) || defined(USE_SSSE3)
 
@@ -53,7 +58,7 @@ void refreshAccumulator(board_t* b, color_t color) {
 
     accum_t* acc = &b->accum[b->ply];
     features_t features;
-    setActiveFeatures(b, color, &features);
+    setActiveFeatures<color>(b, &features);
 
 
     // We have to accumulate respective weights for all 256-neurons in the first layer.
@@ -91,7 +96,7 @@ void refreshAccumulator(board_t* b, color_t color) {
     accum_t* acc = &b->accum[b->ply];
     features_t features;
 
-    setActiveFeatures(b, color, &features);
+    setActiveFeatures<color>(b, &features);
 
     for (size_t i = 0; i < FEAT_OUT_SIZE_HALF; i++)
         acc->accumulation[color][i] = *(bias++);
@@ -112,7 +117,8 @@ void refreshAccumulator(board_t* b, color_t color) {
 
 }
 
-void accumulateFeatures(board_t* b, color_t color) {
+template<color_t color>
+void accumulateFeatures(board_t* b) {
 
     int refreshCost = popCount(b->occupied) - 2;
     int reusePly = b->ply;
@@ -137,15 +143,16 @@ void accumulateFeatures(board_t* b, color_t color) {
     if (   reusePly >= 0
         && b->accum[reusePly].compState[color] == COMPUTED) {
             // cout << "Update sufficient" << endl;
-            updateAccumulator(b, color, reusePly);
+            updateAccumulator<color>(b, reusePly);
     } else {
         // cout << "Refresh necessary" << endl;
-        refreshAccumulator(b, color);
+        refreshAccumulator<color>(b);
     }
 
 }
 
-void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features, color_t c) {
+template<color_t color>
+void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features) {
 
 #if defined(USE_AVX2) || defined(USE_SSSE3)
 
@@ -153,8 +160,8 @@ void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features, color
 
     for (size_t i = 0; i < FEAT_OUT_SIZE_HALF / TILE_HEIGHT; i++) {
 
-        auto to   = (vec_t*)&accDst->accumulation[c][i * TILE_HEIGHT];
-        auto from = (vec_t*)&accSrc->accumulation[c][i * TILE_HEIGHT];
+        auto to   = (vec_t*)&accDst->accumulation[color][i * TILE_HEIGHT];
+        auto from = (vec_t*)&accSrc->accumulation[color][i * TILE_HEIGHT];
 
         // Copy current src-accumulator values in 128/256-bit chunks into our registers
         for (int j = 0; j < NUM_REGS; j++)
@@ -188,7 +195,7 @@ void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features, color
 
     // Copy last accum state that is reused
     for (size_t i = 0; i < FEAT_OUT_SIZE_HALF; i++) {
-        accDst->accumulation[c][i] = accSrc->accumulation[c][i];
+        accDst->accumulation[color][i] = accSrc->accumulation[color][i];
     }
 
     // Delete weight from removed pieces
@@ -196,7 +203,7 @@ void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features, color
         int offset = FEAT_OUT_SIZE_HALF * feature;
 
         for (size_t j = 0; j < FEAT_OUT_SIZE_HALF; j++)
-            accDst->accumulation[c][j] -= feat_weights[offset + j];
+            accDst->accumulation[color][j] -= feat_weights[offset + j];
     }
 
     // Add weight from added pieces
@@ -204,14 +211,15 @@ void adjustWeights(accum_t* accDst, accum_t* accSrc, features_t* features, color
         int offset = FEAT_OUT_SIZE_HALF * feature;
 
         for (size_t j = 0; j < FEAT_OUT_SIZE_HALF; j++)
-            accDst->accumulation[c][j] += feat_weights[offset + j];
+            accDst->accumulation[color][j] += feat_weights[offset + j];
     }
 
 #endif
 
 }
 
-void updateAccumulator(board_t* b, color_t color, int reusePly) {
+template<color_t color>
+void updateAccumulator(board_t* b, int reusePly) {
 
     // For the following code we have the invariant: reusePly < b-ply
     if (reusePly == b->ply)
@@ -223,29 +231,29 @@ void updateAccumulator(board_t* b, color_t color, int reusePly) {
 
     // Append changed pieces from (reusePly + 1) to the first feature list
     dirty_t* dp = &b->dp[reusePly + 1];
-    gatherDirtyFeatures(b, dp, &features[0], color);
+    getDirtyFeatures<color>(b, dp, &features[0]);
 
     // Append changed pieces for further plies mslast+2 <= ply to indexList1
     for (int p = reusePly + 2; p <= b->ply; p++) {
         dp = &b->dp[p];
-        gatherDirtyFeatures(b, dp, &features[1], color);
+        getDirtyFeatures<color>(b, dp, &features[1]);
     }
 
     // Update computation state as we recalculate accumulators at both plies
     b->accum[reusePly + 1].compState[color] = COMPUTED;
     b->accum[b->ply      ].compState[color] = COMPUTED;
 
-    adjustWeights(&b->accum[reusePly + 1], &b->accum[reusePly], &features[0], color);
+    adjustWeights<color>(&b->accum[reusePly + 1], &b->accum[reusePly], &features[0]);
 
     if (reusePly + 1 != b->ply)
-        adjustWeights(&b->accum[b->ply], &b->accum[reusePly + 1], &features[1], color);
+        adjustWeights<color>(&b->accum[b->ply], &b->accum[reusePly + 1], &features[1]);
 
 }
 
 void updateTransformer(board_t* b, clipped_t* output) {
 
-    accumulateFeatures(b, chai::WHITE);
-    accumulateFeatures(b, chai::BLACK);
+    accumulateFeatures<WHITE>(b);
+    accumulateFeatures<BLACK>(b);
 
     auto& acc = b->accum[b->ply].accumulation;
 

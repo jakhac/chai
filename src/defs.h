@@ -7,6 +7,8 @@
 #include <fstream>
 #include <chrono> // time measurement
 #include <tuple>
+#include <sstream> // std::ostringstream
+
 
 #include "types.h"
 
@@ -16,9 +18,6 @@ using std::cerr;
 using std::endl;
 using std::fixed;
 
-// #define ASSERT
-// #define TESTING
-// #define INFO
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) std::string(STRINGIFY(x))
@@ -48,6 +47,38 @@ if(!(n)) { \
 	exit(1); \
 }
 #endif // ASSERT
+
+
+static std::string ver_string(int a, int b, int c) {
+  std::ostringstream ss;
+  ss << a << '.' << b << '.' << c;
+  return ss.str();
+}
+
+
+const std::string info_ASSERT = 
+#ifdef ASSERT
+	"1";
+#else
+	"0";
+#endif // ASSERT
+
+const std::string info_CXX =
+#ifdef __clang__
+   "clang++ " + ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
+#else
+   "g++ " + ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#endif
+
+const std::string info_SIMD =
+#if defined(USE_AVX2)
+	"AVX2";
+#elif defined(USE_SSSE3)
+	"SSSE3";
+#else
+	"NONE";
+#endif
+
 
 extern void logDebug(std::string errMsg);
 extern std::string getTime();

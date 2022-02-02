@@ -3,15 +3,17 @@
 #ifdef CUSTOM_EVALFILE
 INCBIN(IncWeights, CUSTOM_EVALFILE);
 #endif // CUSTOM_EVALFILE
-// INCBIN(IncWeights, "../nets/nn-fb50f1a2b1-20210705.nnue");
 
 
 int netType = 0x0;
 int orientOperator;
 bool canUseNNUE = false;
 
+namespace NNUE {
+
 
 value_t evaluateNNUE(board_t* b) {
+
     value_t eval = (propagate(b) * 64) / 1024;
     return std::clamp(eval, VALUE_LOSS, VALUE_WIN);
 }
@@ -37,7 +39,7 @@ value_t propagate(board_t* b) {
 
 void initIncNet() {
 
-#if defined(CUSTOM_EVALFILE)
+#if defined(USE_NNUE) && defined(CUSTOM_EVALFILE)
 
     char* data = const_cast<char*>(reinterpret_cast<const char*>(gIncWeightsData));
     const int binSize = gIncWeightsSize;
@@ -46,6 +48,7 @@ void initIncNet() {
     ss.rdbuf()->pubsetbuf(data, binSize);
 
     initNet(ss);
+    cout << "NNUE is now active.\n" << endl;
 
 #endif
 
@@ -177,3 +180,6 @@ void endswap(T* buffer) {
     unsigned char *memp = reinterpret_cast<unsigned char*>(buffer);
     std::reverse(memp, memp + sizeof(T));
 }
+
+
+} // namespace NNUE

@@ -2,23 +2,24 @@
 # 1. META DATA
 #######################################
 
-VERSION = v3.2.0
+VERSION = v3.3.0
 
-EXE_RELEASE = chai_$(VERSION)_release.exe
-EXE_DEBUG   = chai_$(VERSION)_debug.exe
+EXE			= chai_$(VERSION)
+EXE_RELEASE = $(EXE)_release.exe
+EXE_DEBUG   = $(EXE)_debug.exe
 EXE_TEST    = test.exe
 
-SRCS = main.cpp tt.cpp thread.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
+SRCS = main.cpp tt.cpp thread.cpp layers.cpp pawn.cpp transformer.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
-	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	timeMan.cpp info.cpp nnue.cpp endgame.cpp attacks.cpp layers.cpp  \
-	transformer.cpp
+	syzygy.cpp timeMan.cpp validate.cpp egtb/tbprobe.cpp bitboard.cpp \
+	info.cpp nnue.cpp endgame.cpp attacks.cpp uci.cpp eval.cpp \
+
 
 OBJ_RELEASE_DIR = ./obj_release
-OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
+OBJS_RELEASE    = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
 
-OBJ_DEBUG_DIR = ./obj_debug
-OBJS_DEBUG = $(patsubst %.cpp, $(OBJ_DEBUG_DIR)/%.o, $(notdir $(SRCS)))
+OBJ_DEBUG_DIR   = ./obj_debug
+OBJS_DEBUG      = $(patsubst %.cpp, $(OBJ_DEBUG_DIR)/%.o, $(notdir $(SRCS)))
 
 VPATH = egtb:nnue:
 
@@ -27,10 +28,11 @@ VPATH = egtb:nnue:
 # 2. Configure architecture & type
 #######################################
 
-# Build type
+# USER choices
 assert   = no
 debug    = no
 nnue     = yes
+# evalfile = no
 evalfile = nn-fb50f1a2b1-20210705.nnue
 
 # Default architecture enables all
@@ -39,6 +41,7 @@ optimize = yes
 popcnt   = yes
 ssse3    = yes
 avx2     = yes
+
 
 ####
 #### 2.1 Define optional constants if passed by user.
@@ -53,9 +56,13 @@ ifneq ($(hashMb),256)
 	CXXFLAGS += -DCUSTOM_HASHSIZE=$(hashMb)
 endif
 
-ifneq ($(evalfile),none)
-	CXXFLAGS += -DCUSTOM_EVALFILE=\"../nets/$(evalfile)\"
+ifeq ($(nnue),yes)
+	CXXFLAGS += -DUSE_NNUE
+	ifneq ($(evalfile),no)
+		CXXFLAGS += -DCUSTOM_EVALFILE=\"../nets/$(evalfile)\"
+	endif
 endif
+
 
 ####
 #### 2.2 Set additional flags for respective build type.
@@ -76,10 +83,6 @@ endif
 
 ifeq ($(debug),yes)
 	CXXFLAGS += -DINFO
-endif
-
-ifeq ($(nnue),yes)
-	CXXFLAGS += -DUSE_NNUE
 endif
 
 
@@ -152,6 +155,25 @@ debug:
 release:
 	if not exist ".\obj_release" mkdir ".\obj_release"
 	$(MAKE) $(EXE_RELEASE) TYPE=release .depend
+
+archive:
+	$(MAKE) clean
+	$(MAKE) release
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_release_1CPU.exe
+	$(MAKE) clean
+	$(MAKE) release threads=3
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_release_3CPU.exe
+	$(MAKE) clean
+	$(MAKE) release evalfile=nn-fb50f1a2b1-20210705.nnue
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_release_1CPU_nnue.exe
+	$(MAKE) clean
+	$(MAKE) release threads=3 evalfile=nn-fb50f1a2b1-20210705.nnue
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_release_3CPU_nnue.exe
+	$(MAKE) clean
 
 strip:
 	$(MAKE) release

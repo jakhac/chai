@@ -1,18 +1,18 @@
 #include "pawn.h"
 
-namespace chai {
 
 value_t evaluatePawns(board_t* b) {
+
 	value_t score = 0;
 	int wCount, bCount;
 	value_t wValue, bValue;
 
 	// 1) Negative pawn structure attributes (subtract value)
 	// Lack of pawns
-	if (!getPieces(b, PAWN, WHITE)) {
+	if (!getPieces(b, cPAWN, WHITE)) {
 		score += +PAWN_LACK_PENALTY;
 	}
-	if (!getPieces(b, PAWN, BLACK)) {
+	if (!getPieces(b, cPAWN, BLACK)) {
 		score += -PAWN_LACK_PENALTY;
 	}
 
@@ -22,66 +22,52 @@ value_t evaluatePawns(board_t* b) {
 	score += BACKWARD_PAWN_PENALTY * (wCount - bCount);
 
 	// Doubled Pawns
-	wCount = doubledPawns(b, WHITE);
-	bCount = doubledPawns(b, BLACK);
+	wCount = doubledPawns<WHITE>(b);
+	bCount = doubledPawns<BLACK>(b);
 	score += DOUBLED_PAWN_PENALTY * (wCount - bCount);
 
 	// Pawn Islands
-	wCount = pawnIslands(b, WHITE);
-	bCount = pawnIslands(b, BLACK);
+	wCount = pawnIslands<WHITE>(b);
+	bCount = pawnIslands<BLACK>(b);
 	score += PAWN_ISLAND_PENALTY * (wCount - bCount);
 
 	// Isolated Pawns
-	wCount = isolatedPawns(b, WHITE);
-	bCount = isolatedPawns(b, BLACK);
+	wCount = isolatedPawns<WHITE>(b);
+	bCount = isolatedPawns<BLACK>(b);
 	score += PAWN_ISOLATION_PENALTY * (wCount - bCount);
-
 
 	// 2) Positive pawn structure attributes (add value)
 	// Passed pawns
-	wValue = passedPawns(b, WHITE);
-	bValue = passedPawns(b, BLACK);
+	wValue = passedPawns<WHITE>(b);
+	bValue = passedPawns<BLACK>(b);
 	score += (wValue - bValue);
 
 	// Hidden passed pawns (2v1 situation)
-	wCount = hiddenPassedPawns(b, WHITE);
-	bCount = hiddenPassedPawns(b, BLACK);
+	wCount = hiddenPassedPawns<WHITE>(b);
+	bCount = hiddenPassedPawns<BLACK>(b);
 	score += HIDDE_PASSED_PAWN_REWARD * (wCount - bCount);
 
 	// Pawn Chains
-	wCount = pawnChain(b, WHITE);
-	bCount = pawnChain(b, BLACK);
+	wCount = pawnChain<WHITE>(b);
+	bCount = pawnChain<BLACK>(b);
 	score += PAWN_CHAIN_REWARD * (wCount - bCount);
 
 	// 3) Evaluate king-safety with respect to pawn structure
-	wValue = kingPawnSafety(b, WHITE);
-	bValue = kingPawnSafety(b, BLACK);
+	wValue = kingPawnSafety<WHITE>(b);
+	bValue = kingPawnSafety<BLACK>(b);
 	score += wValue - bValue;
 
 	Assert(abs(score) < VALUE_IS_MATE_IN);
 	return score;
 }
 
-value_t kingPawnSafety(board_t* b, color_t color) {
-	value_t score = 0;
+template<color_t color>
+value_t kingPawnSafety(board_t* b) {
+
 	int kSq = getKingSquare(b, color);
-	bitboard_t pawns = getPieces(b, PAWN, color);
-	
-	// // Open File next to king
-	// int kingFile = squareToFile[kSq];
-	// if (   kingFile != FILE_A
-	// 	&& !(pawns & FILE_LIST[kingFile - 1])) {
-	// 	score += KING_OPEN_NEIHGBOR_FILE;
-	// }
 
-	// if (   kingFile != FILE_H
-	// 	&& !(pawns & FILE_LIST[kingFile + 1])) {
-	// 	score += KING_OPEN_NEIHGBOR_FILE;
-	// }
-
-	// if (!(pawns & FILE_LIST[kingFile])) {
-	// 	score += KING_OPEN_FILE;
-	// }
+	value_t score    = 0;
+	bitboard_t pawns = getPieces(b, cPAWN, color);
 
 	// Pawns shielding king
 	score += popCount(pawnShield[color][kSq] & pawns) * PAWN_SHIELD_REWARD;
@@ -90,16 +76,17 @@ value_t kingPawnSafety(board_t* b, color_t color) {
 }
 
 bitboard_t wBackwardPawns(board_t* b) {
+
 	int sq;
 	bitboard_t file;
-	bitboard_t wPawns = getPieces(b, PAWN, WHITE);
-	bitboard_t bPawns = getPieces(b, PAWN, BLACK);
-	bitboard_t potentialBackwards = wPawns & (RANK_2_HEX);
-	bitboard_t res = 0ULL;
+	bitboard_t wPawns = getPieces(b, cPAWN, WHITE);
+	bitboard_t bPawns = getPieces(b, cPAWN, BLACK);
+	bitboard_t res    = 0;
 
+	bitboard_t potentialBackwards = wPawns & (RANK_2_HEX);
 	while (potentialBackwards) {
-		sq = popLSB(&potentialBackwards);
-		file = FILE_LIST[squareToFile[sq]];
+		sq   = popLSB(&potentialBackwards);
+		file = toFileBB(sq);
 
 		if (   !(file & bPawns)							// 2) Semi-open file
 			&& pawnAtkMask[WHITE][sq+8] & bPawns		// 3) Forward square is controlled
@@ -114,16 +101,17 @@ bitboard_t wBackwardPawns(board_t* b) {
 }
 
 bitboard_t bBackwardPawns(board_t* b) {
+
 	int sq;
 	bitboard_t file;
-	bitboard_t bPawns = getPieces(b, PAWN, BLACK);
-	bitboard_t wPawns = getPieces(b, PAWN, WHITE);
-	bitboard_t potentialBackwards = bPawns & (RANK_7_HEX);
-	bitboard_t res = 0ULL;
+	bitboard_t bPawns = getPieces(b, cPAWN, BLACK);
+	bitboard_t wPawns = getPieces(b, cPAWN, WHITE);
+	bitboard_t res    = 0;
 
+	bitboard_t potentialBackwards = bPawns & (RANK_7_HEX);
 	while (potentialBackwards) {
-		sq = popLSB(&potentialBackwards);
-		file = FILE_LIST[squareToFile[sq]];
+		sq   = popLSB(&potentialBackwards);
+		file = toFileBB(sq);
 
 		if (   !(file & wPawns)							// 2) Semi-open file
 			&& pawnAtkMask[BLACK][sq+8] & wPawns		// 3) Forward square is controlled
@@ -137,10 +125,12 @@ bitboard_t bBackwardPawns(board_t* b) {
 	return res;
 }
 
-int doubledPawns(board_t* b, color_t color) {
-	int doubled = 0;
+template<color_t color>
+int doubledPawns(board_t* b) {
 
-	bitboard_t pawns = getPieces(b, PAWN, color);
+	int doubled = 0;
+	bitboard_t pawns = getPieces(b, cPAWN, color);
+
 	for (int i = 0; i < 8; i++) {
 		int pawnsOneFile = popCount(FILE_LIST[i] & pawns);
 		if (pawnsOneFile > 1) {
@@ -151,10 +141,11 @@ int doubledPawns(board_t* b, color_t color) {
 	return doubled;
 }
 
-int pawnIslands(board_t* b, color_t color) {
-	int islands = 0;
+template<color_t color>
+int pawnIslands(board_t* b) {
 
-	bitboard_t pawns = getPieces(b, PAWN, color);
+	int islands = 0;
+	bitboard_t pawns = getPieces(b, cPAWN, color);
 
 	int i = 0;
 	while (i < 8) {
@@ -173,17 +164,20 @@ int pawnIslands(board_t* b, color_t color) {
 	return islands;
 }
 
-int isolatedPawns(board_t* b, color_t color) {
+template<color_t color>
+int isolatedPawns(board_t* b) {
+
 	int isolated = 0, sq;
-	bitboard_t pawns = getPieces(b, PAWN, color);
+	bitboard_t pawns = getPieces(b, cPAWN, color);
 	bitboard_t refPawns = pawns;
 
 	while (pawns) {
 		sq = popLSB(&pawns);
-		if (   !(pawnIsolatedMask[sq] & refPawns)
-			&& squareToFile[sq] != FILE_D) {
 
-			// Count isolated pawns. Exclude IQP.
+		// Count isolated pawns. Exclude IQP.
+		if (   !(pawnIsolatedMask[sq] & refPawns)
+			&& toFile(sq) != FILE_D) {
+
 			isolated++;
 		}
 	}
@@ -191,26 +185,30 @@ int isolatedPawns(board_t* b, color_t color) {
 	return isolated;
 }
 
-value_t passedPawns(board_t* b, color_t color) {
+template<color_t color>
+value_t passedPawns(board_t* b) {
+
 	int passerValue = 0, sq;
-	bitboard_t pawns = getPieces(b, PAWN, color);
-	bitboard_t defenders = getPieces(b, PAWN, color ^ 1);
+	bitboard_t pawns = getPieces(b, cPAWN, color);
+	bitboard_t defenders = getPieces(b, cPAWN, !color);
 
 	while (pawns) {
 		sq = popLSB(&pawns);
 		if (!(pawnPassedMask[color][sq] & defenders)) {
-			passerValue += PASSED_PAWN_REWARD[color][squareToRank[sq]];
+			passerValue += PASSED_PAWN_REWARD[color][toRank(sq)];
 		}
 	}
 
 	return passerValue;
 }
 
-int hiddenPassedPawns(board_t* b, color_t color) {
-	int hiddenPassed = 0, sq;
-	bitboard_t pawns = getPieces(b, PAWN, color);
-	bitboard_t refPawns = pawns;
-	bitboard_t defenders = getPieces(b, PAWN, color ^ 1);
+template<color_t color>
+int hiddenPassedPawns(board_t* b) {
+
+	int sq, hiddenPassed = 0;
+	bitboard_t pawns     = getPieces(b, cPAWN, color);
+	bitboard_t refPawns  = pawns;
+	bitboard_t defenders = getPieces(b, cPAWN, !color);
 
 	while (pawns) {
 		sq = popLSB(&pawns);
@@ -241,12 +239,15 @@ int hiddenPassedPawns(board_t* b, color_t color) {
 	return hiddenPassed;
 }
 
-value_t pawnChain(board_t* b, color_t color) {
-	int chains = 0;
-	bitboard_t pawns = getPieces(b, PAWN, color);
-	bitboard_t tPawns = pawns;
+template<color_t color>
+value_t pawnChain(board_t* b) {
 
 	int sq;
+	int chains = 0;
+
+	bitboard_t pawns  = getPieces(b, cPAWN, color);
+	bitboard_t tPawns = pawns;
+
 	while (pawns) {
 		sq = popLSB(&pawns);
 
@@ -259,18 +260,16 @@ value_t pawnChain(board_t* b, color_t color) {
 }
 
 int nonPawnPieces(board_t* b, color_t color) {
-	bitboard_t pieces = getPieces(b, chai::BISHOP, color)
-		| getPieces(b, chai::KNIGHT, color)
-		| getPieces(b, chai::ROOK, color)
-		| getPieces(b, chai::QUEEN, color);
+
+	bitboard_t pieces = getPieces(b, cBISHOP, color)
+		| getPieces(b, cKNIGHT, color)
+		| getPieces(b, cROOK, color)
+		| getPieces(b, cQUEEN, color);
 
 	return popCount(pieces);
 }
 
 bool nonPawnPieces(board_t* b) {
-	return b->occupied & ~b->pieces[chai::PAWN] & ~b->pieces[chai::KING];
+	return b->occupied & ~b->pieces[cPAWN] & ~b->pieces[cKING];
 }
 
-
-
-}

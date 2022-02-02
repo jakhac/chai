@@ -53,7 +53,7 @@ bool isLegal(board_t* b, const move_t move);
  * @param b
  * @param side
  */
-bitboard_t hasSafePawnPush(board_t* b, int side);
+bitboard_t hasSafePawnPush(board_t* b, color_t side);
 
 /**
  * Check if a position that is already in check has an evading move.
@@ -143,6 +143,9 @@ void whitePawnCaptures(board_t* b, moveList_t* moveList);
  * @param  moveList moveList struct to add moves to.
  */
 void blackPawnCaptures(board_t* b, moveList_t* moveList);
+
+template<pType_t pType>
+void addCapturesFor(board_t* b, moveList_t* moveList);
 
 /**
  * Generate all possible knight moves and add to quietMoveList.

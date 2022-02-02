@@ -1,6 +1,7 @@
 
 #include "../src/uci.h"
 #include "../src/perft.h"
+#include "../src/bitboard.h"
 
 #include "gtest/gtest.h"
 
@@ -19,14 +20,16 @@ namespace SearchTest {
 			pSearch = new stats_t();
 			pInstr = new instr_t();
 			
-			init();
-			initHashTables();
-			initThreadPool();
+			MoveOrder::init();
+			Mask::init();
+			Search::init();
+			TT::init();
+			Threads::initPool();
 		}
 
 		virtual void TearDown() {
-			freeHashTables();
-			deleteThreadPool();
+			TT::freeHashTables();
+			Threads::deletePool();
 			delete pBoard;
 			delete pSearch;
 			delete pInstr;
@@ -46,7 +49,9 @@ namespace PerftTest {
 			pBoard = new board_t();
 			pPerft = new Perft();
 
-			init();
+			MoveOrder::init();
+			Mask::init();
+			Search::init();
 		}
 
 		virtual void TearDown() {
@@ -66,7 +71,9 @@ namespace SeeTest {
 		virtual void SetUp() {
 			pBoard = new board_t();
 
-			init();
+			MoveOrder::init();
+			Mask::init();
+			Search::init();
 		}
 
 		virtual void TearDown() {
@@ -85,7 +92,9 @@ namespace EvalTest {
 		virtual void SetUp() {
 			pBoard = new board_t();
 
-			init();
+			MoveOrder::init();
+			Mask::init();
+			Search::init();
 		}
 
 		virtual void TearDown() {
@@ -104,7 +113,9 @@ namespace PositionalTest {
 		virtual void SetUp() {
 			pBoard = new board_t();
 
-			init();
+			MoveOrder::init();
+			Mask::init();
+			Search::init();
 		}
 
 		virtual void TearDown() {

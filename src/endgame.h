@@ -2,8 +2,8 @@
 
 #include "board.h"
 
-namespace chai {
-    
+// namespace chai {
+
 // Endgames:
 //      - KvKNB: force weak king to corner with same color of bishop
 //      - KQvKR: force weak king to border/corner of board
@@ -59,5 +59,4 @@ value_t evaluate_KvKX(board_t* b);
 value_t evaluate_KQvKP(board_t* b);
 value_t evaluate_KQvKQ(board_t* b);
 
-
-} // namespace chai
+// } // namespace chai

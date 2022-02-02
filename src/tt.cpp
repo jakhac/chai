@@ -7,8 +7,11 @@ int indexMask = 0;
 ttable_t tt[1];
 pawntable_t pt[1];
 
+namespace TT {
 
-void initHashTables() {
+
+void init() {
+
 	if (!resizeHashTables(DEFAULT_TT_SIZE)) {
 		cerr << "Error in memory allocation for TT." << endl;
 		exit(1);
@@ -16,6 +19,7 @@ void initHashTables() {
 }
 
 void freeHashTables() {
+
 	if (tt->bucketList != NULL && !VirtualFree(tt->bucketList, 0, MEM_RELEASE)) {
 		DWORD err = GetLastError();
 		cout << "Failed to free large page memory. Error code: 0x"
@@ -27,12 +31,15 @@ void freeHashTables() {
 		free(pt->table);
 	}
 
-	pt->table = NULL;
+	pt->table      = NULL;
 	tt->bucketList = NULL;
 }
 
-// allocate tt with virtualAlloc, return unused MB 
+/**
+ * @brief Allocate tt with virtualAlloc, return number of unused MB.
+ */
 static size_t allocateTT(size_t newMbSize) {
+	
 	unsigned long long totalBytes = (unsigned long long)newMbSize << 20;
 	unsigned long long numBucketsPossible = totalBytes / sizeof(bucket_t);
 
@@ -53,11 +60,13 @@ static size_t allocateTT(size_t newMbSize) {
 
 	clearTT();
 
-	// return remaining bytes
+	// Return remaining bytes
 	return totalBytes - (sizeof(bucket_t) * tt->buckets);
 }
 
-// Init pawn table with clamped remaining MBs
+/**
+ * @brief Init pawn table with clamped remaining MBs
+ */
 static size_t allocatePT(size_t remainingByte) {
 	if (remainingByte < (DEFAULT_PT_SIZE << 20)) {
 		remainingByte = DEFAULT_PT_SIZE << 20;
@@ -66,13 +75,13 @@ static size_t allocatePT(size_t remainingByte) {
 	}
 
 	pt->entries = remainingByte / sizeof(pawntable_entry_t);
+	pt->stored  = 0;
 	pt->entries -= 2;
-	pt->stored = 0;
 
 	pt->table = (pawntable_entry_t*)malloc(pt->entries * sizeof(pawntable_entry_t));
 	clearPT();
 
-	// return used bytes
+	// Return used bytes
 	return remainingByte;
 }
 
@@ -126,8 +135,9 @@ static uint16_t getBucketIndex(key_t zobristKey) {
 }
 
 void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int flag, int depth) {
+
 	int32_t index = getTTIndex(b->zobristKey);
-	uint16_t key = getBucketIndex(b->zobristKey);
+	uint16_t key  = getBucketIndex(b->zobristKey);
 
 	Assert(move != MOVE_NONE);
 	Assert(flag >= TT_ALPHA && flag <= TT_EVAL);
@@ -183,12 +193,12 @@ void storeTT(board_t* b, move_t move, value_t value, value_t staticEval, int fla
 	}
 
 	// Replace entry has been determined: Store information
-	leastValuable->key = key;
-	leastValuable->move = move;
-	leastValuable->flag = flag;
-	leastValuable->value = value;
+	leastValuable->key        = key;
+	leastValuable->move       = move;
+	leastValuable->flag       = flag;
+	leastValuable->value      = value;
 	leastValuable->staticEval = staticEval;
-	leastValuable->depth = depth;
+	leastValuable->depth      = depth;
 }
 
 void storePT(board_t* b, const value_t eval) {
@@ -207,6 +217,7 @@ void storePT(board_t* b, const value_t eval) {
 }
 
 bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, uint8_t* hashFlag, int8_t* hashDepth) {
+
 	int32_t index = getTTIndex(b->zobristKey);
 	uint16_t key = getBucketIndex(b->zobristKey);
 
@@ -230,9 +241,9 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 
 			*hashValue = hashToSearch(b->ply, e->value);
 			*hashDepth = e->depth;
-			*move = e->move;
-			*hashFlag = e->flag;
-			*hashEval = e->staticEval;
+			*move      = e->move;
+			*hashFlag  = e->flag;
+			*hashEval  = e->staticEval;
 			return true;
 
 		}
@@ -242,6 +253,7 @@ bool probeTT(board_t* b, move_t* move, value_t* hashValue, value_t* hashEval, ui
 }
 
 bool probePT(board_t* b, value_t* hashScore) {
+
 	int index = b->zobristPawnKey % pt->entries;
 	Assert(index >= 0 && index <= pt->entries - 1);
 
@@ -265,26 +277,31 @@ void prefetchPT(board_t* b) {
 }
 
 int hashToSearch(int ply, value_t score) {
-	if (score > VALUE_IS_MATE_IN) {
+
+	if (score > VALUE_IS_MATE_IN)
 		return score - ply;
-	} else if (score < -VALUE_IS_MATE_IN) {
+
+	if (score < -VALUE_IS_MATE_IN)
 		return score + ply;
-	}
+
 	return score;
 }
 
 int searchToHash(int ply, value_t score) {
-	if (score > VALUE_IS_MATE_IN) {
+
+	if (score > VALUE_IS_MATE_IN)
 		return score + ply;
-	} else if (score < -VALUE_IS_MATE_IN) {
+
+	if (score < -VALUE_IS_MATE_IN)
 		return score - ply;
-	}
+
 	return score;
 }
 
 move_t probePV(board_t* b) {
+
 	int32_t index = getTTIndex(b->zobristKey);
-	uint16_t key = getBucketIndex(b->zobristKey);
+	uint16_t key  = getBucketIndex(b->zobristKey);
 
 	Assert(index == int32_t(b->zobristKey & indexMask));
 	Assert(index >= 0 && index <= (tt->buckets - 1));
@@ -310,6 +327,8 @@ move_t probePV(board_t* b) {
 	}
 
 	return MOVE_NONE;
+}
+
 
 }
 

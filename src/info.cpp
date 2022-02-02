@@ -1,46 +1,63 @@
 #include "info.h"
 
+
 void logDebug(std::string errMsg) {
     std::ofstream ofs("./assertLog.txt", std::ios_base::app);
     ofs << errMsg;
     ofs.close();
 }
 
+void printEval(board_t* b) {
+
+	cout << "Overall evaluation: "  << evaluation(b) 
+		 << " (positive states advantage for white)" << endl
+		 << "\tPSQT (opening)\t "  << b->psqtOpening << endl
+		 << "\tPSQT (endgame)\t "  << b->psqtEndgame << endl;
+
+#ifdef USE_NNUE
+	// Use NNUE on balanced positions
+	if (canUseNNUE) {
+		cout << "\tNNUE\t\t " << NNUE::evaluateNNUE(b) << endl;
+	}
+#endif // USE_NNUE
+
+}
+
 void printCliHelp() {
     cout << "Command does not exist. Valid commands are:" << endl
-    << "\tuci\t(start uci protocol)" << endl
-    << "\ts\t(search current position)" << endl
-    << "\t[e2e4]\t(apply move)" << endl
-    << "\tpop\t(undo move)" << endl
-    << "\tfen\t(parse fen)" << endl
+		 << "\tuci\t(start uci protocol)" << endl
+	 	 << "\ts\t(search current position)" << endl
+	 	 << "\t[e2e4]\t(apply move)" << endl
+	  	 << "\tpop\t(undo move)" << endl
+		 << "\tfen\t(parse fen)" << endl
 #ifdef INFO
-    << "\tprint\t(print board status)" << endl
+    	 << "\tprint\t(print board status)" << endl
 #endif // INFO
-    << "\tperft\t(perft this position)" << endl
-    << "\tquit\t(exit program)" << endl
-    << endl;
+		 << "\tperft\t(perft this position)" << endl
+		 << "\tquit\t(exit program)" << endl
+		 << endl;
 }
 
 void printEngineMeta(std::string assert, std::string compiler, std::string simd) {
     	cout << "chai " << TOSTRING(VERSION) << endl
-		<< "assert=" << assert
-		<< " buckets=" << BUCKETS
-		<< " threads=" << NUM_THREADS
-		<< " hashMb=" << DEFAULT_TT_SIZE
-        << " simd=" << simd << endl
-		<< "compiler=" << compiler
-		<< " date=" << __DATE__ << endl << endl;
+			 << "assert=" << assert
+			 << " buckets=" << BUCKETS
+			 << " threads=" << NUM_THREADS
+			 << " hashMb=" << DEFAULT_TT_SIZE
+			 << " simd=" << simd << endl
+			 << "compiler=" << compiler
+			 << " date=" << __DATE__ << endl << endl;
 }
 
 void printUCI_Info() {
-    cout << "id name chai_" << TOSTRING(VERSION) << "\n";
-	cout << "id author Jakob Hackstein\n";
-	cout << "option name Hash type spin default 256 min 2 max 8192" << endl;
-	cout << "option name Threads type spin default " 
-		 << NUM_THREADS << " min 1 max " << MAX_THREADS << endl;
-	cout << "option name SyzygyPath type string default \"\"" << endl;
-	cout << "option name EvalFile type string default \"\"" << endl;
-	cout << "uciok\n";
+    cout << "id name chai_" << TOSTRING(VERSION) << endl
+		 << "id author Jakob Hackstein" << endl
+		 << "option name Hash type spin default 256 min 2 max 8192" << endl
+		 << "option name Threads type spin default " 
+		 << NUM_THREADS << " min 1 max " << MAX_THREADS << endl
+		 << "option name SyzygyPath type string default \"\"" << endl
+		 << "option name EvalFile type string default \"\"" << endl
+		 << "uciok" << endl;
 }
 
 void printBitBoard(bitboard_t* bb) {
@@ -75,22 +92,22 @@ void printMove(board_t* b, const move_t move) {
 
     if (promoted) {
         promChar = 'q';
-        if (promoted == Pieces::n || promoted == Pieces::N) {
+        if (promoted == Piece::n || promoted == Piece::N) {
             promChar = 'n';
         }
-        else if (promoted == Pieces::r || promoted == Pieces::R) {
+        else if (promoted == Piece::r || promoted == Piece::R) {
             promChar = 'r';
         }
-        else if (promoted == Pieces::b || promoted == Pieces::B) {
+        else if (promoted == Piece::b || promoted == Piece::B) {
             promChar = 'b';
         }
     }
 
     std::string ret = "";
-    ret += ('a' + squareToFile[fromSq(move)]);
-    ret += ('1' + squareToRank[fromSq(move)]);
-    ret += ('a' + squareToFile[toSq(move)]);
-    ret += ('1' + squareToRank[toSq(move)]);
+    ret += ('a' + toFile(fromSq(move)));
+    ret += ('1' + toRank(fromSq(move)));
+    ret += ('a' + toFile(toSq(move)));
+    ret += ('1' + toRank(toSq(move)));
 
     cout << ret << promChar << endl;
 }
@@ -105,22 +122,22 @@ std::string getStringMove(board_t* b, const move_t move) {
 
     if (promoted) {
         promChar = "q ";
-        if (promoted == Pieces::n || promoted == Pieces::N) {
+        if (promoted == Piece::n || promoted == Piece::N) {
             promChar = "n ";
         }
-        else if (promoted == Pieces::r || promoted == Pieces::R) {
+        else if (promoted == Piece::r || promoted == Piece::R) {
             promChar = "r ";
         }
-        else if (promoted == Pieces::b || promoted == Pieces::B) {
+        else if (promoted == Piece::b || promoted == Piece::B) {
             promChar = "b ";
         }
     }
 
     std::string ret = "";
-    ret += ('a' + squareToFile[fromSq(move)]);
-    ret += ('1' + squareToRank[fromSq(move)]);
-    ret += ('a' + squareToFile[toSq(move)]);
-    ret += ('1' + squareToRank[toSq(move)]);
+    ret += ('a' + toFile(fromSq(move)));
+    ret += ('1' + toRank(fromSq(move)));
+    ret += ('a' + toFile(toSq(move)));
+    ret += ('1' + toRank(toSq(move)));
 
     ret += promChar;
     return ret;
@@ -148,32 +165,6 @@ void log(std::string logMsg) {
     ofs << getTime() << "\t" << logMsg << '\n';
     ofs.close();
 }
-
-// void readInput(instr_t* instr) {
-//     // read input causes tests to wait for cin and does not terminate
-// #ifndef TESTING
-//     int bytes;
-//     char input[256] = "", * endc;
-
-//     if (inputWaiting()) {
-//         instr->stopped = true;
-//         do {
-//             bytes = _read(_fileno(stdin), input, 256);
-//         } while (bytes < 0);
-//         endc = strchr(input, '\n');
-//         if (endc)
-//             *endc = 0;
-
-//         if (strlen(input) > 0) {
-//             if (!strncmp(input, "quit", 4)) {
-//                 cout << "READ INPUT: quit" << endl;
-//                 instr->quit = true;
-//             }
-//         }
-//         return;
-//     }
-// #endif
-// }
 
 void printUCI(instr_t* instr, stats_t* s, int d, int selDpt, int score, long totalNodes) {
     std::string scoreStr = " score ";
@@ -215,7 +206,7 @@ void printTTablePV(board_t* b, int depth) {
     cout << " pv ";
 
     for (int i = 0; i <= depth; i++) {
-        move_t pvMove = probePV(b);
+        move_t pvMove = TT::probePV(b);
 
         if (pvMove != MOVE_NONE && isLegal(b, pvMove)) {
             cout << getStringMove(b, pvMove);
@@ -261,28 +252,237 @@ std::string getTimeAndDate() {
     return buf;
 }
 
-bool inputWaiting() {
-    static int init = 0, pipe;
-    static HANDLE inh;
-    DWORD dw;
+bool parseFen(board_t* board, std::string fen) {
 
-    if (!init) {
-        init = 1;
-        inh = GetStdHandle(STD_INPUT_HANDLE);
-        pipe = !GetConsoleMode(inh, &dw);
-        if (!pipe) {
-            SetConsoleMode(inh, dw & ~(ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT));
-            FlushConsoleInputBuffer(inh);
-        }
-    }
-    if (pipe) {
-        if (!PeekNamedPipe(inh, NULL, 0, NULL, &dw, NULL))
-            return 1;
-        return dw;
-    }
-    else {
-        GetNumberOfConsoleInputEvents(inh, &dw);
-        return dw <= 1 ? 0 : dw;
+	reset(board);
 
-    }
+	// Shortest fen (2 kings, no rights) "8/8/8/k7/K7/8/8/8 w - - 0 1"
+	if (fen.length() < 27) {
+		return true;
+	}
+
+	int file = FILE_A, rank = RANK_8;
+	int index = 0, square = 0, piece = 0, count = 0;
+
+	while (rank >= RANK_1) {
+		count = 1;
+		switch (fen[index]) {
+			case 'p': piece = Piece::p; break;
+			case 'r': piece = Piece::r; break;
+			case 'n': piece = Piece::n; break;
+			case 'b': piece = Piece::b; break;
+			case 'k': piece = Piece::k; break;
+			case 'q': piece = Piece::q; break;
+			case 'P': piece = Piece::P; break;
+			case 'R': piece = Piece::R; break;
+			case 'N': piece = Piece::N; break;
+			case 'B': piece = Piece::B; break;
+			case 'K': piece = Piece::K; break;
+			case 'Q': piece = Piece::Q; break;
+
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+				piece = cNO_TYPE;
+				count = fen[index] - '0';
+				break;
+
+			case '/':
+			case ' ':
+				rank--;
+				file = FILE_A;
+				index++;
+				continue;
+
+			default:
+				cout << "FEN error: " << fen[index] << endl;
+				return true;
+		}
+
+		for (int i = 0; i < count; i++) {
+			square = rank * 8 + file;
+
+			if (piece != cNO_TYPE) {
+				setPiece(board, piece, square, pieceCol[piece]);
+			}
+
+			file++;
+		}
+		index++;
+	}
+
+	// assert for correct position
+	Assert(fen[index] == 'w' || fen[index] == 'b');
+	board->stm = (fen[index] == 'w') ? WHITE 
+									 : BLACK;
+	index += 2;
+
+	// castle permission
+	for (int i = 0; i < 4; i++) {
+		if (fen[index] == ' ') {
+			break;
+		}
+		switch (fen[index]) {
+			case 'K': board->castlePermission |= K_CASTLE; break;
+			case 'Q': board->castlePermission |= Q_CASTLE; break;
+			case 'k': board->castlePermission |= k_CASTLE; break;
+			case 'q': board->castlePermission |= q_CASTLE; break;
+			default: break;
+		}
+		index++;
+	}
+	index++;
+	Assert(board->castlePermission >= 0 && board->castlePermission <= 15);
+
+	// en passant square
+	if (fen[index] != '-') {
+		file = fen[index] - 'a';
+		rank = fen[index + 1] - '1';
+
+		Assert(file >= FILE_A && file <= FILE_H);
+		Assert(rank >= RANK_1 && rank <= RANK_8);
+
+		board->enPas = fileRankToSq(file, rank);
+		Assert(validEnPasSq(board->enPas));
+		index += 3;
+	} else {
+		index += 2;
+	}
+
+	board->fiftyMove += atoi(&fen[index]);
+
+	index += 2;
+
+	std::string fullMoveStr = "";
+	while (fen[index]) {
+		fullMoveStr += fen[index];
+		index++;
+	}
+
+	board->halfMoves += std::stoi(fullMoveStr) * 2;
+
+	board->zobristPawnKey = generatePawnHashKey(board);
+	board->zobristKey     = generateZobristKey(board);
+
+	board->psqtOpening = calcPSQT(board, PSQT_OPENING);
+	board->psqtEndgame = calcPSQT(board, PSQT_ENDGAME);
+	board->material    = materialScore(board);
+
+	checkBoard(board);
+	return false;
+}
+
+std::string getFEN(board_t* b) {
+
+	int piece;
+	int empty = 0;
+	std::string fen = "";
+
+	int i = 0;
+	int r = RANK_8;
+	int f = FILE_A;
+
+	while (r >= RANK_1) {
+
+		f = FILE_A;
+		while (f <= FILE_H) {
+			i = fileRankToSq(f, r);
+
+			piece = pieceAt(b, i);
+			if (pieceValid(piece)) {
+				if (empty) {
+					fen += std::to_string(empty);
+					empty = 0;
+				}
+				fen += pieceChar[piece];
+			} else {
+				empty++;
+			}
+
+			f++;
+		}
+
+		if (empty) {
+			fen += std::to_string(empty);
+		}
+
+		empty = 0;
+
+		if (r != RANK_1) {
+			fen += "/";
+		}
+
+		r--;
+	}
+
+	if (b->stm == WHITE) {
+		fen += " w ";
+	} else {
+		fen += " b ";
+	}
+
+	if (b->castlePermission & K_CASTLE) fen += "K";
+	if (b->castlePermission & Q_CASTLE) fen += "Q";
+	if (b->castlePermission & k_CASTLE) fen += "k";
+	if (b->castlePermission & q_CASTLE) fen += "q";
+	fen += " ";
+
+	if (b->enPas != DEFAULT_EP_SQ) {
+		fen += ('a' + toFile(b->enPas));
+		fen += ('1' + toRank(b->enPas));
+	} else {
+		fen += "-";
+	}
+
+	fen += " " + std::to_string(b->undoPly) + " " + std::to_string(b->halfMoves);
+
+	return fen;
+}
+
+move_t parseMove(board_t* b, std::string move) {
+
+	if (move == "0000")
+		return MOVE_NULL;
+
+	int from = fileRankToSq(move[0] - 97, move[1] - 49);
+	int to   = fileRankToSq(move[2] - 97, move[3] - 49);
+
+	int movingPiece = pieceAt(b, from);
+	int promPiece   = 0;
+	int MOVE_FLAG   = NORMAL_MOVE;
+
+	// Set possible pawn flags
+	if (piecePawn[movingPiece]) {
+
+		// Set ep flag if to square is en passant
+		if (   to == b->enPas
+			&& b->enPas != DEFAULT_EP_SQ ) {
+
+			Assert(abs(from - to) == 7 || abs(from - to) == 9);
+			MOVE_FLAG = EP_MOVE;
+
+		} else if (   toRank(to) == RANK_1 
+				   || toRank(to) == RANK_8) {
+
+			MOVE_FLAG = PROM_MOVE;
+
+			switch (move[4]) {
+				case 'n': promPiece = PROM_TO_KNIGHT; break;
+				case 'b': promPiece = PROM_TO_BISHOP; break;
+				case 'r': promPiece = PROM_TO_ROOK; break;
+				default:  promPiece = PROM_TO_QUEEN; break;
+			}
+		}
+	}
+
+	if (   abs(from - to) == 2
+		&& pieceKing[movingPiece])
+		MOVE_FLAG = CASTLE_MOVE;
+ 
+	return serializeMove(from, to, MOVE_FLAG, promPiece);
 }

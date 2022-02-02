@@ -7,9 +7,19 @@
 #include "transformer.h"
 
 
+#define NNUEFILEVERSIONROTATE       0x7AF32F16u
+#define NNUEFILEVERSIONFLIP         0x7AF32F17u
+#define NNUENETLAYERHASH            0xCC03DAE4u
+#define NNUECLIPPEDRELUHASH         0x538D24C7u
+#define NNUEFEATUREHASH             (0x5D69D5B9u ^ 1)
+#define NNUEINPUTSLICEHASH          0xEC42E90Du
+
+
 extern int netType;
 extern bool canUseNNUE;
 
+
+namespace NNUE {
 
 /**
  * @brief Initialize a local .nnue from the ../net folder.
@@ -55,3 +65,5 @@ bool isBigEndian(void);
 
 template <typename T>
 void endswap(T* buffer);
+
+}

@@ -12,6 +12,12 @@ CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m64
 CXXFLAGS += -pedantic -Wextra -Wshadow
 CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 
+CXXFLAGS += -DUSE_PREFETCH -msse
+CXXFLAGS += -DUSE_AVX2 -mavx2
+CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
+CXXFLAGS += -mssse3 -mpopcnt
+
+DEPENDFLAGS += -msse
 
 nnue     = yes
 evalfile = none
@@ -22,21 +28,13 @@ ifeq ($(nnue),yes)
 	CXXFLAGS += -DUSE_NNUE
 endif
 
-CXXFLAGS += -DUSE_PREFETCH -msse
-CXXFLAGS += -DUSE_AVX2 -mavx2
-CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
-
-CXXFLAGS += -mssse3 -mpopcnt
-DEPENDFLAGS += -msse
-
 
 EXE = ../src/test.exe
 
-CHAI_SRCS = tt.cpp thread.cpp eval.cpp pawn.cpp mask.cpp move.cpp \
+CHAI_SRCS = uci.cpp tt.cpp thread.cpp layers.cpp pawn.cpp attacks.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
-	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	timeMan.cpp info.cpp nnue.cpp endgame.cpp attacks.cpp layers.cpp  \
-	transformer.cpp
+	syzygy.cpp timeMan.cpp validate.cpp egtb/tbprobe.cpp bitboard.cpp \
+	info.cpp nnue.cpp endgame.cpp transformer.cpp eval.cpp \
 
 SRCS = $(addprefix ../chai/, $(CHAI_SRCS))
 
