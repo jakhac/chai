@@ -171,7 +171,9 @@ static Value biggestMaterialSwing(Board* b) {
 
 static void updatePvLine(Move* pv, Move move, Move* childPv) {
 
-	Assert(pv && childPv);
+	Assert(pv);
+	Assert(childPv);
+
 	for (*pv++ = move; childPv && *childPv != MOVE_NONE; ) {
 		*pv++ = *childPv++;
 	}
@@ -246,9 +248,8 @@ Value Search::search(Board* b, Stats* s, Instructions* i) {
 	// }
 
 	// Select "best" thread and return data
-	Thread t = threadPool[selectBestThreadIndex()];
-	// Thread t = threadPool[0];
-	int totalNodes = totalNodeCount();
+	int totalNodes  = totalNodeCount();
+	Thread t        = threadPool[selectBestThreadIndex()];
 	s->depthReached = t->depth;
 
 	// UCI commands
@@ -648,7 +649,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 			(ss + 1)->pvLine = nullptr;
 
 		// Futiilty Pruning
-		if (!rootNode
+		if (   !rootNode
 			&& legalMoves
 			&& depth < 5
 			&& abs(alpha) < VALUE_IS_MATE_IN
@@ -658,7 +659,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 			&& !isPromotion(currentMove)) {
 
 			// Move count based pruning
-			if (!pvNode
+			if (   !pvNode
 				&& !inCheck
 				&& !moveGivesCheck
 				&& depth < moveCountPruningDepth
@@ -676,7 +677,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 			}
 
 			// Futile quiet moves: cannot raise alpha
-			if (!inCheck
+			if (   !inCheck
 				&& !mateThreat
 				&& !moveGivesCheck
 				&& !moveIsTactical(b, currentMove)) {
@@ -708,7 +709,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 			continue;
 		}
 
-		if (mainThread
+		if (   mainThread
 			&& rootNode
 			&& getTimeMs() > instr->startTime + 750
 			) {
@@ -725,16 +726,16 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 		// alpha - beta bounds. Late moves wont raise alpha in most cases, try to prove this
 		// with reduced search around alpha. If the move improves alpha, a research
 		// is required.
-		if (legalMoves == 1) {
+		(ss + 1)->pvLine = pvLine;
+		(ss + 1)->pvLine[0] = MOVE_NONE;
 
-			(ss + 1)->pvLine = pvLine;
-			(ss + 1)->pvLine[0] = MOVE_NONE;
+		if (legalMoves == 1) {
 
 			value = -alphaBeta<PV>(thread, -beta, -alpha, newDepth);
 
 		} else {
 			// Late Move Reductions, do reduced zero window search
-			if (depth > 3
+			if (   depth > 3
 				&& legalMoves > 2 + rootNode
 				&& !isPromotion(currentMove)
 				) {
@@ -745,9 +746,9 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 				if (legalMoves > 6)
 					lmrDepth--;
 
-				if (!moveGivesCheck
-					&& ((ss->staticEval + pieceValues[moveCaptured] + depth * 243 < alpha)
-						|| (!pvNode && !improving)))
+				if (!moveGivesCheck &&
+					(   ss->staticEval + pieceValues[moveCaptured] + depth * 243 < alpha
+					 || (!pvNode && !improving)))
 					lmrDepth--;
 
 				if (mateThreat)
@@ -781,13 +782,15 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 			// Principal Variation Search
 			if (value > alpha) {
 
+				// Ensure fresh PV
+				(ss + 1)->pvLine = pvLine;
+				(ss + 1)->pvLine[0] = MOVE_NONE;
+
 				// Do not research with same depth as LMR
 				if (!lmrSameDepth)
 					value = -alphaBeta<NoPV>(thread, -(alpha + 1), -alpha, newDepth);
 
 				if (value > alpha && (rootNode || value < beta)) {
-					(ss + 1)->pvLine = pvLine;
-					(ss + 1)->pvLine[0] = MOVE_NONE;
 
 					value = -alphaBeta<PV>(thread, -beta, -alpha, newDepth);
 				}
@@ -799,6 +802,24 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 
 		if (ABORT_SEARCH) {
 			return 0;
+		}
+
+		// If the currentMove scores higher than bestMove, update score and move.
+		// This might be useful when this position is stored into the ttable.
+		if (value > bestValue) {
+			bestValue = value;
+			bestMove  = currentMove;
+			Assert(bestValue < VALUE_INFTY);
+
+			// If the currentMove scores higher than alpha, the principal variation
+			// is updated because a better move for this position has been found.
+			if (value > alpha) {
+				alpha = value;
+
+				if (pvNode)
+					updatePvLine(ss->pvLine, bestMove, (ss + 1)->pvLine);
+
+			}
 		}
 
 		// Alpha-Beta Pruning:
@@ -879,23 +900,23 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 			return beta;
 		}
 
-		// If the currentMove scores higher than bestMove, update score and move.
-		// This might be useful when this position is stored into the ttable.
-		if (value > bestValue) {
-			bestValue = value;
-			bestMove  = currentMove;
-			Assert(bestValue < VALUE_INFTY);
+		// // If the currentMove scores higher than bestMove, update score and move.
+		// // This might be useful when this position is stored into the ttable.
+		// if (value > bestValue) {
+		// 	bestValue = value;
+		// 	bestMove  = currentMove;
+		// 	Assert(bestValue < VALUE_INFTY);
 
-			// If the currentMove scores higher than alpha, the principal variation
-			// is updated because a better move for this position has been found.
-			if (value > alpha) {
-				alpha = value;
+		// 	// If the currentMove scores higher than alpha, the principal variation
+		// 	// is updated because a better move for this position has been found.
+		// 	if (value > alpha) {
+		// 		alpha = value;
 
-				if (pvNode)
-					updatePvLine(ss->pvLine, bestMove, (ss + 1)->pvLine);
+		// 		if (pvNode)
+		// 			updatePvLine(ss->pvLine, bestMove, (ss + 1)->pvLine);
 
-			}
-		}
+		// 	}
+		// }
 	}
 
 	Assert(alpha >= oldAlpha);
@@ -1111,7 +1132,7 @@ Value Search::quiescence(Thread thread, Value alpha, Value beta, int depth) {
 
 		if (value > bestValue) {
 			bestValue = value;
-			bestMove = currentMove;
+			bestMove  = currentMove;
 
 			if (value > alpha) {
 				alpha = value;

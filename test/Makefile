@@ -22,7 +22,7 @@ DEPENDFLAGS += -msse
 nnue     = yes
 evalfile = none
 ifneq ($(evalfile),none)
-	CXXFLAGS += -DCUSTOM_EVALFILE=\"../nets/$(evalfile)\"
+	CXXFLAGS += -DCUSTOM_EVALFILE=\"$(evalfile)\"
 endif
 ifeq ($(nnue),yes)
 	CXXFLAGS += -DUSE_NNUE

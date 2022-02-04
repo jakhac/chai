@@ -59,7 +59,6 @@ namespace Piece {
 
 } // namespace Piece
 
-// TODO cPrefix
 enum PieceType {
 	NO_PTYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
 };

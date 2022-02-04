@@ -33,7 +33,7 @@ assert   = no
 debug    = no
 nnue     = yes
 # evalfile = no
-evalfile = nn-fb50f1a2b1-20210705.nnue
+evalfile = F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue
 
 # Default architecture enables all
 prefetch = yes
@@ -59,7 +59,7 @@ endif
 ifeq ($(nnue),yes)
 	CXXFLAGS += -DUSE_NNUE
 	ifneq ($(evalfile),no)
-		CXXFLAGS += -DCUSTOM_EVALFILE=\"../nets/$(evalfile)\"
+		CXXFLAGS += -DCUSTOM_EVALFILE=\"$(evalfile)\"
 	endif
 endif
 
