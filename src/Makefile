@@ -2,10 +2,10 @@
 # 1. META DATA
 #######################################
 
-VERSION = v3.3.0
+VERSION = v3.4.0
 
 EXE			= chai_$(VERSION)
-EXE_RELEASE = $(EXE)_release.exe
+EXE_RELEASE = $(EXE).exe
 EXE_DEBUG   = $(EXE)_debug.exe
 EXE_TEST    = test.exe
 
@@ -32,8 +32,8 @@ VPATH = egtb:nnue:
 assert   = no
 debug    = no
 nnue     = yes
-# evalfile = no
-evalfile = F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue
+evalfile = no
+# evalfile = F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue
 
 # Default architecture enables all
 prefetch = yes
@@ -160,20 +160,27 @@ archive:
 	$(MAKE) clean
 	$(MAKE) release
 	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
-	rename ..\archive\$(EXE_RELEASE) $(EXE)_release_1CPU.exe
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_1CPU.exe
 	$(MAKE) clean
 	$(MAKE) release threads=3
 	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
-	rename ..\archive\$(EXE_RELEASE) $(EXE)_release_3CPU.exe
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_3CPU.exe
 	$(MAKE) clean
-	$(MAKE) release evalfile=nn-fb50f1a2b1-20210705.nnue
+	$(MAKE) release threads=4
 	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
-	rename ..\archive\$(EXE_RELEASE) $(EXE)_release_1CPU_nnue.exe
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_4CPU.exe
 	$(MAKE) clean
-	$(MAKE) release threads=3 evalfile=nn-fb50f1a2b1-20210705.nnue
+	$(MAKE) release evalfile="F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue"
 	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
-	rename ..\archive\$(EXE_RELEASE) $(EXE)_release_3CPU_nnue.exe
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_1CPU_nnue.exe
 	$(MAKE) clean
+	$(MAKE) release threads=3 evalfile="F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue"
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_3CPU_nnue.exe
+	$(MAKE) clean
+	$(MAKE) release threads=4 evalfile="F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue"
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_4CPU_nnue.exe
 
 strip:
 	$(MAKE) release

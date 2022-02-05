@@ -30,7 +30,7 @@ void generateQuiescence(Board* b, MoveList* moveList, bool inCheck);
 void generateCheckEvasions(Board* b, MoveList* moveList);
 
 /**
- * Generate all check moves delivering check.
+ * Generate all quiet moves delivering check.
  *
  * @param b
  * @param moveList
@@ -144,99 +144,33 @@ void whitePawnCaptures(Board* b, MoveList* moveList);
  */
 void blackPawnCaptures(Board* b, MoveList* moveList);
 
+/**
+ * @brief Generate all capturing moves for given piece type.
+ */
 template<PieceType pType>
 void addCapturesFor(Board* b, MoveList* moveList);
 
 /**
- * Generate all possible knight moves and add to quietMoveList.
- *
- * @param  b	    Board.
- * @param  moveList moveList struct to add moves to.
+ * @brief Generate all non-capturing moves for given piece type.
  */
-void addKnightMoves(Board* b, MoveList* moveList);
+template<PieceType pType>
+void addNonCapturesFor(Board* b, MoveList* moveList);
 
 /**
- * Generate all possible knight captures for given side and add to capMoveList.
- *
- * @param  b	    Board.
- * @param  moveList moveList struct to add moves to.
- */
-void addKnightCaptures(Board* b, MoveList* moveList);
-
-/**
- * /// <summary>
- * Generate all king moves for given side and add to quietMoveList.
- * </summary>
- *
- * @param  b	    Board.
- * @param  moveList moveList struct to add moves to.
+ * @brief Generate all king moves for given side and add to quietMoveList.
  */
 void addKingMoves(Board* b, MoveList* moveList);
 
 /**
- * Generate king captures and add to capMoveList.
- *
- * @param  b	    Board.
- * @param  moveList moveList struct to add moves to.
+ * @brief Generate king captures and add to capMoveList.
  */
 void addKingCaptures(Board* b, MoveList* moveList);
 
 /**
- * Generate king check evasions due to double check. Combines quiet and capture moves. Castling
+ * @brief Generate king check evasions due to double check. Combines quiet and capture moves. Castling
  * is not legal.
- *
- * @param  b	    Board.
- * @param  moveList moveList struct to add moves to.
  */
 void addKingCheckEvasions(Board* b, MoveList* moveList);
-
-/**
- * Generate all rook moves for given board and side and add to quietMoveList.
- *
- * @param  b	    Board to search moves on.
- * @param  moveList moveList struct to add moves to.
- */
-void addRookMoves(Board* b, MoveList* moveList);
-
-/**
- * Generate all bishop moves for given board and side and add to quietMoveList.
- *
- * @param  b	    Board to search moves on.
- * @param  moveList moveList struct to add moves to.
- */
-void addBishopMoves(Board* b, MoveList* moveList);
-
-/**
- * Generate all rook captures for given board and side and add to capMoveList.
- *
- * @param  b	    Board to search captures on.
- * @param  moveList moveList struct to add moves to.
- */
-void addRookCaptures(Board* b, MoveList* moveList);
-
-/**
- * Generate all bishop captures for given board and side and add to capMoveList.
- *
- * @param  b	    Board to search captures on.
- * @param  moveList moveList struct to add moves to.
- */
-void addBishopCaptures(Board* b, MoveList* moveList);
-
-/**
- * Generate all queen moves for given board and side. Add moves to quietMoveList.
- *
- * @param  b	    Board.
- * @param  moveList moveList struct to add moves to.
- */
-void addQueenMoves(Board* b, MoveList* moveList);
-
-/**
- * Generate queen captures and add to capMoveList.
- *
- * @param  b	    Board.
- * @param  moveList moveList struct to add moves to.
- */
-void addQueenCaptures(Board* b, MoveList* moveList);
 
 /**
  * Print all generated moves.
@@ -246,7 +180,7 @@ void addQueenCaptures(Board* b, MoveList* moveList);
 void printGeneratedMoves(Board* b, MoveList* moveList);
 
 /**
- * Check if this string is a valid move in this position.
+ * @brief Check if this string is a valid move in this position.
  *
  * @param  b	        Board.
  * @param  stringMove   string, we assume a move.

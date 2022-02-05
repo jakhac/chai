@@ -181,10 +181,8 @@ void uciSetOption(std::string cmd) {
     }
 
 	if (strStartsWith(cmd, "setoption name EvalFile value ")) {
-		std::string netDir   = "../nets/";
 		std::string nnuePath = cmd.substr(30, std::string::npos);
-
-  		std::ifstream nnueData(netDir + nnuePath, std::ios::binary);
+  		std::ifstream nnueData(nnuePath, std::ios::binary);
 
 		if (!NNUE::initNet(nnueData)) {
         	cerr << "info string Error: NNUE parsed incorrect hash value." << endl;

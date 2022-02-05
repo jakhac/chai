@@ -23,26 +23,19 @@ void generateMoves(Board* b, MoveList* moveList, bool inCheck) {
 		blackPawnCaptures(b, moveList);
 	}
 
-	addKnightMoves(b, moveList);
-	addKnightCaptures(b, moveList);
+	addCapturesFor<KNIGHT>(b, moveList);
+	addCapturesFor<BISHOP>(b, moveList);
+	addCapturesFor<ROOK>(b, moveList);
+	addCapturesFor<QUEEN>(b, moveList);
 
-	// TODO perft template vs std
-	// addCapturesFor<KNIGHT>(b, moveList);
-	// addCapturesFor<BISHOP>(b, moveList);
-	// addCapturesFor<ROOK>(b, moveList);
-	// addCapturesFor<QUEEN>(b, moveList);
-
-	addBishopMoves(b, moveList);
-	addBishopCaptures(b, moveList);
+	addNonCapturesFor<KNIGHT>(b, moveList);
+	addNonCapturesFor<BISHOP>(b, moveList);
+	addNonCapturesFor<ROOK>(b, moveList);
+	addNonCapturesFor<QUEEN>(b, moveList);
 
 	addKingMoves(b, moveList);
 	addKingCaptures(b, moveList);
 
-	addRookMoves(b, moveList);
-	addRookCaptures(b, moveList);
-
-	addQueenMoves(b, moveList);
-	addQueenCaptures(b, moveList);
 }
 
 void generateQuiescence(Board* b, MoveList* moveList, bool inCheck) {
@@ -65,11 +58,13 @@ void generateQuiescence(Board* b, MoveList* moveList, bool inCheck) {
 		blackPawnCaptures(b, moveList);
 	}
 
-	addKnightCaptures(b, moveList);
-	addBishopCaptures(b, moveList);
-	addRookCaptures(b, moveList);
-	addQueenCaptures(b, moveList);
+	addCapturesFor<KNIGHT>(b, moveList);
+	addCapturesFor<BISHOP>(b, moveList);
+	addCapturesFor<ROOK>(b, moveList);
+	addCapturesFor<QUEEN>(b, moveList);
+
 	addKingCaptures(b, moveList);
+
 }
 
 void generateCheckEvasions(Board* b, MoveList* moveList) {
@@ -562,38 +557,6 @@ void blackPawnCaptures(Board* board, MoveList* moveList) {
 	}
 }
 
-void addKnightMoves(Board* b, MoveList* moveList) {
-
-	int sq, atkSq;
-	Bitboard knights = getPieces(b, KNIGHT, b->stm);
-	Bitboard atks;
-
-	while (knights) {
-		sq = popLSB(&knights);
-		atks = knightAtkMask[sq] & ~b->occupied;
-		while (atks) {
-			atkSq = popLSB(&atks);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atkSq, NORMAL_MOVE, Piece::NO_PIECE);
-		}
-	}
-}
-
-void addKnightCaptures(Board* b, MoveList* moveList) {
-
-	int sq, atkSq;
-	Bitboard knights = getPieces(b, KNIGHT, b->stm);
-	Bitboard atks;
-
-	while (knights) {
-		sq = popLSB(&knights);
-		atks = knightAtkMask[sq] & b->color[!b->stm];
-		while (atks) {
-			atkSq = popLSB(&atks);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atkSq, NORMAL_MOVE, Piece::NO_PIECE);
-		}
-	}
-}
-
 void addKingMoves(Board* b, MoveList* moveList) {
 
 	int sq, kSq = getKingSquare(b, b->stm);
@@ -643,115 +606,6 @@ void addKingCaptures(Board* b, MoveList* moveList) {
 	}
 }
 
-void addRookMoves(Board* b, MoveList* moveList) {
-
-	int sq, atkSq;
-	Bitboard attackSet;
-	Bitboard rooks = getPieces(b, ROOK, b->stm);
-
-	while (rooks) {
-		sq = popLSB(&rooks);
-		attackSet = lookUpRookMoves(sq, b->occupied);
-		attackSet &= ~b->occupied;
-
-		while (attackSet) {
-			atkSq = popLSB(&attackSet);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atkSq, NORMAL_MOVE, Piece::NO_PIECE);
-		}
-	}
-}
-
-void addBishopMoves(Board* b, MoveList* moveList) {
-
-	int sq, atkSq;
-	Bitboard bishops = getPieces(b, BISHOP, b->stm);
-	Bitboard attackSet;
-
-	while (bishops) {
-		sq = popLSB(&bishops);
-		attackSet = lookUpBishopMoves(sq, b->occupied);
-		attackSet &= ~b->occupied;
-
-		while (attackSet) {
-			atkSq = popLSB(&attackSet);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atkSq, NORMAL_MOVE, Piece::NO_PIECE);
-		}
-	}
-}
-
-void addRookCaptures(Board* b, MoveList* moveList) {
-
-	int sq, atkSq;
-	Bitboard captureSet;
-	Bitboard rooks = getPieces(b, ROOK, b->stm);
-
-	while (rooks) {
-		sq = popLSB(&rooks);
-		captureSet = lookUpRookMoves(sq, b->occupied);
-		captureSet = captureSet & b->color[!b->stm];
-
-		while (captureSet) {
-			atkSq = popLSB(&captureSet);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atkSq, NORMAL_MOVE, Piece::NO_PIECE);
-		}
-	}
-}
-
-void addBishopCaptures(Board* board, MoveList* moveList) {
-
-	int sq, atkSq;
-	Bitboard captureSet;
-	Bitboard bishops = getPieces(board, BISHOP, board->stm);
-
-	while (bishops) {
-		sq = popLSB(&bishops);
-		captureSet = lookUpBishopMoves(sq, board->occupied);
-		captureSet &= board->color[board->stm ^ 1];
-
-		while (captureSet) {
-			atkSq = popLSB(&captureSet);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atkSq, NORMAL_MOVE, Piece::NO_PIECE);
-		}
-	}
-
-}
-
-void addQueenMoves(Board* b, MoveList* moveList) {
-
-	int sq, atkSq;
-	Bitboard attackSet;
-	Bitboard queen = getPieces(b, QUEEN, b->stm);
-
-	while (queen) {
-		sq = popLSB(&queen);
-		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
-		attackSet &= ~b->occupied;
-
-		while (attackSet) {
-			atkSq = popLSB(&attackSet);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atkSq, NORMAL_MOVE, Piece::NO_PIECE);
-		}
-	}
-}
-
-void addQueenCaptures(Board* b, MoveList* moveList) {
-
-	int sq, atkSq;
-	Bitboard attackSet;
-	Bitboard queen = getPieces(b, QUEEN, b->stm);
-
-	while (queen) {
-		sq = popLSB(&queen);
-		attackSet = lookUpRookMoves(sq, b->occupied) ^ lookUpBishopMoves(sq, b->occupied);
-		attackSet &= b->color[!b->stm];
-
-		while (attackSet) {
-			atkSq = popLSB(&attackSet);
-			moveList->moves[moveList->cnt++] = serializeMove(sq, atkSq, NORMAL_MOVE, Piece::NO_PIECE);
-		}
-	}
-}
-
 template<PieceType pType>
 void addCapturesFor(Board* b, MoveList* moveList) {
 
@@ -763,6 +617,26 @@ void addCapturesFor(Board* b, MoveList* moveList) {
 		sq = popLSB(&pieces);
 		attackSet = getMoveMask<pType>(sq, b->occupied);
 		attackSet &= b->color[!b->stm];
+
+		while (attackSet) {
+			atkSq = popLSB(&attackSet);
+			moveList->moves[moveList->cnt++] = serializeMove(sq, atkSq, NORMAL_MOVE, Piece::NO_PIECE);
+		}
+	}
+
+}
+
+template<PieceType pType>
+void addNonCapturesFor(Board* b, MoveList* moveList) {
+
+	int sq, atkSq;
+	Bitboard attackSet;
+	Bitboard pieces = getPieces(b, pType, b->stm);
+
+	while (pieces) {
+		sq = popLSB(&pieces);
+		attackSet = getMoveMask<pType>(sq, b->occupied)
+				  & ~b->occupied;
 
 		while (attackSet) {
 			atkSq = popLSB(&attackSet);
