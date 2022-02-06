@@ -1,3 +1,4 @@
+# Set path to gtest on your local system here!
 GTEST = C:/googletest/googletest/lib/libgtest.a
 GTEST_PATH = C:/googletest/googletest/include
 
@@ -19,12 +20,12 @@ CXXFLAGS += -mssse3 -mpopcnt
 
 DEPENDFLAGS += -msse
 
-nnue     = yes
-evalfile = none
-ifneq ($(evalfile),none)
+nnue     = y
+evalfile = n
+ifneq ($(evalfile),n)
 	CXXFLAGS += -DCUSTOM_EVALFILE=\"$(evalfile)\"
 endif
-ifeq ($(nnue),yes)
+ifeq ($(nnue),y)
 	CXXFLAGS += -DUSE_NNUE
 endif
 

@@ -12,6 +12,8 @@
 /archive
 /nets
 
+**/obj_debug
+**/obj_release
 
 # custom build
 **.o

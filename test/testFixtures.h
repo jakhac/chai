@@ -7,120 +7,120 @@
 
 
 namespace SearchTest {
-	class SearchTest : public ::testing::Test {
+    class SearchTest : public ::testing::Test {
 
-	protected:
-		Board* pBoard;
-		Stats* pSearch;
-		Instructions* pInstr;
-	
-	public:
-		virtual void SetUp() {
-			pBoard = new Board();
-			pSearch = new Stats();
-			pInstr = new Instructions();
-			
-			MoveOrder::init();
-			Mask::init();
-			Search::init();
-			TT::init();
-			Threads::initPool();
-		}
+    protected:
+        Board* pBoard;
+        Stats* pSearch;
+        Instructions* pInstr;
+    
+    public:
+        virtual void SetUp() {
+            pBoard = new Board();
+            pSearch = new Stats();
+            pInstr = new Instructions();
+            
+            MoveOrder::init();
+            Mask::init();
+            Search::init();
+            TT::init();
+            Threads::initPool();
+        }
 
-		virtual void TearDown() {
-			TT::freeHashTables();
-			Threads::deletePool();
-			delete pBoard;
-			delete pSearch;
-			delete pInstr;
-		}
+        virtual void TearDown() {
+            TT::freeHashTables();
+            Threads::deletePool();
+            delete pBoard;
+            delete pSearch;
+            delete pInstr;
+        }
 
-	};
+    };
 }
 
 namespace PerftTest {
-	class PerftTest : public ::testing::Test {
+    class PerftTest : public ::testing::Test {
 
-	protected:
-		Board* pBoard;
-		Perft* pPerft;
+    protected:
+        Board* pBoard;
+        Perft* pPerft;
 
-		virtual void SetUp() {
-			pBoard = new Board();
-			pPerft = new Perft();
+        virtual void SetUp() {
+            pBoard = new Board();
+            pPerft = new Perft();
 
-			MoveOrder::init();
-			Mask::init();
-			Search::init();
-		}
+            MoveOrder::init();
+            Mask::init();
+            Search::init();
+        }
 
-		virtual void TearDown() {
-			delete pBoard;
-			delete pPerft;
-		}
+        virtual void TearDown() {
+            delete pBoard;
+            delete pPerft;
+        }
 
-	};
+    };
 }
 
 namespace SeeTest {
-	class SeeTest : public ::testing::Test {
+    class SeeTest : public ::testing::Test {
 
-	protected:
-		Board* pBoard;
+    protected:
+        Board* pBoard;
 
-		virtual void SetUp() {
-			pBoard = new Board();
+        virtual void SetUp() {
+            pBoard = new Board();
 
-			MoveOrder::init();
-			Mask::init();
-			Search::init();
-		}
+            MoveOrder::init();
+            Mask::init();
+            Search::init();
+        }
 
-		virtual void TearDown() {
-			delete pBoard;
-		}
+        virtual void TearDown() {
+            delete pBoard;
+        }
 
-	};
+    };
 }
 
 namespace EvalTest {
-	class EvalTest : public ::testing::Test {
+    class EvalTest : public ::testing::Test {
 
-	protected:
-		Board* pBoard;
+    protected:
+        Board* pBoard;
 
-		virtual void SetUp() {
-			pBoard = new Board();
+        virtual void SetUp() {
+            pBoard = new Board();
 
-			MoveOrder::init();
-			Mask::init();
-			Search::init();
-		}
+            MoveOrder::init();
+            Mask::init();
+            Search::init();
+        }
 
-		virtual void TearDown() {
-			delete pBoard;
-		}
+        virtual void TearDown() {
+            delete pBoard;
+        }
 
-	};
+    };
 }
 
 namespace PositionalTest {
-	class PositionalTest : public ::testing::Test {
+    class PositionalTest : public ::testing::Test {
 
-	protected:
-		Board* pBoard;
+    protected:
+        Board* pBoard;
 
-		virtual void SetUp() {
-			pBoard = new Board();
+        virtual void SetUp() {
+            pBoard = new Board();
 
-			MoveOrder::init();
-			Mask::init();
-			Search::init();
-		}
+            MoveOrder::init();
+            Mask::init();
+            Search::init();
+        }
 
-		virtual void TearDown() {
-			delete pBoard;
-		}
+        virtual void TearDown() {
+            delete pBoard;
+        }
 
-	};
+    };
 }

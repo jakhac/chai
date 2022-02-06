@@ -35,7 +35,7 @@ enum Color {
 };
 
 constexpr Color operator!(Color c) {
-    return Color(1 ^ 1);
+    return Color(c ^ 1);
 }
 
 enum {
