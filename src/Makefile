@@ -2,151 +2,130 @@
 # 1. META DATA
 #######################################
 
-VERSION = v2.6.6
+VERSION = v3.4.0
 
-EXE_RELEASE = chai_$(VERSION)_release.exe
-EXE_DEBUG = chai_$(VERSION)_debug.exe
-EXE_TEST = test.exe
+EXE			= chai_$(VERSION)
+EXE_RELEASE = $(EXE).exe
+EXE_DEBUG   = $(EXE)_debug.exe
+EXE_TEST    = test.exe
 
-SRCS = main.cpp tt.cpp attacks.cpp eval.cpp info.cpp mask.cpp move.cpp \
+SRCS = main.cpp tt.cpp thread.cpp layers.cpp pawn.cpp transformer.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
-	syzygy.cpp uci.cpp validate.cpp egtb/tbprobe.cpp egtb/tbchess.cpp \
-	thread.cpp timeMan.cpp
+	syzygy.cpp timeMan.cpp validate.cpp egtb/tbprobe.cpp bitboard.cpp \
+	info.cpp nnue.cpp endgame.cpp attacks.cpp uci.cpp eval.cpp \
+
 
 OBJ_RELEASE_DIR = ./obj_release
-OBJS_RELEASE = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
+OBJS_RELEASE    = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
 
-OBJ_DEBUG_DIR = ./obj_debug
-OBJS_DEBUG = $(patsubst %.cpp, $(OBJ_DEBUG_DIR)/%.o, $(notdir $(SRCS)))
+OBJ_DEBUG_DIR   = ./obj_debug
+OBJS_DEBUG      = $(patsubst %.cpp, $(OBJ_DEBUG_DIR)/%.o, $(notdir $(SRCS)))
 
-VPATH = egtb:
+VPATH = egtb:nnue:
 
 
 #######################################
 # 2. Configure architecture & type
 #######################################
 
-# build type
-assert=no
-debug=no
-info=yes
-test=no
+# USER choices
+assert   = n
+debug    = n
+nnue     = y
+evalfile = n
 
-# architecture
-optimize=yes
-bits=64
-prefetch=yes
-popcnt=yes
-sse=yes
-sse2=yes
-ssse3=yes
-sse41=yes
-avx2=yes
-pext=yes
-bits=64
-
-# custom build configs
-threads=0
-hashMb=265
+# Default architecture enables all
+prefetch = y
+optimize = y
+popcnt   = y
+ssse3    = y
+avx2     = y
 
 
-ifeq ($(TYPE),release)
-	assert=no
-	debug=no
-	info=no
-	test=no
-endif
-ifeq ($(TYPE),debug)
-	assert=yes
-	debug=yes
-	info=yes
-	test=no
+####
+#### 2.1 Define optional constants if passed by user.
+threads = 1
+hashMb  = 256
 
-	optimize=no
-endif
-
-
-ifneq ($(threads),0)
+ifneq ($(threads),1)
 	CXXFLAGS += -DCUSTOM_THREADS=$(threads)
 endif
-ifneq ($(hashMb),265)
+
+ifneq ($(hashMb),256)
 	CXXFLAGS += -DCUSTOM_HASHSIZE=$(hashMb)
 endif
 
-
-ifeq ($(info),yes)
-	CXXFLAGS += -DINFO=
+ifeq ($(nnue),y)
+	CXXFLAGS += -DUSE_NNUE
+	ifneq ($(evalfile),n)
+		CXXFLAGS += -DCUSTOM_EVALFILE=\"$(evalfile)\"
+	endif
 endif
 
-ifeq ($(assert),yes)
-	CXXFLAGS += -DASSERT=
+
+####
+#### 2.2 Set additional flags for respective build type.
+ifeq ($(TYPE),release)
+	assert = n
+	debug  = n
 endif
 
-ifeq ($(test),yes)
-	CXXFLAGS += -DTESTING=
+ifeq ($(TYPE),debug)
+	assert   = y
+	debug    = y
+	optimize = n
 endif
 
-ifeq ($(DEBUG),yes)
-	CXXFLAGS+= -DINFO=
+ifeq ($(assert),y)
+	CXXFLAGS += -DASSERT
 endif
 
-ifeq ($(optimize),yes)
+ifeq ($(debug),y)
+	CXXFLAGS += -DINFO
+endif
+
+
+
+####
+#### 2.3 Set optimization flags as previously defined.
+ifeq ($(optimize),y)
 	CXXFLAGS += -O3
 endif
 
-ifeq ($(bits),64)
-	CXXFLAGS += -DIS_64_BIT
+ifeq ($(popcnt),y)
+	CXXFLAGS += -mssse3 -mpopcnt
 endif
 
-ifeq ($(prefetch),yes)
-	ifeq ($(sse),yes)
-		CXXFLAGS += -msse
-		DEPENDFLAGS += -msse
-	endif
-else
-	CXXFLAGS += -DNO_PREFETCH
+ifeq ($(prefetch),y)
+	CXXFLAGS += -DUSE_PREFETCH -msse
+	DEPENDFLAGS += -msse
 endif
 
-ifeq ($(popcnt),yes)
-	ifeq ($(bits),64)
-		CXXFLAGS += -msse3 -mpopcnt -DUSE_POPCNT
-	else
-		CXXFLAGS += -mpopcnt -DUSE_POPCNT
-	endif
+ifeq ($(avx2),y)
+	CXXFLAGS += -DUSE_AVX2 -mavx2
 endif
 
-ifeq ($(avx2),yes)
-	CXXFLAGS += -DUSE_AVX2
-	CXXFLAGS += -mavx2
-endif
-
-ifeq ($(pext),yes)
-	CXXFLAGS += -DUSE_PEXT
-	CXXFLAGS += -mbmi -mbmi2
+ifeq ($(ssse3),y)
+	CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
 endif
 
 
-# Always add standard flags
-CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m$(bits)
-
-# Warning flags for cleaner code
+####
+#### 2.4 Additional flags for code quality.
+CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m64
+CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 CXXFLAGS += -pedantic -Wextra -Wshadow
-
-# Add version flag for info in target exe
 CXXFLAGS += -DVERSION=$(VERSION)
 
-# Set 4MB stack size
-CXXFLAGS += -Wl,--stack,4194304 -fexceptions
-
 DEPENDFLAGS += -std=c++17 -fexceptions
-LDFLAGS += -m$(bits) -Wl,--stack,4194304
+
+LDFLAGS += -m64 -Wl,--stack,4194304
 
 
 #######################################
-# 3. Compiler and link to target
+# 3. Compile and link to target
 #######################################
 
-# Use GNU compiler
 CXX = g++
 
 $(EXE_DEBUG): $(OBJS_DEBUG)
@@ -160,7 +139,6 @@ $(EXE_RELEASE): $(OBJS_RELEASE)
 
 $(OBJ_RELEASE_DIR)/%.o: %.cpp
 	g++ $(CXXFLAGS) -c -o $@ $<
-
 
 
 #######################################
@@ -177,12 +155,38 @@ release:
 	if not exist ".\obj_release" mkdir ".\obj_release"
 	$(MAKE) $(EXE_RELEASE) TYPE=release .depend
 
+archive:
+	$(MAKE) clean
+	$(MAKE) release
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_1CPU.exe
+	$(MAKE) clean
+	$(MAKE) release threads=3
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_3CPU.exe
+	$(MAKE) clean
+	$(MAKE) release threads=4
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_4CPU.exe
+	$(MAKE) clean
+	$(MAKE) release evalfile="F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue"
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_1CPU_nnue.exe
+	$(MAKE) clean
+	$(MAKE) release threads=3 evalfile="F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue"
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_3CPU_nnue.exe
+	$(MAKE) clean
+	$(MAKE) release threads=4 evalfile="F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue"
+	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
+	rename ..\archive\$(EXE_RELEASE) $(EXE)_4CPU_nnue.exe
+
 strip:
 	$(MAKE) release
 	$(MAKE) objClean
 
 test:
-	cd ../test & $(MAKE) TYPE=debug
+	cd ../test & $(MAKE) TYPE=debug evalfile=$(evalfile)
 
 clean:
 	$(MAKE) cleanExe
@@ -203,11 +207,11 @@ objClean:
 	del /Q .\obj_debug\ 2>nul
 
 help:
-	@echo "Build chai_$(VERSION) with "make target [threads=#threads] [hashMb=#hashMb]"
-	@echo "Possible targets are:"
-	@echo "make debug     > Build includes assertions, extra checks and information."
-	@echo "make release   > Build optimized on performance and speed."
-	@echo "make test      > Build test-suite."
+	@echo "To build chai_$(VERSION), use the "release" target. Optional parameters are indicated in brackets
+	@echo "Values for threads, hashMb and evalfile can also be set via GUI."
+	@echo ""
+	@echo "make release [threads=#threads] [hashMb=#hashMb] [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n]"
+	@echo "(defaults are:       =1                =256               =n                      =y          =y)"
 
 .depend:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null
