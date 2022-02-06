@@ -421,7 +421,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 
         // 50-move rule might checkmate / stalemate
         if (b->fiftyMove >= 100) {
-            return (b->fiftyMove == 100 
+            return (   b->fiftyMove == 100 
                     && isCheck(b, b->stm) 
                     && !hasEvadingMove(b)) ? -VALUE_MATE + b->ply
                                            : 0;
@@ -553,7 +553,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
 
     // Reverse Futility Pruning:
     // Similar idea like NMP, but (eval - margin) is acting as the lower bound.
-    if (!pvNode
+    if (   !pvNode
         && !inCheck
         && depth < 5
         && nonPawnPieces(b)
@@ -570,7 +570,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
     // Give opposite side a free move and use nullScore as lower bound.
     // If this position is still winning, e.g. fails high, it will never be reached.
     // Restrict NMP to reasonable positions (zugzwang, depth, checks).
-    if (ss->currentMove != MOVE_NULL
+    if (   ss->currentMove != MOVE_NULL
         && !inCheck
         && !pvNode
         && depth > 2
@@ -900,23 +900,6 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
             return beta;
         }
 
-        // // If the currentMove scores higher than bestMove, update score and move.
-        // // This might be useful when this position is stored into the ttable.
-        // if (value > bestValue) {
-        // 	bestValue = value;
-        // 	bestMove  = currentMove;
-        // 	Assert(bestValue < VALUE_INFTY);
-
-        // 	// If the currentMove scores higher than alpha, the principal variation
-        // 	// is updated because a better move for this position has been found.
-        // 	if (value > alpha) {
-        // 		alpha = value;
-
-        // 		if (pvNode)
-        // 			updatePvLine(ss->pvLine, bestMove, (ss + 1)->pvLine);
-
-        // 	}
-        // }
     }
 
     Assert(alpha >= oldAlpha);
