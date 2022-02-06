@@ -208,7 +208,6 @@ cleanObj:
 help:
 	$(info To build chai_$(VERSION), use the "release" target (optional parameters are indicated in brackets))
 	$(info > make release [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n])
-	@:
 
 .depend:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null
