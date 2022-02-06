@@ -13,10 +13,10 @@
 
 
 enum CASTLING_RIGHTS {
-	K_CASTLE = 1 << 0,
-	Q_CASTLE = 1 << 1,
-	k_CASTLE = 1 << 2,
-	q_CASTLE = 1 << 3
+    K_CASTLE = 1 << 0,
+    Q_CASTLE = 1 << 1,
+    k_CASTLE = 1 << 2,
+    q_CASTLE = 1 << 3
 };
 
 
@@ -29,18 +29,18 @@ const int pieceKing[13]        = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 };
 
 
 const int stmPiece[7][2] = { 
-	{Piece::NO_PIECE, Piece::NO_PIECE},
-	{Piece::p, Piece::P},
-	{Piece::n, Piece::N},
-	{Piece::b, Piece::B},
-	{Piece::r, Piece::R},
-	{Piece::q, Piece::Q},
-	{Piece::k, Piece::K},
+    {Piece::NO_PIECE, Piece::NO_PIECE},
+    {Piece::p, Piece::P},
+    {Piece::n, Piece::N},
+    {Piece::b, Piece::B},
+    {Piece::r, Piece::R},
+    {Piece::q, Piece::Q},
+    {Piece::k, Piece::K},
 };
 
 const Color pieceCol[13] = { BW,
-	WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
-	BLACK, BLACK, BLACK, BLACK, BLACK, BLACK
+    WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
+    BLACK, BLACK, BLACK, BLACK, BLACK, BLACK
 };
 
 const std::string pieceChar = ".PNBRQKpnbrqk";
@@ -50,21 +50,21 @@ const std::string fileChar  = "abcdefgh";
 
 
 inline int fileRankToSq(int f, int r) {
-	return 8 * r + f;
+    return 8 * r + f;
 }
 
 inline bool hasBishopOrKnight(Board* b, Color color) {
-	return (b->pieces[BISHOP] & b->color[color]) 
-		|| (b->pieces[KNIGHT] & b->color[color]);
+    return (b->pieces[BISHOP] & b->color[color]) 
+        || (b->pieces[KNIGHT] & b->color[color]);
 }
 
 template<Color color>
 inline int relSeventh() {
-	return (color == WHITE) ? RANK_7 : RANK_2;
+    return (color == WHITE) ? RANK_7 : RANK_2;
 }
 
 inline int relSquare(int sq, Color color) {
-	return (color == WHITE) ? sq : mirror64[sq];
+    return (color == WHITE) ? sq : mirror64[sq];
 }
 
 Bitboard getDiagPieces(Board* b, Color color);

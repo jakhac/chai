@@ -9,55 +9,55 @@ void logDebug(std::string errMsg) {
 
 void printEval(Board* b) {
 
-	cout << "Overall evaluation: "  << evaluation(b) 
-		 << " (positive states advantage for white)" << endl
-		 << "\tPSQT (opening)\t "  << b->psqtOpening << endl
-		 << "\tPSQT (endgame)\t "  << b->psqtEndgame << endl;
+    cout << "Overall evaluation: "  << evaluation(b) 
+         << " (positive states advantage for white)" << endl
+         << "\tPSQT (opening)\t "  << b->psqtOpening << endl
+         << "\tPSQT (endgame)\t "  << b->psqtEndgame << endl;
 
 #ifdef USE_NNUE
-	// Use NNUE on balanced positions
-	if (canUseNNUE) {
-		cout << "\tNNUE\t\t " << NNUE::evaluateNNUE(b) << endl;
-	}
+    // Use NNUE on balanced positions
+    if (canUseNNUE) {
+        cout << "\tNNUE\t\t " << NNUE::evaluateNNUE(b) << endl;
+    }
 #endif // USE_NNUE
 
 }
 
 void printCliHelp() {
     cout << "Command does not exist. Valid commands are:" << endl
-		 << "\tuci\t(start uci protocol)" << endl
-	 	 << "\ts\t(search current position)" << endl
-	 	 << "\t[e2e4]\t(apply move)" << endl
-	  	 << "\tpop\t(undo move)" << endl
-		 << "\tfen\t(parse fen)" << endl
+         << "\tuci\t(start uci protocol)" << endl
+          << "\ts\t(search current position)" << endl
+          << "\t[e2e4]\t(apply move)" << endl
+           << "\tpop\t(undo move)" << endl
+         << "\tfen\t(parse fen)" << endl
 #ifdef INFO
-    	 << "\tprint\t(print board status)" << endl
+         << "\tprint\t(print board status)" << endl
 #endif // INFO
-		 << "\tperft\t(perft this position)" << endl
-		 << "\tquit\t(exit program)" << endl
-		 << endl;
+         << "\tperft\t(perft this position)" << endl
+         << "\tquit\t(exit program)" << endl
+         << endl;
 }
 
 void printEngineMeta(std::string assert, std::string compiler, std::string simd) {
-    	cout << "chai " << TOSTRING(VERSION) << endl
-			 << "assert=" << assert
-			 << " buckets=" << BUCKETS
-			 << " threads=" << NUM_THREADS
-			 << " hashMb=" << DEFAULT_TT_SIZE
-			 << " simd=" << simd << endl
-			 << "compiler=" << compiler
-			 << " date=" << __DATE__ << endl << endl;
+        cout << "chai " << TOSTRING(VERSION) << endl
+             << "assert=" << assert
+             << " buckets=" << BUCKETS
+             << " threads=" << NUM_THREADS
+             << " hashMb=" << DEFAULT_TT_SIZE
+             << " simd=" << simd << endl
+             << "compiler=" << compiler
+             << " date=" << __DATE__ << endl << endl;
 }
 
 void printUCI_Info() {
     cout << "id name chai_" << TOSTRING(VERSION) << endl
-		 << "id author Jakob Hackstein" << endl
-		 << "option name Hash type spin default 256 min 2 max 8192" << endl
-		 << "option name Threads type spin default " 
-		 << NUM_THREADS << " min 1 max " << MAX_THREADS << endl
-		 << "option name SyzygyPath type string default \"\"" << endl
-		 << "option name EvalFile type string default \"\"" << endl
-		 << "uciok" << endl;
+         << "id author Jakob Hackstein" << endl
+         << "option name Hash type spin default 256 min 2 max 8192" << endl
+         << "option name Threads type spin default " 
+         << NUM_THREADS << " min 1 max " << MAX_THREADS << endl
+         << "option name SyzygyPath type string default \"\"" << endl
+         << "option name EvalFile type string default \"\"" << endl
+         << "uciok" << endl;
 }
 
 void printBitBoard(Bitboard* bb) {
@@ -254,235 +254,235 @@ std::string getTimeAndDate() {
 
 bool parseFen(Board* board, std::string fen) {
 
-	reset(board);
+    reset(board);
 
-	// Shortest fen (2 kings, no rights) "8/8/8/k7/K7/8/8/8 w - - 0 1"
-	if (fen.length() < 27) {
-		return true;
-	}
+    // Shortest fen (2 kings, no rights) "8/8/8/k7/K7/8/8/8 w - - 0 1"
+    if (fen.length() < 27) {
+        return true;
+    }
 
-	int file = FILE_A, rank = RANK_8;
-	int index = 0, square = 0, piece = 0, count = 0;
+    int file = FILE_A, rank = RANK_8;
+    int index = 0, square = 0, piece = 0, count = 0;
 
-	while (rank >= RANK_1) {
-		count = 1;
-		switch (fen[index]) {
-			case 'p': piece = Piece::p; break;
-			case 'r': piece = Piece::r; break;
-			case 'n': piece = Piece::n; break;
-			case 'b': piece = Piece::b; break;
-			case 'k': piece = Piece::k; break;
-			case 'q': piece = Piece::q; break;
-			case 'P': piece = Piece::P; break;
-			case 'R': piece = Piece::R; break;
-			case 'N': piece = Piece::N; break;
-			case 'B': piece = Piece::B; break;
-			case 'K': piece = Piece::K; break;
-			case 'Q': piece = Piece::Q; break;
+    while (rank >= RANK_1) {
+        count = 1;
+        switch (fen[index]) {
+            case 'p': piece = Piece::p; break;
+            case 'r': piece = Piece::r; break;
+            case 'n': piece = Piece::n; break;
+            case 'b': piece = Piece::b; break;
+            case 'k': piece = Piece::k; break;
+            case 'q': piece = Piece::q; break;
+            case 'P': piece = Piece::P; break;
+            case 'R': piece = Piece::R; break;
+            case 'N': piece = Piece::N; break;
+            case 'B': piece = Piece::B; break;
+            case 'K': piece = Piece::K; break;
+            case 'Q': piece = Piece::Q; break;
 
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-				piece = NO_PTYPE;
-				count = fen[index] - '0';
-				break;
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+                piece = NO_PTYPE;
+                count = fen[index] - '0';
+                break;
 
-			case '/':
-			case ' ':
-				rank--;
-				file = FILE_A;
-				index++;
-				continue;
+            case '/':
+            case ' ':
+                rank--;
+                file = FILE_A;
+                index++;
+                continue;
 
-			default:
-				cout << "FEN error: " << fen[index] << endl;
-				return true;
-		}
+            default:
+                cout << "FEN error: " << fen[index] << endl;
+                return true;
+        }
 
-		for (int i = 0; i < count; i++) {
-			square = rank * 8 + file;
+        for (int i = 0; i < count; i++) {
+            square = rank * 8 + file;
 
-			if (piece != NO_PTYPE) {
-				setPiece(board, piece, square, pieceCol[piece]);
-			}
+            if (piece != NO_PTYPE) {
+                setPiece(board, piece, square, pieceCol[piece]);
+            }
 
-			file++;
-		}
-		index++;
-	}
+            file++;
+        }
+        index++;
+    }
 
-	// assert for correct position
-	Assert(fen[index] == 'w' || fen[index] == 'b');
-	board->stm = (fen[index] == 'w') ? WHITE 
-									 : BLACK;
-	index += 2;
+    // assert for correct position
+    Assert(fen[index] == 'w' || fen[index] == 'b');
+    board->stm = (fen[index] == 'w') ? WHITE 
+                                     : BLACK;
+    index += 2;
 
-	// castle permission
-	for (int i = 0; i < 4; i++) {
-		if (fen[index] == ' ') {
-			break;
-		}
-		switch (fen[index]) {
-			case 'K': board->castlePermission |= K_CASTLE; break;
-			case 'Q': board->castlePermission |= Q_CASTLE; break;
-			case 'k': board->castlePermission |= k_CASTLE; break;
-			case 'q': board->castlePermission |= q_CASTLE; break;
-			default: break;
-		}
-		index++;
-	}
-	index++;
-	Assert(board->castlePermission >= 0 && board->castlePermission <= 15);
+    // castle permission
+    for (int i = 0; i < 4; i++) {
+        if (fen[index] == ' ') {
+            break;
+        }
+        switch (fen[index]) {
+            case 'K': board->castlePermission |= K_CASTLE; break;
+            case 'Q': board->castlePermission |= Q_CASTLE; break;
+            case 'k': board->castlePermission |= k_CASTLE; break;
+            case 'q': board->castlePermission |= q_CASTLE; break;
+            default: break;
+        }
+        index++;
+    }
+    index++;
+    Assert(board->castlePermission >= 0 && board->castlePermission <= 15);
 
-	// en passant square
-	if (fen[index] != '-') {
-		file = fen[index] - 'a';
-		rank = fen[index + 1] - '1';
+    // en passant square
+    if (fen[index] != '-') {
+        file = fen[index] - 'a';
+        rank = fen[index + 1] - '1';
 
-		Assert(file >= FILE_A && file <= FILE_H);
-		Assert(rank >= RANK_1 && rank <= RANK_8);
+        Assert(file >= FILE_A && file <= FILE_H);
+        Assert(rank >= RANK_1 && rank <= RANK_8);
 
-		board->enPas = fileRankToSq(file, rank);
-		Assert(validEnPasSq(board->enPas));
-		index += 3;
-	} else {
-		index += 2;
-	}
+        board->enPas = fileRankToSq(file, rank);
+        Assert(validEnPasSq(board->enPas));
+        index += 3;
+    } else {
+        index += 2;
+    }
 
-	board->fiftyMove += atoi(&fen[index]);
+    board->fiftyMove += atoi(&fen[index]);
 
-	index += 2;
+    index += 2;
 
-	std::string fullMoveStr = "";
-	while (fen[index]) {
-		fullMoveStr += fen[index];
-		index++;
-	}
+    std::string fullMoveStr = "";
+    while (fen[index]) {
+        fullMoveStr += fen[index];
+        index++;
+    }
 
-	board->halfMoves += std::stoi(fullMoveStr) * 2;
+    board->halfMoves += std::stoi(fullMoveStr) * 2;
 
-	board->zobristPawnKey = generatePawnHashKey(board);
-	board->zobristKey     = generateZobristKey(board);
+    board->zobristPawnKey = generatePawnHashKey(board);
+    board->zobristKey     = generateZobristKey(board);
 
-	board->psqtOpening = calcPSQT(board, PSQT_OPENING);
-	board->psqtEndgame = calcPSQT(board, PSQT_ENDGAME);
-	board->material    = materialScore(board);
+    board->psqtOpening = calcPSQT(board, PSQT_OPENING);
+    board->psqtEndgame = calcPSQT(board, PSQT_ENDGAME);
+    board->material    = materialScore(board);
 
-	checkBoard(board);
-	return false;
+    checkBoard(board);
+    return false;
 }
 
 std::string getFEN(Board* b) {
 
-	int piece;
-	int empty = 0;
-	std::string fen = "";
+    int piece;
+    int empty = 0;
+    std::string fen = "";
 
-	int i = 0;
-	int r = RANK_8;
-	int f = FILE_A;
+    int i = 0;
+    int r = RANK_8;
+    int f = FILE_A;
 
-	while (r >= RANK_1) {
+    while (r >= RANK_1) {
 
-		f = FILE_A;
-		while (f <= FILE_H) {
-			i = fileRankToSq(f, r);
+        f = FILE_A;
+        while (f <= FILE_H) {
+            i = fileRankToSq(f, r);
 
-			piece = pieceAt(b, i);
-			if (pieceValid(piece)) {
-				if (empty) {
-					fen += std::to_string(empty);
-					empty = 0;
-				}
-				fen += pieceChar[piece];
-			} else {
-				empty++;
-			}
+            piece = pieceAt(b, i);
+            if (pieceValid(piece)) {
+                if (empty) {
+                    fen += std::to_string(empty);
+                    empty = 0;
+                }
+                fen += pieceChar[piece];
+            } else {
+                empty++;
+            }
 
-			f++;
-		}
+            f++;
+        }
 
-		if (empty) {
-			fen += std::to_string(empty);
-		}
+        if (empty) {
+            fen += std::to_string(empty);
+        }
 
-		empty = 0;
+        empty = 0;
 
-		if (r != RANK_1) {
-			fen += "/";
-		}
+        if (r != RANK_1) {
+            fen += "/";
+        }
 
-		r--;
-	}
+        r--;
+    }
 
-	if (b->stm == WHITE) {
-		fen += " w ";
-	} else {
-		fen += " b ";
-	}
+    if (b->stm == WHITE) {
+        fen += " w ";
+    } else {
+        fen += " b ";
+    }
 
-	if (b->castlePermission & K_CASTLE) fen += "K";
-	if (b->castlePermission & Q_CASTLE) fen += "Q";
-	if (b->castlePermission & k_CASTLE) fen += "k";
-	if (b->castlePermission & q_CASTLE) fen += "q";
-	fen += " ";
+    if (b->castlePermission & K_CASTLE) fen += "K";
+    if (b->castlePermission & Q_CASTLE) fen += "Q";
+    if (b->castlePermission & k_CASTLE) fen += "k";
+    if (b->castlePermission & q_CASTLE) fen += "q";
+    fen += " ";
 
-	if (b->enPas != DEFAULT_EP_SQ) {
-		fen += ('a' + toFile(b->enPas));
-		fen += ('1' + toRank(b->enPas));
-	} else {
-		fen += "-";
-	}
+    if (b->enPas != DEFAULT_EP_SQ) {
+        fen += ('a' + toFile(b->enPas));
+        fen += ('1' + toRank(b->enPas));
+    } else {
+        fen += "-";
+    }
 
-	fen += " " + std::to_string(b->undoPly) + " " + std::to_string(b->halfMoves);
+    fen += " " + std::to_string(b->undoPly) + " " + std::to_string(b->halfMoves);
 
-	return fen;
+    return fen;
 }
 
 Move parseMove(Board* b, std::string move) {
 
-	if (move == "0000")
-		return MOVE_NULL;
+    if (move == "0000")
+        return MOVE_NULL;
 
-	int from = fileRankToSq(move[0] - 97, move[1] - 49);
-	int to   = fileRankToSq(move[2] - 97, move[3] - 49);
+    int from = fileRankToSq(move[0] - 97, move[1] - 49);
+    int to   = fileRankToSq(move[2] - 97, move[3] - 49);
 
-	int movingPiece = pieceAt(b, from);
-	int promPiece   = 0;
-	int MOVE_FLAG   = NORMAL_MOVE;
+    int movingPiece = pieceAt(b, from);
+    int promPiece   = 0;
+    int MOVE_FLAG   = NORMAL_MOVE;
 
-	// Set possible pawn flags
-	if (piecePawn[movingPiece]) {
+    // Set possible pawn flags
+    if (piecePawn[movingPiece]) {
 
-		// Set ep flag if to square is en passant
-		if (   to == b->enPas
-			&& b->enPas != DEFAULT_EP_SQ ) {
+        // Set ep flag if to square is en passant
+        if (   to == b->enPas
+            && b->enPas != DEFAULT_EP_SQ ) {
 
-			Assert(abs(from - to) == 7 || abs(from - to) == 9);
-			MOVE_FLAG = EP_MOVE;
+            Assert(abs(from - to) == 7 || abs(from - to) == 9);
+            MOVE_FLAG = EP_MOVE;
 
-		} else if (   toRank(to) == RANK_1 
-				   || toRank(to) == RANK_8) {
+        } else if (   toRank(to) == RANK_1 
+                   || toRank(to) == RANK_8) {
 
-			MOVE_FLAG = PROM_MOVE;
+            MOVE_FLAG = PROM_MOVE;
 
-			switch (move[4]) {
-				case 'n': promPiece = PROM_TO_KNIGHT; break;
-				case 'b': promPiece = PROM_TO_BISHOP; break;
-				case 'r': promPiece = PROM_TO_ROOK; break;
-				default:  promPiece = PROM_TO_QUEEN; break;
-			}
-		}
-	}
+            switch (move[4]) {
+                case 'n': promPiece = PROM_TO_KNIGHT; break;
+                case 'b': promPiece = PROM_TO_BISHOP; break;
+                case 'r': promPiece = PROM_TO_ROOK; break;
+                default:  promPiece = PROM_TO_QUEEN; break;
+            }
+        }
+    }
 
-	if (   abs(from - to) == 2
-		&& pieceKing[movingPiece])
-		MOVE_FLAG = CASTLE_MOVE;
+    if (   abs(from - to) == 2
+        && pieceKing[movingPiece])
+        MOVE_FLAG = CASTLE_MOVE;
  
-	return serializeMove(from, to, MOVE_FLAG, promPiece);
+    return serializeMove(from, to, MOVE_FLAG, promPiece);
 }

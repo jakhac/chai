@@ -2,7 +2,7 @@
 
 
 // SIMD layers implementation from Cfish. For further SIMD
-// instruction-sets see https://github.com/syzygy1/Cfish.
+// instruction-sets (SSE2, AVX512) see https://github.com/syzygy1/Cfish.
 
 
 a64 int16_t feat_weights[FEAT_INPUT_SIZE * FEAT_OUT_SIZE_HALF];

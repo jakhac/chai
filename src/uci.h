@@ -14,7 +14,7 @@
 
 
 inline bool strStartsWith(std::string str, std::string start) {
-	return str.rfind(start, 0) == 0;
+    return str.rfind(start, 0) == 0;
 }
 
 

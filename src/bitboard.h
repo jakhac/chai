@@ -8,14 +8,14 @@
  * @brief Get pieces of given type and color.
  */
 inline Bitboard getPieces(Board* b, int piece, Color color) {
-	return b->pieces[pieceType[piece]] & b->color[color];
+    return b->pieces[pieceType[piece]] & b->color[color];
 }
 
 /**
  * @brief Returns the color at sq: Either black or white since we assume non-empty square!
  */
 inline Color colorAt(Board* b, int sq) {
-	return (b->color[WHITE] & (1ULL << sq)) ? WHITE : BLACK;
+    return (b->color[WHITE] & (1ULL << sq)) ? WHITE : BLACK;
 }
 
 /**
@@ -23,22 +23,22 @@ inline Color colorAt(Board* b, int sq) {
  */
 inline int pieceAt(Board* b, int sq) {
 
-	for (int i = PAWN; i <= KING; i++) {
-		if (b->pieces[i] & (1ULL << sq)) {
-			int offset = (colorAt(b, sq) == BLACK) ? 6 : 0;
-			return i + offset;
-		}
-	}
+    for (int i = PAWN; i <= KING; i++) {
+        if (b->pieces[i] & (1ULL << sq)) {
+            int offset = (colorAt(b, sq) == BLACK) ? 6 : 0;
+            return i + offset;
+        }
+    }
 
-	return Piece::NO_PIECE;
+    return Piece::NO_PIECE;
 }
 
 /**
  * @brief Return the king square for color.
  */
 inline getKingSquare(Board* b, Color color) {
-	Assert(getPieces(b, KING, color));
-	return getLSB(getPieces(b, KING, color));
+    Assert(getPieces(b, KING, color));
+    return getLSB(getPieces(b, KING, color));
 }
 
 

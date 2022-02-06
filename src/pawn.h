@@ -14,8 +14,8 @@ const Value PAWN_SHIELD_REWARD       = 5;
 
 // const Value PASSED_PAWN_REWARD = 8;
 const Value PASSED_PAWN_REWARD[2][8] = {
-	{ 200, 110, 75, 35, 20, 10, 5, 0 },
-	{ 0, 5, 10, 20, 35, 75, 110, 200 }
+    { 200, 110, 75, 35, 20, 10, 5, 0 },
+    { 0, 5, 10, 20, 35, 75, 110, 200 }
 };
 
 

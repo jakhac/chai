@@ -21,26 +21,26 @@
  * @returns Index of first found bit.
  */
 inline int getLSB(Bitboard bb) {
-	Assert(bb);
+    Assert(bb);
 
 #if defined(_MSC_VER)
-	unsigned long ret;
-	_BitScanForward64(&ret, bb);
-	return unsigned(ret);
+    unsigned long ret;
+    _BitScanForward64(&ret, bb);
+    return unsigned(ret);
 #else
-	return __builtin_ctzll(bb);
+    return __builtin_ctzll(bb);
 #endif
 }
 
 inline int getLSB_tb(Bitboard bb) {
-	Assert(bb);
+    Assert(bb);
 
 #if defined(_MSC_VER)
-	unsigned long ret;
-	_BitScanForward64(&ret, bb);
-	return unsigned(ret);
+    unsigned long ret;
+    _BitScanForward64(&ret, bb);
+    return unsigned(ret);
 #else
-	return __builtin_ctzll(bb);
+    return __builtin_ctzll(bb);
 #endif
 }
 
@@ -52,14 +52,14 @@ inline int getLSB_tb(Bitboard bb) {
  * @returns Index of first found bit.
  */
 inline int getMSB(Bitboard bb) {
-	Assert(bb);
+    Assert(bb);
 
 #if defined(_MSC_VER)
-	unsigned long ret;
-	_BitScanReverse64(&ret, bb);
-	return (unsigned)ret;
+    unsigned long ret;
+    _BitScanReverse64(&ret, bb);
+    return (unsigned)ret;
 #else
-	return __builtin_clzll(bb) ^ 63;
+    return __builtin_clzll(bb) ^ 63;
 #endif
 }
 
@@ -72,9 +72,9 @@ inline int getMSB(Bitboard bb) {
  */
 inline int popCount(Bitboard bb) {
 #if defined(_MSC_VER)
-	return (int)__popcnt64(bb);
+    return (int)__popcnt64(bb);
 #elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
-	return (int)_popcnt64(bb);
+    return (int)_popcnt64(bb);
 #endif
 }
 
@@ -86,27 +86,27 @@ inline int popCount(Bitboard bb) {
  * @returns Index of popped bit.
  */
 inline int popLSB(Bitboard* bb) {
-	Assert(*bb);
-	int lsb = getLSB(*bb);
-	*bb &= (*bb - 1);
-	return lsb;
+    Assert(*bb);
+    int lsb = getLSB(*bb);
+    *bb &= (*bb - 1);
+    return lsb;
 }
 
 inline int popLSB_tb(uint64_t* bb) {
-	Assert(*bb);
-	int lsb = getLSB_tb(*bb);
-	*bb &= (*bb - 1);
-	return lsb;
+    Assert(*bb);
+    int lsb = getLSB_tb(*bb);
+    *bb &= (*bb - 1);
+    return lsb;
 }
 
 inline int popMSB(uint64_t* bb) {
-	int msb = getMSB(*bb);
-	*bb ^= 1ull << msb;
-	return msb;
+    int msb = getMSB(*bb);
+    *bb ^= 1ull << msb;
+    return msb;
 }
 
 inline bool bitIsSet(uint64_t bb, int i) {
-	return bb & (1ull << i);
+    return bb & (1ull << i);
 }
 
 /**
@@ -116,8 +116,8 @@ inline bool bitIsSet(uint64_t bb, int i) {
  * @param  i  Index of bit that is set to 1.
  */
 inline void setBit(Bitboard* bb, int i) {
-	Assert(bitIsSet(*bb, i));
-	*bb ^= (1ULL << i);
+    Assert(bitIsSet(*bb, i));
+    *bb ^= (1ULL << i);
 }
 
 /**
@@ -127,8 +127,8 @@ inline void setBit(Bitboard* bb, int i) {
  * @param  i  Index of bit that is set to 0.
  */
 inline void clearBit(Bitboard* bb, int i) {
-	Assert(bitIsSet(*bb, i));
-	*bb ^= 1ULL << i;
+    Assert(bitIsSet(*bb, i));
+    *bb ^= 1ULL << i;
 }
 
 /**
@@ -138,8 +138,8 @@ inline void clearBit(Bitboard* bb, int i) {
  */
 inline int getTimeMs() {
 #ifdef __GNUG__
-	return (int)GetTickCount();
+    return (int)GetTickCount();
 #else
-	return (int)GetTickCount64();
+    return (int)GetTickCount64();
 #endif
 }

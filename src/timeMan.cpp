@@ -5,9 +5,9 @@ const int pieceValuesPawns[7] = { 0, 1, 3, 3, 5, 9, 0 };
 int totalMaterial(Board* b) {
 
     int value = 0;
-	for (int i = 1; i < 7; i++) {
-		value += popCount(b->pieces[i]) * pieceValuesPawns[i];
-	}
+    for (int i = 1; i < 7; i++) {
+        value += popCount(b->pieces[i]) * pieceValuesPawns[i];
+    }
 
     return value;
 }
@@ -37,9 +37,9 @@ static int middleGameFactor(int moveNumber) {
 int allocateTime(Board* b, int timeLeft, int inc) {
 
         // Catch low remaining time
-		if (timeLeft <= 2000) {
+        if (timeLeft <= 2000) {
             return (inc / 8);
-		} else if (timeLeft <= 3500) {
+        } else if (timeLeft <= 3500) {
             return (inc / 4);
         }
 
@@ -61,7 +61,7 @@ int allocateTime(Board* b, int timeLeft, int inc) {
              << endl;
 #endif // INFO
         
-		Assert(timeToAllocate > 0);
+        Assert(timeToAllocate > 0);
         return std::min(timeToAllocate, timeLeft - 100);
 }
 

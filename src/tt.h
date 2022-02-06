@@ -42,11 +42,11 @@ const size_t DEFAULT_TT_SIZE =
 
 
 typedef enum TT_FLAG {
-	TT_NONE  = 0,
-	TT_ALPHA = 1,
-	TT_BETA  = 1 << 1,
-	TT_VALUE = 1 << 2,
-	TT_EVAL  = 1 << 3
+    TT_NONE  = 0,
+    TT_ALPHA = 1,
+    TT_BETA  = 1 << 1,
+    TT_VALUE = 1 << 2,
+    TT_EVAL  = 1 << 3
 } bound_t;
 
 

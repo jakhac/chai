@@ -20,15 +20,15 @@ const Value VALUE_TB_WIN     = VALUE_MATE - 1000;
 
 
 inline Tuple t(Value v1, Value v2) {
-	return (v2 << 16) + (v1);
+    return (v2 << 16) + (v1);
 }
 
 inline Value t1(Tuple tuple) {
-	return (int16_t)((uint16_t)((unsigned)(tuple)));
+    return (int16_t)((uint16_t)((unsigned)(tuple)));
 }
 
 inline Value t2(Tuple tuple) {
-	return (int16_t)((uint16_t)((unsigned)(tuple + 0x8000) >> 16));
+    return (int16_t)((uint16_t)((unsigned)(tuple + 0x8000) >> 16));
 }
 
 // namespace chai {
@@ -37,16 +37,16 @@ inline Value t2(Tuple tuple) {
 
 
 const Value pieceValues[13] = {
-	0, 100, 325, 325, 550, 1000,
-	0, 100, 325, 325, 550, 1000, 
-	0
+    0, 100, 325, 325, 550, 1000,
+    0, 100, 325, 325, 550, 1000, 
+    0
 };
 
 
 const Tuple pieceTupleValues[13] = {
-	0, t(100, 160), t(325, 310), t(325, 340), t(550, 640), t(1000, 1150),
-	0, t(100, 160), t(325, 310), t(325, 340), t(550, 640), t(1000, 1150),
-	0
+    0, t(100, 160), t(325, 310), t(325, 340), t(550, 640), t(1000, 1150),
+    0, t(100, 160), t(325, 310), t(325, 340), t(550, 640), t(1000, 1150),
+    0
 };
 
 

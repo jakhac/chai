@@ -29,22 +29,22 @@ using std::fixed;
 #else
 #define Assert(n) \
 if(!(n)) { \
-	std::string errMsg = "Failed assert \"" + TOSTRING(n) + "\"\n" \
-		+ "in " + TOSTRING(__FILE__) + ":" + TOSTRING(__LINE__) + "\n" \
-		+ "at " + getTimeAndDate() +"\n\n"; \
-	cout << errMsg; \
-	logDebug(errMsg); \
-	exit(1); \
+    std::string errMsg = "Failed assert \"" + TOSTRING(n) + "\"\n" \
+        + "in " + TOSTRING(__FILE__) + ":" + TOSTRING(__LINE__) + "\n" \
+        + "at " + getTimeAndDate() +"\n\n"; \
+    cout << errMsg; \
+    logDebug(errMsg); \
+    exit(1); \
 }
 #define Assert3(n, x, y) \
 if(!(n)) { \
-	std::string errMsg = "Failed assert \"" + TOSTRING(n) + "\"\n" \
-		+ TOSTRING(x) + "=" + x + " " + TOSTRING(y) + "=" + y + "\n" \
-		+ "in " + TOSTRING(__FILE__) + ":" + TOSTRING(__LINE__) + "\n" \
-		+ "at " + getTime() + "\n\n"; \
-	cerr << errMsg; \
-	logDebug(errMsg); \
-	exit(1); \
+    std::string errMsg = "Failed assert \"" + TOSTRING(n) + "\"\n" \
+        + TOSTRING(x) + "=" + x + " " + TOSTRING(y) + "=" + y + "\n" \
+        + "in " + TOSTRING(__FILE__) + ":" + TOSTRING(__LINE__) + "\n" \
+        + "at " + getTime() + "\n\n"; \
+    cerr << errMsg; \
+    logDebug(errMsg); \
+    exit(1); \
 }
 #endif // ASSERT
 
@@ -58,9 +58,9 @@ static std::string ver_string(int a, int b, int c) {
 
 const std::string info_ASSERT = 
 #ifdef ASSERT
-	"1";
+    "1";
 #else
-	"0";
+    "0";
 #endif // ASSERT
 
 const std::string info_CXX =
@@ -72,11 +72,11 @@ const std::string info_CXX =
 
 const std::string info_SIMD =
 #if defined(USE_AVX2)
-	"AVX2";
+    "AVX2";
 #elif defined(USE_SSSE3)
-	"SSSE3";
+    "SSSE3";
 #else
-	"NONE";
+    "NONE";
 #endif
 
 

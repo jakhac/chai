@@ -65,18 +65,18 @@ const Bitboard MIDDLE_SQUARES = 0x00003C3C3C3C0000;
 const Bitboard BORDER_SQUARES = FILE_A_HEX | FILE_H_HEX | RANK_1_HEX | RANK_8_HEX;
 
 const Bitboard FILE_LIST[8] = {
-	FILE_A_HEX, FILE_B_HEX, FILE_C_HEX, FILE_D_HEX,
-	FILE_E_HEX, FILE_F_HEX, FILE_G_HEX, FILE_H_HEX
+    FILE_A_HEX, FILE_B_HEX, FILE_C_HEX, FILE_D_HEX,
+    FILE_E_HEX, FILE_F_HEX, FILE_G_HEX, FILE_H_HEX
 };
 
 const Bitboard RANK_LIST[8] = {
-	RANK_1_HEX, RANK_2_HEX, RANK_3_HEX, RANK_4_HEX,
-	RANK_5_HEX, RANK_6_HEX, RANK_7_HEX, RANK_8_HEX
+    RANK_1_HEX, RANK_2_HEX, RANK_3_HEX, RANK_4_HEX,
+    RANK_5_HEX, RANK_6_HEX, RANK_7_HEX, RANK_8_HEX
 };
 
 namespace Mask {
 
-	void init();
+    void init();
 
 }
 
@@ -100,7 +100,7 @@ Bitboard lookUpQueenMoves(int sq, Bitboard blockers);
  * @returns Line-bitboard or zero (!) if s1 and s2 are not aligned.
  */
 inline Bitboard lineBetween(int s1, int s2) {
-	return lineBB[s1][s2];
+    return lineBB[s1][s2];
 }
 
 /**
@@ -108,30 +108,30 @@ inline Bitboard lineBetween(int s1, int s2) {
  * @returns True if all squares are aligned, else false.
  */
 inline bool aligned(int s1, int s2, int s3) {
-	return lineBetween(s1, s2) & setMask[s3];
+    return lineBetween(s1, s2) & setMask[s3];
 }
 
 /**
  * Returns bitboard with all bits sets between sq1 and sq2
  */
 inline Bitboard obstructed(int sq1, int sq2) {
-	return inBetween[sq1][sq2];
+    return inBetween[sq1][sq2];
 }
 
 inline int toRank(int sq) {
-	return squareToRank[sq];
+    return squareToRank[sq];
 }
 
 inline int toFile(int sq) {
-	return squareToFile[sq];
+    return squareToFile[sq];
 }
 
 inline Bitboard toRankBB(int sq) {
-	return RANK_LIST[toRank(sq)];
+    return RANK_LIST[toRank(sq)];
 }
 
 inline Bitboard toFileBB(int sq) {
-	return FILE_LIST[toFile(sq)];
+    return FILE_LIST[toFile(sq)];
 }
 
 
@@ -141,15 +141,15 @@ inline Bitboard toFileBB(int sq) {
 template<PieceType piece>
 inline Bitboard getMoveMask(int sq, Bitboard occ, Color color) {
 
-	switch (piece) {
-		case PAWN:   return pawnAtkMask[color][sq];
-		case KNIGHT: return knightAtkMask[sq];
-		case BISHOP: return lookUpBishopMoves(sq, occ);
-		case ROOK:   return lookUpRookMoves(sq, occ);
-		case QUEEN:  return lookUpQueenMoves(sq, occ);
-		case KING:   return kingAtkMask[sq];
-		default: break;
-	}
+    switch (piece) {
+        case PAWN:   return pawnAtkMask[color][sq];
+        case KNIGHT: return knightAtkMask[sq];
+        case BISHOP: return lookUpBishopMoves(sq, occ);
+        case ROOK:   return lookUpRookMoves(sq, occ);
+        case QUEEN:  return lookUpQueenMoves(sq, occ);
+        case KING:   return kingAtkMask[sq];
+        default: break;
+    }
 }
 
 /**
@@ -158,78 +158,78 @@ inline Bitboard getMoveMask(int sq, Bitboard occ, Color color) {
 template<PieceType piece>
 inline Bitboard getMoveMask(int sq, Bitboard occ) {
 
-	switch (piece) {
-		case PAWN:   Assert(false); exit(1);
-		case KNIGHT: return knightAtkMask[sq];
-		case BISHOP: return lookUpBishopMoves(sq, occ);
-		case ROOK:   return lookUpRookMoves(sq, occ);
-		case QUEEN:  return lookUpQueenMoves(sq, occ);
-		case KING:   return kingAtkMask[sq];
-		default: break;
-	}
+    switch (piece) {
+        case PAWN:   Assert(false); exit(1);
+        case KNIGHT: return knightAtkMask[sq];
+        case BISHOP: return lookUpBishopMoves(sq, occ);
+        case ROOK:   return lookUpRookMoves(sq, occ);
+        case QUEEN:  return lookUpQueenMoves(sq, occ);
+        case KING:   return kingAtkMask[sq];
+        default: break;
+    }
 }
 
 
 /** Store number of bits required for that square in rook magic table index */
 const int rookIndexBits[64] = {
-	12, 11, 11, 11, 11, 11, 11, 12,
-	11, 10, 10, 10, 10, 10, 10, 11,
-	11, 10, 10, 10, 10, 10, 10, 11,
-	11, 10, 10, 10, 10, 10, 10, 11,
-	11, 10, 10, 10, 10, 10, 10, 11,
-	11, 10, 10, 10, 10, 10, 10, 11,
-	11, 10, 10, 10, 10, 10, 10, 11,
-	12, 11, 11, 11, 11, 11, 11, 12
+    12, 11, 11, 11, 11, 11, 11, 12,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    12, 11, 11, 11, 11, 11, 11, 12
 };
 
 /** Store number of bits required for that square in bishop magic table index */
 const int bishopIndexBits[64] = {
-	6, 5, 5, 5, 5, 5, 5, 6,
-	5, 5, 5, 5, 5, 5, 5, 5,
-	5, 5, 7, 7, 7, 7, 5, 5,
-	5, 5, 7, 9, 9, 7, 5, 5,
-	5, 5, 7, 9, 9, 7, 5, 5,
-	5, 5, 7, 7, 7, 7, 5, 5,
-	5, 5, 5, 5, 5, 5, 5, 5,
-	6, 5, 5, 5, 5, 5, 5, 6
+    6, 5, 5, 5, 5, 5, 5, 6,
+    5, 5, 5, 5, 5, 5, 5, 5,
+    5, 5, 7, 7, 7, 7, 5, 5,
+    5, 5, 7, 9, 9, 7, 5, 5,
+    5, 5, 7, 9, 9, 7, 5, 5,
+    5, 5, 7, 7, 7, 7, 5, 5,
+    5, 5, 5, 5, 5, 5, 5, 5,
+    6, 5, 5, 5, 5, 5, 5, 6
 };
 
 /** Magic numbers for bishop squares */
 const Bitboard bishopMagic[64] = {
-	Bitboard(0x0002020202020200), Bitboard(0x0002020202020000), Bitboard(0x0004010202000000), Bitboard(0x0004040080000000),
-	Bitboard(0x0001104000000000), Bitboard(0x0000821040000000), Bitboard(0x0000410410400000), Bitboard(0x0000104104104000),
-	Bitboard(0x0000040404040400), Bitboard(0x0000020202020200), Bitboard(0x0000040102020000), Bitboard(0x0000040400800000),
-	Bitboard(0x0000011040000000), Bitboard(0x0000008210400000), Bitboard(0x0000004104104000), Bitboard(0x0000002082082000),
-	Bitboard(0x0004000808080800), Bitboard(0x0002000404040400), Bitboard(0x0001000202020200), Bitboard(0x0000800802004000),
-	Bitboard(0x0000800400A00000), Bitboard(0x0000200100884000), Bitboard(0x0000400082082000), Bitboard(0x0000200041041000),
-	Bitboard(0x0002080010101000), Bitboard(0x0001040008080800), Bitboard(0x0000208004010400), Bitboard(0x0000404004010200),
-	Bitboard(0x0000840000802000), Bitboard(0x0000404002011000), Bitboard(0x0000808001041000), Bitboard(0x0000404000820800),
-	Bitboard(0x0001041000202000), Bitboard(0x0000820800101000), Bitboard(0x0000104400080800), Bitboard(0x0000020080080080),
-	Bitboard(0x0000404040040100), Bitboard(0x0000808100020100), Bitboard(0x0001010100020800), Bitboard(0x0000808080010400),
-	Bitboard(0x0000820820004000), Bitboard(0x0000410410002000), Bitboard(0x0000082088001000), Bitboard(0x0000002011000800),
-	Bitboard(0x0000080100400400), Bitboard(0x0001010101000200), Bitboard(0x0002020202000400), Bitboard(0x0001010101000200),
-	Bitboard(0x0000410410400000), Bitboard(0x0000208208200000), Bitboard(0x0000002084100000), Bitboard(0x0000000020880000),
-	Bitboard(0x0000001002020000), Bitboard(0x0000040408020000), Bitboard(0x0004040404040000), Bitboard(0x0002020202020000),
-	Bitboard(0x0000104104104000), Bitboard(0x0000002082082000), Bitboard(0x0000000020841000), Bitboard(0x0000000000208800),
-	Bitboard(0x0000000010020200), Bitboard(0x0000000404080200), Bitboard(0x0000040404040400), Bitboard(0x0002020202020200)
+    Bitboard(0x0002020202020200), Bitboard(0x0002020202020000), Bitboard(0x0004010202000000), Bitboard(0x0004040080000000),
+    Bitboard(0x0001104000000000), Bitboard(0x0000821040000000), Bitboard(0x0000410410400000), Bitboard(0x0000104104104000),
+    Bitboard(0x0000040404040400), Bitboard(0x0000020202020200), Bitboard(0x0000040102020000), Bitboard(0x0000040400800000),
+    Bitboard(0x0000011040000000), Bitboard(0x0000008210400000), Bitboard(0x0000004104104000), Bitboard(0x0000002082082000),
+    Bitboard(0x0004000808080800), Bitboard(0x0002000404040400), Bitboard(0x0001000202020200), Bitboard(0x0000800802004000),
+    Bitboard(0x0000800400A00000), Bitboard(0x0000200100884000), Bitboard(0x0000400082082000), Bitboard(0x0000200041041000),
+    Bitboard(0x0002080010101000), Bitboard(0x0001040008080800), Bitboard(0x0000208004010400), Bitboard(0x0000404004010200),
+    Bitboard(0x0000840000802000), Bitboard(0x0000404002011000), Bitboard(0x0000808001041000), Bitboard(0x0000404000820800),
+    Bitboard(0x0001041000202000), Bitboard(0x0000820800101000), Bitboard(0x0000104400080800), Bitboard(0x0000020080080080),
+    Bitboard(0x0000404040040100), Bitboard(0x0000808100020100), Bitboard(0x0001010100020800), Bitboard(0x0000808080010400),
+    Bitboard(0x0000820820004000), Bitboard(0x0000410410002000), Bitboard(0x0000082088001000), Bitboard(0x0000002011000800),
+    Bitboard(0x0000080100400400), Bitboard(0x0001010101000200), Bitboard(0x0002020202000400), Bitboard(0x0001010101000200),
+    Bitboard(0x0000410410400000), Bitboard(0x0000208208200000), Bitboard(0x0000002084100000), Bitboard(0x0000000020880000),
+    Bitboard(0x0000001002020000), Bitboard(0x0000040408020000), Bitboard(0x0004040404040000), Bitboard(0x0002020202020000),
+    Bitboard(0x0000104104104000), Bitboard(0x0000002082082000), Bitboard(0x0000000020841000), Bitboard(0x0000000000208800),
+    Bitboard(0x0000000010020200), Bitboard(0x0000000404080200), Bitboard(0x0000040404040400), Bitboard(0x0002020202020200)
 };
 
 /** Magic numbers for rook squares */
 const Bitboard rookMagic[64] = {
-	Bitboard(0x0080001020400080), Bitboard(0x0040001000200040), Bitboard(0x0080081000200080), Bitboard(0x0080040800100080),
-	Bitboard(0x0080020400080080), Bitboard(0x0080010200040080), Bitboard(0x0080008001000200), Bitboard(0x0080002040800100),
-	Bitboard(0x0000800020400080), Bitboard(0x0000400020005000), Bitboard(0x0000801000200080), Bitboard(0x0000800800100080),
-	Bitboard(0x0000800400080080), Bitboard(0x0000800200040080), Bitboard(0x0000800100020080), Bitboard(0x0000800040800100),
-	Bitboard(0x0000208000400080), Bitboard(0x0000404000201000), Bitboard(0x0000808010002000), Bitboard(0x0000808008001000),
-	Bitboard(0x0000808004000800), Bitboard(0x0000808002000400), Bitboard(0x0000010100020004), Bitboard(0x0000020000408104),
-	Bitboard(0x0000208080004000), Bitboard(0x0000200040005000), Bitboard(0x0000100080200080), Bitboard(0x0000080080100080),
-	Bitboard(0x0000040080080080), Bitboard(0x0000020080040080), Bitboard(0x0000010080800200), Bitboard(0x0000800080004100),
-	Bitboard(0x0000204000800080), Bitboard(0x0000200040401000), Bitboard(0x0000100080802000), Bitboard(0x0000080080801000),
-	Bitboard(0x0000040080800800), Bitboard(0x0000020080800400), Bitboard(0x0000020001010004), Bitboard(0x0000800040800100),
-	Bitboard(0x0000204000808000), Bitboard(0x0000200040008080), Bitboard(0x0000100020008080), Bitboard(0x0000080010008080),
-	Bitboard(0x0000040008008080), Bitboard(0x0000020004008080), Bitboard(0x0000010002008080), Bitboard(0x0000004081020004),
-	Bitboard(0x0000204000800080), Bitboard(0x0000200040008080), Bitboard(0x0000100020008080), Bitboard(0x0000080010008080),
-	Bitboard(0x0000040008008080), Bitboard(0x0000020004008080), Bitboard(0x0000800100020080), Bitboard(0x0000800041000080),
-	Bitboard(0x00FFFCDDFCED714A), Bitboard(0x007FFCDDFCED714A), Bitboard(0x003FFFCDFFD88096), Bitboard(0x0000040810002101),
-	Bitboard(0x0001000204080011), Bitboard(0x0001000204000801), Bitboard(0x0001000082000401), Bitboard(0x0001FFFAABFAD1A2)
+    Bitboard(0x0080001020400080), Bitboard(0x0040001000200040), Bitboard(0x0080081000200080), Bitboard(0x0080040800100080),
+    Bitboard(0x0080020400080080), Bitboard(0x0080010200040080), Bitboard(0x0080008001000200), Bitboard(0x0080002040800100),
+    Bitboard(0x0000800020400080), Bitboard(0x0000400020005000), Bitboard(0x0000801000200080), Bitboard(0x0000800800100080),
+    Bitboard(0x0000800400080080), Bitboard(0x0000800200040080), Bitboard(0x0000800100020080), Bitboard(0x0000800040800100),
+    Bitboard(0x0000208000400080), Bitboard(0x0000404000201000), Bitboard(0x0000808010002000), Bitboard(0x0000808008001000),
+    Bitboard(0x0000808004000800), Bitboard(0x0000808002000400), Bitboard(0x0000010100020004), Bitboard(0x0000020000408104),
+    Bitboard(0x0000208080004000), Bitboard(0x0000200040005000), Bitboard(0x0000100080200080), Bitboard(0x0000080080100080),
+    Bitboard(0x0000040080080080), Bitboard(0x0000020080040080), Bitboard(0x0000010080800200), Bitboard(0x0000800080004100),
+    Bitboard(0x0000204000800080), Bitboard(0x0000200040401000), Bitboard(0x0000100080802000), Bitboard(0x0000080080801000),
+    Bitboard(0x0000040080800800), Bitboard(0x0000020080800400), Bitboard(0x0000020001010004), Bitboard(0x0000800040800100),
+    Bitboard(0x0000204000808000), Bitboard(0x0000200040008080), Bitboard(0x0000100020008080), Bitboard(0x0000080010008080),
+    Bitboard(0x0000040008008080), Bitboard(0x0000020004008080), Bitboard(0x0000010002008080), Bitboard(0x0000004081020004),
+    Bitboard(0x0000204000800080), Bitboard(0x0000200040008080), Bitboard(0x0000100020008080), Bitboard(0x0000080010008080),
+    Bitboard(0x0000040008008080), Bitboard(0x0000020004008080), Bitboard(0x0000800100020080), Bitboard(0x0000800041000080),
+    Bitboard(0x00FFFCDDFCED714A), Bitboard(0x007FFCDDFCED714A), Bitboard(0x003FFFCDFFD88096), Bitboard(0x0000040810002101),
+    Bitboard(0x0001000204080011), Bitboard(0x0001000204000801), Bitboard(0x0001000082000401), Bitboard(0x0001FFFAABFAD1A2)
 };

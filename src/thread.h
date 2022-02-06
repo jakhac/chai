@@ -36,32 +36,32 @@ public:
     }
 
     int id;
-	bool searching;
+    bool searching;
     
     int depth;
     int selDepth;
 
-	long nodes;
-	long qnodes;
+    long nodes;
+    long qnodes;
 
     std::thread t;
 
-	Board b;
-	Stats s;
+    Board b;
+    Stats s;
     Instructions instr;
 
-	// Search heuristics for each thread
-	Move killer[2][MAX_GAME_MOVES];
-	Move mateKiller[MAX_GAME_MOVES];
-	Move counterHeuristic[64][64][2];
-	int histHeuristic[2][64][64];
-	int histMax = 0;
+    // Search heuristics for each thread
+    Move killer[2][MAX_GAME_MOVES];
+    Move mateKiller[MAX_GAME_MOVES];
+    Move counterHeuristic[64][64][2];
+    int histHeuristic[2][64][64];
+    int histMax = 0;
 
-	// Search parameters
-	Value bestScore;
-	Move bestMove;
-	SearchStack ss[MAX_DEPTH + 1];
-	Move pvLine[MAX_DEPTH + 1];
+    // Search parameters
+    Value bestScore;
+    Move bestMove;
+    SearchStack ss[MAX_DEPTH + 1];
+    Move pvLine[MAX_DEPTH + 1];
 
     void startIdle() {
         t = std::thread(&ThreadWrapper::idle, this);
