@@ -50,6 +50,6 @@ bool fileValid(int file);
  *
  * @returns True if move is neither NULL_MOVE, NO_MOVE and from and to square are legal.
  */
-bool pseudoValidBitMove(move_t move);
+bool pseudoValidBitMove(Move move);
 
 bool validEnPasSq(int sq);

@@ -1,26 +1,26 @@
 #include "thread.h"
 
-// Makefile might set number of threads. If not, set to maximum.
+// Makefile might set number of threads. If not, set default (1 thread).
 #ifdef CUSTOM_THREADS
 int NUM_THREADS = std::min(CUSTOM_THREADS, (int)std::thread::hardware_concurrency());
 #else
-int NUM_THREADS = MAX_THREADS; 
+int NUM_THREADS = 1; 
 #endif // CUSTOM_THREADS
-
 
 bool TERMINATE_THREADS = false;
 bool ABORT_SEARCH = false;
 
+
 std::vector<Thread> threadPool;
 
-void ThreadWrapper::resetThreadStates(board_t* board, stats_t* search, instr_t* instructions) {
-    b = *board;
-    s = *search;
+void ThreadWrapper::resetThreadStates(Board* board, Stats* search, Instructions* instructions) {
+    b     = *board;
+    s     = *search;
     instr = *instructions;
 
+
     // Reset heuristics: Matekiller, Killer, Counter, History
-    std::fill_n(mateKiller, 
-        MAX_GAME_MOVES, MOVE_NONE);
+    std::fill_n(mateKiller, MAX_GAME_MOVES, MOVE_NONE);
 
     for (int i = 0; i < 2; i++) {
         std::fill_n(killer[i], MAX_DEPTH, 0);
@@ -58,7 +58,7 @@ void ThreadWrapper::idle() {
         // Returned from conditional wait: Start searching
         // cout << "T" << id << " searches." << endl;
         searching = true;
-        iid(threadPool[this->id]);
+        Threads::iid(threadPool[this->id]);
         searching = false;
         // cout << "T" << id << " finished search." << endl;
     }
@@ -78,7 +78,11 @@ void ThreadWrapper::waitThread() {
     });
 }
 
-void initThreadPool() {
+
+namespace Threads {
+
+
+void initPool() {
 
     threadPool.clear();
     TERMINATE_THREADS = false;
@@ -97,7 +101,7 @@ void initThreadPool() {
 
 }
 
-void deleteThreadPool() {
+void deletePool() {
 
     // Let all threads run into termination
     TERMINATE_THREADS = true;
@@ -114,24 +118,26 @@ void deleteThreadPool() {
     // cout << "Joined all threads" << endl;
 }
 
-bool resizeThreadPool(size_t numWorkers) {
-    if (numWorkers < 1) {
-        return false;
-    }
+bool resizePool(size_t numWorkers) {
 
-    deleteThreadPool();
+    if (numWorkers < 1)
+        return false;
+
+    deletePool();
     NUM_THREADS = std::min(numWorkers, (size_t)MAX_THREADS);
-    initThreadPool();
+    initPool();
+
     return true;
 }
 
-void resetAllThreadStates(board_t* board, stats_t* search, instr_t* instructions) {
+void resetAllThreadStates(Board* board, Stats* search, Instructions* instructions) {
     for (int i = 0; i < NUM_THREADS; i++) {
         threadPool[i]->resetThreadStates(board, search, instructions);
     }
 }
 
 void startAllThreads() {
+
     for (int i = 1; i < NUM_THREADS; i++) {
         threadPool[i]->searching = true;
         threadPool[i]->startThread();
@@ -139,12 +145,14 @@ void startAllThreads() {
 }
 
 void waitAllThreads() {
+
     for (int i = 1; i < NUM_THREADS; i++) {
         threadPool[i]->waitThread();
     }
 }
 
 int totalNodeCount() {
+
     int n = 0;
     for (auto t : threadPool) {
         n += t->nodes + t->qnodes;
@@ -153,8 +161,9 @@ int totalNodeCount() {
 }
 
 int selectBestThreadIndex() {
+    
     int bestIdx = 0;
-    value_t bestScore = threadPool[bestIdx]->bestScore;
+    Value bestScore = threadPool[bestIdx]->bestScore;
     int bestDepth = threadPool[bestIdx]->depth;
 
     for (size_t i = 1; i < threadPool.size(); i++) {
@@ -170,4 +179,7 @@ int selectBestThreadIndex() {
     }
 
     return bestIdx;
+}
+
+
 }

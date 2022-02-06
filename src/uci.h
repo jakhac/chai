@@ -5,39 +5,53 @@
 
 #include "search.h"
 #include "timeMan.h"
+#include "perft.h"
+
 
 #ifndef VERSION
 #define VERSION 0
 #endif // !VERSION
 
+
+inline bool strStartsWith(std::string str, std::string start) {
+	return str.rfind(start, 0) == 0;
+}
+
+
+namespace UCI {
+
+
+/**
+ * Start a game in console.
+ */
+void cli(Board* b, Instructions* i, Stats* s, Perft* p);
+
 /**
  * Enters UCI mode. Described in http://wbec-ridderkerk.nl/html/UCIProtocol.html
  *
- * @param  b A board_t to process.
- * @param  s A stats_t to process.
+ * @param  b A Board to process.
+ * @param  s A Stats to process.
  */
-void uciMode(board_t* b, stats_t* s, instr_t* i);
+void uciMode(Board* b, Stats* s, Instructions* i);
 
 void uciSetOption(std::string cmd);
 
 /**
  * Parse a position from UCI command.
  *
- * @param  b   A board_t to process.
+ * @param  b   A Board to process.
  * @param  cmd The command.
  */
-void uciParsePosition(board_t* b, std::string cmd);
+void uciParsePosition(Board* b, std::string cmd);
 
 /**
  * Parse search information from UCI go command.
  *
- * @param  b   A board_t to process.
- * @param  s   A stats_t to process.
+ * @param  b   A Board to process.
+ * @param  s   A Stats to process.
  * @param  cmd The command.
  */
-void uciParseGo(board_t* b, stats_t* s, instr_t* instr, std::string cmd);
+void uciParseGo(Board* b, Stats* s, Instructions* instr, std::string cmd);
 
-/**
- * Complete initialization for chess engine. Called once at startup.
- */
-void init();
+
+}

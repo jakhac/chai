@@ -25,6 +25,9 @@
 #ifndef TBCONFIG_H
 #define TBCONFIG_H
 
+namespace EGTB {
+
+
  /****************************************************************************/
  /* BUILD CONFIG:                                                            */
  /****************************************************************************/
@@ -148,3 +151,5 @@
 				/* #define TB_PAWN_ATTACKS(square, color)   <DEFINITION> */
 
 #endif
+
+} // namespace EGTB

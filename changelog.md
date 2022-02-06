@@ -88,11 +88,11 @@
   - [x] Reset MateKillers between search
 
 - Project
-  - [x] Update typedefs: `key_t`
+  - [x] Update typedefs: `Key`
   - [x] Rename executables according to version
   - [x] Refactor `Board`-Class
-    - Convert `Board` to `struct board_t`
-    - Reduce `board_t` size and share huge arrays between instances if possible
+    - Convert `Board` to `struct Board`
+    - Reduce `Board` size and share huge arrays between instances if possible
   - [x] Namespace `Piece::` for piece enums
 - Bugfixes:
 
@@ -160,6 +160,35 @@
   - [x] UCI fixes, e.g. quit current mode
   - [x] UCI refactor parsing
   - [x] Update README.md to new build process
+
+
+**Changes in v3.0**
+
+Evaluation
+- v3.0.1
+  - [x] Include king position in pawnKey
+  - [x] Update PSQT valueand materialBalance on-the-fly
+- v3.0.2
+  - [x] Use Color type
+  - [x] Sophisticated evaluation of pawn structure (+ king-safety wrt. pawns)
+- v3.0.3
+  - Refactor evaluation for:
+    - [x] King Safety     (v3.0.3 +15)
+    - [x] Knight          (v3.0.4 +10)
+    - [x] Mobility Terms  (v3.0.5 +5)
+    - [x] Bishop          (v3.0.6 +7)
+    - [x] Rook            (v3.0.7 +7)
+    - [x] Queen           (v3.0.8 +5)
+- v3.1.0
+  - [x] Dedicated endgame evals (-+ 0)
+- v3.2.0
+  - [x] Add NNUE evaluation
+- v3.3.0
+  - [x] Cleanup (namespaces, constexpr, docs, inline, refactoring)
+- Project
+  - Update readme: how to use uci options, what are the defaults?
+  - a1a1 bug if non-main thread is selected
+
 
 # Todo
 

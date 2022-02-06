@@ -1,14 +1,24 @@
 #include <iostream>
-#include "gtest/gtest.h"
 
 #include "testFixtures.h"
 
-int main(int argc, char **argv) 
-{
+
+int main(int argc, char **argv) {
+
+#if defined(USE_NNUE) && defined(CUSTOM_EVALFILE)
+	cout << "Init custom evalfile" << endl;
+	NNUE::initIncNet();
+#endif
+    
     ::testing::InitGoogleTest(&argc, argv);
+    // ::testing::GTEST_FLAG(filter) = "SearchTest*";
 
-	auto old_buffer = std::cout.rdbuf(nullptr);
+#if defined(__linux__) 
+    ::testing::FLAGS_gtest_color = "yes";
+#endif
 
-    // 0 if passed, else 1
+    // Disable std output to prevent spam in cmd-interface
+	std::cout.rdbuf(nullptr);
+
     return RUN_ALL_TESTS();
 }

@@ -10,16 +10,17 @@
 #include "timeMan.h"
 
 
-const value_t aspiration = 18;
-
-const unsigned long long aspirationWindows[] = {
-	100, 2500, 32000, 64000
+enum nodeType_t {
+	PV, NoPV
 };
 
+
+namespace Search {
+
 /**
- * Initialize some search parameters like MCP values.
+ * Initialize some search parameters, e.g. MCP values.
  */
-void initSearch();
+void init();
 
 /**
  * Alpha beta algorithm root. Searches current board for best move and score.
@@ -32,8 +33,8 @@ void initSearch();
  *
  * @returns Best score found in search.
  */
-template <chai::nodeType_t nodeType>
-value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth);
+template <nodeType_t nodeType>
+Value alphaBeta(Thread thread, Value alpha, Value beta, int depth);
 
 /**
  * Quiescence search pushes all captures to evaluate a stable and quiet position. AlphaBeta
@@ -47,17 +48,17 @@ value_t alphaBeta(Thread thread, value_t alpha, value_t beta, int depth);
  *
  * @returns Best score found in quiescences search.
  */
-template <chai::nodeType_t nodeType>
-value_t quiescence(Thread thread, value_t alpha, value_t beta, int depth);
+template <nodeType_t nodeType>
+Value quiescence(Thread thread, Value alpha, Value beta, int depth);
 
 /**
  * Root function that starts alphaBeta search in iterative deepening framework.
  *
  * @param  b Reference to current board.
  *
- * @returns value_t Best value found search.
+ * @returns Value Best value found search.
  */
-value_t search(board_t* b, stats_t* s, instr_t* i);
+Value search(Board* b, Stats* s, Instructions* i);
 
 /**
  * Apply offset of aspiration windows in alphaBeta call and try to score inside alpha and beta.
@@ -70,47 +71,14 @@ value_t search(board_t* b, stats_t* s, instr_t* i);
  *
  * @returns Best score found in alphaBeta search.
  */
-value_t aspirationSearch(Thread thread, int depth, value_t bestScore);
-
-/**
- * Tries to find a single(!) repetition in undoPly array. Used in search to find upcoming draws.
- *
- * @param  b Current board.
- *
- * @returns True if repetition is found in undoPly array, else false.
- */
-bool isRepetition(board_t* b);
-
-/**
- * Checks if current position might be a zugzwang. Considers endgame
- *
- * @param  b	  Current board.
- *
- * @returns True if current position is probably azugzwang, else false.
- */
-bool zugzwang(board_t* b);
-
-/**
- * Swaps the best move found in moveList with move at current index.
- *
- * @param  b	  Current board.
- * @param  move_s Move struct with all moves and scores.
- * @param  curIdx Current index in moveList.
- */
-void getNextMove(moveList_t* move_s, int curIdx);
-
-/**
- * Swap to moves and their score in given MOVE_S struct. Returns if id1 is equal to id2.
- *
- * @param  move_s Move struct with all moves and scores.
- * @param  id1    First index.
- * @param  id2    Second index.
- */
-void swapMove(moveList_t* move_s, int id1, int id2);
+Value aspirationSearch(Thread thread, int depth, Value bestScore);
 
 /**
  * Print search information to console.
  *
  * @param  s This search info printed to console.
  */
-void printSearchInfo(stats_t* s);
+void printSearchInfo(Stats* s);
+
+
+} // namespace Search

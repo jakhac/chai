@@ -1,21 +1,27 @@
 #include "timeMan.h"
 
-const int pieceValuesStd[7] = { 0, 1, 3, 3, 5, 9, 0 };
+const int pieceValuesPawns[7] = { 0, 1, 3, 3, 5, 9, 0 };
 
-int totalMaterial(board_t* b) {
+int totalMaterial(Board* b) {
+
     int value = 0;
 	for (int i = 1; i < 7; i++) {
-		value += popCount(b->pieces[i]) * pieceValuesStd[i];
+		value += popCount(b->pieces[i]) * pieceValuesPawns[i];
 	}
 
     return value;
 }
 
-int remainingHalfMoves(board_t* b) {
+int remainingHalfMoves(Board* b) {
+
     int mat = totalMaterial(b);
 
-    if (mat < 20) return mat + 10;
-    if (mat <= 60) return ((3./8.)*(float)mat) + 22;
+    if (mat < 20)
+        return mat + 10;
+
+    if (mat <= 60)
+        return ((3./8.)*(float)mat) + 22;
+
     return ((5./4.)*(float)mat) - 30;
 }
 
@@ -28,7 +34,8 @@ static int middleGameFactor(int moveNumber) {
 //      1) Estimate remaining full-moves based on material.
 //      2) Equally distribute remaining time
 //      3) Time in middle game is slightly increased
-int allocateTime(board_t* b, int timeLeft, int inc) {
+int allocateTime(Board* b, int timeLeft, int inc) {
+
         // Catch low remaining time
 		if (timeLeft <= 2000) {
             return (inc / 8);
@@ -58,6 +65,6 @@ int allocateTime(board_t* b, int timeLeft, int inc) {
         return std::min(timeToAllocate, timeLeft - 100);
 }
 
-bool isTimeLeft(instr_t* instr) {
+bool isTimeLeft(Instructions* instr) {
     return getTimeMs() < (instr->startTime + instr->allocatedTime);
 }

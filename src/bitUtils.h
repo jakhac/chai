@@ -14,13 +14,13 @@
 #endif
 
 /**
- * Bit scan forward and return index. If board_t is 0 return 0. Uses compiler bitscan.
+ * Bit scan forward and return index. If Board is 0 return 0. Uses compiler bitscan.
  *
- * @param  board board_t.
+ * @param  board Board.
  *
  * @returns Index of first found bit.
  */
-inline int getLSB(bitboard_t bb) {
+inline int getLSB(Bitboard bb) {
 	Assert(bb);
 
 #if defined(_MSC_VER)
@@ -32,7 +32,7 @@ inline int getLSB(bitboard_t bb) {
 #endif
 }
 
-inline int getLSB_tb(bitboard_t bb) {
+inline int getLSB_tb(Bitboard bb) {
 	Assert(bb);
 
 #if defined(_MSC_VER)
@@ -45,13 +45,13 @@ inline int getLSB_tb(bitboard_t bb) {
 }
 
 /**
- * Reversed bit scan reverse and return index. If board_t is 0 return 0.
+ * Reversed bit scan reverse and return index. If Board is 0 return 0.
  *
- * @param  board board_t.
+ * @param  board Board.
  *
  * @returns Index of first found bit.
  */
-inline int getMSB(bitboard_t bb) {
+inline int getMSB(Bitboard bb) {
 	Assert(bb);
 
 #if defined(_MSC_VER)
@@ -70,7 +70,7 @@ inline int getMSB(bitboard_t bb) {
  *
  * @returns Amount of bits set to 1 in bb.
  */
-inline int popCount(bitboard_t bb) {
+inline int popCount(Bitboard bb) {
 #if defined(_MSC_VER)
 	return (int)__popcnt64(bb);
 #elif defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
@@ -85,7 +85,7 @@ inline int popCount(bitboard_t bb) {
  *
  * @returns Index of popped bit.
  */
-inline int popLSB(bitboard_t* bb) {
+inline int popLSB(Bitboard* bb) {
 	Assert(*bb);
 	int lsb = getLSB(*bb);
 	*bb &= (*bb - 1);
@@ -115,7 +115,7 @@ inline bool bitIsSet(uint64_t bb, int i) {
  * @param  bb Bitboard to set bit on.
  * @param  i  Index of bit that is set to 1.
  */
-inline void setBit(bitboard_t* bb, int i) {
+inline void setBit(Bitboard* bb, int i) {
 	Assert(bitIsSet(*bb, i));
 	*bb ^= (1ULL << i);
 }
@@ -126,7 +126,7 @@ inline void setBit(bitboard_t* bb, int i) {
  * @param  bb Bitboard to clear bit on.
  * @param  i  Index of bit that is set to 0.
  */
-inline void clearBit(bitboard_t* bb, int i) {
+inline void clearBit(Bitboard* bb, int i) {
 	Assert(bitIsSet(*bb, i));
 	*bb ^= 1ULL << i;
 }

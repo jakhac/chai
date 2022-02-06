@@ -1,9 +1,21 @@
 #include "board.h"
 
-int totalMaterial(board_t* b);
+/**
+ * @brief Return the material in pawn=1 ratio.
+ */
+int totalMaterial(Board* b);
 
-int remainingHalfMoves(board_t* b);
+/**
+ * @brief Estimate the number of remaining halfmoves.
+ */
+int remainingHalfMoves(Board* b);
 
-int allocateTime(board_t* b, int timeLeft, int inc);
+/**
+ * @brief Allocate time for next move.
+ */
+int allocateTime(Board* b, int timeLeft, int inc);
 
-bool isTimeLeft(instr_t* instr);
+/**
+ * @brief Returns true if we have more time to search the postition.
+ */
+bool isTimeLeft(Instructions* instr);

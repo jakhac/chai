@@ -15,8 +15,8 @@ Latest prebuild binaries including different architectures and active NNUE are p
 
 In order to build from source in Windows, C++17 and Make is required. The target to build the engine is called ``release`` and has the following parameters:
 - __evalfile__ Here you can set the path to a NNUE file that should be included during compilation. Currently, no original NNUE files are offered. Instead, we refer to [this](https://github.com/Matthies/NN) repository where supported networks can be found. Note that nets can also be loaded via UCI protocol as explained below.
-- __avx2__ Set this to `n` if your CPU does not support AVX2.
-- __ssse3__ Set this to `n` if your CPU does not support SSSE3.
+- __avx2__ Default is `y`. Set this to `n` if your CPU does not support AVX2.
+- __ssse3__ Default is `y`. Set this to `n` if your CPU does not support SSSE3.
 
 
 

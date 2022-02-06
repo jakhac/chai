@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+#include <vector>
+
+
 #define MAX_DEPTH 64
 #define MAX_GAME_MOVES 512
 #define BUCKETS 3
@@ -8,83 +12,137 @@
 #define MAX_POSITION_MOVES 256
 #define DEFAULT_EP_SQ 0
 
-/**
- * Unsigned 64-Bit integer represents bitboard isntance.
- */
-typedef unsigned long long bitboard_t;
+#define a64 alignas(64)
 
-/**
- * Unsigned 64-Bit integer Hash-Keys both hashtables.
- */
-typedef unsigned long long key_t;
 
-/**
- * Move type. All moves are unsigned.
- */
-typedef uint16_t move_t;
 
-/**
- * Value type. Used for all evalutions.
- */
-typedef int16_t value_t;
+typedef unsigned long long Bitboard;
+typedef unsigned long long Key;
 
-/**
- * Store moves, scores and number entries in moveList. Used in move generation.
- */
-struct moveList_t {
-	int cnt = 0;
-	int moves[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
-	int scores[MAX_POSITION_MOVES]{}; // MAX POSITION MOVES
+typedef uint16_t Move;
 
-	bitboard_t attackedSquares = 0ULL;
+typedef int16_t Value;
+typedef int32_t Tuple;
+
+typedef int8_t Weight;
+typedef int8_t Clipped;
+
+
+enum Color {
+	BLACK,
+	WHITE,
+	BW
 };
 
-/**
- * Stores board state to reverse pushed moves.
- */
-struct undo_t {
-	move_t move;
+constexpr Color operator!(Color c) {
+  return Color(c ^ 1);
+}
+
+enum {
+    NNUE_ROTATE = 1,
+    NNUE_FLIP   = 2
+};
+
+enum {
+	EMPTY = 0,
+	COMPUTED = 1
+};
+
+// Namespace to avoid ambiguity with 'b' naming convention for boards
+namespace Piece {
+
+	enum {
+		NO_PIECE = 0,
+		P = 1, N, B, R, Q, K,
+		p = 7, n, b, r, q, k
+	};
+
+} // namespace Piece
+
+enum PieceType {
+	NO_PTYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
+};
+
+const PieceType pieceType[13] = { 
+	NO_PTYPE,
+	PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING,
+	PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
+};
+
+
+enum FILES {
+	FILE_A, FILE_B, FILE_C, FILE_D,
+	FILE_E, FILE_F, FILE_G, FILE_H, 
+	FILE_NONE
+};
+
+enum RANKS {
+	RANK_1, RANK_2, RANK_3, RANK_4,
+	RANK_5, RANK_6, RANK_7, RANK_8, 
+	RANK_NONE
+};
+
+enum SQUARES {
+	A8 = 56, B8, C8, D8, E8, F8, G8, H8, NO_SQ,
+	A7 = 48, B7, C7, D7, E7, F7, G7, H7,
+	A6 = 40, B6, C6, D6, E6, F6, G6, H6,
+	A5 = 32, B5, C5, D5, E5, F5, G5, H5,
+	A4 = 24, B4, C4, D4, E4, F4, G4, H4,
+	A3 = 16, B3, C3, D3, E3, F3, G3, H3,
+	A2 =  8, B2, C2, D2, E2, F2, G2, H2,
+	A1 =  0, B1, C1, D1, E1, F1, G1, H1
+};
+
+
+struct MoveList {
+	int cnt = 0;
+	a64 int moves[MAX_POSITION_MOVES]{};
+	a64 int scores[MAX_POSITION_MOVES]{};
+
+	Bitboard attackedSquares = 0ULL;
+};
+
+struct Undo {
+	Move move;
 	int castle;
 	int enPas;
 	uint8_t fiftyMove;
 	uint8_t cap;
-	key_t zobKey;
-	key_t pawnKey;
+	Key zobKey;
+	Key pawnKey;
+
+	Value psqtOpening;
+	Value psqtEndgame;
+	Value material;
 };
 
-struct searchStack_t {
+struct SearchStack {
 	bool isCheck;
 	int staticEval;
-	move_t currentMove;
+	Move currentMove;
 
-	move_t* pvLine;
+	Move* pvLine;
 };
 
-/**
- * Transposition table entry.
- */
-struct ttable_entry_t {
+struct TTEntry {
 	uint16_t key = 0; // upper 16bit to determine bucket
 
-	value_t value = 0;
-	value_t staticEval = 0;
-	move_t move = 0;
+	Value value = 0;
+	Value staticEval = 0;
+	Move move = 0;
 
 	uint8_t flag = 0;
 	int8_t depth = 0;
 
 };
 
-struct bucket_t {
-	ttable_entry_t bucketEntries[BUCKETS];
+struct Bucket {
+	TTEntry bucketEntries[BUCKETS];
 	char padding[2];
 };
 
-/**
- * Transposition table instance. Contains stat-variables and pointer to entries.
- */
-struct ttable_t {
-	bucket_t* bucketList = NULL;
+struct TTable {
+	a64 Bucket* bucketList = NULL;
 
 	// total number of buckets (entries-stacks)
 	int buckets = 0;
@@ -100,19 +158,13 @@ struct ttable_t {
 	int stored;
 };
 
-/**
- * Pawn Table entry.
- */
-struct pawntable_entry_t {
-	key_t zobristPawnKey;
+struct PTEntry {
+	Key zobristPawnKey;
 	int16_t eval;
 };
 
-/**
- * Pawn table instance. Contains stat-variables and pointer to entry.
- */
-struct pawntable_t {
-	pawntable_entry_t* table = NULL;
+struct PTable {
+	PTEntry* table = NULL;
 	int entries;
 
 	// measure collided keys
@@ -124,9 +176,28 @@ struct pawntable_t {
 	int hit;
 };
 
-struct board_t {
-	// Current side, 0 for black and 1 for white. Use enums for debug purpose.
-	bool stm;
+struct Accum {
+    a64 int16_t accumulation[2][256];
+    bool compState[2] = { EMPTY, EMPTY }; 
+};
+
+struct Dirty {
+	bool isKingMove;
+
+	int changedPieces;
+    int piece[3];
+    int from[3];
+    int to[3];
+};
+
+struct Features {
+    // Keep track of all feature-indices to add and to indices to delete
+    std::vector<size_t> addIndex;
+    std::vector<size_t> delIndex;
+};
+
+struct Board {
+	Color stm;
 
 	// Current en passant square. DEFAULT_EP_SQ, if not set.
 	int enPas;
@@ -147,45 +218,55 @@ struct board_t {
 	int castlePermission;
 
 	// Unique zobrist key.
-	key_t zobristKey;
+	Key zobristKey;
 
 	// Unique zobrist pawn key.
-	key_t zobristPawnKey;
+	Key zobristPawnKey;
 
 	// Store pieces for given color.
-	bitboard_t color[2];
+	Bitboard color[2];
 
 	// Store pieces for given type.
-	bitboard_t pieces[7];
+	Bitboard pieces[7];
 
 	// Store occupied squares.
-	bitboard_t occupied;
+	Bitboard occupied;
 
-	// Stores the currently attacked squares by side.
-	bitboard_t attackedSquares[2];
+	// Stores the currently attacked squares by WHITE/BLACK.
+	Bitboard attackedSquares[2];
 
 	// Stack stores pushed moves as Undo objects.
-	undo_t undoHistory[MAX_GAME_MOVES];
+	a64 Undo undoHistory[MAX_GAME_MOVES];
+
+	// PSQT values and material for calculation on-the-fly
+	Value psqtOpening = 0;
+	Value psqtEndgame = 0;
+	Value material    = 0;
+
+
+	a64 Accum accum[MAX_DEPTH];
+	a64 Dirty dp[MAX_DEPTH];
 };
 
-/// Holds various pruning and counting statistics.
-struct stats_t {
+// Holds various pruning and counting statistics during search.
+struct Stats {
 	int futileCnt;
 	int futileFH;
 
 	int tbHit;
 
+	int depthReached;
+
 	// fail high heuristics
 	float fh;
 	float fhf;
 
-	// pv hits
 	int pvHits = 0;
 };
 
-/// Contains instructions about time management parsed from
-/// UCI protocol command.
-struct instr_t {
+// Contains instructions about time management parsed from
+// UCI protocol command.
+struct Instructions {
 	int startTime;
 	int allocatedTime;
 	int depth;
@@ -199,69 +280,4 @@ struct instr_t {
 	bool stopped = false;
 };
 
-namespace Pieces {
-	typedef enum PIECE {
-		NO_PIECE = 0,
-		P = 1, N, B, R, Q, K,
-		p = 7, n, b, r, q, k
-	} piece_t;
-}
 
-namespace chai {
-	typedef enum COLORS {
-		BLACK, WHITE, BOTH
-	} color_t;
-
-	typedef enum nodeType_t {
-		PV, NoPV
-	} nodeType_t;
-
-	typedef enum PIECES_TYPES {
-		NO_TYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
-	} pieceType_t;
-}
-
-enum FILES {
-	FILE_A, FILE_B, FILE_C, FILE_D,
-	FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE
-};
-
-enum RANKS {
-	RANK_1, RANK_2, RANK_3, RANK_4,
-	RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE
-};
-
-enum CASTLING_RIGHTS {
-	K_CASTLE = 1, Q_CASTLE = 2, k_CASTLE = 4, q_CASTLE = 8
-};
-
-typedef enum TT_FLAG {
-	TT_NONE = 0,
-	TT_ALPHA = 1,
-	TT_BETA = 1 << 1,
-	TT_VALUE = 1 << 2,
-	TT_EVAL = 1 << 3
-} bound_t;
-
-enum MOVE_FLAG {
-	NORMAL_MOVE = 0 << 12,
-	CASTLE_MOVE = 1 << 12,
-	EP_MOVE = 2 << 12,
-	PROM_MOVE = 3 << 12,
-
-	PROM_TO_KNIGHT = 0 << 14,
-	PROM_TO_BISHOP = 1 << 14,
-	PROM_TO_ROOK = 2 << 14,
-	PROM_TO_QUEEN = 3 << 14,
-};
-
-enum SQUARES {
-	A8 = 56, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD,
-	A7 = 48, B7, C7, D7, E7, F7, G7, H7,
-	A6 = 40, B6, C6, D6, E6, F6, G6, H6,
-	A5 = 32, B5, C5, D5, E5, F5, G5, H5,
-	A4 = 24, B4, C4, D4, E4, F4, G4, H4,
-	A3 = 16, B3, C3, D3, E3, F3, G3, H3,
-	A2 = 8, B2, C2, D2, E2, F2, G2, H2,
-	A1 = 0, B1, C1, D1, E1, F1, G1, H1
-};

@@ -6,6 +6,9 @@
 #include <iostream>
 #include <fstream>
 #include <chrono> // time measurement
+#include <tuple>
+#include <sstream> // std::ostringstream
+
 
 #include "types.h"
 
@@ -15,9 +18,6 @@ using std::cerr;
 using std::endl;
 using std::fixed;
 
-// #define ASSERT
-// #define TESTING
-// #define INFO
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) std::string(STRINGIFY(x))
@@ -31,7 +31,7 @@ using std::fixed;
 if(!(n)) { \
 	std::string errMsg = "Failed assert \"" + TOSTRING(n) + "\"\n" \
 		+ "in " + TOSTRING(__FILE__) + ":" + TOSTRING(__LINE__) + "\n" \
-		+ "at " + getTime() +"\n\n"; \
+		+ "at " + getTimeAndDate() +"\n\n"; \
 	cout << errMsg; \
 	logDebug(errMsg); \
 	exit(1); \
@@ -48,8 +48,41 @@ if(!(n)) { \
 }
 #endif // ASSERT
 
+
+static std::string ver_string(int a, int b, int c) {
+  std::ostringstream ss;
+  ss << a << '.' << b << '.' << c;
+  return ss.str();
+}
+
+
+const std::string info_ASSERT = 
+#ifdef ASSERT
+	"1";
+#else
+	"0";
+#endif // ASSERT
+
+const std::string info_CXX =
+#ifdef __clang__
+   "clang++ " + ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
+#else
+   "g++ " + ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+#endif
+
+const std::string info_SIMD =
+#if defined(USE_AVX2)
+	"AVX2";
+#elif defined(USE_SSSE3)
+	"SSSE3";
+#else
+	"NONE";
+#endif
+
+
 extern void logDebug(std::string errMsg);
 extern std::string getTime();
+extern std::string getTimeAndDate();
 
 const std::string STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const std::string MID_FEN      = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";

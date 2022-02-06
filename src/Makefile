@@ -109,7 +109,6 @@ ifeq ($(ssse3),y)
 	CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
 endif
 
-
 ####
 #### 2.4 Additional flags for code quality.
 CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m64
@@ -183,14 +182,14 @@ archive:
 
 strip:
 	$(MAKE) release
-	$(MAKE) objClean
+	$(MAKE) cleanObj
 
 test:
 	cd ../test & $(MAKE) TYPE=debug evalfile=$(evalfile)
 
 clean:
 	$(MAKE) cleanExe
-	$(MAKE) objClean
+	$(MAKE) cleanObj
 	$(MAKE) cleanTest
 
 cleanExe:
@@ -202,16 +201,14 @@ cleanTest:
 	del /Q .\obj_debug\ 2>nul
 	del /Q $(EXE_TEST) 2>nul
 
-objClean:
+cleanObj:
 	del /Q .\obj_release\ 2>nul
 	del /Q .\obj_debug\ 2>nul
 
 help:
-	@echo "To build chai_$(VERSION), use the "release" target. Optional parameters are indicated in brackets
-	@echo "Values for threads, hashMb and evalfile can also be set via GUI."
-	@echo ""
-	@echo "make release [threads=#threads] [hashMb=#hashMb] [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n]"
-	@echo "(defaults are:       =1                =256               =n                      =y          =y)"
+	$(info To build chai_$(VERSION), use the "release" target (optional parameters are indicated in brackets))
+	$(info > make release [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n])
+	@:
 
 .depend:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null

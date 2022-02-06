@@ -43,6 +43,7 @@ SOFTWARE.
 using namespace std;
 #endif
 
+
 #define TB_PIECES 7
 #define TB_HASHBITS  (TB_PIECES < 7 ?  11 : 12)
 #define TB_MAX_PIECE (TB_PIECES < 7 ? 254 : 650)
@@ -1751,7 +1752,7 @@ static void free_tb_entry(struct BaseEntry* be) {
 	}
 }
 
-bool tb_init(const char* path) {
+bool EGTB::tb_init(const char* path) {
 	if (!initialized) {
 		init_indices();
 		king_attacks_init();
@@ -1929,7 +1930,7 @@ finished:
 	return true;
 }
 
-void tb_free(void) {
+void EGTB::tb_free(void) {
 	tb_init("");
 	free(pieceEntry);
 	free(pawnEntry);
@@ -3526,3 +3527,4 @@ uint64_t tb_pawn_attacks(unsigned sq, bool color) {
 }
 
 #endif      /* TB_NO_HELPER_API */
+

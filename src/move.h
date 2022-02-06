@@ -18,68 +18,67 @@
 */
 
 
-const move_t MOVE_NONE = 0;
-const move_t MOVE_NULL = 4095; // C1-C1 used as nullmove (impossible move, never generated)
+enum MOVE_FLAG {
+	NORMAL_MOVE    = 0 << 12,
+	CASTLE_MOVE    = 1 << 12,
+	EP_MOVE        = 2 << 12,
+	PROM_MOVE      = 3 << 12,
+
+	PROM_TO_KNIGHT = 0 << 14,
+	PROM_TO_BISHOP = 1 << 14,
+	PROM_TO_ROOK   = 2 << 14,
+	PROM_TO_QUEEN  = 3 << 14,
+};
+
+
+const Move MOVE_NONE = 0;
+const Move MOVE_NULL = 4095; // C1-C1 used as nullmove (impossible move, never generated)
 
 const int sqBitMask = 0x3F;
 
-const int promIndex[] = { chai::KNIGHT, chai::BISHOP, chai::ROOK, chai::QUEEN };
+const int promIndex[]      = { KNIGHT, BISHOP, ROOK, QUEEN };
 const int piecePromIndex[] = { 0, 0, PROM_TO_KNIGHT, PROM_TO_BISHOP, PROM_TO_ROOK, PROM_TO_QUEEN, 0 };
 
 // new move, promPiece
-inline move_t serializeMove(int from, int to, int flag, int promoteTo) {
+inline Move serializeMove(int from, int to, int moveType, int promoteTo) {
 	Assert(promoteTo == 0 || (PROM_TO_KNIGHT <= promoteTo && promoteTo <= PROM_TO_QUEEN));
 
 	return (from)
-		| (to << 6)
-		| (flag)
-		| (promoteTo);
+		 | (to << 6)
+		 | (moveType)
+		 | (promoteTo);
 }
 
-/**
- * Get the fromSq of a serialized move.
- *
- * @param  move Serialized move.
- *
- * @returns From square.
- */
-inline int fromSq(move_t move) {
+inline int fromSq(Move move) {
 	return move & sqBitMask;
 }
 
-/**
- * Get the toSq of a serialized move.
- *
- * @param  move Serialized move.
- *
- * @returns To square.
- */
-inline int toSq(move_t move) {
+inline int toSq(Move move) {
 	return (move >> 6) & sqBitMask;
 }
 
-inline bool isPromotion(move_t move) {
+inline bool isPromotion(Move move) {
 	return (move & (3 << 12)) == PROM_MOVE;
 }
 
-inline int promPiece(board_t* b, move_t move) {
-	return isPromotion(move) ? (move >> 14) + 2 + (b->stm == chai::BLACK ? 6 : 0)
-							 : chai::NO_TYPE;
+inline int promPiece(Board* b, Move move) {
+	return isPromotion(move) ? (move >> 14) + 2 + (b->stm == BLACK ? 6 : 0)
+							 : NO_PTYPE;
 }
 
-inline int promPieceType(move_t move) {
+inline int promPieceType(Move move) {
 	return (move >> 14) + 2;
 }
 
-inline bool isPawnStart(move_t move, int movingPiece) {
-	return (movingPiece == Pieces::P || movingPiece == Pieces::p)
+inline bool isPawnStart(Move move, int movingPiece) {
+	return (movingPiece == Piece::P || movingPiece == Piece::p)
 		&& abs(fromSq(move) - toSq(move)) == 16;
 }
 
-inline bool isEnPassant(move_t move) {
+inline bool isEnPassant(Move move) {
 	return (move & (3 << 12)) == EP_MOVE;
 }
 
-inline bool isCastling(move_t move) {
+inline bool isCastling(Move move) {
 	return (move & (3 << 12)) == CASTLE_MOVE;
 }
