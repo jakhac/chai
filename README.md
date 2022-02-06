@@ -23,7 +23,6 @@ In order to build from source in Windows, C++17 and Make is required. The target
 ```
 $ git clone https://github.com/jakhac/chai
 $ cd chai/src
-$ make help
 $ make release [evalfile=path/to/evalfile.nnue] [avx2=y/n] [ssse3=y/n]
 ```
 
