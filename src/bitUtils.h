@@ -3,7 +3,14 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif // !NOMINMAX
+
+#ifdef _WIN32
 #include "windows.h" // used for getTimeMs()
+#else
+#include <unistd.h> // used for getTimeMs()
+#include <time.h> // - = -
+#endif // _WIN32
+
 
 #include "defs.h"
 
@@ -137,9 +144,22 @@ inline void clearBit(Bitboard* bb, int i) {
  * @returns The time in milliseconds.
  */
 inline int getTimeMs() {
+#ifdef _WIN32
+
 #ifdef __GNUG__
     return (int)GetTickCount();
 #else
     return (int)GetTickCount64();
+#endif
+
+#else
+
+    struct timespec ts;
+    unsigned theTick = 0U;
+    clock_gettime( CLOCK_REALTIME, &ts );
+    theTick  = ts.tv_nsec / 1000000;
+    theTick += ts.tv_sec * 1000;
+    return theTick;
+
 #endif
 }

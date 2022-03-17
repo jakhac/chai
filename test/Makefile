@@ -1,23 +1,20 @@
-# Set path to gtest on your local system here!
-GTEST = C:/googletest/googletest/lib/libgtest.a
-GTEST_PATH = C:/googletest/googletest/include
+EXE = test
 
-CXX = g++
-CXXFLAGS = -std=c++17 -Wall -I h -I$(GTEST_PATH) -c
-LXXFLAGS = -std=c++17 -I h -pthread
-LXXFLAGS += -m64 -Wl,--stack,4194304
-DEPENDFLAGS += -std=c++17 -fexceptions
+LXXFLAGS  = -std=c++17 -I h 
+LXXFLAGS += -m64 -Wl,-z,stack-size=4194304
+LXXFLAGS += -lgtest -lgtest_main -lpthread
 
 CXXFLAGS += -DINFO= -DASSERT= -DTESTING=
-CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17 -m64
+CXXFLAGS += -Wall -Wcast-qual -fno-exceptions -std=c++17
 CXXFLAGS += -pedantic -Wextra -Wshadow
-CXXFLAGS += -Wl,--stack,4194304 -fexceptions
+CXXFLAGS += -m64 -Wl,-z,stack-size=4194304 -fexceptions
 
 CXXFLAGS += -DUSE_PREFETCH -msse
 CXXFLAGS += -DUSE_AVX2 -mavx2
 CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
 CXXFLAGS += -mssse3 -mpopcnt
 
+DEPENDFLAGS += -std=c++17 -fexceptions
 DEPENDFLAGS += -msse
 
 nnue     = y
@@ -29,8 +26,6 @@ ifeq ($(nnue),y)
 	CXXFLAGS += -DUSE_NNUE
 endif
 
-
-EXE = ../src/test.exe
 
 CHAI_SRCS = uci.cpp tt.cpp thread.cpp layers.cpp pawn.cpp attacks.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
@@ -48,19 +43,15 @@ OBJS = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(notdir $(SRCS)))
 VPATH = ../src:../src/egtb:../src/nnue:
 
 $(EXE): $(OBJS)
-	$(CXX) $(LXXFLAGS) -o $(EXE) $(OBJS) $(GTEST)
+	$(cxx) -o $(EXE) $(OBJS) $(LXXFLAGS)
 
 $(OBJ_DIR)/%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(cxx) $(CXXFLAGS) -c -o $@ $<
 
 
 ### Public targets
 all:
 	$(MAKE) $(EXE) .depend
-
-clean:
-	del /Q $(EXE) 2>nul
-	del /Q .\obj\ 2>nul
 
 
 .depend:

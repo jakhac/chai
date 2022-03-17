@@ -3,8 +3,6 @@
 using namespace SeeTest;
 using namespace MoveOrder;
 
-// using namespace chai::Eval;
-
 
 TEST_F(SeeTest, PawnCap) {
     parseFen(pBoard, "4R3/2r3p1/5bk1/1p1r3p/p2PR1P1/P1BK1P2/1P6/8 b - - 0 1");

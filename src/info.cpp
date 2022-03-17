@@ -235,10 +235,25 @@ void printPvLine(Board* b, Move* pvLine, int d, int score) {
 
 std::string getTime() {
     char str[32]{};
+
+#ifdef _WIN32
     time_t a = time(nullptr);
     struct tm time_info;
+    
+    if (localtime_s(&time_info, &a) == 0) {
+        strftime(str, sizeof(str), "%H:%M:%S", &time_info);
+    }
 
-    if (localtime_s(&time_info, &a) == 0) strftime(str, sizeof(str), "%H:%M:%S", &time_info);
+#else
+    time_t     now = time(0);
+    struct tm  tstruct;
+    tstruct = *localtime(&now);
+
+    strftime(str, sizeof(str), "%H:%M:%S", &tstruct);
+
+#endif // _WIN32
+
+
     return str;
 }
 

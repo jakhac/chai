@@ -20,6 +20,16 @@
 #endif
 
 
+
+#ifdef _WIN32
+#else
+
+#include <cstring> // memset
+#include <sys/mman.h> // madvise
+
+#endif // _WIN32
+
+
 extern TTable tt[1];
 extern PTable pt[1];
 

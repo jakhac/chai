@@ -5,7 +5,6 @@
 
 #include "gtest/gtest.h"
 
-
 namespace SearchTest {
     class SearchTest : public ::testing::Test {
 

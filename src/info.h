@@ -1,7 +1,5 @@
 #pragma once
 
-#include "io.h" // _read()
-
 #include "board.h"
 #include "tt.h"
 #include "eval.h"

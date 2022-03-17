@@ -36,11 +36,10 @@ inline int pieceAt(Board* b, int sq) {
 /**
  * @brief Return the king square for color.
  */
-inline getKingSquare(Board* b, Color color) {
+inline int getKingSquare(Board* b, Color color) {
     Assert(getPieces(b, KING, color));
     return getLSB(getPieces(b, KING, color));
 }
-
 
 
 

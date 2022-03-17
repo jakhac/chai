@@ -11,7 +11,6 @@ int main(int argc, char **argv) {
 #endif
     
     ::testing::InitGoogleTest(&argc, argv);
-    // ::testing::GTEST_FLAG(filter) = "SearchTest*";
 
 #if defined(__linux__) 
     ::testing::FLAGS_gtest_color = "yes";

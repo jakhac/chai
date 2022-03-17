@@ -2,12 +2,22 @@
 # 1. META DATA
 #######################################
 
-VERSION = v3.4.0
+UNAME = $(shell uname)
 
-EXE			= chai_$(VERSION)
-EXE_RELEASE = $(EXE).exe
-EXE_DEBUG   = $(EXE)_debug.exe
-EXE_TEST    = test.exe
+VERSION = v3.4.1
+EXE		= chai_$(VERSION)
+
+
+ifeq ($(COMP),mingw)
+	EXE_RELEASE = $(EXE).exe
+	EXE_DEBUG   = $(EXE)_debug.exe
+	EXE_TEST    = test.exe
+else
+	EXE_RELEASE = $(EXE)
+	EXE_DEBUG   = $(EXE)_debug
+	EXE_TEST    = test
+endif
+
 
 SRCS = main.cpp tt.cpp thread.cpp layers.cpp pawn.cpp transformer.cpp \
 	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
@@ -85,7 +95,6 @@ ifeq ($(debug),y)
 endif
 
 
-
 ####
 #### 2.3 Set optimization flags as previously defined.
 ifeq ($(optimize),y)
@@ -118,26 +127,47 @@ CXXFLAGS += -DVERSION=$(VERSION)
 
 DEPENDFLAGS += -std=c++17 -fexceptions
 
-LDFLAGS += -m64 -Wl,--stack,4194304
-
 
 #######################################
 # 3. Compile and link to target
 #######################################
 
-CXX = g++
+ifeq ($(COMP),)
+	COMP=gcc
+endif
+
+ifeq ($(COMP),gcc)
+	comp=gcc
+	CXX=g++
+
+	LDFLAGS += -m64 -Wl,-z,stack-size=4194304 -lpthread
+endif
+
+ifeq ($(COMP),mingw)
+	comp=mingw
+
+	ifeq ($(UNAME),Linux)
+		CXX=x86_64-w64-mingw32-c++
+	else
+		CXX=g++
+	endif
+
+	LDFLAGS += -m64 -Wl,--stack,4194304
+	LDFLAGS += -static
+endif
+
 
 $(EXE_DEBUG): $(OBJS_DEBUG)
 	+$(CXX) -o $@ $(OBJS_DEBUG) $(LDFLAGS)
 
 $(OBJ_DEBUG_DIR)/%.o: %.cpp
-	g++ $(CXXFLAGS) -c -o $@ $<
+	+$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(EXE_RELEASE): $(OBJS_RELEASE)
 	+$(CXX) -o $@ $(OBJS_RELEASE) $(LDFLAGS)
 
 $(OBJ_RELEASE_DIR)/%.o: %.cpp
-	g++ $(CXXFLAGS) -c -o $@ $<
+	+$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 
 #######################################
@@ -147,67 +177,30 @@ $(OBJ_RELEASE_DIR)/%.o: %.cpp
 .DEFAULT_GOAL=help
 
 debug:
-	if not exist ".\obj_debug" mkdir ".\obj_debug"
+	mkdir -p ./obj_debug
 	$(MAKE) $(EXE_DEBUG) TYPE=debug .depend
 
 release:
-	if not exist ".\obj_release" mkdir ".\obj_release"
+	mkdir -p ./obj_release
 	$(MAKE) $(EXE_RELEASE) TYPE=release .depend
 
-archive:
-	$(MAKE) clean
-	$(MAKE) release
-	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
-	rename ..\archive\$(EXE_RELEASE) $(EXE)_1CPU.exe
-	$(MAKE) clean
-	$(MAKE) release threads=3
-	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
-	rename ..\archive\$(EXE_RELEASE) $(EXE)_3CPU.exe
-	$(MAKE) clean
-	$(MAKE) release threads=4
-	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
-	rename ..\archive\$(EXE_RELEASE) $(EXE)_4CPU.exe
-	$(MAKE) clean
-	$(MAKE) release evalfile="F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue"
-	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
-	rename ..\archive\$(EXE_RELEASE) $(EXE)_1CPU_nnue.exe
-	$(MAKE) clean
-	$(MAKE) release threads=3 evalfile="F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue"
-	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
-	rename ..\archive\$(EXE_RELEASE) $(EXE)_3CPU_nnue.exe
-	$(MAKE) clean
-	$(MAKE) release threads=4 evalfile="F:/SmartGit-Repositories/chai/nets/nn-fb50f1a2b1-20210705.nnue"
-	copy .\$(EXE_RELEASE) ..\archive\$(EXE_RELEASE)
-	rename ..\archive\$(EXE_RELEASE) $(EXE)_4CPU_nnue.exe
-
-strip:
-	$(MAKE) release
-	$(MAKE) cleanObj
-
 test:
-	cd ../test & $(MAKE) TYPE=debug evalfile=$(evalfile)
+	cd ../test && $(MAKE) TYPE=debug evalfile=$(evalfile) cxx=$(CXX)
+	mv ../test/$(EXE_TEST) .
 
 clean:
-	$(MAKE) cleanExe
-	$(MAKE) cleanObj
-	$(MAKE) cleanTest
-
-cleanExe:
-	del /Q $(EXE_DEBUG) 2>nul
-	del /Q $(EXE_RELEASE) 2>nul
-	del /Q $(EXE_TEST) 2>nul
-
-cleanTest:
-	del /Q .\obj_debug\ 2>nul
-	del /Q $(EXE_TEST) 2>nul
-
-cleanObj:
-	del /Q .\obj_release\ 2>nul
-	del /Q .\obj_debug\ 2>nul
+	@rm -f $(EXE_DEBUG) $(EXE_RELEASE) $(EXE_TEST) ./obj_debug/*.o ./obj_release/*.o
 
 help:
-	$(info To build chai_$(VERSION), use the "release" target (optional parameters are indicated in brackets))
-	$(info > make release [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n])
+	$(info To build chai, use the "release" target:)
+	$(info > make release [COMP=comp] [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n])
+
+archive:
+	for number in 1 3 4 ; do \
+		$(MAKE) clean ; \
+		$(MAKE) release threads=$$number ; \
+		mv ./$(EXE_RELEASE) ../archive/$(EXE)_"$$number"CPU.exe ; \
+	done
 
 .depend:
 	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null

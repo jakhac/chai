@@ -3,8 +3,6 @@
 using namespace SearchTest;
 using namespace Search;
 
-// namespace chai {
-// namespace Search {
 
 #if defined(USE_NNUE)
 TEST_F(SearchTest, NNUE) {
@@ -138,6 +136,3 @@ TEST_F(SearchTest, Endgame_KQvKP_6) {
 }
 
 
-
-// }
-// }

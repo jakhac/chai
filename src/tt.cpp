@@ -20,13 +20,25 @@ void init() {
 
 void freeHashTables() {
 
-    if (tt->bucketList != NULL && !VirtualFree(tt->bucketList, 0, MEM_RELEASE)) {
-        DWORD err = GetLastError();
-        cout << "Failed to free large page memory. Error code: 0x"
-            << std::hex << err
-            << std::dec << endl;
-        exit(1);
+    if (tt->bucketList != NULL) {
+        
+#ifdef _WIN32
+        // Windows uses virtual-mem functions
+        if (!VirtualFree(tt->bucketList, 0, MEM_RELEASE)) {
+            DWORD err = GetLastError();
+            cout << "Failed to free large page memory. Error code: 0x"
+                 << std::hex << err
+                 << std::dec << endl;
+            exit(1);
+        }
+#else
+
+        free(tt->bucketList);
+
+#endif // _WIN32
+
     }
+
     if (pt->table != NULL) {
         free(pt->table);
     }
@@ -53,7 +65,14 @@ static size_t allocateTT(size_t newMbSize) {
     }
 
     tt->buckets = 1 << msb;
+
+#ifdef _WIN32
     tt->bucketList = (Bucket*)VirtualAlloc(NULL, sizeof(Bucket) * tt->buckets, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+#else
+    tt->bucketList = (Bucket*)aligned_alloc(2 * (1ULL << 20), sizeof(Bucket) * tt->buckets);
+    madvise(tt->bucketList, sizeof(Bucket) * tt->buckets, MADV_HUGEPAGE);
+#endif // _WIN32
+
     Assert(tt->bucketList);
 
     for (int i = 0; i < msb; i++) indexMask |= (1 << i);
