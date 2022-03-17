@@ -28,5 +28,6 @@ jobs:
       - name: Release Build Windows 4CPU
         run: |
           cd src
+          make clean
           mkdir -p obj_release
           make release COMP=mingw threads=4 -j2
