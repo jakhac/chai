@@ -1,19 +1,21 @@
 # chai - Chess Engine
 
+[![UnitTest](https://github.com/jakhac/chai/actions/workflows/gtest.yml/badge.svg?branch=master)](https://github.com/jakhac/chai/actions/workflows/gtest.yml)
+
 chai is a free [UCI](http://wbec-ridderkerk.nl/html/UCIProtocol.html) compatible chess engine playing at estimated ~2300 elo supporting state-of-the-art NNUE evaluation. In order to play or test this engine, a GUI like [Arena](http://www.playwitharena.de/), [Lucas Chess](https://lucaschess.pythonanywhere.com/) or a command-line interface like [c-chess-cli](https://github.com/lucasart/c-chess-cli) is recommended.
 
 
 
 ## Installation
----
 
 ### Prebuild Binaries
 
 Latest prebuild binaries including different architectures and active NNUE are provided in [releases](https://github.com/jakhac/chai/releases). The engine speed between the architectures is _avx2 > ssse3 > none_. In case you do not know which architecture is supported on your CPU, you can either check with tools like HWINFO and CPUID or simply try to run the binaries (almost all somewhat modern CPUs support AVX2).
 
-###  Building From Source
+###  Building From Source in Linux
 
-In order to build from source in Windows, C++17 and Make is required. The target to build the engine is called ``release`` and has the following parameters:
+In order to build from source, C++17 and Make is required. The target to build the engine is called ``release`` and has the following parameters:
+- __COMP__ Default is gcc. Set this to mingw to cross-compile and target windows binaries.
 - __evalfile__ Here you can set the path with forward-slashes (!) to a NNUE file that should be included during compilation. Currently, no original NNUE files are offered. Instead, we refer to [this](https://github.com/Matthies/NN) repository where supported networks can be found. Note that nets can also be loaded via UCI protocol as explained below.
 - __avx2__ Default is `y`. Set this to `n` if your CPU does not support AVX2.
 - __ssse3__ Default is `y`. Set this to `n` if your CPU does not support SSSE3.
@@ -23,12 +25,11 @@ In order to build from source in Windows, C++17 and Make is required. The target
 ```
 $ git clone https://github.com/jakhac/chai
 $ cd chai/src
-$ make release [evalfile=path/to/evalfile.nnue] [avx2=y/n] [ssse3=y/n]
+$ make release [COMP=compiler] [evalfile=path/to/evalfile.nnue] [avx2=y/n] [ssse3=y/n]
 ```
 
 
 ## Testing, Strength, NNUE
----
 
 ### NNUE
 
@@ -52,7 +53,6 @@ The engines are mainly tested by self-play and occasionally checked against addi
 
 
 ## Features
----
 
 ### UCI Options
 
@@ -102,7 +102,7 @@ An excerpt of applied techniques and heuristics is listed in the following:
 - Test-Suite based on GoogleTest-Framework (for usage see [here](https://github.com/google/googletest))
 
 ## Acknowledgement
----
+
 Following sources supported and influenced development:
 
 - [Stockfish](https://github.com/official-stockfish/Stockfish), [Ethereal](https://github.com/AndyGrant/Ethereal), [Jazz](https://www.chessprogramming.org/Jazz), [RubiChess](https://github.com/Matthies/NN)
