@@ -1,6 +1,8 @@
 # chai - Chess Engine
 
 [![UnitTest](https://github.com/jakhac/chai/actions/workflows/gtest.yml/badge.svg?branch=master)](https://github.com/jakhac/chai/actions/workflows/gtest.yml)
+[![build](https://github.com/jakhac/chai/actions/workflows/build.yml/badge.svg)](https://github.com/jakhac/chai/actions/workflows/build.yml)
+
 
 chai is a free [UCI](http://wbec-ridderkerk.nl/html/UCIProtocol.html) compatible chess engine playing at estimated ~2300 elo supporting state-of-the-art NNUE evaluation. In order to play or test this engine, a GUI like [Arena](http://www.playwitharena.de/), [Lucas Chess](https://lucaschess.pythonanywhere.com/) or a command-line interface like [c-chess-cli](https://github.com/lucasart/c-chess-cli) is recommended.
 
