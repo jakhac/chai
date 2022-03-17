@@ -1,0 +1,28 @@
+name: UnitTest
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test-action:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Googletest installer
+        # You may pin to the exact commit or the version.
+        # uses: MarkusJx/googletest-installer@2dbed3d0a9dc19bebe3e36773185ab9c17664c8d
+        uses: MarkusJx/googletest-installer@v1.1
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build engine
+        run: |
+          cd src
+          mkdir -p obj_debug
+          make test -j2
+      - name: Run tests
+        run: ./src/test
