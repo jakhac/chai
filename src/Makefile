@@ -9,30 +9,37 @@ EXE		= chai_$(VERSION)
 
 
 ifeq ($(COMP),mingw)
-	EXE_RELEASE = $(EXE).exe
-	EXE_DEBUG   = $(EXE)_debug.exe
-	EXE_TEST    = test.exe
+    EXE_RELEASE = $(EXE).exe
+    EXE_DEBUG   = $(EXE)_debug.exe
+    EXE_TEST    = bench.exe
 else
-	EXE_RELEASE = $(EXE)
-	EXE_DEBUG   = $(EXE)_debug
-	EXE_TEST    = test
+    EXE_RELEASE = $(EXE)
+    EXE_DEBUG   = $(EXE)_debug
+    EXE_TEST    = bench
 endif
 
 
-SRCS = main.cpp tt.cpp thread.cpp layers.cpp pawn.cpp transformer.cpp \
-	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
-	syzygy.cpp timeMan.cpp validate.cpp egtb/tbprobe.cpp bitboard.cpp \
-	info.cpp nnue.cpp endgame.cpp attacks.cpp uci.cpp eval.cpp \
+ENG_SRC = uci.cpp tt.cpp thread.cpp layers.cpp pawn.cpp attacks.cpp \
+    board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
+    syzygy.cpp timeMan.cpp validate.cpp egtb/tbprobe.cpp bitboard.cpp \
+    info.cpp nnue.cpp endgame.cpp transformer.cpp eval.cpp \
 
+TEST_SRC = ../test/testMain.cpp ../test/testSearch.cpp \
+    ../test/testPerft.cpp ../test/testSee.cpp ../test/testEval.cpp \
+    ../test/testPosition.cpp
+
+TEST_SRCS = $(ENG_SRC) $(TEST_SRC)
+CHAI_SRCS = $(ENG_SRC) main.cpp
+SRCS 	  = $(TEST_SRCS) $(CHAI_SRCS)
 
 OBJ_RELEASE_DIR = ./obj_release
-OBJS_RELEASE    = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(SRCS)))
-
 OBJ_DEBUG_DIR   = ./obj_debug
-OBJS_DEBUG      = $(patsubst %.cpp, $(OBJ_DEBUG_DIR)/%.o, $(notdir $(SRCS)))
 
-VPATH = egtb:nnue:
+OBJS_RELEASE    = $(patsubst %.cpp, $(OBJ_RELEASE_DIR)/%.o, $(notdir $(CHAI_SRCS)))
+OBJS_DEBUG      = $(patsubst %.cpp, $(OBJ_DEBUG_DIR)/%.o, $(notdir $(CHAI_SRCS)))
+OBJS_TEST       = $(patsubst %.cpp, $(OBJ_DEBUG_DIR)/%.o, $(notdir $(TEST_SRCS)))
 
+VPATH = egtb:nnue:../test:
 
 #######################################
 # 2. Configure architecture & type
@@ -58,64 +65,64 @@ threads = 1
 hashMb  = 256
 
 ifneq ($(threads),1)
-	CXXFLAGS += -DCUSTOM_THREADS=$(threads)
+    CXXFLAGS += -DCUSTOM_THREADS=$(threads)
 endif
 
 ifneq ($(hashMb),256)
-	CXXFLAGS += -DCUSTOM_HASHSIZE=$(hashMb)
+    CXXFLAGS += -DCUSTOM_HASHSIZE=$(hashMb)
 endif
 
 ifeq ($(nnue),y)
-	CXXFLAGS += -DUSE_NNUE
-	ifneq ($(evalfile),n)
-		CXXFLAGS += -DCUSTOM_EVALFILE=\"$(evalfile)\"
-	endif
+    CXXFLAGS += -DUSE_NNUE
+    ifneq ($(evalfile),n)
+        CXXFLAGS += -DCUSTOM_EVALFILE=\"$(evalfile)\"
+    endif
 endif
 
 
 ####
 #### 2.2 Set additional flags for respective build type.
 ifeq ($(TYPE),release)
-	assert = n
-	debug  = n
+    assert = n
+    debug  = n
 endif
 
 ifeq ($(TYPE),debug)
-	assert   = y
-	debug    = y
-	optimize = n
+    assert   = y
+    debug    = y
+    optimize = n
 endif
 
 ifeq ($(assert),y)
-	CXXFLAGS += -DASSERT
+    CXXFLAGS += -DASSERT
 endif
 
 ifeq ($(debug),y)
-	CXXFLAGS += -DINFO
+    CXXFLAGS += -DINFO
 endif
 
 
 ####
 #### 2.3 Set optimization flags as previously defined.
 ifeq ($(optimize),y)
-	CXXFLAGS += -O3
+    CXXFLAGS += -O3
 endif
 
 ifeq ($(popcnt),y)
-	CXXFLAGS += -mssse3 -mpopcnt
+    CXXFLAGS += -mssse3 -mpopcnt
 endif
 
 ifeq ($(prefetch),y)
-	CXXFLAGS += -DUSE_PREFETCH -msse
-	DEPENDFLAGS += -msse
+    CXXFLAGS += -DUSE_PREFETCH -msse
+    DEPENDFLAGS += -msse
 endif
 
 ifeq ($(avx2),y)
-	CXXFLAGS += -DUSE_AVX2 -mavx2
+    CXXFLAGS += -DUSE_AVX2 -mavx2
 endif
 
 ifeq ($(ssse3),y)
-	CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
+    CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
 endif
 
 ####
@@ -133,41 +140,49 @@ DEPENDFLAGS += -std=c++17 -fexceptions
 #######################################
 
 ifeq ($(COMP),)
-	COMP=gcc
+    COMP=gcc
 endif
 
 ifeq ($(COMP),gcc)
-	comp=gcc
-	CXX=g++
+    comp=gcc
+    CXX=g++
 
-	LDFLAGS += -m64 -Wl,-z,stack-size=4194304 -lpthread
+    LDFLAGS += -m64 -Wl,-z,stack-size=4194304 -lpthread
 endif
 
 ifeq ($(COMP),mingw)
-	comp=mingw
+    comp=mingw
 
-	ifeq ($(UNAME),Linux)
-		CXX=x86_64-w64-mingw32-c++
-	else
-		CXX=g++
-	endif
+    ifeq ($(UNAME),Linux)
+        CXX=x86_64-w64-mingw32-c++
+    else
+        CXX=g++
+    endif
 
-	LDFLAGS += -m64 -Wl,--stack,4194304
-	LDFLAGS += -static
+    LDFLAGS += -m64 -Wl,--stack,4194304
+    LDFLAGS += -static
 endif
 
 
-$(EXE_DEBUG): $(OBJS_DEBUG)
-	+$(CXX) -o $@ $(OBJS_DEBUG) $(LDFLAGS)
+### Compile to object files
 
 $(OBJ_DEBUG_DIR)/%.o: %.cpp
-	+$(CXX) $(CXXFLAGS) -c -o $@ $<
-
-$(EXE_RELEASE): $(OBJS_RELEASE)
-	+$(CXX) -o $@ $(OBJS_RELEASE) $(LDFLAGS)
+    +$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJ_RELEASE_DIR)/%.o: %.cpp
-	+$(CXX) $(CXXFLAGS) -c -o $@ $<
+    +$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+
+### Link to executables
+
+$(EXE_DEBUG): $(OBJS_DEBUG)
+    +$(CXX) -o $@ $(OBJS_DEBUG) $(LDFLAGS)
+
+$(EXE_RELEASE): $(OBJS_RELEASE)
+    +$(CXX) -o $@ $(OBJS_RELEASE) $(LDFLAGS)
+
+$(EXE_TEST): $(OBJS_TEST)
+    +$(CXX) -o $@ $(OBJS_TEST) $(LDFLAGS) -lgtest -lgtest_main -lpthread
 
 
 #######################################
@@ -177,33 +192,33 @@ $(OBJ_RELEASE_DIR)/%.o: %.cpp
 .DEFAULT_GOAL=help
 
 debug:
-	mkdir -p ./obj_debug
-	$(MAKE) $(EXE_DEBUG) TYPE=debug .depend
+    mkdir -p ./obj_debug
+    $(MAKE) $(EXE_DEBUG) TYPE=debug .depend
 
 release:
-	mkdir -p ./obj_release
-	$(MAKE) $(EXE_RELEASE) TYPE=release .depend
+    mkdir -p ./obj_release
+    $(MAKE) $(EXE_RELEASE) TYPE=release .depend
 
 test:
-	cd ../test && $(MAKE) TYPE=debug evalfile=$(evalfile) cxx=$(CXX)
-	mv ../test/$(EXE_TEST) .
+    mkdir -p ./obj_debug
+    $(MAKE) $(EXE_TEST) TYPE=debug .depend
 
-clean:
-	@rm -f $(EXE_DEBUG) $(EXE_RELEASE) $(EXE_TEST) ./obj_debug/*.o ./obj_release/*.o
+git statclean:
+    rm -f $(EXE_DEBUG) $(EXE_RELEASE) $(EXE_TEST) ./obj_debug/*.o ./obj_release/*.o
 
 help:
-	$(info To build chai, use the "release" target:)
-	$(info > make release [COMP=comp] [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n])
+    $(info To build chai, use the "release" target:)
+    $(info > make release [COMP=comp] [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n])
 
 archive:
-	for number in 1 3 4 ; do \
-		$(MAKE) clean ; \
-		$(MAKE) release threads=$$number ; \
-		mv ./$(EXE_RELEASE) ../archive/$(EXE)_"$$number"CPU.exe ; \
-	done
+    for number in 1 3 4 ; do \
+        $(MAKE) clean ; \
+        $(MAKE) release threads=$$number ; \
+        mv ./$(EXE_RELEASE) ../archive/$(EXE)_"$$number"CPU.exe ; \
+    done
 
 .depend:
-	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null
+    -@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null
 
 -include .depend
 
