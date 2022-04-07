@@ -16,7 +16,7 @@ Latest prebuild binaries including different architectures and active NNUE are p
 
 ###  Building From Source in Linux
 
-In order to build from source, C++17 and Make is required. The target to build the engine is called ``release`` and has the following parameters:
+Building from source requires C++17 and Make. The target to build the engine is called ``release`` and has the following parameters:
 - __COMP__ Default is gcc. Set this to mingw to cross-compile and target windows binaries.
 - __evalfile__ Here you can set the path with forward-slashes (!) to a NNUE file that should be included during compilation. Currently, no original NNUE files are offered. Instead, we refer to [this](https://github.com/Matthies/NN) repository where supported networks can be found. Note that nets can also be loaded via UCI protocol as explained below.
 - __avx2__ Default is `y`. Set this to `n` if your CPU does not support AVX2.

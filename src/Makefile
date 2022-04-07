@@ -9,24 +9,24 @@ EXE		= chai_$(VERSION)
 
 
 ifeq ($(COMP),mingw)
-    EXE_RELEASE = $(EXE).exe
-    EXE_DEBUG   = $(EXE)_debug.exe
-    EXE_TEST    = bench.exe
+	EXE_RELEASE = $(EXE).exe
+	EXE_DEBUG   = $(EXE)_debug.exe
+	EXE_TEST    = bench.exe
 else
-    EXE_RELEASE = $(EXE)
-    EXE_DEBUG   = $(EXE)_debug
-    EXE_TEST    = bench
+	EXE_RELEASE = $(EXE)
+	EXE_DEBUG   = $(EXE)_debug
+	EXE_TEST    = bench
 endif
 
 
 ENG_SRC = uci.cpp tt.cpp thread.cpp layers.cpp pawn.cpp attacks.cpp \
-    board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
-    syzygy.cpp timeMan.cpp validate.cpp egtb/tbprobe.cpp bitboard.cpp \
-    info.cpp nnue.cpp endgame.cpp transformer.cpp eval.cpp \
+	board.cpp moveGenerator.cpp moveOrdering.cpp perft.cpp search.cpp \
+	syzygy.cpp timeMan.cpp validate.cpp egtb/tbprobe.cpp bitboard.cpp \
+	info.cpp nnue.cpp endgame.cpp transformer.cpp eval.cpp \
 
 TEST_SRC = ../test/testMain.cpp ../test/testSearch.cpp \
-    ../test/testPerft.cpp ../test/testSee.cpp ../test/testEval.cpp \
-    ../test/testPosition.cpp
+	../test/testPerft.cpp ../test/testSee.cpp ../test/testEval.cpp \
+	../test/testPosition.cpp
 
 TEST_SRCS = $(ENG_SRC) $(TEST_SRC)
 CHAI_SRCS = $(ENG_SRC) main.cpp
@@ -176,13 +176,15 @@ $(OBJ_RELEASE_DIR)/%.o: %.cpp
 ### Link to executables
 
 $(EXE_DEBUG): $(OBJS_DEBUG)
-    +$(CXX) -o $@ $(OBJS_DEBUG) $(LDFLAGS)
+	+$(CXX) -o $@ $(OBJS_DEBUG) $(LDFLAGS)
+
 
 $(EXE_RELEASE): $(OBJS_RELEASE)
-    +$(CXX) -o $@ $(OBJS_RELEASE) $(LDFLAGS)
+	+$(CXX) -o $@ $(OBJS_RELEASE) $(LDFLAGS)
+
 
 $(EXE_TEST): $(OBJS_TEST)
-    +$(CXX) -o $@ $(OBJS_TEST) $(LDFLAGS) -lgtest -lgtest_main -lpthread
+	+$(CXX) -o $@ $(OBJS_TEST) $(LDFLAGS) -lgtest -lgtest_main -lpthread
 
 
 #######################################
@@ -200,11 +202,11 @@ release:
     $(MAKE) $(EXE_RELEASE) TYPE=release .depend
 
 test:
-    mkdir -p ./obj_debug
-    $(MAKE) $(EXE_TEST) TYPE=debug .depend
+	mkdir -p ./obj_debug
+	$(MAKE) $(EXE_TEST) TYPE=debug .depend
 
-git statclean:
-    rm -f $(EXE_DEBUG) $(EXE_RELEASE) $(EXE_TEST) ./obj_debug/*.o ./obj_release/*.o
+clean:
+	rm -f $(EXE_DEBUG) $(EXE_RELEASE) $(EXE_TEST) ./obj_debug/*.o ./obj_release/*.o
 
 help:
     $(info To build chai, use the "release" target:)
