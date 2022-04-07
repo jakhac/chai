@@ -206,7 +206,7 @@ test:
 	mkdir -p ./obj_debug
 	$(MAKE) $(EXE_TEST) TYPE=debug .depend
 
-git statclean:
+clean:
 	rm -f $(EXE_DEBUG) $(EXE_RELEASE) $(EXE_TEST) ./obj_debug/*.o ./obj_release/*.o
 
 help:

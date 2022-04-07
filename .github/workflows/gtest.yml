@@ -25,4 +25,4 @@ jobs:
           mkdir -p obj_debug
           make test -j2
       - name: Run tests
-        run: ./src/test
+        run: ./bench
