@@ -10,7 +10,7 @@ void logDebug(std::string errMsg) {
 void printEval(Board* b) {
 
     cout << "Overall evaluation: "  << evaluation(b) 
-         << " (positive states advantage for white)" << endl
+         << " (positive value claims advantage for white)" << endl
          << "\tPSQT (opening)\t "  << b->psqtOpening << endl
          << "\tPSQT (endgame)\t "  << b->psqtEndgame << endl;
 
@@ -25,16 +25,17 @@ void printEval(Board* b) {
 
 void printCliHelp() {
     cout << "Command does not exist. Valid commands are:" << endl
-         << "\tuci\t(start uci protocol)" << endl
-          << "\ts\t(search current position)" << endl
-          << "\t[e2e4]\t(apply move)" << endl
-           << "\tpop\t(undo move)" << endl
-         << "\tfen\t(parse fen)" << endl
+         << "\t- uci\t\t\t(start uci protocol)" << endl
+        //  << "\t- s\t\t\t(search current position)" << endl
+         << "\t- [e2e4]\t\t(apply move)" << endl
+         << "\t- pop\t\t\t(undo move)" << endl
+         << "\t- fen <KQP/34KR/...>\t(parse provided fen)" << endl
 #ifdef INFO
-         << "\tprint\t(print board status)" << endl
+         << "\t- print\t\t\t(print board status)" << endl
 #endif // INFO
-         << "\tperft\t(perft this position)" << endl
-         << "\tquit\t(exit program)" << endl
+         << "\t- perft <d>\t\t(perft position to depth d)" << endl
+         << "\t- sperft <d>\t\t(perft position to depth d and adds move-stats)" << endl
+         << "\t- quit\t\t\t(exit program)" << endl
          << endl;
 }
 

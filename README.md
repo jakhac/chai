@@ -17,7 +17,7 @@ Latest prebuild binaries including different architectures and active NNUE are p
 ###  Building From Source in Linux
 
 Building from source requires C++17 and Make. The target to build the engine is called ``release`` and has the following parameters:
-- __COMP__ Default is gcc. Set this to mingw to cross-compile and target windows binaries.
+- __comp__ Default is gcc. Set this to mingw to cross-compile and target windows binaries.
 - __evalfile__ Here you can set the path with forward-slashes (!) to a NNUE file that should be included during compilation. Currently, no original NNUE files are offered. Instead, we refer to [this](https://github.com/Matthies/NN) repository where supported networks can be found. Note that nets can also be loaded via UCI protocol as explained below.
 - __avx2__ Default is `y`. Set this to `n` if your CPU does not support AVX2.
 - __ssse3__ Default is `y`. Set this to `n` if your CPU does not support SSSE3.
@@ -27,7 +27,7 @@ Building from source requires C++17 and Make. The target to build the engine is 
 ```
 $ git clone https://github.com/jakhac/chai
 $ cd chai/src
-$ make release [COMP=compiler] [evalfile=path/to/evalfile.nnue] [avx2=y/n] [ssse3=y/n]
+$ make release [comp=compiler] [evalfile=path/to/evalfile.nnue] [avx2=y/n] [ssse3=y/n]
 ```
 
 
@@ -96,10 +96,10 @@ An excerpt of applied techniques and heuristics is listed in the following:
 - Evaluation
   - NNUE evaluation as outlined by Gary Linscott in [nnue-pytorch](https://github.com/glinscott/nnue-pytorch/blob/master/docs/nnue.md). The implementation follows the classical HalfKP Feature-Set that was implemented in Stockfish 13.1.
 - Move Generation
+  - Contains Perft option to debug move generator (including statistics on captures, checks, mates, ..)
   - Bitboard based move generation with [Magic-Bitboards](http://pradu.us/old/Nov27_2008/Buzz/research/magic/Bitboards.pdf)
   - Special generators for quiescence and check evasions
   - Checker generator (generates all checking moves for first ply of quiescence)
-  - Contains Perft option to debug move generator
 - Endgame Tablebase Probing ([Fathom](https://github.com/jdart1/Fathom) probing tool)
 - Test-Suite based on GoogleTest-Framework (for usage see [here](https://github.com/google/googletest))
 

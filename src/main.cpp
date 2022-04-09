@@ -3,7 +3,6 @@
 
 
 Board board;
-Perft perft;
 Stats stats;
 Instructions instr;
 
@@ -21,8 +20,7 @@ int main() {
 
     parseFen(&board, STARTING_FEN);
     printBoard(&board);
-
-    UCI::cli(&board, &instr, &stats, &perft);
+    UCI::cli(&board, &instr, &stats);
 
     EGTB::freeEGTB();
     TT::freeHashTables();

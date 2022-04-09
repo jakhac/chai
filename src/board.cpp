@@ -845,6 +845,18 @@ bool checkingMove(Board* b, Move move) {
     return false;
 }
 
+bool isMate(Board* b) {
+
+    if (isCheck(b, b->stm)) {
+
+        MoveList m;
+        generateCheckEvasions(b, &m);
+        return m.cnt == 0;
+    }
+
+    return false;
+}
+
 bool castleValid(Board* b, int castle, Bitboard* attackerSet) {
     if (   isCheck(b, b->stm)
         || !(b->castlePermission & castle))

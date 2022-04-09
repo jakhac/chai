@@ -8,7 +8,7 @@ VERSION = v3.4.1
 EXE		= chai_$(VERSION)
 
 
-ifeq ($(COMP),mingw)
+ifeq ($(comp),mingw)
 	EXE_RELEASE = $(EXE).exe
 	EXE_DEBUG   = $(EXE)_debug.exe
 	EXE_TEST    = bench.exe
@@ -132,6 +132,8 @@ CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 CXXFLAGS += -pedantic -Wextra -Wshadow
 CXXFLAGS += -DVERSION=$(VERSION)
 
+LDFLAGS   = -m64 
+
 DEPENDFLAGS += -std=c++17 -fexceptions
 
 
@@ -139,19 +141,19 @@ DEPENDFLAGS += -std=c++17 -fexceptions
 # 3. Compile and link to target
 #######################################
 
-ifeq ($(COMP),)
-    COMP=gcc
+ifeq ($(comp),)
+	comp=gcc
 endif
 
-ifeq ($(COMP),gcc)
-    comp=gcc
-    CXX=g++
+ifeq ($(comp),gcc)
+	COMP=gcc
+	CXX=g++
 
-    LDFLAGS += -m64 -Wl,-z,stack-size=4194304 -lpthread
+	LDFLAGS += -Wl,-z,stack-size=4194304 -pthread
 endif
 
-ifeq ($(COMP),mingw)
-    comp=mingw
+ifeq ($(comp),mingw)
+	COMP=mingw
 
     ifeq ($(UNAME),Linux)
         CXX=x86_64-w64-mingw32-c++
@@ -159,8 +161,8 @@ ifeq ($(COMP),mingw)
         CXX=g++
     endif
 
-    LDFLAGS += -m64 -Wl,--stack,4194304
-    LDFLAGS += -static
+	LDFLAGS += -Wl,--stack,4194304
+	LDFLAGS += -static
 endif
 
 

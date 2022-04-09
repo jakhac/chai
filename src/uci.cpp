@@ -3,19 +3,14 @@
 namespace UCI {
 
 
-void cli(Board* b, Instructions* i, Stats* s, Perft* p) {
+void cli(Board* b, Instructions* i, Stats* s) {
+
     MoveList moveList;
     Move parsedMove;
     std::string userInput;
 
-    // cout << "Propagate " << propagate(b) << endl;
-    // cout << "nnue eval " << evaluateNNUE(b) << endl;
-
-    // Bitboard = 
-    // printBitBoard(&t);
-
     while (1) {
-        cin >> userInput;
+        std::getline(cin, userInput);
 
         // Start UCI protocol.
         if (userInput == "uci") {
@@ -37,19 +32,29 @@ void cli(Board* b, Instructions* i, Stats* s, Perft* p) {
             continue;
         }
 
-        // Perft current position.
-        if (userInput == "perft") {
-            cout << "Enter Perft depth: ";
+        // Fast-Perft current position.
+        if (strStartsWith(userInput, "perft")) {
+            int perftDepth = stoi(userInput.substr(6));
 
-            std::string perftDepth;
-            cin >> perftDepth;
-
-            if (stoi(perftDepth) >= 1 && stoi(perftDepth) <= 15) {
-                dividePerft(p, b, stoi(perftDepth));
+            if (perftDepth >= 1 && perftDepth <= 15) {
+                dividePerft<FastPerft>(b, perftDepth);
             } else {
-                cerr << "Enter an integer between in [1, 15]." << endl;
+                cerr << "Error: bad depth. Enter an integer between in [1, 15]." << endl;
             }
-            cout << "Leaving perft option." << endl;
+
+            continue;
+        }
+
+        // Stats-Perft current position
+        if (strStartsWith(userInput, "sperft")) {
+            int perftDepth = stoi(userInput.substr(7));
+
+            if (perftDepth >= 1 && perftDepth <= 15) {
+                dividePerft<StatPerft>(b, perftDepth);  
+            } else {
+                cerr << "Error: bad depth. Enter an integer between in [1, 15]." << endl;
+            }
+
             continue;
         }
 
@@ -61,19 +66,20 @@ void cli(Board* b, Instructions* i, Stats* s, Perft* p) {
         }
 
         if (userInput == "eval") {
-            // cout << "Eval = " << evaluation(b) << " (white side)" << endl;
             printEval(b);
             continue;
         }
 
         // Parse fen into board variables.
-        if (userInput == "fen") {
-            cout << "Enter FEN: ";
-            cin.ignore();
-            getline(cin, userInput);
-            cout << "Parsed FEN \"" << userInput << "\" into board." << endl;
-            parseFen(b, userInput);
-            printBoard(b);
+        if (strStartsWith(userInput, "fen")) {
+            std::string fen = userInput.substr(4);
+
+            if (parseFen(b, fen)) {
+                cerr << "Error: bad FEN. Make sure to povide complete string." << endl;
+            } else {
+                printBoard(b);
+            }
+
             continue;
         }
 
@@ -115,6 +121,7 @@ void cli(Board* b, Instructions* i, Stats* s, Perft* p) {
 }
 
 void uciMode(Board* b, Stats* s, Instructions* i) {
+
     std::string cmd;
 
     printUCI_Info();
@@ -235,6 +242,7 @@ void uciParsePosition(Board* b, std::string cmd) {
 }
 
 void uciParseGo(Board* b, Stats* s, Instructions* instr, std::string cmd) {
+
     instr->startTime = getTimeMs();
 
     int depth    = 0; // search to this depth
