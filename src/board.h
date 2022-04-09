@@ -258,4 +258,9 @@ bool castleValid(Board* b, int castle, Bitboard* attackerSet);
  */
 bool checkingMove(Board* b, Move move);
 
+/**
+ * Determines if a position is checkmate (the slow way).
+ */
+bool isMate(Board* b);
+
 Move getCurrentMove(Board* b);

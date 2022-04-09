@@ -24,7 +24,7 @@ namespace UCI {
 /**
  * Start a game in console.
  */
-void cli(Board* b, Instructions* i, Stats* s, Perft* p);
+void cli(Board* b, Instructions* i, Stats* s);
 
 /**
  * Enters UCI mode. Described in http://wbec-ridderkerk.nl/html/UCIProtocol.html

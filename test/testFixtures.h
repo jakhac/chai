@@ -42,11 +42,10 @@ namespace PerftTest {
 
     protected:
         Board* pBoard;
-        Perft* pPerft;
+        FastPerft perft;
 
         virtual void SetUp() {
             pBoard = new Board();
-            pPerft = new Perft();
 
             MoveOrder::init();
             Mask::init();
@@ -55,7 +54,6 @@ namespace PerftTest {
 
         virtual void TearDown() {
             delete pBoard;
-            delete pPerft;
         }
 
     };

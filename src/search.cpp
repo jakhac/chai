@@ -116,14 +116,15 @@ bool zugzwang(Board* b) {
     return false;
 }
 
-// following moves are tactical: caps, proms, eps
+// Following moves are tactical: caps, proms, eps 
+// (NOTE: only use before pushing the move)
 static bool moveIsTactical(Board* b, Move move) {
     return isCapture(b, move)
         || isPromotion(move)
         || isEnPassant(move);
 }
 
-// return true if any pawns are on 2nd, resp. 7th, rank
+// Return true if any pawns are on 2nd, resp. 7th, rank
 static bool promotablePawns(Board* b, bool side) {
 
     if (side == WHITE) {
@@ -133,7 +134,7 @@ static bool promotablePawns(Board* b, bool side) {
     }
 }
 
-// check if move pushes pawn on 2nd/7th rank (call AFTER! pushing the move)
+// Check if move pushes pawn on 2nd/7th rank (call AFTER! pushing the move)
 static bool dangerousPawnPush(Board* b, Move m) {
 
     if (piecePawn[pieceAt(b, toSq(m))]) {
