@@ -132,6 +132,8 @@ CXXFLAGS += -Wl,--stack,4194304 -fexceptions
 CXXFLAGS += -pedantic -Wextra -Wshadow
 CXXFLAGS += -DVERSION=$(VERSION)
 
+LDFLAGS   = -m64 
+
 DEPENDFLAGS += -std=c++17 -fexceptions
 
 
@@ -140,18 +142,18 @@ DEPENDFLAGS += -std=c++17 -fexceptions
 #######################################
 
 ifeq ($(comp),)
-	COMP=gcc
+	comp=gcc
 endif
 
 ifeq ($(comp),gcc)
-	comp=gcc
+	COMP=gcc
 	CXX=g++
 
-	LDFLAGS += -m64 -Wl,-z,stack-size=4194304 -lpthread
+	LDFLAGS += -Wl,-z,stack-size=4194304 -pthread
 endif
 
 ifeq ($(comp),mingw)
-	comp=mingw
+	COMP=mingw
 
 	ifeq ($(UNAME),Linux)
 		CXX=x86_64-w64-mingw32-c++
@@ -159,7 +161,7 @@ ifeq ($(comp),mingw)
 		CXX=g++
 	endif
 
-	LDFLAGS += -m64 -Wl,--stack,4194304
+	LDFLAGS += -Wl,--stack,4194304
 	LDFLAGS += -static
 endif
 
