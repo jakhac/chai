@@ -23,6 +23,12 @@ void cli(Board* b, Instructions* i, Stats* s) {
             break;
         }
 
+        // Exit program.
+        if (userInput == "info") {
+            printEngineMeta(info_ASSERT, info_CXX, info_SIMD);
+            continue;
+        }
+
         // Start searching this position.
         if (userInput == "s") {
             i->depth = 40;
@@ -32,12 +38,12 @@ void cli(Board* b, Instructions* i, Stats* s) {
             continue;
         }
 
-        // Fast-Perft current position.
+        // Stats-Perft current position
         if (strStartsWith(userInput, "perft")) {
             int perftDepth = stoi(userInput.substr(6));
 
             if (perftDepth >= 1 && perftDepth <= 15) {
-                dividePerft<FastPerft>(b, perftDepth);
+                dividePerft<StatPerft>(b, perftDepth);  
             } else {
                 cerr << "Error: bad depth. Enter an integer between in [1, 15]." << endl;
             }
@@ -46,11 +52,11 @@ void cli(Board* b, Instructions* i, Stats* s) {
         }
 
         // Stats-Perft current position
-        if (strStartsWith(userInput, "sperft")) {
+        if (strStartsWith(userInput, "fperft")) {
             int perftDepth = stoi(userInput.substr(7));
 
             if (perftDepth >= 1 && perftDepth <= 15) {
-                dividePerft<StatPerft>(b, perftDepth);  
+                dividePerft<FastPerft>(b, perftDepth);  
             } else {
                 cerr << "Error: bad depth. Enter an integer between in [1, 15]." << endl;
             }

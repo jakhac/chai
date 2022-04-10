@@ -24,17 +24,17 @@ void printEval(Board* b) {
 }
 
 void printCliHelp() {
-    cout << "Command does not exist. Valid commands are:" << endl
+    cout << "Error: bad command. Valid commands are:" << endl
          << "\t- uci\t\t\t(start uci protocol)" << endl
-        //  << "\t- s\t\t\t(search current position)" << endl
-         << "\t- [e2e4]\t\t(apply move)" << endl
+         << "\t- <e2e4>\t\t(apply move)" << endl
          << "\t- pop\t\t\t(undo move)" << endl
          << "\t- fen <KQP/34KR/...>\t(parse provided fen)" << endl
 #ifdef INFO
          << "\t- print\t\t\t(print board status)" << endl
 #endif // INFO
-         << "\t- perft <d>\t\t(perft position to depth d)" << endl
-         << "\t- sperft <d>\t\t(perft position to depth d and adds move-stats)" << endl
+         << "\t- perft <d>\t\t(perft to depth d)" << endl
+         << "\t- fperft <d>\t\t(fast-perft to depth d using all available cores)" << endl
+         << "\t- info\t\t\t(print engine info)" << endl
          << "\t- quit\t\t\t(exit program)" << endl
          << endl;
 }

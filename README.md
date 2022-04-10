@@ -95,8 +95,10 @@ An excerpt of applied techniques and heuristics is listed in the following:
   - Transposition Table (4 buckets: replace entry with lowest depth)
 - Evaluation
   - NNUE evaluation as outlined by Gary Linscott in [nnue-pytorch](https://github.com/glinscott/nnue-pytorch/blob/master/docs/nnue.md). The implementation follows the classical HalfKP Feature-Set that was implemented in Stockfish 13.1.
+- Perft
+  - Use perft option to debug your move generator. Each run contains statistics about captures, checks, mates (..)
+  - Optimized perft option using all available cores for deep perfting results
 - Move Generation
-  - Contains Perft option to debug move generator (including statistics on captures, checks, mates, ..)
   - Bitboard based move generation with [Magic-Bitboards](http://pradu.us/old/Nov27_2008/Buzz/research/magic/Bitboards.pdf)
   - Special generators for quiescence and check evasions
   - Checker generator (generates all checking moves for first ply of quiescence)

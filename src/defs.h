@@ -65,9 +65,9 @@ const std::string info_ASSERT =
 
 const std::string info_CXX =
 #ifdef __clang__
-   "clang++ " + ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
+   "clang " + ver_string(__clang_major__, __clang_minor__, __clang_patchlevel__);
 #else
-   "g++ " + ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+   "gnu " + ver_string(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #endif
 
 const std::string info_SIMD =

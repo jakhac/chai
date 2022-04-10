@@ -1,7 +1,7 @@
 #pragma once
 
 #include "moveGenerator.h"
-
+#include "thread.h"
 
 /**
  * Generic class for perfting applications.
@@ -16,7 +16,7 @@ class GenericPerft {
      *
      * @returns The number of leaf nodes counted at given depth.
      */
-    virtual void perft(Board* b, int depth) = 0;
+    virtual long long perftRoot(Board* b, int depth) = 0;
 
     /**
      * Recursive call for perft using {@link #isLegal(Board, Move)} isLegal function.
@@ -24,33 +24,15 @@ class GenericPerft {
      * @param  b	 The board reference.
      * @param  depth Depth remaining.
      */
-    virtual long long perftRoot(Board* b, int depth) = 0;
+    virtual void perft(Board* b, int depth, long long* leaves) = 0;
 
-};
-
-
-class FastPerft : public GenericPerft {
-
-private:
-
-    long long leafNodes = 0;
-
-public:
-
-    virtual long long perftRoot(Board* b, int depth);
-    virtual void perft(Board* b, int depth);
-
-    void printStats() { };
-
-    void resetStats() {
-        leafNodes = 0;
-    }
 };
 
 class StatPerft : public GenericPerft {
 
 private:
 
+    long long leafList[MAX_POSITION_MOVES] = { 0 };
     long long leafNodes = 0;
     long long captures  = 0;
     long long proms     = 0;
@@ -61,12 +43,12 @@ private:
 
 public:
 
-    virtual long long perftRoot(Board* b, int depth);
-    virtual void perft(Board* b, int depth);
+    long long perftRoot(Board* b, int depth) override;
+    void perft(Board* b, int depth, long long* leaves) override;
 
     void printStats();
-
     void resetStats() {
+        std::fill(std::begin(leafList), std::end(leafList), 0);
         leafNodes = 0;
         captures  = 0;
         proms     = 0;
@@ -77,6 +59,27 @@ public:
     }
 };
 
+class FastPerft : public GenericPerft {
+
+private:
+
+    long long leafNodes = 0;
+    long long leafList[MAX_POSITION_MOVES] = { 0 };
+
+public:
+
+    long long perftRoot(Board* b, int depth) override;
+    void perft(Board* b, int depth, long long* leaves) override;
+    void perftJob(Board b, int depth, int idx);
+
+    void printStats() {};
+    void resetStats() {
+        leafNodes = 0;
+        std::fill(std::begin(leafList), std::end(leafList), 0);
+    }
+
+};
+
 
 /**
  * Function to divide with cmd-line move after each perft.
@@ -84,10 +87,10 @@ public:
  * @param  b	 Board reference.
  * @param  depth The initial depth.
  */
-template<class Perft>
+template<class PerftClass>
 void dividePerft(Board* b, int depth) {
     
-    Perft p;
+    PerftClass p;
     std::string move;
 
     int pushedMoves = 0;
@@ -106,7 +109,7 @@ void dividePerft(Board* b, int depth) {
         if (move == "q") {
             cout << endl;
             return;
-        } 
+        }
 
         int parsedMove = parseMove(b, move);
         Assert(parsedMove != MOVE_NONE);

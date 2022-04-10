@@ -65,64 +65,64 @@ threads = 1
 hashMb  = 256
 
 ifneq ($(threads),1)
-    CXXFLAGS += -DCUSTOM_THREADS=$(threads)
+	CXXFLAGS += -DCUSTOM_THREADS=$(threads)
 endif
 
 ifneq ($(hashMb),256)
-    CXXFLAGS += -DCUSTOM_HASHSIZE=$(hashMb)
+	CXXFLAGS += -DCUSTOM_HASHSIZE=$(hashMb)
 endif
 
 ifeq ($(nnue),y)
-    CXXFLAGS += -DUSE_NNUE
-    ifneq ($(evalfile),n)
-        CXXFLAGS += -DCUSTOM_EVALFILE=\"$(evalfile)\"
-    endif
+	CXXFLAGS += -DUSE_NNUE
+	ifneq ($(evalfile),n)
+		CXXFLAGS += -DCUSTOM_EVALFILE=\"$(evalfile)\"
+	endif
 endif
 
 
 ####
 #### 2.2 Set additional flags for respective build type.
 ifeq ($(TYPE),release)
-    assert = n
-    debug  = n
+	assert = n
+	debug  = n
 endif
 
 ifeq ($(TYPE),debug)
-    assert   = y
-    debug    = y
-    optimize = n
+	assert   = y
+	debug    = y
+	optimize = n
 endif
 
 ifeq ($(assert),y)
-    CXXFLAGS += -DASSERT
+	CXXFLAGS += -DASSERT
 endif
 
 ifeq ($(debug),y)
-    CXXFLAGS += -DINFO
+	CXXFLAGS += -DINFO
 endif
 
 
 ####
 #### 2.3 Set optimization flags as previously defined.
 ifeq ($(optimize),y)
-    CXXFLAGS += -O3
+	CXXFLAGS += -O3
 endif
 
 ifeq ($(popcnt),y)
-    CXXFLAGS += -mssse3 -mpopcnt
+	CXXFLAGS += -mssse3 -mpopcnt
 endif
 
 ifeq ($(prefetch),y)
-    CXXFLAGS += -DUSE_PREFETCH -msse
-    DEPENDFLAGS += -msse
+	CXXFLAGS += -DUSE_PREFETCH -msse
+	DEPENDFLAGS += -msse
 endif
 
 ifeq ($(avx2),y)
-    CXXFLAGS += -DUSE_AVX2 -mavx2
+	CXXFLAGS += -DUSE_AVX2 -mavx2
 endif
 
 ifeq ($(ssse3),y)
-    CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
+	CXXFLAGS += -DUSE_SSSE3 -mssse3 -msse2
 endif
 
 ####
@@ -155,11 +155,11 @@ endif
 ifeq ($(comp),mingw)
 	COMP=mingw
 
-    ifeq ($(UNAME),Linux)
-        CXX=x86_64-w64-mingw32-c++
-    else
-        CXX=g++
-    endif
+	ifeq ($(UNAME),Linux)
+		CXX=x86_64-w64-mingw32-c++
+	else
+		CXX=g++
+	endif
 
 	LDFLAGS += -Wl,--stack,4194304
 	LDFLAGS += -static
@@ -169,10 +169,10 @@ endif
 ### Compile to object files
 
 $(OBJ_DEBUG_DIR)/%.o: %.cpp
-    +$(CXX) $(CXXFLAGS) -c -o $@ $<
+	+$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJ_RELEASE_DIR)/%.o: %.cpp
-    +$(CXX) $(CXXFLAGS) -c -o $@ $<
+	+$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 
 ### Link to executables
@@ -196,12 +196,12 @@ $(EXE_TEST): $(OBJS_TEST)
 .DEFAULT_GOAL=help
 
 debug:
-    mkdir -p ./obj_debug
-    $(MAKE) $(EXE_DEBUG) TYPE=debug .depend
+	mkdir -p ./obj_debug
+	$(MAKE) $(EXE_DEBUG) TYPE=debug .depend
 
 release:
-    mkdir -p ./obj_release
-    $(MAKE) $(EXE_RELEASE) TYPE=release .depend
+	mkdir -p ./obj_release
+	$(MAKE) $(EXE_RELEASE) TYPE=release .depend
 
 test:
 	mkdir -p ./obj_debug
@@ -211,18 +211,18 @@ clean:
 	rm -f $(EXE_DEBUG) $(EXE_RELEASE) $(EXE_TEST) ./obj_debug/*.o ./obj_release/*.o
 
 help:
-    $(info To build chai, use the "release" target:)
-    $(info > make release [COMP=comp] [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n])
+	$(info To build chai, use the "release" target:)
+	$(info > make release [COMP=comp] [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n])
 
 archive:
-    for number in 1 3 4 ; do \
-        $(MAKE) clean ; \
-        $(MAKE) release threads=$$number ; \
-        mv ./$(EXE_RELEASE) ../archive/$(EXE)_"$$number"CPU.exe ; \
-    done
+	for number in 1 3 4 ; do \
+		$(MAKE) clean ; \
+		$(MAKE) release threads=$$number ; \
+		mv ./$(EXE_RELEASE) ../archive/$(EXE)_"$$number"CPU.exe ; \
+	done
 
 .depend:
-    -@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null
+	-@$(CXX) $(DEPENDFLAGS) -MM $(SRCS) > $@ 2> /dev/null
 
 -include .depend
 

@@ -42,7 +42,8 @@ namespace PerftTest {
 
     protected:
         Board* pBoard;
-        FastPerft perft;
+        StatPerft sperft;
+        FastPerft fperft;
 
         virtual void SetUp() {
             pBoard = new Board();
