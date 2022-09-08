@@ -229,8 +229,10 @@ void printPvLine(Board* b, Move* pvLine, int d, int score) {
         d = VALUE_MATE - score;
 
     cout << " pv ";
-    for (int i = 0; i < d; i++) {
-        cout << getStringMove(b, pvLine[i]);
+    int i = 0;
+
+    while (i < d && pvLine[i] != MOVE_NONE) {
+        cout << getStringMove(b, pvLine[i++]);
     }
 }
 

@@ -156,7 +156,7 @@ ifeq ($(comp),mingw)
 	COMP=mingw
 
 	ifeq ($(UNAME),Linux)
-		CXX=x86_64-w64-mingw32-c++
+		CXX=x86_64-w64-mingw32-g++-posix
 	else
 		CXX=g++
 	endif

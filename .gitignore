@@ -5,6 +5,7 @@
 
 # log files
 **.txt
+egtb_files/
 
 # all executables
 **.exe

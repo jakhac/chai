@@ -31,7 +31,7 @@ void cli(Board* b, Instructions* i, Stats* s) {
 
         // Start searching this position.
         if (userInput == "s") {
-            i->depth = 40;
+            i->depth = 10;
             i->timeSet = false;
 
             Search::search(b, s, i);

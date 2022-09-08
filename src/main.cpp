@@ -1,7 +1,6 @@
 #include "uci.h"
 #include "search.h"
 
-
 Board board;
 Stats stats;
 Instructions instr;
