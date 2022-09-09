@@ -649,7 +649,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
         if (pvNode)
             (ss + 1)->pvLine = nullptr;
 
-        // Futiilty Pruning
+        // Futility Pruning
         if (   !rootNode
             && legalMoves
             && depth < 5
@@ -744,7 +744,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
                 lmrDepth = newDepth - 2;
 
                 // Increase reduction for late moves
-                if (legalMoves > 6)
+                if (legalMoves > 4)
                     lmrDepth--;
 
                 if (!moveGivesCheck &&

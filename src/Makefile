@@ -4,7 +4,7 @@
 
 UNAME = $(shell uname)
 
-VERSION = v3.4.1
+VERSION = v3.4.2
 EXE		= chai_$(VERSION)
 
 
