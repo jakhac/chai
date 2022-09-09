@@ -43,7 +43,7 @@ void printEngineMeta(std::string assert, std::string compiler, std::string simd)
         cout << "chai " << TOSTRING(VERSION) << endl
              << "assert=" << assert
              << " buckets=" << BUCKETS
-             << " threads=" << NUM_THREADS
+             << " threads=" << NUM_THREADS << "/" << getMaxPhysicalCores()
              << " hashMb=" << DEFAULT_TT_SIZE
              << " simd=" << simd << endl
              << "compiler=" << compiler
@@ -55,7 +55,7 @@ void printUCI_Info() {
          << "id author Jakob Hackstein" << endl
          << "option name Hash type spin default 256 min 2 max 8192" << endl
          << "option name Threads type spin default " 
-         << NUM_THREADS << " min 1 max " << MAX_THREADS << endl
+         << NUM_THREADS << " min 1 max " << getMaxPhysicalCores() << endl
          << "option name SyzygyPath type string default \"\"" << endl
          << "option name EvalFile type string default \"\"" << endl
          << "uciok" << endl;

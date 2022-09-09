@@ -1,5 +1,48 @@
 #include "thread.h"
 
+
+
+#ifdef _WIN32
+    #include <windows.h>
+#elif MACOS
+    #include <sys/param.h>
+    #include <sys/sysctl.h>
+#else
+    #include <unistd.h>
+#endif
+
+#ifdef _WIN32
+SYSTEM_INFO systeminfo;
+GetSystemInfo( &systeminfo );
+unsigned logicalcpucount = systeminfo.dwNumberOfProcessors;
+#else
+unsigned logicalcpucount = sysconf( _SC_NPROCESSORS_ONLN );
+#endif
+
+unsigned int getMaxPhysicalCores() {
+    uint32_t registers[4];
+    unsigned int physicalcpucount;
+
+    __asm__ __volatile__ ("cpuid " :
+        "=a" (registers[0]),
+        "=b" (registers[1]),
+        "=c" (registers[2]),
+        "=d" (registers[3])
+        : "a" (1), "c" (0)
+    );
+
+    unsigned CPUFeatureSet = registers[3];
+    bool hyperthreading = CPUFeatureSet & (1 << 28);
+    if (hyperthreading){
+        physicalcpucount = logicalcpucount / 2;
+    } else {
+        physicalcpucount = logicalcpucount;
+    }
+
+    return physicalcpucount;
+}
+
+
 // Makefile might set number of threads. If not, set default (1 thread).
 #ifdef CUSTOM_THREADS
 int NUM_THREADS = std::min(CUSTOM_THREADS, (int)std::thread::hardware_concurrency());
@@ -81,7 +124,6 @@ void ThreadWrapper::waitThread() {
 
 namespace Threads {
 
-
 void initPool() {
 
     threadPool.clear();
@@ -124,7 +166,7 @@ bool resizePool(size_t numWorkers) {
         return false;
 
     deletePool();
-    NUM_THREADS = std::min(numWorkers, (size_t)MAX_THREADS);
+    NUM_THREADS = std::min(numWorkers, (size_t)getMaxPhysicalCores());
     initPool();
 
     return true;
