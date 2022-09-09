@@ -255,8 +255,7 @@ Value Search::search(Board* b, Stats* s, Instructions* i) {
 
     // UCI commands
     printUCI(&t->instr, &t->s, t->depth, t->selDepth, t->bestScore, totalNodes);
-    // printPvLine(b, t->pvLine, t->depth, t->bestScore);
-    printTTablePV(b, s->depthReached, t->bestScore);
+    printPvLine(b, t->pvLine, t->depth, t->bestScore);
     cout << endl;
 
     printUCIBestMove(b, t->bestMove);
@@ -314,8 +313,7 @@ void Threads::iid(Thread thread) {
             // 1)
             printUCI(instr, s, thread->depth, thread->selDepth, thread->bestScore, 
                 thread->nodes + thread->qnodes);
-            // printPvLine(b, thread->pvLine, thread->depth, thread->bestScore);
-            printTTablePV(b, thread->depth, thread->bestScore);
+            printPvLine(b, thread->pvLine, thread->depth, thread->bestScore);
 
             cout << endl;
 

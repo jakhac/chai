@@ -17,6 +17,24 @@ inline bool strStartsWith(std::string str, std::string start) {
     return str.rfind(start, 0) == 0;
 }
 
+inline void parseMoveList(Board* b, std::string moves) {
+    std::istringstream iss(moves);
+    std::vector<std::string> tokens{ std::istream_iterator<std::string>{iss},
+                        std::istream_iterator<std::string>{} };
+
+    // Push all moves
+    int parsedMove;
+    for (std::string m : tokens) {
+        parsedMove = parseMove(b, m);
+        cout << "Push " << m << endl;
+        push(b, parsedMove);
+
+        // Push increases ply by default. We have to keep it at zero,
+        // otherwise some of our arrays are indexed out-of-bounds!
+        b->ply = 0;
+    }
+}
+
 
 namespace UCI {
 

@@ -76,9 +76,9 @@ void log(std::string logMsg);
  *
  * @param  b Board to call function.
  * @param  fen FEN Notation string of board.
- * @returns bool true if error occured or FEN invalid, else false.
+ * @returns int number of characters parsed
  */
-bool parseFen(Board* b, std::string fen);
+int parseFen(Board* b, std::string fen);
 
 /**
  * @brief Return FEN from current position.
