@@ -8,12 +8,11 @@
 #include "move.h"
 
 
-#define MAX_THREADS std::max((unsigned int)1, std::thread::hardware_concurrency())
-
 extern int NUM_THREADS;
 extern bool TERMINATE_THREADS;
 extern bool ABORT_SEARCH;
 
+unsigned int getMaxPhysicalCores();
 
 class ThreadWrapper {
 

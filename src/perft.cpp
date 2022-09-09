@@ -111,11 +111,11 @@ long long FastPerft::perftRoot(Board* b, int depth) {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::vector<std::thread> perfter(MAX_THREADS);
-    for (unsigned int i = 0; i < MAX_THREADS; i++)
+    std::vector<std::thread> perfter(getMaxPhysicalCores());
+    for (unsigned int i = 0; i < getMaxPhysicalCores(); i++)
         perfter[i] = std::thread(&FastPerft::perftJob, this, *b, depth, i);
 
-    for (unsigned int i = 0; i < MAX_THREADS; i++)
+    for (unsigned int i = 0; i < getMaxPhysicalCores(); i++)
         perfter[i].join();
 
     for (int i = 0; i < MAX_POSITION_MOVES; i++)
@@ -136,7 +136,7 @@ void FastPerft::perftJob(Board b, int depth, int idx) {
     MoveList moveList[1];
     generateMoves(&b, moveList, isCheck(&b, b.stm));
 
-    for (int i = idx; i < moveList->cnt; i += MAX_THREADS) {
+    for (int i = idx; i < moveList->cnt; i += getMaxPhysicalCores()) {
         int move = moveList->moves[i];
 
         // Skip illegal moves

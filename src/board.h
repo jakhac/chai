@@ -250,7 +250,6 @@ bool sqIsBlockerForKing(Board* b, int kSq, int discoverSide, int potBlockerSq);
  */
 bool castleValid(Board* b, int castle, Bitboard* attackerSet);
 
-
 /**
  * Check before making the move if move gives check.
  * @param  b Board to call function.

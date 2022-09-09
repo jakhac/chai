@@ -142,7 +142,7 @@ struct Bucket {
 };
 
 struct TTable {
-    a64 Bucket* bucketList = NULL;
+    a64 Bucket* bucketList = nullptr;
 
     // total number of buckets (entries-stacks)
     int buckets = 0;
@@ -164,7 +164,7 @@ struct PTEntry {
 };
 
 struct PTable {
-    PTEntry* table = NULL;
+    PTEntry* table = nullptr;
     int entries;
 
     // measure collided keys
@@ -192,8 +192,8 @@ struct Dirty {
 
 struct Features {
     // Keep track of all feature-indices to add and to indices to delete
-    std::vector<size_t> addIndex;
-    std::vector<size_t> delIndex;
+    std::vector<std::size_t> addIndex;
+    std::vector<std::size_t> delIndex;
 };
 
 struct Board {
@@ -211,7 +211,7 @@ struct Board {
     // Fifty-move rule counter. Resets after captures or pawn moves.
     int fiftyMove;
 
-    // Count half moves. Increment when push or pushNull, decrement when pop.
+    // Count half moves. Increment when push or pushnullptr, decrement when pop.
     int halfMoves;
 
     // CastlePermission stored as number between 0 and 15 (4 bits for each side and color).

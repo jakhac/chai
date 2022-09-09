@@ -28,7 +28,7 @@ void printCliHelp() {
          << "\t- uci\t\t\t(start uci protocol)" << endl
          << "\t- <e2e4>\t\t(apply move)" << endl
          << "\t- pop\t\t\t(undo move)" << endl
-         << "\t- fen <KQP/34KR/...>\t(parse provided fen)" << endl
+         << "\t- fen <KQP/34KR/...>\t(parse a fen)" << endl
 #ifdef INFO
          << "\t- print\t\t\t(print board status)" << endl
 #endif // INFO
@@ -43,7 +43,7 @@ void printEngineMeta(std::string assert, std::string compiler, std::string simd)
         cout << "chai " << TOSTRING(VERSION) << endl
              << "assert=" << assert
              << " buckets=" << BUCKETS
-             << " threads=" << NUM_THREADS
+             << " threads=" << NUM_THREADS << "/" << getMaxPhysicalCores()
              << " hashMb=" << DEFAULT_TT_SIZE
              << " simd=" << simd << endl
              << "compiler=" << compiler
@@ -55,7 +55,7 @@ void printUCI_Info() {
          << "id author Jakob Hackstein" << endl
          << "option name Hash type spin default 256 min 2 max 8192" << endl
          << "option name Threads type spin default " 
-         << NUM_THREADS << " min 1 max " << MAX_THREADS << endl
+         << NUM_THREADS << " min 1 max " << getMaxPhysicalCores() << endl
          << "option name SyzygyPath type string default \"\"" << endl
          << "option name EvalFile type string default \"\"" << endl
          << "uciok" << endl;
@@ -202,7 +202,26 @@ void printPV(Board* b, Move* moves, int len) {
     }
 }
 
-void printTTablePV(Board* b, int depth) {
+bool isValidMoveList(Board* b, Move* moveList, int depth) {
+    int i = 0, cnt = 0;
+    while (i < depth && moveList[i] != MOVE_NONE) {
+        if (!push(b, moveList[i++])) {
+            cerr << "PV line contains invalid moves" << endl;
+            exit(EXIT_FAILURE);
+        }
+        cnt++;
+    }
+
+    while (cnt-- > 0)
+        pop(b);
+
+    return true;
+}
+
+void printTTablePV(Board* b, int depth, int score) {
+    if (score >= VALUE_IS_MATE_IN)
+        depth = VALUE_MATE - score;
+
     int cnt = 0;
     cout << " pv ";
 
@@ -228,9 +247,12 @@ void printPvLine(Board* b, Move* pvLine, int d, int score) {
     if (score >= VALUE_IS_MATE_IN)
         d = VALUE_MATE - score;
 
+    Assert(isValidMoveList(b, pvLine, d))
+
     cout << " pv ";
-    for (int i = 0; i < d; i++) {
-        cout << getStringMove(b, pvLine[i]);
+    int i = 0;
+    while (i < d && pvLine[i] != MOVE_NONE) {
+        cout << getStringMove(b, pvLine[i++]);
     }
 }
 
@@ -268,14 +290,9 @@ std::string getTimeAndDate() {
     return buf;
 }
 
-bool parseFen(Board* board, std::string fen) {
+int parseFen(Board* board, std::string fen) {
 
     reset(board);
-
-    // Shortest fen (2 kings, no rights) "8/8/8/k7/K7/8/8/8 w - - 0 1"
-    if (fen.length() < 27) {
-        return true;
-    }
 
     int file = FILE_A, rank = RANK_8;
     int index = 0, square = 0, piece = 0, count = 0;
@@ -316,8 +333,8 @@ bool parseFen(Board* board, std::string fen) {
                 continue;
 
             default:
-                cout << "FEN error: " << fen[index] << endl;
-                return true;
+                cerr << "FEN error: " << fen[index] << endl;
+                Assert(false);
         }
 
         for (int i = 0; i < count; i++) {
@@ -375,7 +392,7 @@ bool parseFen(Board* board, std::string fen) {
     index += 2;
 
     std::string fullMoveStr = "";
-    while (fen[index]) {
+    while (fen[index] && !isspace(fen[index])) {
         fullMoveStr += fen[index];
         index++;
     }
@@ -390,7 +407,7 @@ bool parseFen(Board* board, std::string fen) {
     board->material    = materialScore(board);
 
     checkBoard(board);
-    return false;
+    return index;
 }
 
 std::string getFEN(Board* b) {

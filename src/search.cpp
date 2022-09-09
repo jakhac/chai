@@ -314,6 +314,7 @@ void Threads::iid(Thread thread) {
             printUCI(instr, s, thread->depth, thread->selDepth, thread->bestScore, 
                 thread->nodes + thread->qnodes);
             printPvLine(b, thread->pvLine, thread->depth, thread->bestScore);
+
             cout << endl;
 
             // 2)
@@ -519,7 +520,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
     }
 
     // Static evaluation of position:
-    // Either use previos evaluations from TT hit / null-move or calculate evaluation score.
+    // Either use previous evaluations from TT hit / null-move or calculate evaluation score.
     if (hashStored && abs(hashEval) < VALUE_IS_MATE_IN) {
         ss->staticEval = posValue = hashEval;
 
@@ -649,7 +650,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
         if (pvNode)
             (ss + 1)->pvLine = nullptr;
 
-        // Futiilty Pruning
+        // Futility Pruning
         if (   !rootNode
             && legalMoves
             && depth < 5

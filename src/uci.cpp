@@ -31,7 +31,7 @@ void cli(Board* b, Instructions* i, Stats* s) {
 
         // Start searching this position.
         if (userInput == "s") {
-            i->depth = 40;
+            i->depth = 10;
             i->timeSet = false;
 
             Search::search(b, s, i);
@@ -80,12 +80,8 @@ void cli(Board* b, Instructions* i, Stats* s) {
         if (strStartsWith(userInput, "fen")) {
             std::string fen = userInput.substr(4);
 
-            if (parseFen(b, fen)) {
-                cerr << "Error: bad FEN. Make sure to povide complete string." << endl;
-            } else {
-                printBoard(b);
-            }
-
+            parseFen(b, fen);
+            printBoard(b);
             continue;
         }
 
@@ -211,8 +207,16 @@ void uciParsePosition(Board* b, std::string cmd) {
 
     if (strStartsWith(cmd, "position fen")) {
         std::string fen = cmd.substr(13, cmd.size());
-        parseFen(b, fen);
+        int offset = parseFen(b, fen);
 
+        // Possibly further moves after fen position
+        // E.g. "position fen r2qkb1r/p2n1ppp/2p1pn2/1p6/2BPP1b1/2N2N2/PP3PPP/R1BQ1RK1 w kq b6 0 9 moves c4b3"
+        if (offset+1 < fen.size()) {
+            std::string moves = fen.substr(offset+1, fen.size());
+            if (strStartsWith(moves, "moves")) {
+                parseMoveList(b, moves.substr(6, moves.size()));
+            }
+        }
         return;
     }
 
@@ -220,27 +224,12 @@ void uciParsePosition(Board* b, std::string cmd) {
         parseFen(b, STARTING_FEN);
         std::string move;
 
-        std::istringstream iss(cmd.substr(24, cmd.size()));
-        std::vector<std::string> tokens{ std::istream_iterator<std::string>{iss},
-                          std::istream_iterator<std::string>{} };
-
-        // Push all moves
-        int parsedMove;
-        for (std::string m : tokens) {
-            parsedMove = parseMove(b, m);
-            push(b, parsedMove);
-
-            // Push increases ply by default. We have to keep it at zero,
-            // otherwise some of our arrays are indexed out-of-bounds!
-            b->ply = 0;
-        }
-
+        parseMoveList(b, cmd.substr(24, cmd.size()));
         return;
     }
 
     if (strStartsWith(cmd, "position startpos")) {
         parseFen(b, STARTING_FEN);
-
         return;
     }
 
