@@ -60,7 +60,7 @@ void printCliHelp();
  * @param pvLine pvLine struct filled by alphaBeta search.
  */
 void printPV(Board* b, Move* moves, int len);
-void printTTablePV(Board* b, int depth);
+void printTTablePV(Board* b, int depth, int score);
 void printPvLine(Board* b, Move* pvLine, int d, int score);
 
 /**

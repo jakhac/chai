@@ -202,7 +202,10 @@ void printPV(Board* b, Move* moves, int len) {
     }
 }
 
-void printTTablePV(Board* b, int depth) {
+void printTTablePV(Board* b, int depth, int score) {
+    if (score >= VALUE_IS_MATE_IN)
+        depth = VALUE_MATE - score;
+
     int cnt = 0;
     cout << " pv ";
 

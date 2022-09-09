@@ -216,6 +216,7 @@ void uciParsePosition(Board* b, std::string cmd) {
         return;
     }
 
+    // position fen r2qkb1r/p2n1ppp/2p1pn2/1p6/2BPP1b1/2N2N2/PP3PPP/R1BQ1RK1 w kq b6 0 9 moves c4b3
     if (strStartsWith(cmd, "position startpos moves")) {
         parseFen(b, STARTING_FEN);
         std::string move;

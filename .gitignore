@@ -10,6 +10,10 @@ egtb_files/
 # all executables
 **.exe
 
+run.sh
+active_jobs.sh
+**.out
+
 /archive
 /nets
 

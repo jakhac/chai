@@ -9,6 +9,8 @@ int main() {
 
     printEngineMeta(info_ASSERT, info_CXX, info_SIMD);
 
+    cout << "move " << getStringMove(&board, MOVE_NULL) << endl;
+
     MoveOrder::init();
     Mask::init();
     EGTB::init("");
