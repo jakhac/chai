@@ -211,9 +211,11 @@ void uciParsePosition(Board* b, std::string cmd) {
 
         // Possibly further moves after fen position
         // E.g. "position fen r2qkb1r/p2n1ppp/2p1pn2/1p6/2BPP1b1/2N2N2/PP3PPP/R1BQ1RK1 w kq b6 0 9 moves c4b3"
-        std::string moves = fen.substr(offset+1, fen.size());
-        if (strStartsWith(moves, "moves")) {
-            parseMoveList(b, moves.substr(6, moves.size()));
+        if (offset+1 < fen.size()) {
+            std::string moves = fen.substr(offset+1, fen.size());
+            if (strStartsWith(moves, "moves")) {
+                parseMoveList(b, moves.substr(6, moves.size()));
+            }
         }
         return;
     }

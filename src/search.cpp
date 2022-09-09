@@ -745,7 +745,7 @@ Value Search::alphaBeta(Thread thread, Value alpha, Value beta, int depth) {
                 lmrDepth = newDepth - 2;
 
                 // Increase reduction for late moves
-                if (legalMoves > 4)
+                if (legalMoves > 6)
                     lmrDepth--;
 
                 if (!moveGivesCheck &&

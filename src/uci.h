@@ -26,7 +26,6 @@ inline void parseMoveList(Board* b, std::string moves) {
     int parsedMove;
     for (std::string m : tokens) {
         parsedMove = parseMove(b, m);
-        cout << "Push " << m << endl;
         push(b, parsedMove);
 
         // Push increases ply by default. We have to keep it at zero,

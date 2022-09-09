@@ -203,16 +203,16 @@ void printPV(Board* b, Move* moves, int len) {
 }
 
 bool isValidMoveList(Board* b, Move* moveList, int depth) {
-    int i = 0;
+    int i = 0, cnt = 0;
     while (i < depth && moveList[i] != MOVE_NONE) {
-        
         if (!push(b, moveList[i++])) {
             cerr << "PV line contains invalid moves" << endl;
             exit(EXIT_FAILURE);
         }
+        cnt++;
     }
 
-    while (depth--)
+    while (cnt-- > 0)
         pop(b);
 
     return true;
