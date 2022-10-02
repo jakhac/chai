@@ -212,7 +212,7 @@ clean:
 
 help:
 	$(info To build chai, use the "release" target:)
-	$(info > make release [COMP=comp] [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n])
+	$(info > make release [comp=compiler] [evalfile=path/to/nnue.bin] [avx2=y/n] [ssse3=y/n])
 
 archive:
 	for number in 1 3 4 ; do \
