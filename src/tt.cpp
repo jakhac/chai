@@ -75,6 +75,7 @@ static size_t allocateTT(size_t newMbSize) {
 
     Assert(tt->bucketList);
 
+    indexMask = 0; // Zero the index mask before re-computing it!
     for (int i = 0; i < msb; i++) indexMask |= (1 << i);
 
     clearTT();
