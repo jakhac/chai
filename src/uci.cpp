@@ -193,12 +193,13 @@ void uciSetOption(std::string cmd) {
         std::string nnuePath = cmd.substr(30, std::string::npos);
           std::ifstream nnueData(nnuePath, std::ios::binary);
 
-        if (!NNUE::initNet(nnueData)) {
-            cerr << "info string Error: NNUE parsed incorrect hash value." << endl;
-            return;
+        if (NNUE::initNet(nnueData)) {
+            cout << "info string NNUE parsed successfully." << endl;
+        } else {
+            // cerr << "info string Error: NNUE parsed incorrect hash value." << endl;
+            cerr << "Warning: Different hash values in NNUE. Network weights possibly corrupted.\n" << endl;
         }
 
-        cerr << "info string NNUE parsed successfully." << endl;
     }
 
 }
@@ -211,7 +212,7 @@ void uciParsePosition(Board* b, std::string cmd) {
 
         // Possibly further moves after fen position
         // E.g. "position fen r2qkb1r/p2n1ppp/2p1pn2/1p6/2BPP1b1/2N2N2/PP3PPP/R1BQ1RK1 w kq b6 0 9 moves c4b3"
-        if (offset+1 < fen.size()) {
+        if ((size_t)offset+1 < fen.size()) {
             std::string moves = fen.substr(offset+1, fen.size());
             if (strStartsWith(moves, "moves")) {
                 parseMoveList(b, moves.substr(6, moves.size()));

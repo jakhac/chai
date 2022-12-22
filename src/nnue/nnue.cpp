@@ -46,8 +46,11 @@ void initIncNet() {
     std::istringstream ss;
     ss.rdbuf()->pubsetbuf(data, binSize);
 
-    initNet(ss);
+    bool matching_hash = initNet(ss);
     cout << "NNUE is now active.\n" << endl;
+    if (!matching_hash) {
+        cout << "Warning: Different hash values in NNUE. Network weights possibly corrupted.\n" << endl;
+    }
 
 #endif
 
