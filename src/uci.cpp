@@ -241,6 +241,7 @@ void uciParseGo(Board* b, Stats* s, Instructions* instr, std::string cmd) {
 
     instr->startTime = getTimeMs();
 
+    int movetime = 0;
     int depth    = 0; // search to this depth
     int timeLeft = 0; // time left on (our) clock
     int inc;	      // increment
@@ -258,6 +259,7 @@ void uciParseGo(Board* b, Stats* s, Instructions* instr, std::string cmd) {
         if (tokens[i] == "btime" && b->stm == BLACK) timeLeft = stoi(tokens[i + 1]);
         if (tokens[i] == "wtime" && b->stm == WHITE) timeLeft = stoi(tokens[i + 1]);
         if (tokens[i] == "depth") depth = stoi(tokens[i + 1]);
+        if (tokens[i] == "movetime") movetime = stoi(tokens[i + 1]);
     }
 
     // Depth is either set as "go depth x" command or MAX_DEPTH of engine
@@ -265,7 +267,11 @@ void uciParseGo(Board* b, Stats* s, Instructions* instr, std::string cmd) {
 
     // If timeLeft is provided, search with time constraints
     instr->timeSet = false;
-    if (timeLeft) {
+    if (movetime) {
+        instr->timeSet       = true;
+        instr->timeLeft      = timeLeft;
+        instr->allocatedTime = movetime;
+    } else if (timeLeft) {
         instr->timeSet       = true;
         instr->timeLeft      = timeLeft;
         instr->allocatedTime = allocateTime(b, timeLeft, inc);
