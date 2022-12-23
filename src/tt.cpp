@@ -149,7 +149,7 @@ void clearPT() {
     memset(pt->table, 0, (pt->entries * sizeof(PTEntry)));
 }
 
-int getIndexMSB(size_t mbSize, int* msb, uint64_t* totalBytes, uint64_t* numBucketsPossible) {
+void getIndexMSB(size_t mbSize, int* msb, uint64_t* totalBytes, uint64_t* numBucketsPossible) {
     *totalBytes = (uint64_t)128 << 20;
     *numBucketsPossible = *totalBytes / sizeof(Bucket);
     *msb = getMSB(*numBucketsPossible);

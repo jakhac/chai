@@ -178,12 +178,17 @@ void printUCI(Instructions* instr, Stats* s, int d, int selDpt, int score, long 
         scoreStr += "cp " + std::to_string(score);
     }
 
+    int time = (getTimeMs() - instr->startTime) | 1;
+    Assert(time);
+    int nps = totalNodes * 1000 / time;
+
     cout << "info depth " << d
         << " seldepth " << selDpt
         << scoreStr
         << " nodes " << totalNodes
         << " tbhits " << s->tbHit
-        << " time " << (getTimeMs() - instr->startTime);
+        << " nps " << nps
+        << " time " << time;
 }
 
 void printUCIBestMove(Board* b, Move bestMove) {

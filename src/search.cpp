@@ -140,7 +140,7 @@ static bool dangerousPawnPush(Board* b, Move m) {
     if (piecePawn[pieceAt(b, toSq(m))]) {
         int rank = toRank(toSq(m));
         return (b->stm == WHITE) ? rank == relSeventh<WHITE>()
-                                  : rank == relSeventh<BLACK>();
+                                 : rank == relSeventh<BLACK>();
 
     }
 
@@ -271,7 +271,7 @@ void Threads::iid(Thread thread) {
     Value previousBestScore = VALUE_NONE;
     Value tempBestScore     = VALUE_NONE;
     thread->bestScore       = tempBestScore;
-     thread->bestMove        = MOVE_NONE;
+    thread->bestMove        = MOVE_NONE;
 
     // Search setup 
     resetSearchParameters(thread);

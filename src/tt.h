@@ -109,9 +109,8 @@ uint32_t getTTIndex(Key zobristKey);
  * in the transposition table.
  * 
  * @param mbSize 
- * @return int Index of highest bit (msb)
  */
-int getIndexMSB(size_t mbSize, int* msb, uint64_t* totalBytes, uint64_t* numBucketsPossible);
+void getIndexMSB(size_t mbSize, int* msb, uint64_t* totalBytes, uint64_t* numBucketsPossible);
 
 /**
  * Store a transposition entry containing score, score flag, move and depth in in transposition
