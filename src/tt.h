@@ -97,6 +97,23 @@ void clearTT();
 void clearPT();
 
 /**
+ * Get transposition table index.
+ * 
+ * @param zobristKey
+ * @return uint32_t
+ */
+uint32_t getTTIndex(Key zobristKey);
+
+/**
+ * For a given MB, compute the highest bit that might be used to index a bucket
+ * in the transposition table.
+ * 
+ * @param mbSize 
+ * @return int Index of highest bit (msb)
+ */
+int getIndexMSB(size_t mbSize, int* msb, uint64_t* totalBytes, uint64_t* numBucketsPossible);
+
+/**
  * Store a transposition entry containing score, score flag, move and depth in in transposition
  * table if possible. Entries are always written to empty bucket-entries if possible. If all
  * full, the entry with lowest depth (longest to root) is replaced.

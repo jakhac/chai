@@ -26,7 +26,7 @@ ENG_SRC = uci.cpp tt.cpp thread.cpp layers.cpp pawn.cpp attacks.cpp \
 
 TEST_SRC = ../test/testMain.cpp ../test/testSearch.cpp \
 	../test/testPerft.cpp ../test/testSee.cpp ../test/testEval.cpp \
-	../test/testPosition.cpp
+	../test/testPosition.cpp ../test/testTT.cpp
 
 TEST_SRCS = $(ENG_SRC) $(TEST_SRC)
 CHAI_SRCS = $(ENG_SRC) main.cpp

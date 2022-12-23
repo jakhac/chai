@@ -2,6 +2,7 @@
 #include "../src/uci.h"
 #include "../src/perft.h"
 #include "../src/bitboard.h"
+#include "../src/tt.h"
 
 #include "gtest/gtest.h"
 
@@ -114,6 +115,28 @@ namespace PositionalTest {
             MoveOrder::init();
             Mask::init();
             Search::init();
+        }
+
+        virtual void TearDown() {
+            delete pBoard;
+        }
+
+    };
+}
+
+namespace TTTest {
+    class TTTest : public ::testing::Test {
+
+    protected:
+        Board* pBoard;
+
+        virtual void SetUp() {
+            pBoard = new Board();
+
+            MoveOrder::init();
+            Mask::init();
+            EGTB::init("");
+            TT::init();
         }
 
         virtual void TearDown() {

@@ -52,11 +52,12 @@ void freeHashTables() {
  */
 static size_t allocateTT(size_t newMbSize) {
     
-    unsigned long long totalBytes = (unsigned long long)newMbSize << 20;
-    unsigned long long numBucketsPossible = totalBytes / sizeof(Bucket);
+    int msb;
+    uint64_t totalBytes;
+    uint64_t numBucketsPossible;
 
     // Most significant bit is maximum power of 2 while smaller than number of buckets
-    int msb = getMSB(numBucketsPossible);
+    getIndexMSB(newMbSize, &msb, &totalBytes, &numBucketsPossible);
     Assert(pow(2, msb) <= numBucketsPossible);
 
     if (msb > 48) {
@@ -148,7 +149,13 @@ void clearPT() {
     memset(pt->table, 0, (pt->entries * sizeof(PTEntry)));
 }
 
-static uint32_t getTTIndex(Key zobristKey) {
+int getIndexMSB(size_t mbSize, int* msb, uint64_t* totalBytes, uint64_t* numBucketsPossible) {
+    *totalBytes = (uint64_t)128 << 20;
+    *numBucketsPossible = *totalBytes / sizeof(Bucket);
+    *msb = getMSB(*numBucketsPossible);
+}
+
+uint32_t getTTIndex(Key zobristKey) {
     return (uint32_t)(zobristKey & indexMask);
 }
 
